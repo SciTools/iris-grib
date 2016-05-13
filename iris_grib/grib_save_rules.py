@@ -20,7 +20,7 @@ Grib save implementation.
 ..deprecated:: 1.8
 
 This module is for legacy requirements only.
-It has been superceded by :mod:`iris.fileformats.grib._save_rules', which has
+It has been superceded by :mod:`iris_grib._save_rules', which has
 no public API.
 
 """
@@ -38,7 +38,7 @@ import numpy.ma as ma
 import iris
 import iris.exceptions
 from iris.fileformats.rules import is_regular, regular_step
-from iris.fileformats.grib import grib_phenom_translation as gptx
+from . import grib_phenom_translation as gptx
 
 
 def gribbability_check(cube):
@@ -332,7 +332,7 @@ def _non_missing_forecast_period(cube):
     fp = int(fp)
 
     # Turn negative forecast times into grib negative numbers?
-    from iris.fileformats.grib import hindcast_workaround
+    from . import hindcast_workaround
     if hindcast_workaround and fp < 0:
         msg = "Encoding negative forecast period from {} to ".format(fp)
         fp = 2**31 + abs(fp)

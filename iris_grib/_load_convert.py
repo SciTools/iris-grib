@@ -38,7 +38,7 @@ from iris.aux_factory import HybridPressureFactory
 import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
-from iris.fileformats.grib import grib_phenom_translation as itranslation
+from . import grib_phenom_translation as itranslation
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 from iris.util import _is_circular
 

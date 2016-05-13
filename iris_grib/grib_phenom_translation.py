@@ -37,7 +37,7 @@ import warnings
 
 import cf_units
 
-from iris.fileformats.grib import _grib_cf_map as grcf
+from . import _grib_cf_map as grcf
 import iris.std_names
 
 

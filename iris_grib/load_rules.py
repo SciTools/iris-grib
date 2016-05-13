@@ -40,7 +40,7 @@ def convert(grib):
     Args:
 
     * grib:
-        A :class:`~iris.fileformats.grib.GribWrapper` object.
+        A :class:`~iris_grib.GribWrapper` object.
 
     Returns:
         A :class:`iris.fileformats.rules.ConversionMetadata` object.

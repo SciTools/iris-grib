@@ -18,9 +18,9 @@
 Grib save implementation.
 
 This module replaces the deprecated
-:mod:`iris.fileformats.grib.grib_save_rules`. It is a private module
+:mod:`iris_grib.grib_save_rules`. It is a private module
 with no public API. It is invoked from
-:meth:`iris.fileformats.grib.save_grib2`.
+:meth:`iris_grib.save_grib2`.
 
 """
 
@@ -37,13 +37,12 @@ import numpy.ma as ma
 import iris
 import iris.exceptions
 from iris.coord_systems import GeogCS, RotatedGeogCS, TransverseMercator
-from iris.fileformats.grib import grib_phenom_translation as gptx
-from iris.fileformats.grib._load_convert import (_STATISTIC_TYPE_NAMES,
-                                                 _TIME_RANGE_UNITS)
+from . import grib_phenom_translation as gptx
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
 from iris.util import is_regular, regular_step
 
 
-# Invert code tables from :mod:`iris.fileformats.grib._load_convert`.
+# Invert code tables from :mod:`iris_grib._load_convert`.
 _STATISTIC_TYPE_NAMES = {val: key for key, val in
                          _STATISTIC_TYPE_NAMES.items()}
 _TIME_RANGE_UNITS = {val: key for key, val in _TIME_RANGE_UNITS.items()}
@@ -574,7 +573,7 @@ def _non_missing_forecast_period(cube):
     fp = int(fp)
 
     # Turn negative forecast times into grib negative numbers?
-    from iris.fileformats.grib import hindcast_workaround
+    from . import hindcast_workaround
     if hindcast_workaround and fp < 0:
         msg = "Encoding negative forecast period from {} to ".format(fp)
         fp = 2**31 + abs(fp)

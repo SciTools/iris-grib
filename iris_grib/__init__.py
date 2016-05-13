@@ -37,16 +37,18 @@ import numpy as np
 import numpy.ma as ma
 import scipy.interpolate
 
+import iris
+import iris.fileformats.rules as iris_rules
 from iris._deprecation import warn_deprecated
 from iris.analysis._interpolate_private import Linear1dExtrapolator
 import iris.coord_systems as coord_systems
-from iris.exceptions import TranslationError
+from iris.exceptions import TranslationError, NotYetImplementedError
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
-from iris.fileformats.grib import grib_phenom_translation as gptx
-from iris.fileformats.grib import _save_rules
-import iris.fileformats.grib._load_convert
-from iris.fileformats.grib.message import GribMessage
-import iris.fileformats.grib.load_rules
+from . import grib_phenom_translation as gptx
+from . import _save_rules
+from ._load_convert import convert as old_load_convert
+from .message import GribMessage
+from .load_rules import convert as new_load_convert
 
 
 __version__ = '0.1.0.dev0'
@@ -183,7 +185,7 @@ class GribWrapper(object):
 
     .. deprecated:: 1.10
 
-    The class :class:`iris.fileformats.grib.message.GribMessage`
+    The class :class:`iris_grib.message.GribMessage`
     provides alternative means of working with GRIB message instances.
 
     """
@@ -275,7 +277,7 @@ class GribWrapper(object):
         #forbid alternate row scanning
         #(uncommon entry from GRIB2 flag table 3.4, also in GRIB1)
         if self.alternativeRowScanning == 1:
-            raise iris.exceptions.IrisError("alternativeRowScanning == 1 not handled.")
+            raise ValueError("alternativeRowScanning == 1 not handled.")
 
     def __getattr__(self, key):
         """Return a grib key, or one of our extra keys."""
@@ -322,7 +324,7 @@ class GribWrapper(object):
         if unit_code not in code_to_detail:
             message = 'Unhandled time unit for forecast ' \
                       'indicatorOfUnitOfTimeRange : ' + str(unit_code)
-            raise iris.exceptions.NotYetImplementedError(message)
+            raise NotYetImplementedError(message)
         return code_to_detail[unit_code]
 
     def _timeunit_string(self):
@@ -522,10 +524,10 @@ class GribWrapper(object):
             southPoleLon = longitudeOfSouthernPoleInDegrees
             southPoleLat = latitudeOfSouthernPoleInDegrees
             self.extra_keys['_coord_system'] = \
-                iris.coord_systems.RotatedGeogCS(
-                                        -southPoleLat,
-                                        math.fmod(southPoleLon + 180.0, 360.0),
-                                        self.angleOfRotation, geoid)
+                coord_systems.RotatedGeogCS(
+                    -southPoleLat,
+                    math.fmod(southPoleLon + 180.0, 360.0),
+                    self.angleOfRotation, geoid)
         elif gridType == 'polar_stereographic':
             self.extra_keys['_x_coord_name'] = "projection_x_coordinate"
             self.extra_keys['_y_coord_name'] = "projection_y_coordinate"
@@ -539,7 +541,7 @@ class GribWrapper(object):
 
             # Note: I think the grib api defaults LaDInDegrees to 60 for grib1.
             self.extra_keys['_coord_system'] = \
-                iris.coord_systems.Stereographic(
+                coord_systems.Stereographic(
                     pole_lat, self.orientationOfTheGridInDegrees, 0, 0,
                     self.LaDInDegrees, ellipsoid=geoid)
 
@@ -559,7 +561,7 @@ class GribWrapper(object):
             else:
                 raise TranslationError("Unhandled projectionCentreFlag")
 
-            LambertConformal = iris.coord_systems.LambertConformal
+            LambertConformal = coord_systems.LambertConformal
             self.extra_keys['_coord_system'] = LambertConformal(
                 self.LaDInDegrees, self.LoVInDegrees, 0, 0,
                 secant_latitudes=(self.Latin1InDegrees, self.Latin2InDegrees),
@@ -843,13 +845,13 @@ def _regularise(grib_message):
 
 def grib_generator(filename, auto_regularise=True):
     """
-    Returns a generator of :class:`~iris.fileformats.grib.GribWrapper`
+    Returns a generator of :class:`~iris_grib.GribWrapper`
     fields from the given filename.
 
     .. deprecated:: 1.10
 
     The function:
-    :meth:`iris.fileformats.grib.message.GribMessage.messages_from_filename`
+    :meth:`iris_grib.message.GribMessage.messages_from_filename`
     provides alternative means of obtainig GRIB messages from a file.
 
     Args:
@@ -910,10 +912,10 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
 
     """
     if iris.FUTURE.strict_grib_load:
-        grib_loader = iris.fileformats.rules.Loader(
+        grib_loader = iris_rules.Loader(
             GribMessage.messages_from_filename,
             {},
-            iris.fileformats.grib._load_convert.convert)
+            old_load_convert)
     else:
         if auto_regularise is not None:
             # The old loader supports the auto_regularise keyword, but in
@@ -925,10 +927,10 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
                    'loaded cube instead using Cube.regrid.')
             warn_deprecated(msg)
 
-        grib_loader = iris.fileformats.rules.Loader(
+        grib_loader = iris_rules.Loader(
             grib_generator, {'auto_regularise': auto_regularise},
-            iris.fileformats.grib.load_rules.convert)
-    return iris.fileformats.rules.load_cubes(filenames, callback, grib_loader)
+            new_load_convert)
+    return iris_rules.load_cubes(filenames, callback, grib_loader)
 
 
 def load_pairs_from_fields(grib_messages):
@@ -939,11 +941,11 @@ def load_pairs_from_fields(grib_messages):
     Args:
 
     * grib_messages:
-        An iterable of :class:`iris.fileformats.grib.message.GribMessage`.
+        An iterable of :class:`iris_grib.message.GribMessage`.
 
     Returns:
         An iterable of tuples of (:class:`iris.cube.Cube`,
-        :class:`iris.fileformats.grib.message.GribMessage`).
+        :class:`iris_grib.message.GribMessage`).
 
     This capability can be used to filter out fields before they are passed to
     the load pipeline, and amend the cubes once they are created, using
@@ -952,8 +954,8 @@ def load_pairs_from_fields(grib_messages):
     significant:
 
         >>> import iris
-        >>> from iris.fileformats.grib import load_pairs_from_fields
-        >>> from iris.fileformats.grib.message import GribMessage
+        >>> from iris_grib import load_pairs_from_fields
+        >>> from iris_grib.message import GribMessage
         >>> filename = iris.sample_data_path('polar_stereo.grib2')
         >>> filtered_messages = []
         >>> for message in GribMessage.messages_from_filename(filename):
@@ -970,7 +972,7 @@ def load_pairs_from_fields(grib_messages):
     the load pipeline.  Fields with out of specification header elements can
     be cleaned up this way and cubes created:
 
-        >>> from iris.fileformats.grib import load_pairs_from_fields
+        >>> from iris_grib import load_pairs_from_fields
         >>> cleaned_messages = GribMessage.messages_from_filename(filename)
         >>> for message in cleaned_messages:
         ...     if message.sections[1]['productionStatusOfProcessedData'] == 0:
@@ -978,9 +980,7 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
-    grib_conv = iris.fileformats.grib._load_convert.convert
-    return iris.fileformats.rules.load_pairs_from_fields(grib_messages,
-                                                         grib_conv)
+    return iris_rules.load_pairs_from_fields(grib_messages, old_load_convert)
 
 
 def save_grib2(cube, target, append=False, **kwargs):
@@ -1010,7 +1010,7 @@ def save_grib2(cube, target, append=False, **kwargs):
 def as_pairs(cube):
     """
     .. deprecated:: 1.10
-    Please use :func:`iris.fileformats.grib.save_pairs_from_cube`
+    Please use :func:`iris_grib.save_pairs_from_cube`
     for the same functionality.
 
 
@@ -1047,7 +1047,7 @@ def save_pairs_from_cube(cube):
 def as_messages(cube):
     """
     .. deprecated:: 1.10
-    Please use :func:`iris.fileformats.grib.save_pairs_from_cube` instead.
+    Please use :func:`iris_grib.save_pairs_from_cube` instead.
 
     Convert one or more cubes to GRIB messages.
     Returns an iterable of grib_api GRIB messages.
