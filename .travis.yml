@@ -1,0 +1,53 @@
+language: python
+sudo: false
+env:
+  - python=2.7
+    iris=master
+    grib_api=1.14.7
+
+#  - python=3.4
+#    iris=master
+#    grib_api=1.14.7
+
+#  - python=3.5
+#    iris=master
+#    grib_api=1.14.7
+
+
+install:
+  # Fetch and install conda
+  # -----------------------
+  - export CONDA_BASE=http://repo.continuum.io/miniconda/Miniconda3
+  - wget ${CONDA_BASE}-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda config --set show_channel_urls True
+  - conda config --add channels scitools
+  - conda config --add channels conda-forge
+
+  # Install iris-grib's dependencies
+  # --------------------------------
+  - export IRIS_DEPS="biggus numpy cf_units setuptools pyke netcdf4 scipy cartopy"
+  - conda install --quiet --yes python=${python} pip nomkl ${IRIS_DEPS} python-ecmwf_grib=${grib_api}
+
+  # Fetch and install Iris from source
+  # ----------------------------------
+  - wget https://github.com/scitools/iris/archive/${iris}.tar.gz -O iris.tar.gz
+  - tar xzf iris.tar.gz && rm -rf iris.tar.gz && mv iris-${iris} iris_source
+  - pip install ./iris_source --no-deps
+  - rm -rf iris_source
+
+  # Summarise the environment
+  # -------------------------
+  - conda list
+
+  # Install iris-grib itself
+  # ------------------------
+  - pip install . --no-deps
+  - python -c 'import iris; print(iris); print(iris.__version__)'
+
+
+script:
+  # Ensure we can import iris_grib and that the tests pass
+  # ------------------------------------------------------
+  - python -c "import iris_grib; print(iris_grib)"
