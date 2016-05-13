@@ -38,11 +38,15 @@ import numpy as np
 import numpy.ma as ma
 import scipy.interpolate
 import threading
+import warnings
 
 import iris
 import iris.fileformats.rules as iris_rules
-from iris._deprecation import warn_deprecated
-from iris.analysis._interpolate_private import Linear1dExtrapolator
+try:
+    from iris.analysis._interpolate_private import Linear1dExtrapolator
+except ImportError:
+    from iris.analysis.interpolate import Linear1dExtrapolator
+
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
@@ -51,6 +55,7 @@ from . import _save_rules
 from ._load_convert import convert as old_load_convert
 from .message import GribMessage
 from .load_rules import convert as new_load_convert
+from ._deprecation import warn_deprecated
 
 
 __version__ = '0.1.0.dev0'
