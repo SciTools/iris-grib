@@ -1,19 +1,19 @@
 # (C) British Crown Copyright 2010 - 2016, Met Office
 #
-# This file is part of Iris.
+# This file is part of iris-grib.
 #
-# Iris is free software: you can redistribute it and/or modify it under
+# iris-grib is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the
 # Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Iris is distributed in the hope that it will be useful,
+# iris-grib is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with Iris.  If not, see <http://www.gnu.org/licenses/>.
+# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 A package for handling multi-dimensional data and associated metadata.
 
@@ -115,7 +115,7 @@ import iris.fileformats
 import iris.io
 
 
-# Iris revision.
+# iris-grib revision.
 __version__ = '1.10.0-DEV'
 
 # Restrict the names imported when using "from iris import *"
@@ -125,7 +125,7 @@ __all__ = ['load', 'load_cube', 'load_cubes', 'load_raw',
            'IrisDeprecation']
 
 
-# When required, log the usage of Iris.
+# When required, log the usage of iris-grib.
 if iris.config.IMPORT_LOGGER:
     logging.getLogger(iris.config.IMPORT_LOGGER).info('iris %s' % __version__)
 
@@ -242,12 +242,12 @@ class Future(threading.local):
             self.__dict__.update(current_state)
 
 
-#: Object containing all the Iris run-time options.
+#: Object containing all the iris-grib run-time options.
 FUTURE = Future()
 
 
 # Initialise the site configuration dictionary.
-#: Iris site configuration dictionary.
+#: iris-grib site configuration dictionary.
 site_configuration = {}
 
 try:
