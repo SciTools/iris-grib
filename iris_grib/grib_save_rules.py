@@ -1,26 +1,26 @@
 # (C) British Crown Copyright 2010 - 2015, Met Office
 #
-# This file is part of Iris.
+# This file is part of iris-grib.
 #
-# Iris is free software: you can redistribute it and/or modify it under
+# iris-grib is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the
 # Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Iris is distributed in the hope that it will be useful,
+# iris-grib is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with Iris.  If not, see <http://www.gnu.org/licenses/>.
+# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 Grib save implementation.
 
 ..deprecated:: 1.8
 
 This module is for legacy requirements only.
-It has been superceded by :mod:`iris.fileformats.grib._save_rules', which has
+It has been superceded by :mod:`iris_grib._save_rules', which has
 no public API.
 
 """
@@ -38,7 +38,7 @@ import numpy.ma as ma
 import iris
 import iris.exceptions
 from iris.fileformats.rules import is_regular, regular_step
-from iris.fileformats.grib import grib_phenom_translation as gptx
+from . import grib_phenom_translation as gptx
 
 
 def gribbability_check(cube):
@@ -332,7 +332,7 @@ def _non_missing_forecast_period(cube):
     fp = int(fp)
 
     # Turn negative forecast times into grib negative numbers?
-    from iris.fileformats.grib import hindcast_workaround
+    from . import hindcast_workaround
     if hindcast_workaround and fp < 0:
         msg = "Encoding negative forecast period from {} to ".format(fp)
         fp = 2**31 + abs(fp)

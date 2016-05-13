@@ -1,26 +1,26 @@
 # (C) British Crown Copyright 2010 - 2015, Met Office
 #
-# This file is part of Iris.
+# This file is part of iris-grib.
 #
-# Iris is free software: you can redistribute it and/or modify it under
+# iris-grib is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the
 # Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Iris is distributed in the hope that it will be useful,
+# iris-grib is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with Iris.  If not, see <http://www.gnu.org/licenses/>.
+# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 Grib save implementation.
 
 This module replaces the deprecated
-:mod:`iris.fileformats.grib.grib_save_rules`. It is a private module
+:mod:`iris_grib.grib_save_rules`. It is a private module
 with no public API. It is invoked from
-:meth:`iris.fileformats.grib.save_grib2`.
+:meth:`iris_grib.save_grib2`.
 
 """
 
@@ -37,13 +37,12 @@ import numpy.ma as ma
 import iris
 import iris.exceptions
 from iris.coord_systems import GeogCS, RotatedGeogCS, TransverseMercator
-from iris.fileformats.grib import grib_phenom_translation as gptx
-from iris.fileformats.grib._load_convert import (_STATISTIC_TYPE_NAMES,
-                                                 _TIME_RANGE_UNITS)
+from . import grib_phenom_translation as gptx
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
 from iris.util import is_regular, regular_step
 
 
-# Invert code tables from :mod:`iris.fileformats.grib._load_convert`.
+# Invert code tables from :mod:`iris_grib._load_convert`.
 _STATISTIC_TYPE_NAMES = {val: key for key, val in
                          _STATISTIC_TYPE_NAMES.items()}
 _TIME_RANGE_UNITS = {val: key for key, val in _TIME_RANGE_UNITS.items()}
@@ -574,7 +573,7 @@ def _non_missing_forecast_period(cube):
     fp = int(fp)
 
     # Turn negative forecast times into grib negative numbers?
-    from iris.fileformats.grib import hindcast_workaround
+    from . import hindcast_workaround
     if hindcast_workaround and fp < 0:
         msg = "Encoding negative forecast period from {} to ".format(fp)
         fp = 2**31 + abs(fp)
@@ -899,7 +898,7 @@ def product_definition_template_11(cube, grib):
                          "point is required, but not present")
     gribapi.grib_set(grib, "perturbationNumber",
                      int(cube.coord('realization').points[0]))
-    # no encoding at present in Iris, set to missing
+    # no encoding at present in iris-grib, set to missing
     gribapi.grib_set(grib, "numberOfForecastsInEnsemble", 255)
     gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
     _product_definition_template_8_and_11(cube, grib)
