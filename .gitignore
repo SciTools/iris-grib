@@ -19,9 +19,6 @@ pip-log.txt
 #shared objects
 *.so
 
-#config
-cf_units/etc/site.cfg
-
 # Created by editors
 *~
 \#*

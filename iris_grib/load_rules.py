@@ -60,9 +60,9 @@ def convert(grib):
     if grib.edition == 2:
         msg = ('This GRIB loader is deprecated and will be removed in '
               'a future release.  Please consider using the new '
-              'GRIB loader by setting the :class:`iris.Future` '
+              'GRIB loader by setting the :class:`iris_grib.Future` '
               'option `strict_grib_load` to True; e.g.:\n'
-              'iris.FUTURE.strict_grib_load = True\n'
+              'iris_grib.FUTURE.strict_grib_load = True\n'
               'Please report issues you experience to:\n'
               'https://groups.google.com/forum/#!topic/scitools-iris-dev/'
               'lMsOusKNfaU')
