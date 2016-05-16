@@ -17,7 +17,7 @@
 """
 Grib save implementation.
 
-..deprecated:: 1.8
+..deprecated:: 1.0
 
 This module is for legacy requirements only.
 It has been superceded by :mod:`iris_grib._save_rules', which has
