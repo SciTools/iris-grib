@@ -75,8 +75,8 @@ setup_args = dict(
     ],
     extras_require = {
         'test:python_version=="2.7"': ['mock'],
-        'test': ['nose'],
     },
+    test_suite = 'iris_grib.tests',
 )
 
 
