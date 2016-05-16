@@ -25,7 +25,6 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 import six
 
-import contextlib
 import datetime
 import math  #for fmod
 import warnings
@@ -37,11 +36,10 @@ import gribapi
 import numpy as np
 import numpy.ma as ma
 import scipy.interpolate
-import threading
-import warnings
 
 import iris
 import iris.fileformats.rules as iris_rules
+from iris._deprecation import warn_deprecated
 # Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
 # NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
 # Use is confined to the old 'non-strict' loader, which is likewise deprecated
@@ -63,7 +61,6 @@ from . import _save_rules
 from ._load_convert import convert as old_load_convert
 from .message import GribMessage
 from .load_rules import convert as new_load_convert
-from ._deprecation import warn_deprecated
 
 
 __version__ = '0.1.0.dev0'
@@ -72,82 +69,6 @@ __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
            'as_messages', 'as_pairs', 'grib_generator', 'reset_load_rules',
            'hindcast_workaround']
-
-
-class Future(threading.local):
-    """Run-time configuration controller."""
-
-    def __init__(self, strict_grib_load=False):
-        """
-        A container for run-time options controls.
-
-        To adjust the values simply update the relevant attribute from
-        within your code. For example::
-
-            iris_grib.FUTURE.strict_grib_load = True
-
-        The option `strict_grib_load` controls whether GRIB files are
-        loaded as Cubes using a new template-based conversion process.
-        This new conversion process will raise an exception when it
-        encounters a GRIB message which uses a template not supported
-        by the conversion.
-
-        """
-        self.__dict__['strict_grib_load'] = strict_grib_load
-
-    def __repr__(self):
-        msg = ('Future(strict_grib_load={})')
-        return msg.format(self.strict_grib_load)
-
-    deprecated_options = []
-
-    def __setattr__(self, name, value):
-        if name in self.deprecated_options:
-            msg = ("the 'Future' object property {!r} is now deprecated. "
-                   "Please remove code which uses this.")
-            warn_deprecated(msg.format(name))
-        if name not in self.__dict__:
-            msg = "'Future' object has no attribute {!r}".format(name)
-            raise AttributeError(msg)
-        self.__dict__[name] = value
-
-    @contextlib.contextmanager
-    def context(self, **kwargs):
-        """
-        Return a context manager which allows temporary modification of
-        the option values for the active thread.
-
-        On entry to the `with` statement, all keyword arguments are
-        applied to the Future object. On exit from the `with`
-        statement, the previous state is restored.
-
-        For example::
-
-            with iris_grib.FUTURE.context():
-                iris_grib.FUTURE.strict_grib_load = True
-                # ... code to load data
-
-        Or more concisely::
-
-            with iris_grib.FUTURE.context(strict_grib_load=True):
-                # ... code to load data
-
-        """
-        # Save the current context
-        current_state = self.__dict__.copy()
-        # Update the state
-        for name, value in six.iteritems(kwargs):
-            setattr(self, name, value)
-        try:
-            yield
-        finally:
-            # Return the state
-            self.__dict__.clear()
-            self.__dict__.update(current_state)
-
-
-#: Object containing all the Iris-grib run-time options.
-FUTURE = Future()
 
 
 #: Set this flag to True to enable support of negative forecast periods
@@ -993,7 +914,7 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
         If *True*, any cube defined on a reduced grid will be interpolated
         to an equivalent regular grid. If *False*, any cube defined on a
         reduced grid will be loaded on the raw reduced grid with no shape
-        information. If `iris_grib.FUTURE.strict_grib_load` is `True` then this
+        information. If `iris.FUTURE.strict_grib_load` is `True` then this
         keyword has no effect, raw grids are always used. If the older GRIB
         loader is in use then the default behaviour is to interpolate cubes
         on a reduced grid to an equivalent regular grid.
@@ -1002,7 +923,7 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
 
 
     """
-    if FUTURE.strict_grib_load:
+    if iris.FUTURE.strict_grib_load:
         grib_loader = iris_rules.Loader(
             GribMessage.messages_from_filename,
             {},
