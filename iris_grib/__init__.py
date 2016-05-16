@@ -42,9 +42,17 @@ import warnings
 
 import iris
 import iris.fileformats.rules as iris_rules
+# Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
+# NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
+# Use is confined to the old 'non-strict' loader, which is likewise deprecated
+# in this project, and intended for removal in iris-grib v2.
 try:
+    # Import from the 'private version' of iris.analysis.interpolate, if
+    # available, to avoid an Iris deprecation warning.
     from iris.analysis._interpolate_private import Linear1dExtrapolator
 except ImportError:
+    # 'Else' import from public iris.analysis.interpolate, if "private" version
+    # of module is not available :  Required to work with Iris 1.9.
     from iris.analysis.interpolate import Linear1dExtrapolator
 
 import iris.coord_systems as coord_systems
