@@ -70,7 +70,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3.5',
     ],
     install_requires = [
-        'iris>=1.8,<1.10',
+        'iris>=1.9,<2',
         # Also: the ECMWF GRIB API
     ],
     extras_require = {

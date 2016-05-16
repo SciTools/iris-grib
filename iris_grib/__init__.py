@@ -39,8 +39,29 @@ import scipy.interpolate
 
 import iris
 import iris.fileformats.rules as iris_rules
-from iris._deprecation import warn_deprecated
-from iris.analysis._interpolate_private import Linear1dExtrapolator
+
+# Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
+# NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
+# Use is confined to the old 'non-strict' loader, which is likewise deprecated
+# in this project, and intended for removal in iris-grib v2.
+try:
+    # Import from the 'private version' of iris.analysis.interpolate, if
+    # available, to avoid an Iris deprecation warning.
+    from iris.analysis._interpolate_private import Linear1dExtrapolator
+except ImportError:
+    # 'Else' import from public iris.analysis.interpolate, if "private" version
+    # of module is not available :  Required to work with Iris 1.9.
+    from iris.analysis.interpolate import Linear1dExtrapolator
+
+
+# Define a dumb replacement for the iris deprecation helper routine.
+# This way we are compatibile back to Iris v1.9.0.
+# (Must do before we import load_rules.)
+# TODO: remove when the existing deprecated code is cleaned out.
+def warn_deprecated(msg, **kwargs):
+    warnings.warn(msg)
+
+
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
