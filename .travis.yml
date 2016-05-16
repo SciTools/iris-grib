@@ -45,6 +45,23 @@ install:
         rm -rf iris_source;
      fi
 
+  # Download iris-test-data
+  # --------------------------------
+  - export IRIS_TEST_DATA_REF=https://github.com/SciTools/iris-test-data/archive/master.zip
+  - export IRIS_TEST_DATA_LOCATION=$HOME/iris-test-data
+  - mkdir $IRIS_TEST_DATA_LOCATION
+  - wget -O $IRIS_TEST_DATA_LOCATION/iris-test-data.zip ${IRIS_TEST_DATA_REF}
+  - unzip -q $IRIS_TEST_DATA_LOCATION/iris-test-data.zip -d $IRIS_TEST_DATA_LOCATION
+
+  # Locate iris installation
+  # ------------------------
+  - export IRIS_DIR=$(python -c "import iris; import os.path; print os.path.dirname(iris.__file__)")
+
+  # Poke site.cfg to reference iris-test-data
+  - SITE_CFG=$IRIS_DIR/etc/site.cfg
+  - echo "[Resources]" > $SITE_CFG
+  - echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/iris-test-data-master/test_data" >> $SITE_CFG
+
   # Summarise the environment
   # -------------------------
   - conda list
@@ -57,4 +74,4 @@ install:
 script:
   # Ensure we can import iris_grib and that the tests pass
   # ------------------------------------------------------
-  - python -c "import iris_grib; print(iris_grib)"
+  - python setup.py test
