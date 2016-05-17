@@ -83,7 +83,7 @@ __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
 #: Set this flag to True to enable support of negative forecast periods
 #: when loading and saving GRIB files.
 #:
-#: .. deprecated:: 1.10
+#: .. deprecated:: 1.0
 hindcast_workaround = False
 
 
@@ -149,10 +149,10 @@ def reset_load_rules():
     """
     Resets the GRIB load process to use only the standard conversion rules.
 
-    .. deprecated:: 1.7
+    .. deprecated:: 1.0
 
     """
-    warn_deprecated('reset_load_rules was deprecated in v1.7.')
+    warn_deprecated('reset_load_rules was deprecated in v1.0.')
 
 
 class GribDataProxy(object):
@@ -204,14 +204,14 @@ class GribWrapper(object):
     """
     Contains a pygrib object plus some extra keys of our own.
 
-    .. deprecated:: 1.10
+    .. deprecated:: 1.0
 
     The class :class:`iris_grib.message.GribMessage`
     provides alternative means of working with GRIB message instances.
 
     """
     def __init__(self, grib_message, grib_fh=None, auto_regularise=True):
-        warn_deprecated('Deprecated at version 1.10')
+        warn_deprecated('Deprecated at version 1.0')
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
         deferred = grib_fh is not None
@@ -869,7 +869,7 @@ def grib_generator(filename, auto_regularise=True):
     Returns a generator of :class:`~iris_grib.GribWrapper`
     fields from the given filename.
 
-    .. deprecated:: 1.10
+    .. deprecated:: 1.0
 
     The function:
     :meth:`iris_grib.message.GribMessage.messages_from_filename`
@@ -890,7 +890,7 @@ def grib_generator(filename, auto_regularise=True):
         reduced grid to an equivalent regular grid.
 
     """
-    warn_deprecated('Deprecated at version 1.10')
+    warn_deprecated('Deprecated at version 1.0')
     with open(filename, 'rb') as grib_fh:
         while True:
             grib_message = gribapi.grib_new_from_file(grib_fh)
@@ -928,7 +928,7 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
         loader is in use then the default behaviour is to interpolate cubes
         on a reduced grid to an equivalent regular grid.
 
-        .. deprecated:: 1.8. Please use strict_grib_load and regrid instead.
+        .. deprecated:: 1.0. Please use strict_grib_load and regrid instead.
 
 
     """
@@ -1030,13 +1030,13 @@ def save_grib2(cube, target, append=False, **kwargs):
 
 def as_pairs(cube):
     """
-    .. deprecated:: 1.10
+    .. deprecated:: 1.0
     Please use :func:`iris_grib.save_pairs_from_cube`
     for the same functionality.
 
 
     """
-    warn_deprecated('as_pairs is deprecated in v1.10; please use'
+    warn_deprecated('as_pairs is deprecated in v1.0; please use'
                     ' save_pairs_from_cube instead.')
     return save_pairs_from_cube(cube)
 
@@ -1067,7 +1067,7 @@ def save_pairs_from_cube(cube):
 
 def as_messages(cube):
     """
-    .. deprecated:: 1.10
+    .. deprecated:: 1.0
     Please use :func:`iris_grib.save_pairs_from_cube` instead.
 
     Convert one or more cubes to GRIB messages.
