@@ -34,21 +34,24 @@ import os.path
 from iris.tests import IrisTest, main, skip_data, get_data_path
 
 
-#: Basepath for test results.
+#: Basepath for iris-grib test results.
 _RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
-
-
-def get_result_path(relative_path):
-    """Returns the absolute path to a result file when given the relative path
-    as a string, or sequence of strings."""
-    if not isinstance(relative_path, six.string_types):
-        relative_path = os.path.join(*relative_path)
-    return os.path.abspath(os.path.join(_RESULT_PATH, relative_path))
 
 
 class IrisGribTest(IrisTest):
     # A specialised version of an IrisTest that implements the correct
-    # automatic paths for test results in iris_grib.
+    # automatic paths for test results in iris-grib.
+
+    @staticmethod
+    def get_result_path(relative_path):
+        """
+        Returns the absolute path to a result file when given the relative path
+        as a string, or sequence of strings.
+
+        """
+        if not isinstance(relative_path, six.string_types):
+            relative_path = os.path.join(*relative_path)
+        return os.path.abspath(os.path.join(_RESULT_PATH, relative_path))
 
     def result_path(self, basename=None, ext=''):
         """
