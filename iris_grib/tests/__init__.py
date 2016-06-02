@@ -82,7 +82,7 @@ class IrisGribTest(IrisTest):
                     break
         filename = basename + ext
 
-        result = os.path.join(get_result_path(''),
+        result = os.path.join(self.get_result_path(''),
                               sub_path.replace('test_', ''),
                               self.__class__.__name__.replace('Test_', ''),
                               filename)
