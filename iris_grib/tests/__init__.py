@@ -31,7 +31,7 @@ import inspect
 import os
 import os.path
 
-from iris.tests import IrisTest, main, skip_data, get_data_path
+from iris.tests import IrisTest, main, skip_data, get_data_path, mock
 
 
 #: Basepath for iris-grib test results.
