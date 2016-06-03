@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2015, Met Office
+# (C) British Crown Copyright 2014 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -15,22 +15,22 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for the `iris.fileformats.grib.GribWrapper` class.
+Unit tests for the `iris_grib.GribWrapper` class.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 from biggus import NumpyArrayAdapter
 import numpy as np
 
-from iris.fileformats.grib import GribWrapper, GribDataProxy
-from iris.tests import mock
+from iris_grib import GribWrapper, GribDataProxy
+from iris_grib.tests import mock
 
 _message_length = 1000
 
@@ -60,12 +60,12 @@ def _mock_grib_get_native_type(grib_message, key):
     return result
 
 
-class Test_deferred(tests.IrisTest):
+class Test_deferred(tests.IrisGribTest):
     def setUp(self):
         confirm_patch = mock.patch(
-            'iris.fileformats.grib.GribWrapper._confirm_in_scope')
+            'iris_grib.GribWrapper._confirm_in_scope')
         compute_patch = mock.patch(
-            'iris.fileformats.grib.GribWrapper._compute_extra_keys')
+            'iris_grib.GribWrapper._compute_extra_keys')
         long_patch = mock.patch('gribapi.grib_get_long', _mock_grib_get_long)
         string_patch = mock.patch('gribapi.grib_get_string',
                                   _mock_grib_get_string)
