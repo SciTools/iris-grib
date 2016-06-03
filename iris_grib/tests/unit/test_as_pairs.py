@@ -14,23 +14,25 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for the `iris.fileformats.grib.as_pairs` function."""
+"""Unit tests for the `iris_grib.as_pairs` function."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-import iris.tests as tests
+# Import iris_grib.tests first so that some things can be initialised before
+# importing anything else.
+import iris_grib.tests as tests
 
 import gribapi
 
 import iris
 from iris.coords import DimCoord
-import iris.fileformats.grib as grib
-from iris.tests import mock
 import iris.tests.stock as stock
 
+import iris_grib
 
-class TestAsPairs(tests.IrisTest):
+
+class TestAsPairs(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.realistic_3d()
 
@@ -39,7 +41,7 @@ class TestAsPairs(tests.IrisTest):
         type_of_process = 4
         coord = DimCoord(realization, standard_name='realization', units='1')
         self.cube.add_aux_coord(coord)
-        slices_and_messages = grib.as_pairs(self.cube)
+        slices_and_messages = iris_grib.as_pairs(self.cube)
         for aslice, message in slices_and_messages:
             self.assertEqual(aslice.shape, (9, 11))
             self.assertEqual(gribapi.grib_get_long(message,
