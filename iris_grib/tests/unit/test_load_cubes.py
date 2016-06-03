@@ -27,7 +27,7 @@ import iris.fileformats.rules
 import iris_grib
 import iris_grib.load_rules
 from iris_grib import load_cubes
-from iris.tests import mock
+from iris_grib.tests import mock
 
 
 class TestToggle(tests.IrisGribTest):
