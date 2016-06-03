@@ -14,23 +14,23 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for the `iris.fileformats.grib.as_messages` function."""
+"""Unit tests for the `iris_grib.as_messages` function."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import gribapi
 
 import iris
 from iris.coords import DimCoord
-import iris.fileformats.grib as grib
-from iris.tests import mock
 import iris.tests.stock as stock
 
+import iris_grib
 
-class TestAsMessages(tests.IrisTest):
+
+class TestAsMessages(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.realistic_3d()
 
@@ -39,7 +39,7 @@ class TestAsMessages(tests.IrisTest):
         type_of_process = 4
         coord = DimCoord(realization, standard_name='realization', units='1')
         self.cube.add_aux_coord(coord)
-        messages = grib.as_messages(self.cube)
+        messages = iris_grib.as_messages(self.cube)
         for message in messages:
             self.assertEqual(gribapi.grib_get_long(message,
                                                    'typeOfProcessedData'),
