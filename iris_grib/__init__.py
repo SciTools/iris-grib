@@ -67,9 +67,9 @@ from iris.exceptions import TranslationError, NotYetImplementedError
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
-from ._load_convert import convert as old_load_convert
+from ._load_convert import convert as new_load_convert
 from .message import GribMessage
-from .load_rules import convert as new_load_convert
+from .load_rules import convert as old_load_convert
 
 
 __version__ = '0.1.0.dev0'
@@ -936,7 +936,7 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
         grib_loader = iris_rules.Loader(
             GribMessage.messages_from_filename,
             {},
-            old_load_convert)
+            new_load_convert)
     else:
         if auto_regularise is not None:
             # The old loader supports the auto_regularise keyword, but in
@@ -950,7 +950,7 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
 
         grib_loader = iris_rules.Loader(
             grib_generator, {'auto_regularise': auto_regularise},
-            new_load_convert)
+            old_load_convert)
     return iris_rules.load_cubes(filenames, callback, grib_loader)
 
 
@@ -1001,7 +1001,7 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
-    return iris_rules.load_pairs_from_fields(grib_messages, old_load_convert)
+    return iris_rules.load_pairs_from_fields(grib_messages, new_load_convert)
 
 
 def save_grib2(cube, target, append=False, **kwargs):
