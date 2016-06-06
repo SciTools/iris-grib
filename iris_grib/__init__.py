@@ -38,33 +38,9 @@ import numpy.ma as ma
 import scipy.interpolate
 
 import iris
-import iris.fileformats.rules as iris_rules
-
-# Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
-# NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
-# Use is confined to the old 'non-strict' loader, which is likewise deprecated
-# in this project, and intended for removal in iris-grib v2.
-try:
-    # Import from the 'private version' of iris.analysis.interpolate, if
-    # available, to avoid an Iris deprecation warning.
-    from iris.analysis._interpolate_private import Linear1dExtrapolator
-except ImportError:
-    # 'Else' import from public iris.analysis.interpolate, if "private" version
-    # of module is not available :  Required to work with Iris 1.9.
-    from iris.analysis.interpolate import Linear1dExtrapolator
-
-
-# Define a dumb replacement for the iris deprecation helper routine.
-# This way we are compatibile back to Iris v1.9.0.
-# (Must do before we import load_rules.)
-# TODO: remove when the existing deprecated code is cleaned out.
-def warn_deprecated(msg, **kwargs):
-    warnings.warn(msg)
-
-
 import iris.coord_systems as coord_systems
+import iris.fileformats.rules as iris_rules
 from iris.exceptions import TranslationError, NotYetImplementedError
-# NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
 from ._load_convert import convert as new_load_convert
@@ -76,15 +52,7 @@ __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'as_messages', 'as_pairs', 'grib_generator', 'reset_load_rules',
-           'hindcast_workaround']
-
-
-#: Set this flag to True to enable support of negative forecast periods
-#: when loading and saving GRIB files.
-#:
-#: .. deprecated:: 1.10
-hindcast_workaround = False
+           'as_messages', 'as_pairs', 'grib_generator', 'reset_load_rules']
 
 
 CENTRE_TITLES = {'egrr': 'U.K. Met Office - Exeter',
@@ -145,16 +113,6 @@ TIME_CODES_EDITION2 = {
 unknown_string = "???"
 
 
-def reset_load_rules():
-    """
-    Resets the GRIB load process to use only the standard conversion rules.
-
-    .. deprecated:: 1.7
-
-    """
-    warn_deprecated('reset_load_rules was deprecated in v1.7.')
-
-
 class GribDataProxy(object):
     """A reference to the data payload of a single Grib message."""
 
@@ -204,14 +162,11 @@ class GribWrapper(object):
     """
     Contains a pygrib object plus some extra keys of our own.
 
-    .. deprecated:: 1.10
-
     The class :class:`iris_grib.message.GribMessage`
     provides alternative means of working with GRIB message instances.
 
     """
     def __init__(self, grib_message, grib_fh=None, auto_regularise=True):
-        warn_deprecated('Deprecated at version 1.10')
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
         deferred = grib_fh is not None
@@ -368,20 +323,6 @@ class GribWrapper(object):
         # time-processed forcast time is from reference time to start of period
         if edition == 2:
             forecastTime = self.forecastTime
-
-            uft = np.uint32(forecastTime)
-            BILL = 2**30
-
-            # Workaround grib api's assumption that forecast time is positive.
-            # Handles correctly encoded -ve forecast times up to one -1 billion.
-            if hindcast_workaround:
-                if 2 * BILL < uft < 3 * BILL:
-                    msg = "Re-interpreting negative forecastTime from " \
-                            + str(forecastTime)
-                    forecastTime = -(uft - 2 * BILL)
-                    msg += " to " + str(forecastTime)
-                    warnings.warn(msg)
-
         else:
             forecastTime = self.startStep
 
@@ -1028,19 +969,6 @@ def save_grib2(cube, target, append=False, **kwargs):
     save_messages(messages, target, append=append)
 
 
-def as_pairs(cube):
-    """
-    .. deprecated:: 1.10
-    Please use :func:`iris_grib.save_pairs_from_cube`
-    for the same functionality.
-
-
-    """
-    warn_deprecated('as_pairs is deprecated in v1.10; please use'
-                    ' save_pairs_from_cube instead.')
-    return save_pairs_from_cube(cube)
-
-
 def save_pairs_from_cube(cube):
     """
     Convert one or more cubes to (2D cube, GRIB message) pairs.
@@ -1063,22 +991,6 @@ def save_pairs_from_cube(cube):
         grib_message = gribapi.grib_new_from_samples("GRIB2")
         _save_rules.run(slice2D, grib_message)
         yield (slice2D, grib_message)
-
-
-def as_messages(cube):
-    """
-    .. deprecated:: 1.10
-    Please use :func:`iris_grib.save_pairs_from_cube` instead.
-
-    Convert one or more cubes to GRIB messages.
-    Returns an iterable of grib_api GRIB messages.
-
-    Args:
-        * cube      - A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
-                      list of cubes.
-
-    """
-    return (message for cube, message in save_pairs_from_cube(cube))
 
 
 def save_messages(messages, target, append=False):

@@ -17,9 +17,7 @@
 """
 Grib save implementation.
 
-This module replaces the deprecated
-:mod:`iris_grib.grib_save_rules`. It is a private module
-with no public API. It is invoked from
+This is a private module with no public API. It is invoked from
 :meth:`iris_grib.save_grib2`.
 
 """
