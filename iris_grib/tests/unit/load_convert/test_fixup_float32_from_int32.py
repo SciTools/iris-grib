@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -14,16 +14,34 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for the :mod:`iris_grib` package."""
+"""
+Unit tests for `iris_grib._load_convert.fixup_float32_from_int32`.
+
+"""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-from iris_grib.message import GribMessage
-from iris_grib.tests import mock
+# Import iris_grib.tests first so that some things can be initialised before
+# importing anything else.
+import iris_grib.tests as tests
+
+from iris_grib._load_convert import fixup_float32_from_int32
 
 
-def _make_test_message(sections):
-    raw_message = mock.Mock(sections=sections)
-    recreate_raw = mock.Mock(return_value=raw_message)
-    return GribMessage(raw_message, recreate_raw)
+class Test(tests.IrisGribTest):
+    def test_negative(self):
+        result = fixup_float32_from_int32(-0x3f000000)
+        self.assertEqual(result, -0.5)
+
+    def test_zero(self):
+        result = fixup_float32_from_int32(0)
+        self.assertEqual(result, 0)
+
+    def test_positive(self):
+        result = fixup_float32_from_int32(0x3f000000)
+        self.assertEqual(result, 0.5)
+
+
+if __name__ == '__main__':
+    tests.main()
