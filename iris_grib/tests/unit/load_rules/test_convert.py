@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2015, Met Office
+# (C) British Crown Copyright 2013 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -14,26 +14,26 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for :func:`iris.fileformats.grib.load_rules.convert`."""
+"""Unit tests for :func:`iris_grib.load_rules.convert`."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import cf_units
 import gribapi
 
 import iris
 from iris.fileformats.rules import Reference
-from iris.tests import mock
-from iris.tests.test_grib_load import TestGribSimple
-from iris.tests.unit.fileformats import TestField
 
-from iris.fileformats.grib import GribWrapper
-from iris.fileformats.grib.load_rules import convert
+from iris_grib import GribWrapper
+from iris_grib.load_rules import convert
+
+from iris_grib.tests import mock
+from iris_grib.tests.unit import TestField, TestGribSimple
 
 
 class Test_GribLevels_Mock(TestGribSimple):
