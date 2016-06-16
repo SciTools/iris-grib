@@ -39,13 +39,12 @@ import scipy.interpolate
 
 import iris
 import iris.coord_systems as coord_systems
-import iris.fileformats.rules as iris_rules
+# import iris.fileformats.rules as iris_rules
 from iris.exceptions import TranslationError, NotYetImplementedError
 from . import grib_phenom_translation as gptx
 from . import _save_rules
-from ._load_convert import convert as new_load_convert
+from ._load_convert import convert as load_convert
 from .message import GribMessage
-from .load_rules import convert as old_load_convert
 
 
 __version__ = '0.1.0.dev0'
@@ -715,15 +714,11 @@ def load_cubes(filenames, callback=None):
         Function which can be passed on to :func:`iris.io.run_callback`.
 
     """
-    if iris.FUTURE.strict_grib_load:
-        grib_loader = iris_rules.Loader(
-            GribMessage.messages_from_filename,
-            {},
-            new_load_convert)
-    else:
-        grib_loader = iris_rules.Loader(
-            grib_generator, {},
-            old_load_convert)
+    import iris.fileformats.rules as iris_rules
+    grib_loader = iris_rules.Loader(
+        GribMessage.messages_from_filename,
+        {},
+        load_convert)
     return iris_rules.load_cubes(filenames, callback, grib_loader)
 
 
@@ -774,7 +769,8 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
-    return iris_rules.load_pairs_from_fields(grib_messages, new_load_convert)
+    import iris.fileformats.rules as iris_rules
+    return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
 
 
 def save_grib2(cube, target, append=False, **kwargs):

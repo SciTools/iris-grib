@@ -85,10 +85,9 @@ class Test_deferred(tests.IrisGribTest):
     def test_regular_sequential(self):
         tell_tale = np.arange(1, 5) * _message_length
         grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
-        auto_regularise = False
         grib_message = 'regular_ll'
         for i, _ in enumerate(tell_tale):
-            gw = GribWrapper(grib_message, grib_fh, auto_regularise)
+            gw = GribWrapper(grib_message, grib_fh)
             self.assertIsInstance(gw._data, NumpyArrayAdapter)
             proxy = gw._data.concrete
             self.assertIsInstance(proxy, GribDataProxy)
@@ -97,16 +96,14 @@ class Test_deferred(tests.IrisGribTest):
             self.assertIs(proxy.fill_value, np.nan)
             self.assertEqual(proxy.path, grib_fh.name)
             self.assertEqual(proxy.offset, _message_length * i)
-            self.assertEqual(proxy.regularise, auto_regularise)
 
     def test_regular_mixed(self):
         tell_tale = np.arange(1, 5) * _message_length
         expected = tell_tale - _message_length
         grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
-        auto_regularise = False
         grib_message = 'regular_ll'
         for offset in expected:
-            gw = GribWrapper(grib_message, grib_fh, auto_regularise)
+            gw = GribWrapper(grib_message, grib_fh)
             self.assertIsInstance(gw._data, NumpyArrayAdapter)
             proxy = gw._data.concrete
             self.assertIsInstance(proxy, GribDataProxy)
@@ -115,15 +112,13 @@ class Test_deferred(tests.IrisGribTest):
             self.assertIs(proxy.fill_value, np.nan)
             self.assertEqual(proxy.path, grib_fh.name)
             self.assertEqual(proxy.offset, offset)
-            self.assertEqual(proxy.regularise, auto_regularise)
 
     def test_reduced_sequential(self):
         tell_tale = np.arange(1, 5) * _message_length
         grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
-        auto_regularise = False
         grib_message = 'reduced_gg'
         for i, _ in enumerate(tell_tale):
-            gw = GribWrapper(grib_message, grib_fh, auto_regularise)
+            gw = GribWrapper(grib_message, grib_fh)
             self.assertIsInstance(gw._data, NumpyArrayAdapter)
             proxy = gw._data.concrete
             self.assertIsInstance(proxy, GribDataProxy)
@@ -132,16 +127,14 @@ class Test_deferred(tests.IrisGribTest):
             self.assertIs(proxy.fill_value, np.nan)
             self.assertEqual(proxy.path, grib_fh.name)
             self.assertEqual(proxy.offset, _message_length * i)
-            self.assertEqual(proxy.regularise, auto_regularise)
 
     def test_reduced_mixed(self):
         tell_tale = np.arange(1, 5) * _message_length
         expected = tell_tale - _message_length
         grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
-        auto_regularise = False
         grib_message = 'reduced_gg'
         for offset in expected:
-            gw = GribWrapper(grib_message, grib_fh, auto_regularise)
+            gw = GribWrapper(grib_message, grib_fh)
             self.assertIsInstance(gw._data, NumpyArrayAdapter)
             proxy = gw._data.concrete
             self.assertIsInstance(proxy, GribDataProxy)
@@ -150,7 +143,6 @@ class Test_deferred(tests.IrisGribTest):
             self.assertIs(proxy.fill_value, np.nan)
             self.assertEqual(proxy.path, grib_fh.name)
             self.assertEqual(proxy.offset, offset)
-            self.assertEqual(proxy.regularise, auto_regularise)
 
 
 if __name__ == '__main__':
