@@ -15,25 +15,25 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for `iris.fileformats.grib.message.Section`.
+Unit tests for `iris_grib.message.Section`.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import gribapi
 import numpy as np
 
-from iris.fileformats.grib.message import Section
+from iris_grib.message import Section
 
 
 @tests.skip_data
-class Test___getitem__(tests.IrisTest):
+class Test___getitem__(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
         with open(filename, 'rb') as grib_fh:
@@ -66,7 +66,7 @@ class Test___getitem__(tests.IrisTest):
 
 
 @tests.skip_data
-class Test__getitem___pdt_31(tests.IrisTest):
+class Test__getitem___pdt_31(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'umukv', 'ukv_chan9.grib2'))
         with open(filename, 'rb') as grib_fh:
@@ -84,7 +84,7 @@ class Test__getitem___pdt_31(tests.IrisTest):
 
 
 @tests.skip_data
-class Test_get_computed_key(tests.IrisTest):
+class Test_get_computed_key(tests.IrisGribTest):
     def test_gdt40_computed(self):
         fname = tests.get_data_path(('GRIB', 'gaussian', 'regular_gg.grib2'))
         with open(fname, 'rb') as grib_fh:

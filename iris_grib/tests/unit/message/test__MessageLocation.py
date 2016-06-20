@@ -15,27 +15,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for the `iris.fileformats.grib.message._MessageLocation` class.
+Unit tests for the `iris.message._MessageLocation` class.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
-from iris.fileformats.grib.message import _MessageLocation
-from iris.tests import mock
+from iris_grib.message import _MessageLocation
+from iris_grib.tests import mock
 
 
-class Test(tests.IrisTest):
+class Test(tests.IrisGribTest):
     def test(self):
         message_location = _MessageLocation(mock.sentinel.filename,
                                             mock.sentinel.location)
-        patch_target = 'iris.fileformats.grib.message._RawGribMessage.' \
-                       'from_file_offset'
+        patch_target = 'iris_grib.message._RawGribMessage.from_file_offset'
         expected = mock.sentinel.message
         with mock.patch(patch_target, return_value=expected) as rgm:
             result = message_location()
