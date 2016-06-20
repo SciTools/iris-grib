@@ -15,24 +15,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for the `iris.fileformats.grib.message._RawGribMessage` class.
+Unit tests for the `iris_grib.message._RawGribMessage` class.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import gribapi
 
-from iris.fileformats.grib.message import _RawGribMessage
+from iris_grib.message import _RawGribMessage
 
 
 @tests.skip_data
-class Test(tests.IrisTest):
+class Test(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
         with open(filename, 'rb') as grib_fh:

@@ -15,25 +15,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for the `iris.fileformats.grib.message._DataProxy` class.
+Unit tests for the `iris.message._DataProxy` class.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import numpy as np
 from numpy.random import randint
 
 from iris.exceptions import TranslationError
-from iris.fileformats.grib.message import _DataProxy
+
+from iris_grib.message import _DataProxy
 
 
-class Test__bitmap(tests.IrisTest):
+class Test__bitmap(tests.IrisGribTest):
     def test_no_bitmap(self):
         section_6 = {'bitMapIndicator': 255, 'bitmap': None}
         data_proxy = _DataProxy(0, 0, 0, 0)
