@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2015, Met Office
+# (C) British Crown Copyright 2013 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -15,27 +15,27 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for
-:func:`iris.fileformats.grib._save_rules.set_fixed_surfaces`.
+Unit tests for :func:`iris_grib._save_rules.set_fixed_surfaces`.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import gribapi
 import numpy as np
 
 import iris.cube
 import iris.coords
-from iris.fileformats.grib._save_rules import set_fixed_surfaces
+
+from iris_grib._save_rules import set_fixed_surfaces
 
 
-class Test(tests.IrisTest):
+class Test(tests.IrisGribTest):
     def test_bounded_altitude_feet(self):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(iris.coords.AuxCoord(

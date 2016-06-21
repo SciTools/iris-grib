@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2015, Met Office
+# (C) British Crown Copyright 2014 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -15,21 +15,21 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for `iris.fileformats.grib._save_rules.fixup_float32_as_int32`.
+Unit tests for `iris_grib._save_rules.fixup_float32_as_int32`.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
-from iris.fileformats.grib._save_rules import fixup_float32_as_int32
+from iris_grib._save_rules import fixup_float32_as_int32
 
 
-class Test(tests.IrisTest):
+class Test(tests.IrisGribTest):
     def test_positive_zero(self):
         result = fixup_float32_as_int32(0.0)
         self.assertEqual(result, 0)

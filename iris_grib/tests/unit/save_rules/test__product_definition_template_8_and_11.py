@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2015, Met Office
+# (C) British Crown Copyright 2013 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -16,28 +16,28 @@
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 Unit tests for
-:func:`iris.fileformats.grib._save_rules._product_definition_template_8_and_11`
+:func:`iris_grib._save_rules._product_definition_template_8_and_11`
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 from cf_units import Unit
 import gribapi
 
 from iris.coords import CellMethod, DimCoord
-from iris.tests import mock
 import iris.tests.stock as stock
-from iris.fileformats.grib._save_rules import \
-    _product_definition_template_8_and_11
+
+from iris_grib._save_rules import _product_definition_template_8_and_11
+from iris_grib.tests import mock
 
 
-class TestTypeOfStatisticalProcessing(tests.IrisTest):
+class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.lat_lon_cube()
         # Rename cube to avoid warning about unknown discipline/parameter.
@@ -87,7 +87,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisTest):
             _product_definition_template_8_and_11(cube, mock.sentinel.grib)
 
 
-class TestTimeCoordPrerequisites(tests.IrisTest):
+class TestTimeCoordPrerequisites(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.lat_lon_cube()
         # Rename cube to avoid warning about unknown discipline/parameter.
@@ -130,7 +130,7 @@ class TestTimeCoordPrerequisites(tests.IrisTest):
                                                   mock.sentinel.grib)
 
 
-class TestEndOfOverallTimeInterval(tests.IrisTest):
+class TestEndOfOverallTimeInterval(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.lat_lon_cube()
         # Rename cube to avoid warning about unknown discipline/parameter.
@@ -187,7 +187,7 @@ class TestEndOfOverallTimeInterval(tests.IrisTest):
             grib, "secondOfEndOfOverallTimeInterval", 7)
 
 
-class TestNumberOfTimeRange(tests.IrisTest):
+class TestNumberOfTimeRange(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_other_cell_methods(self, mock_set):
         cube = stock.lat_lon_cube()

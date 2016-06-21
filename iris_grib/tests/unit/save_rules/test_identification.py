@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2015, Met Office
+# (C) British Crown Copyright 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -14,25 +14,26 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for `iris.fileformats.grib.grib_save_rules.identification`."""
+"""Unit tests for `iris_grib.grib_save_rules.identification`."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import gribapi
 
-import iris.fileformats.grib
-from iris.fileformats.grib._save_rules import identification
-from iris.tests import mock
+import iris
 import iris.tests.stock as stock
-from iris.tests.test_grib_load import TestGribSimple
+
+from iris_grib._save_rules import identification
+from iris_grib.tests import mock
+from iris_grib.tests.unit import TestGribSimple
 
 
-GRIB_API = 'iris.fileformats.grib._save_rules.gribapi'
+GRIB_API = 'iris_grib._save_rules.gribapi'
 
 
 class Test(TestGribSimple):
