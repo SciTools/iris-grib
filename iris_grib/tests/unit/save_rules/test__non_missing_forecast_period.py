@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2015, Met Office
+# (C) British Crown Copyright 2013 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -19,17 +19,18 @@
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import cf_units
 
 import iris
-from iris.fileformats.grib._save_rules import _non_missing_forecast_period
+
+from iris_grib._save_rules import _non_missing_forecast_period
 
 
-class Test(tests.IrisTest):
+class Test(tests.IrisGribTest):
     def _cube(self, t_bounds=False):
         time_coord = iris.coords.DimCoord(15, standard_name='time',
                                           units='hours since epoch')

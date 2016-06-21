@@ -25,10 +25,10 @@ import six
 import iris_grib.tests as tests
 
 import gribapi
+import mock
 import numpy as np
 
 import iris_grib
-from iris_grib.tests import mock
 
 
 class TestSaveMessages(tests.IrisGribTest):

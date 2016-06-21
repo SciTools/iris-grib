@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2015, Met Office
+# (C) British Crown Copyright 2013 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -14,22 +14,25 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for the :mod:`iris.fileformats.grib.grib_save_rules` module."""
+"""Unit tests for the :mod:`iris_grib.grib_save_rules` module."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-import iris.tests as tests
+# Import iris_grib.tests first so that some things can be initialised before
+# importing anything else.
+import iris_grib.tests as tests
+
+import mock
+import numpy as np
 
 import iris
 from iris.fileformats.pp import EARTH_RADIUS as PP_DEFAULT_EARTH_RADIUS
-from iris.tests import mock
-import numpy as np
 
 
 class GdtTestMixin(object):
     """Some handy common test capabilities for grib grid-definition tests."""
-    TARGET_MODULE = 'iris.fileformats.grib._save_rules'
+    TARGET_MODULE = 'iris_grib._save_rules'
 
     def setUp(self):
         # Patch the gribapi of the tested module.

@@ -25,14 +25,13 @@ import iris_grib.tests as tests
 
 import cf_units
 import gribapi
+import mock
 
 import iris
 from iris.fileformats.rules import Reference
 
 from iris_grib import GribWrapper
 from iris_grib.load_rules import convert
-
-from iris_grib.tests import mock
 from iris_grib.tests.unit import TestField, TestGribSimple
 
 

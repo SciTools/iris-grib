@@ -27,12 +27,12 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 from cf_units import Unit
+import mock
 import numpy as np
 
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import validity_time_coord
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

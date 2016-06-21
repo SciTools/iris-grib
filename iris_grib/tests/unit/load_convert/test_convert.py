@@ -23,10 +23,11 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # before importing anything else.
 import iris_grib.tests as tests
 
+import mock
+
 from iris.exceptions import TranslationError
 
 from iris_grib._load_convert import convert
-from iris_grib.tests import mock
 from iris_grib.tests.unit import _make_test_message
 
 

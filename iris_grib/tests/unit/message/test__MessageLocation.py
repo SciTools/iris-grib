@@ -26,8 +26,9 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # importing anything else.
 import iris_grib.tests as tests
 
+import mock
+
 from iris_grib.message import _MessageLocation
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

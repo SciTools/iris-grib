@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2015, Met Office
+# (C) British Crown Copyright 2014 - 2016, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -15,27 +15,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Unit tests for
-:meth:`iris.fileformats.grib._save_rules.grid_definition_template_0`.
+Unit tests for :meth:`iris_grib._save_rules.grid_definition_template_0`.
 
 """
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
 
-# Import iris.tests first so that some things can be initialised before
+# Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris.tests as tests
+import iris_grib.tests as tests
 
 import numpy as np
 
 from iris.coord_systems import GeogCS
-from iris.tests.unit.fileformats.grib.save_rules import GdtTestMixin
 
-from iris.fileformats.grib._save_rules import grid_definition_template_0
+from iris_grib._save_rules import grid_definition_template_0
+from iris_grib.tests.unit.save_rules import GdtTestMixin
 
 
-class Test(tests.IrisTest, GdtTestMixin):
+class Test(tests.IrisGribTest, GdtTestMixin):
     def setUp(self):
         GdtTestMixin.setUp(self)
 

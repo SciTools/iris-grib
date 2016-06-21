@@ -28,15 +28,14 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import warnings
-
+import mock
 import numpy as np
+import warnings
 
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import (grid_definition_template_4_and_5,
                                      _MDI as MDI)
-from iris_grib.tests import mock
 
 
 RESOLUTION = 1e6
