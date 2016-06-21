@@ -24,12 +24,13 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 import gribapi
-import iris
+import mock
 import numpy as np
+
+import iris
 
 import iris_grib
 from iris_grib.message import GribMessage
-from iris_grib.tests import mock
 
 
 def _make_test_message(sections):

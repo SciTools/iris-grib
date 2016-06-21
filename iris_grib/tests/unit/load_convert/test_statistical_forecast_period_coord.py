@@ -27,9 +27,9 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 import datetime
+import mock
 
 from iris_grib._load_convert import statistical_forecast_period_coord
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

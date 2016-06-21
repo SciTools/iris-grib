@@ -27,11 +27,11 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 import gribapi
+import mock
 
 from iris.coords import CellMethod
 
 from iris_grib._save_rules import set_time_increment
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

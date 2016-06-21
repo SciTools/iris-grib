@@ -28,9 +28,9 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 from copy import deepcopy
+import mock
 
 from iris_grib._load_convert import grid_definition_template_5
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

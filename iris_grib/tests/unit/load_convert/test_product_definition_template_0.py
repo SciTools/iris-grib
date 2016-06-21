@@ -27,12 +27,13 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # before importing anything else.
 import iris_grib.tests as tests
 
+import mock
+
 import iris.coords
 
 import iris_grib
 from iris_grib.tests.unit.load_convert import LoadConvertTest, empty_metadata
 from iris_grib._load_convert import product_definition_template_0
-from iris_grib.tests import mock
 
 
 MDI = 0xffffffff

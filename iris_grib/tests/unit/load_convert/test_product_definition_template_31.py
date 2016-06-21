@@ -27,14 +27,13 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import warnings
-
+import mock
 import numpy as np
+import warnings
 
 from iris.coords import AuxCoord
 
 from iris_grib._load_convert import product_definition_template_31
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

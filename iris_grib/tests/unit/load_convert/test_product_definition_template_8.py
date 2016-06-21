@@ -28,8 +28,9 @@ import six
 # before importing anything else.
 import iris_grib.tests as tests
 
+import mock
+
 from iris_grib._load_convert import product_definition_template_8
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):

@@ -28,12 +28,12 @@ import iris_grib.tests as tests
 
 from cf_units import Unit
 import gribapi
+import mock
 
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
 
 from iris_grib._save_rules import product_definition_template_8
-from iris_grib.tests import mock
 
 
 class TestProductDefinitionIdentifier(tests.IrisGribTest):

@@ -27,6 +27,7 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 from copy import deepcopy
+import mock
 
 from iris.coords import DimCoord
 from iris.exceptions import TranslationError
@@ -35,7 +36,6 @@ from iris_grib._load_convert import vertical_coords
 from iris_grib._load_convert import \
     _TYPE_OF_FIXED_SURFACE_MISSING as MISSING_SURFACE, \
     _MDI as MISSING_LEVEL
-from iris_grib.tests import mock
 
 
 class Test(tests.IrisGribTest):
