@@ -42,7 +42,6 @@ class TestNoForecastReferenceTime(tests.IrisGribTest):
         cube.add_aux_coord(t_coord)
 
         res = _missing_forecast_period(cube)
-#        expected_rt = datetime.datetime(1970, 1, 1, 15, 0)
         expected_rt = t_coord.units.num2date(15)
         expected_rt_type = 3
         expected_fp = 0
@@ -60,7 +59,6 @@ class TestNoForecastReferenceTime(tests.IrisGribTest):
         cube.add_aux_coord(t_coord)
 
         res = _missing_forecast_period(cube)
-#        expected_rt = datetime.datetime(1970, 1, 1, 14, 0)
         expected_rt = t_coord.units.num2date(14)
         expected_rt_type = 3
         expected_fp = 0
@@ -82,7 +80,6 @@ class TestWithForecastReferenceTime(tests.IrisGribTest):
         cube.add_aux_coord(frt_coord)
 
         res = _missing_forecast_period(cube)
-#        expected_rt = datetime.datetime(1970, 1, 1, 8, 0)
         expected_rt = frt_coord.units.num2date(8)
         expected_rt_type = 1
         expected_fp = 3 * 24 - 8
@@ -102,7 +99,6 @@ class TestWithForecastReferenceTime(tests.IrisGribTest):
         cube.add_aux_coord(frt_coord)
 
         res = _missing_forecast_period(cube)
-#        expected_rt = datetime.datetime(1970, 1, 1, 8, 0)
         expected_rt = frt_coord.units.num2date(8)
         expected_rt_type = 1
         expected_fp = 2 * 24 - 8
