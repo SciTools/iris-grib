@@ -26,7 +26,6 @@ import warnings
 from cf_units import CALENDAR_GREGORIAN, Unit
 import numpy as np
 
-from . import warn_deprecated
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris.fileformats.rules import (ConversionMetadata, Factory, Reference,
@@ -56,17 +55,10 @@ def convert(grib):
     dim_coords_and_dims = []
     aux_coords_and_dims = []
 
-    # deprecation warning for this code path for edition 2 messages
     if grib.edition == 2:
-        msg = ('This GRIB loader is deprecated and will be removed in '
-              'a future release.  Please consider using the new '
-              'GRIB loader by setting the :class:`iris.Future` '
-              'option `strict_grib_load` to True; e.g.:\n'
-              'iris.FUTURE.strict_grib_load = True\n'
-              'Please report issues you experience to:\n'
-              'https://groups.google.com/forum/#!topic/scitools-iris-dev/'
-              'lMsOusKNfaU')
-        warn_deprecated(msg)
+        msg = ('This GRIB loader is not suitable for use with GRIB edition 2'
+               'messages.')
+        raise ValueError(msg)
 
     if \
             (grib.gridType=="reduced_gg"):

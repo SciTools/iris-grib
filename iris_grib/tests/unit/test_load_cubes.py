@@ -40,15 +40,9 @@ class TestToggle(tests.IrisGribTest):
             with mock.patch('iris.fileformats.rules.load_cubes') as rules_load:
                 rules_load.return_value = mock.sentinel.RESULT
                 result = load_cubes(mock.sentinel.FILES,
-                                    mock.sentinel.CALLBACK,
-                                    mock.sentinel.REGULARISE)
-                if mode:
-                    kw_args = {}
-                else:
-                    kw_args = {'auto_regularise': mock.sentinel.REGULARISE}
+                                    mock.sentinel.CALLBACK)
                 loader = iris.fileformats.rules.Loader(
-                    generator, kw_args,
-                    converter, None)
+                    generator, {}, converter, None)
                 rules_load.assert_called_once_with(mock.sentinel.FILES,
                                                    mock.sentinel.CALLBACK,
                                                    loader)
@@ -79,7 +73,7 @@ class Test_load_cubes(tests.IrisGribTest):
         # interpolating to a regular grid.
         gribfile = tests.get_data_path(
             ("GRIB", "reduced", "reduced_gg.grib2"))
-        grib_generator = load_cubes(gribfile, auto_regularise=False)
+        grib_generator = load_cubes(gribfile)
         self.assertCML(next(grib_generator))
 
 
