@@ -1,13 +1,14 @@
 #!/usr/bin/env python
+
 from __future__ import print_function
 
 import os
-import os.path
 from setuptools import setup
 import textwrap
 
 
-name = 'iris_grib'
+NAME = 'iris_grib'
+DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 LONG_DESCRIPTION = textwrap.dedent("""
@@ -22,24 +23,21 @@ LONG_DESCRIPTION = textwrap.dedent("""
     """)
 
 
-here = os.path.abspath(os.path.dirname(__file__))
-pkg_root = os.path.join(here, name)
-
-packages = []
-for d, _, _ in os.walk(os.path.join(here, name)):
-    if os.path.exists(os.path.join(d, '__init__.py')):
-        packages.append(d[len(here)+1:].replace(os.path.sep, '.'))
-
-package_data = {
-    'iris_grib': ['iris_grib/tests/results/*'],
-}
+def extract_packages():
+    packages = []
+    root = os.path.join(DIR, 'lib', NAME)
+    offset = len(os.path.dirname(root)) + 1
+    for dpath, _, _ in os.walk(root):
+        if os.path.exists(os.path.join(dpath, '__init__.py')):
+            package = dpath[offset:].replace(os.path.sep, '.')
+            packages.append(package)
+    return packages
 
 
 def extract_version():
     version = None
-    fdir = os.path.dirname(__file__)
-    fnme = os.path.join(fdir, 'iris_grib', '__init__.py')
-    with open(fnme) as fd:
+    fname = os.path.join(DIR, 'lib', NAME, '__init__.py')
+    with open(fname) as fd:
         for line in fd:
             if (line.startswith('__version__')):
                 _, version = line.split('=')
@@ -49,10 +47,10 @@ def extract_version():
 
 
 setup_args = dict(
-    name             = name,
+    name             = NAME,
     version          = extract_version(),
-    packages         = packages,
-    package_data     = package_data,
+    package_dir      = {'': 'lib'},
+    packages         = extract_packages(),
     description      = "GRIB loading for Iris",
     long_description = LONG_DESCRIPTION,
     url              = 'https://github.com/SciTools/iris-grib',
@@ -76,7 +74,7 @@ setup_args = dict(
     extras_require = {
         'test:python_version=="2.7"': ['mock'],
     },
-    test_suite = 'iris_grib.tests',
+    test_suite = '{}.tests'.format(NAME),
 )
 
 
