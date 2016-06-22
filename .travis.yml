@@ -62,16 +62,21 @@ install:
   - echo "[Resources]" > $SITE_CFG
   - echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/iris-test-data-master/test_data" >> $SITE_CFG
 
-  # Summarise the environment
-  # -------------------------
-  - conda list
-
   # Install iris-grib itself
   # ------------------------
   - pip install . --no-deps
 
+  # Install coveralls for test coverage
+  # -----------------------------------
+  - pip install coveralls
+
+  # Summarise the environment
+  # -------------------------
+  - conda list
 
 script:
   # Ensure we can import iris_grib and that the tests pass
   # ------------------------------------------------------
-  - python setup.py test
+  - coverage run setup.py test
+
+after_success: coveralls
