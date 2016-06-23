@@ -76,8 +76,7 @@ __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'as_messages', 'as_pairs', 'grib_generator', 'reset_load_rules',
-           'hindcast_workaround']
+           'as_messages', 'as_pairs', 'grib_generator', 'hindcast_workaround']
 
 
 #: Set this flag to True to enable support of negative forecast periods
@@ -143,16 +142,6 @@ TIME_CODES_EDITION2 = {
 }
 
 unknown_string = "???"
-
-
-def reset_load_rules():
-    """
-    Resets the GRIB load process to use only the standard conversion rules.
-
-    .. deprecated:: 1.7
-
-    """
-    warn_deprecated('reset_load_rules was deprecated in v1.7.')
 
 
 class GribDataProxy(object):
