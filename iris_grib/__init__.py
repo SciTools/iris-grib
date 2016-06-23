@@ -76,7 +76,7 @@ __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'as_messages', 'as_pairs', 'grib_generator', 'hindcast_workaround']
+           'as_messages', 'grib_generator', 'hindcast_workaround']
 
 
 #: Set this flag to True to enable support of negative forecast periods
@@ -1015,19 +1015,6 @@ def save_grib2(cube, target, append=False, **kwargs):
     """
     messages = as_messages(cube)
     save_messages(messages, target, append=append)
-
-
-def as_pairs(cube):
-    """
-    .. deprecated:: 1.10
-    Please use :func:`iris_grib.save_pairs_from_cube`
-    for the same functionality.
-
-
-    """
-    warn_deprecated('as_pairs is deprecated in v1.10; please use'
-                    ' save_pairs_from_cube instead.')
-    return save_pairs_from_cube(cube)
 
 
 def save_pairs_from_cube(cube):
