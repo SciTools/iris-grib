@@ -993,7 +993,7 @@ def load_pairs_from_fields(grib_messages):
     return iris_rules.load_pairs_from_fields(grib_messages, new_load_convert)
 
 
-def save_grib2(cube, target, append=False, **kwargs):
+def save_grib2(cube, target, append=False):
     """
     Save a cube or iterable of cubes to a GRIB2 file.
 
@@ -1009,8 +1009,6 @@ def save_grib2(cube, target, append=False, **kwargs):
                       the end of the file.
                       Only applicable when target is a filename, not a file
                       handle. Default is False.
-
-    See also :func:`iris.io.save`.
 
     """
     messages = (message for _, message in save_pairs_from_cube(cube))
