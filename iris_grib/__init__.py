@@ -76,7 +76,7 @@ __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'as_messages', 'grib_generator', 'hindcast_workaround']
+           'grib_generator', 'hindcast_workaround']
 
 
 #: Set this flag to True to enable support of negative forecast periods
@@ -993,7 +993,7 @@ def load_pairs_from_fields(grib_messages):
     return iris_rules.load_pairs_from_fields(grib_messages, new_load_convert)
 
 
-def save_grib2(cube, target, append=False, **kwargs):
+def save_grib2(cube, target, append=False):
     """
     Save a cube or iterable of cubes to a GRIB2 file.
 
@@ -1010,10 +1010,8 @@ def save_grib2(cube, target, append=False, **kwargs):
                       Only applicable when target is a filename, not a file
                       handle. Default is False.
 
-    See also :func:`iris.io.save`.
-
     """
-    messages = as_messages(cube)
+    messages = (message for _, message in save_pairs_from_cube(cube))
     save_messages(messages, target, append=append)
 
 
@@ -1039,22 +1037,6 @@ def save_pairs_from_cube(cube):
         grib_message = gribapi.grib_new_from_samples("GRIB2")
         _save_rules.run(slice2D, grib_message)
         yield (slice2D, grib_message)
-
-
-def as_messages(cube):
-    """
-    .. deprecated:: 1.10
-    Please use :func:`iris_grib.save_pairs_from_cube` instead.
-
-    Convert one or more cubes to GRIB messages.
-    Returns an iterable of grib_api GRIB messages.
-
-    Args:
-        * cube      - A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
-                      list of cubes.
-
-    """
-    return (message for cube, message in save_pairs_from_cube(cube))
 
 
 def save_messages(messages, target, append=False):
