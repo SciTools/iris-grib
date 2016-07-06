@@ -26,25 +26,15 @@ import iris_grib.tests as tests
 import gribapi
 import mock
 
-import iris_grib
+from iris_grib import load_cubes
 from iris_grib._save_rules import reference_time
-from iris_grib.tests.unit import TestGribSimple
 
 
-GRIB_API = 'iris_grib._save_rules.gribapi'
-
-
-class Test(TestGribSimple):
-    @tests.skip_data
-    def test_forecast_period(self):
-        # The stock cube has a non-compliant forecast_period.
-        iris_grib.hindcast_workaround = True
-        fname = tests.get_data_path(('GRIB', 'global_t', 'global.grib2'))
-        [cube] = iris_grib.load_cubes(fname)
-
+class Test(tests.IrisGribTest):
+    def _test(self, cube):
         grib = mock.Mock()
         mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch(GRIB_API, mock_gribapi):
+        with mock.patch('iris_grib._save_rules.gribapi', mock_gribapi):
             reference_time(cube, grib)
 
         mock_gribapi.assert_has_calls(
@@ -53,22 +43,19 @@ class Test(TestGribSimple):
              mock.call.grib_set_long(grib, "dataTime", '0300')])
 
     @tests.skip_data
+    def test_forecast_period(self):
+        # The stock cube has a non-compliant forecast_period.
+        fname = tests.get_data_path(('GRIB', 'global_t', 'global.grib2'))
+        [cube] = load_cubes(fname)
+        self._test(cube)
+
+    @tests.skip_data
     def test_no_forecast_period(self):
         # The stock cube has a non-compliant forecast_period.
-        iris_grib.hindcast_workaround = True
         fname = tests.get_data_path(('GRIB', 'global_t', 'global.grib2'))
-        [cube] = iris_grib.load_cubes(fname)
+        [cube] = load_cubes(fname)
         cube.remove_coord("forecast_period")
-
-        grib = mock.Mock()
-        mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch(GRIB_API, mock_gribapi):
-            reference_time(cube, grib)
-
-        mock_gribapi.assert_has_calls(
-            [mock.call.grib_set_long(grib, "significanceOfReferenceTime", 3),
-             mock.call.grib_set_long(grib, "dataDate", '19941201'),
-             mock.call.grib_set_long(grib, "dataTime", '0000')])
+        self._test(cube)
 
 
 if __name__ == "__main__":

@@ -28,11 +28,11 @@ import mock
 from iris.exceptions import TranslationError
 
 from iris_grib._load_convert import convert
-from iris_grib.tests.unit import _make_test_message
+from iris_grib.tests.unit import _make_test_message, FakeGribMessage
 
 
-class Test(tests.IrisGribTest):
-    def test_call(self):
+class TestGribMessage(tests.IrisGribTest):
+    def test_edition_2(self):
         sections = [{'editionNumber': 2}]
         field = _make_test_message(sections)
         this = 'iris_grib._load_convert.grib2_convert'
@@ -45,12 +45,29 @@ class Test(tests.IrisGribTest):
             metadata = ([factory], [], None, None, None, {}, [], [], [])
             self.assertEqual(result, metadata)
 
-    def test_edition_1(self):
+    def test_edition_1_bad(self):
         sections = [{'editionNumber': 1}]
         field = _make_test_message(sections)
-        with self.assertRaisesRegexp(TranslationError,
-                                     'edition 1 is not supported'):
+        emsg = 'edition 1 is not supported'
+        with self.assertRaisesRegexp(TranslationError, emsg):
             convert(field)
+
+
+class TestGribWrapper(tests.IrisGribTest):
+    def test_edition_2_bad(self):
+        field = mock.Mock(edition=2)
+        emsg = 'edition 2 is not supported'
+        with self.assertRaisesRegexp(TranslationError, emsg):
+            convert(field)
+
+    def test_edition_1(self):
+        field = mock.Mock(edition=1)
+        func = 'iris_grib._load_convert.grib1_convert'
+        metadata = mock.sentinel.metadata
+        with mock.patch(func, return_value=metadata) as grib1_convert:
+            result = convert(field)
+            grib1_convert.assert_called_once_with(field)
+            self.assertEqual(result, metadata)
 
 
 if __name__ == '__main__':
