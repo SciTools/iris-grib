@@ -63,6 +63,8 @@ def warn_deprecated(msg, **kwargs):
 
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
+import iris.fileformats.rules as iris_rules
+
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
@@ -893,7 +895,6 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
 
 
     """
-    import iris.fileformats.rules as iris_rules
     grib_loader = iris_rules.Loader(_load_generate,
                                     {'auto_regularise': auto_regularise},
                                     load_convert)
@@ -947,7 +948,6 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
-    import iris.fileformats.rules as iris_rules
     return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
 
 
