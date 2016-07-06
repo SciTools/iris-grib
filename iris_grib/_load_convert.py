@@ -1008,10 +1008,10 @@ def grid_definition_template_40_regular(section, metadata, cs):
 
     # Create lat/lon coordinates.
     x_coord = DimCoord(x_points, standard_name='longitude',
-                       units='degrees_east', coord_system=cs,
+                       units='degrees', coord_system=cs,
                        circular=circular)
     y_coord = DimCoord(y_points, standard_name='latitude',
-                       units='degrees_north', coord_system=cs)
+                       units='degrees', coord_system=cs)
 
     # Determine the lat/lon dimensions.
     y_dim, x_dim = 0, 1
@@ -1043,9 +1043,9 @@ def grid_definition_template_40_reduced(section, metadata, cs):
 
     # Create lat/lon coordinates.
     x_coord = AuxCoord(x_points, standard_name='longitude',
-                       units='degrees_east', coord_system=cs)
+                       units='degrees', coord_system=cs)
     y_coord = AuxCoord(y_points, standard_name='latitude',
-                       units='degrees_north', coord_system=cs)
+                       units='degrees', coord_system=cs)
 
     # Add the lat/lon coordinates to the metadata dim coords.
     metadata['aux_coords_and_dims'].append((y_coord, 0))
