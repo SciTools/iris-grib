@@ -42,6 +42,9 @@ from . import grib_phenom_translation as itranslation
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 from iris.util import _is_circular
 
+from .load_rules import convert as grib1_convert
+from .message import GribMessage
+
 
 # Restrict the names imported from this namespace.
 __all__ = ['convert']
@@ -2179,24 +2182,38 @@ def convert(field):
         A :class:`iris.fileformats.rules.ConversionMetadata` object.
 
     """
-    editionNumber = field.sections[0]['editionNumber']
-    if editionNumber != 2:
-        msg = 'GRIB edition {} is not supported'.format(editionNumber)
-        raise TranslationError(msg)
+    if isinstance(field, GribMessage):
+        editionNumber = field.sections[0]['editionNumber']
 
-    # Initialise the cube metadata.
-    metadata = OrderedDict()
-    metadata['factories'] = []
-    metadata['references'] = []
-    metadata['standard_name'] = None
-    metadata['long_name'] = None
-    metadata['units'] = None
-    metadata['attributes'] = {}
-    metadata['cell_methods'] = []
-    metadata['dim_coords_and_dims'] = []
-    metadata['aux_coords_and_dims'] = []
+        if editionNumber != 2:
+            emsg = 'GRIB edition {} is not supported by {!r}.'
+            raise TranslationError(emsg.format(editionNumber,
+                                               type(field).__name__))
 
-    # Convert GRIB2 message to cube metadata.
-    grib2_convert(field, metadata)
+        # Initialise the cube metadata.
+        metadata = OrderedDict()
+        metadata['factories'] = []
+        metadata['references'] = []
+        metadata['standard_name'] = None
+        metadata['long_name'] = None
+        metadata['units'] = None
+        metadata['attributes'] = {}
+        metadata['cell_methods'] = []
+        metadata['dim_coords_and_dims'] = []
+        metadata['aux_coords_and_dims'] = []
 
-    return ConversionMetadata._make(metadata.values())
+        # Convert GRIB2 message to cube metadata.
+        grib2_convert(field, metadata)
+
+        result = ConversionMetadata._make(metadata.values())
+    else:
+        editionNumber = field.edition
+
+        if editionNumber != 1:
+            emsg = 'GRIB edition {} is not supported by {!r}.'
+            raise TranslationError(emsg.format(editionNumber,
+                                               type(field).__name__))
+
+        result = grib1_convert(field)
+
+    return result

@@ -38,7 +38,6 @@ import numpy.ma as ma
 import scipy.interpolate
 
 import iris
-import iris.fileformats.rules as iris_rules
 
 # Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
 # NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
@@ -67,16 +66,15 @@ from iris.exceptions import TranslationError, NotYetImplementedError
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
-from ._load_convert import convert as new_load_convert
+from ._load_convert import convert as load_convert
 from .message import GribMessage
-from .load_rules import convert as old_load_convert
 
 
 __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'grib_generator', 'hindcast_workaround']
+           'hindcast_workaround']
 
 
 #: Set this flag to True to enable support of negative forecast periods
@@ -853,45 +851,19 @@ def _regularise(grib_message):
     gribapi.grib_set_long(grib_message, "PLPresent", 0)
 
 
-def grib_generator(filename, auto_regularise=True):
-    """
-    Returns a generator of :class:`~iris_grib.GribWrapper`
-    fields from the given filename.
-
-    .. deprecated:: 1.10
-
-    The function:
-    :meth:`iris_grib.message.GribMessage.messages_from_filename`
-    provides alternative means of obtainig GRIB messages from a file.
-
-    Args:
-
-    * filename (string):
-        Name of the file to generate fields from.
-
-    Kwargs:
-
-    * auto_regularise (*True* | *False*):
-        If *True*, any field defined on a reduced grid will be interpolated
-        to an equivalent regular grid. If *False*, any field defined on a
-        reduced grid will be loaded on the raw reduced grid with no shape
-        information. The default behaviour is to interpolate fields on a
-        reduced grid to an equivalent regular grid.
-
-    """
-    warn_deprecated('Deprecated at version 1.10')
-    with open(filename, 'rb') as grib_fh:
-        while True:
-            grib_message = gribapi.grib_new_from_file(grib_fh)
-            if grib_message is None:
-                break
-
-            grib_wrapper = GribWrapper(grib_message, grib_fh, auto_regularise)
-
-            yield grib_wrapper
-
-            # finished with the grib message - claimed by the ecmwf c library.
-            gribapi.grib_release(grib_message)
+def _load_generate(filename, auto_regularise=True):
+    messages = GribMessage.messages_from_filename(filename)
+    for message in messages:
+        editionNumber = message.sections[0]['editionNumber']
+        if editionNumber == 1:
+            message_id = message._raw_message._message_id
+            grib_fh = message._file_ref.open_file
+            message = GribWrapper(message_id, grib_fh=grib_fh,
+                                  auto_regularise=auto_regularise)
+        elif editionNumber != 2:
+            emsg = 'GRIB edition {} is not supported.'
+            raise TranslationError(emsg.format(editionNumber))
+        yield message
 
 
 def load_cubes(filenames, callback=None, auto_regularise=True):
@@ -921,25 +893,10 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
 
 
     """
-    if iris.FUTURE.strict_grib_load:
-        grib_loader = iris_rules.Loader(
-            GribMessage.messages_from_filename,
-            {},
-            new_load_convert)
-    else:
-        if auto_regularise is not None:
-            # The old loader supports the auto_regularise keyword, but in
-            # deprecation mode, so warning if it is found.
-            msg = ('the`auto_regularise` kwarg is deprecated and '
-                   'will be removed in a future release. Resampling '
-                   'quasi-regular grids on load will no longer be '
-                   'available.  Resampling should be done on the '
-                   'loaded cube instead using Cube.regrid.')
-            warn_deprecated(msg)
-
-        grib_loader = iris_rules.Loader(
-            grib_generator, {'auto_regularise': auto_regularise},
-            old_load_convert)
+    import iris.fileformats.rules as iris_rules
+    grib_loader = iris_rules.Loader(_load_generate,
+                                    {'auto_regularise': auto_regularise},
+                                    load_convert)
     return iris_rules.load_cubes(filenames, callback, grib_loader)
 
 
@@ -990,7 +947,8 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
-    return iris_rules.load_pairs_from_fields(grib_messages, new_load_convert)
+    import iris.fileformats.rules as iris_rules
+    return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
 
 
 def save_grib2(cube, target, append=False):
