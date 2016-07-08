@@ -75,15 +75,7 @@ from .message import GribMessage
 __version__ = '0.1.0.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
-           'save_pairs_from_cube', 'save_messages', 'GribWrapper',
-           'hindcast_workaround']
-
-
-#: Set this flag to True to enable support of negative forecast periods
-#: when loading and saving GRIB files.
-#:
-#: .. deprecated:: 1.10
-hindcast_workaround = False
+           'save_pairs_from_cube', 'save_messages', 'GribWrapper']
 
 
 CENTRE_TITLES = {'egrr': 'U.K. Met Office - Exeter',
@@ -354,25 +346,7 @@ class GribWrapper(object):
         # work out stuff based on these values from the message
         edition = self.edition
 
-        # time-processed forcast time is from reference time to start of period
-        if edition == 2:
-            forecastTime = self.forecastTime
-
-            uft = np.uint32(forecastTime)
-            BILL = 2**30
-
-            # Workaround grib api's assumption that forecast time is positive.
-            # Handles correctly encoded -ve forecast times up to one -1 billion.
-            if hindcast_workaround:
-                if 2 * BILL < uft < 3 * BILL:
-                    msg = "Re-interpreting negative forecastTime from " \
-                            + str(forecastTime)
-                    forecastTime = -(uft - 2 * BILL)
-                    msg += " to " + str(forecastTime)
-                    warnings.warn(msg)
-
-        else:
-            forecastTime = self.startStep
+        forecastTime = self.startStep
 
         #regular or rotated grid?
         try:
@@ -383,7 +357,6 @@ class GribWrapper(object):
             latitudeOfSouthernPoleInDegrees = 90.0
 
         centre = gribapi.grib_get_string(self.grib_message, "centre")
-
 
         #default values
         self.extra_keys = {'_referenceDateTime':-1.0, '_phenomenonDateTime':-1.0,
