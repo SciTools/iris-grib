@@ -30,6 +30,8 @@ from biggus import NumpyArrayAdapter
 import mock
 import numpy as np
 
+from iris.exceptions import TranslationError
+
 from iris_grib import GribWrapper, GribDataProxy
 
 
@@ -41,7 +43,8 @@ def _mock_grib_get_long(grib_message, key):
                   numberOfValues=200,
                   jPointsAreConsecutive=0,
                   Ni=20,
-                  Nj=10)
+                  Nj=10,
+                  edition=1)
     try:
         result = lookup[key]
     except KeyError:
@@ -59,6 +62,30 @@ def _mock_grib_get_native_type(grib_message, key):
     if key == 'gridType':
         result = str
     return result
+
+
+class Test_edition(tests.IrisGribTest):
+    def setUp(self):
+        self.patch('iris_grib.GribWrapper._confirm_in_scope')
+        self.patch('iris_grib.GribWrapper._compute_extra_keys')
+        self.patch('gribapi.grib_get_long', _mock_grib_get_long)
+        self.patch('gribapi.grib_get_string', _mock_grib_get_string)
+        self.patch('gribapi.grib_get_native_type', _mock_grib_get_native_type)
+        self.tell = mock.Mock(side_effect=[_message_length])
+
+    def test_not_edition_1(self):
+        emsg = "GRIB edition 2 is not supported by 'GribWrapper'"
+        func = lambda grib_mesage, key: 2
+        with mock.patch('gribapi.grib_get_long', func):
+            with self.assertRaisesRegexp(TranslationError, emsg):
+                GribWrapper(None)
+
+    def test_edtion_1(self):
+        grib_message = 'regular_ll'
+        grib_fh = mock.Mock(tell=self.tell)
+        auto_regularise = False
+        wrapper = GribWrapper(grib_message, grib_fh, auto_regularise)
+        self.assertEqual(wrapper.grib_message, grib_message)
 
 
 class Test_deferred(tests.IrisGribTest):

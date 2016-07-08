@@ -103,26 +103,25 @@ class FakeGribMessage(dict):
         Create a fake message object.
 
         General keys can be set/add as required via **kwargs.
-        The keys 'edition' and 'time_code' are specially managed.
+        The 'time_code' key is specially managed.
 
         """
         # Start with a bare dictionary
         dict.__init__(self)
         # Extract specially-recognised keys.
-        edition = kwargs.pop('edition', 1)
         time_code = kwargs.pop('time_code', None)
         # Set the minimally required keys.
-        self._init_minimal_message(edition=edition)
+        self._init_minimal_message()
         # Also set a time-code, if given.
         if time_code is not None:
             self.set_timeunit_code(time_code)
         # Finally, add any remaining passed key-values.
         self.update(**kwargs)
 
-    def _init_minimal_message(self, edition=1):
+    def _init_minimal_message(self):
         # Set values for all the required keys.
-        # 'edition' controls the edition-specific keys.
         self.update({
+            'edition': 1,
             'Ni': 1,
             'Nj': 1,
             'numberOfValues': 1,
@@ -147,38 +146,19 @@ class FakeGribMessage(dict):
             'values': np.array([[1.0]]),
             'indicatorOfParameter': 9999,
             'parameterNumber': 9999,
-        })
-        # Add edition-dependent settings.
-        self['edition'] = edition
-        if edition == 1:
-            self.update({
-                'startStep': 24,
-                'timeRangeIndicator': 1,
-                'P1': 2, 'P2': 0,
-                # time unit - needed AS WELL as 'indicatorOfUnitOfTimeRange'
-                'unitOfTime': 1,
-                'table2Version': 9999,
-            })
-        if edition == 2:
-            self.update({
-                'iDirectionIncrementGiven': 1,
-                'jDirectionIncrementGiven': 1,
-                'uvRelativeToGrid': 0,
-                'forecastTime': 24,
-                'productDefinitionTemplateNumber': 0,
-                'stepRange': 24,
-                'discipline': 9999,
-                'parameterCategory': 9999,
-                'tablesVersion': 4
+            'startStep': 24,
+            'timeRangeIndicator': 1,
+            'P1': 2, 'P2': 0,
+            # time unit - needed AS WELL as 'indicatorOfUnitOfTimeRange'
+            'unitOfTime': 1,
+            'table2Version': 9999,
             })
 
     def set_timeunit_code(self, timecode):
-        # Do timecode setting (somewhat edition-dependent).
         self['indicatorOfUnitOfTimeRange'] = timecode
-        if self['edition'] == 1:
-            # for some odd reason, GRIB1 code uses *both* of these
-            # NOTE kludge -- the 2 keys are really the same thing
-            self['unitOfTime'] = timecode
+        # for some odd reason, GRIB1 code uses *both* of these
+        # NOTE kludge -- the 2 keys are really the same thing
+        self['unitOfTime'] = timecode
 
 
 class TestField(tests.IrisGribTest):
@@ -250,5 +230,5 @@ class TestGribSimple(tests.IrisGribTest):
                 grib_message = FakeGribMessage(**grib.__dict__)
                 wrapped_msg = iris_grib.GribWrapper(grib_message)
                 cube, _, _ = iris.fileformats.rules._make_cube(
-                    wrapped_msg, iris_grib.load_rules.convert)
+                    wrapped_msg, iris_grib.load_rules.grib1_convert)
         return cube
