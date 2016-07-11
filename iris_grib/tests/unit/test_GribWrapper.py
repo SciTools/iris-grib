@@ -74,8 +74,10 @@ class Test_edition(tests.IrisGribTest):
         self.tell = mock.Mock(side_effect=[_message_length])
 
     def test_not_edition_1(self):
+        def func(grib_message, key):
+            return 2
+
         emsg = "GRIB edition 2 is not supported by 'GribWrapper'"
-        func = lambda grib_mesage, key: 2
         with mock.patch('gribapi.grib_get_long', func):
             with self.assertRaisesRegexp(TranslationError, emsg):
                 GribWrapper(None)

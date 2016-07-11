@@ -30,7 +30,7 @@ install:
   # Install iris-grib's dependencies
   # --------------------------------
   - |
-     conda install --quiet --yes python=${python} pip nomkl \
+     conda install --quiet --yes python=${python} pep8 pip nomkl \
             iris=${iris}* \
             python-ecmwf_grib=${grib_api}*
 
