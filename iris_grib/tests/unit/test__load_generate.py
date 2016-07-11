@@ -55,8 +55,7 @@ class Test(tests.IrisGribTest):
                 mock_func.assert_called_once_with(self.fname)
                 self.assertIsInstance(field, GribWrapper)
                 mock_wrapper.assert_called_once_with(self.message_id,
-                                                     grib_fh=self.grib_fh,
-                                                     auto_regularise=True)
+                                                     grib_fh=self.grib_fh)
 
     def test_grib2(self):
         sections = [{'editionNumber': 2}]

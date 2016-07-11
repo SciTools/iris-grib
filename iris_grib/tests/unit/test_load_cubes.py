@@ -36,12 +36,11 @@ class Test(tests.IrisGribTest):
         converter = iris_grib._load_convert.convert
         files = mock.sentinel.FILES
         callback = mock.sentinel.CALLBACK
-        auto_regularise = mock.sentinel.REGULARISE
         expected_result = mock.sentinel.RESULT
         with mock.patch('iris.fileformats.rules.load_cubes') as rules_load:
             rules_load.return_value = expected_result
-            result = load_cubes(files, callback, auto_regularise)
-            kwargs = {'auto_regularise': auto_regularise}
+            result = load_cubes(files, callback)
+            kwargs = {}
             loader = Loader(generator, kwargs, converter, None)
             rules_load.assert_called_once_with(files, callback, loader)
             self.assertIs(result, expected_result)
