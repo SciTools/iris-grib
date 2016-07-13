@@ -35,23 +35,8 @@ import cf_units
 import gribapi
 import numpy as np
 import numpy.ma as ma
-import scipy.interpolate
 
 import iris
-
-# Import 'Linear1dExtrapolator' interpolator from Iris for data regularising.
-# NOTE: deprecated from Iris v1.10, expected to be removed in Iris v2.
-# Use is confined to the old 'non-strict' loader, which is likewise deprecated
-# in this project, and intended for removal in iris-grib v2.
-try:
-    # Import from the 'private version' of iris.analysis.interpolate, if
-    # available, to avoid an Iris deprecation warning.
-    from iris.analysis._interpolate_private import Linear1dExtrapolator
-except ImportError:
-    # 'Else' import from public iris.analysis.interpolate, if "private" version
-    # of module is not available :  Required to work with Iris 1.9.
-    from iris.analysis.interpolate import Linear1dExtrapolator
-
 
 # Define a dumb replacement for the iris deprecation helper routine.
 # This way we are compatibile back to Iris v1.9.0.
@@ -122,15 +107,14 @@ unknown_string = "???"
 class GribDataProxy(object):
     """A reference to the data payload of a single Grib message."""
 
-    __slots__ = ('shape', 'dtype', 'fill_value', 'path', 'offset', 'regularise')
+    __slots__ = ('shape', 'dtype', 'fill_value', 'path', 'offset')
 
-    def __init__(self, shape, dtype, fill_value, path, offset, regularise):
+    def __init__(self, shape, dtype, fill_value, path, offset):
         self.shape = shape
         self.dtype = dtype
         self.fill_value = fill_value
         self.path = path
         self.offset = offset
-        self.regularise = regularise
 
     @property
     def ndim(self):
@@ -140,10 +124,6 @@ class GribDataProxy(object):
         with open(self.path, 'rb') as grib_fh:
             grib_fh.seek(self.offset)
             grib_message = gribapi.grib_new_from_file(grib_fh)
-
-            if self.regularise and _is_quasi_regular_grib(grib_message):
-                _regularise(grib_message)
-
             data = _message_values(grib_message, self.shape)
             gribapi.grib_release(grib_message)
 
@@ -152,8 +132,7 @@ class GribDataProxy(object):
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
           'dtype={self.dtype!r} fill_value={self.fill_value!r} ' \
-          'path={self.path!r} offset={self.offset} ' \
-          'regularise={self.regularise}>'
+          'path={self.path!r} offset={self.offset}>'
         return msg.format(self=self)
 
     def __getstate__(self):
@@ -174,7 +153,7 @@ class GribWrapper(object):
     provides alternative means of working with GRIB message instances.
 
     """
-    def __init__(self, grib_message, grib_fh=None, auto_regularise=True):
+    def __init__(self, grib_message, grib_fh=None):
         warn_deprecated('Deprecated at version 1.10')
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
@@ -193,13 +172,6 @@ class GribWrapper(object):
             # advanced the file pointer to the end of the message.
             offset = grib_fh.tell()
             message_length = gribapi.grib_get_long(grib_message, 'totalLength')
-
-        if auto_regularise and _is_quasi_regular_grib(grib_message):
-            warnings.warn('Regularising GRIB message.')
-            if deferred:
-                self._regularise_shape(grib_message)
-            else:
-                _regularise(grib_message)
 
         # Initialise the key-extension dictionary.
         # NOTE: this attribute *must* exist, or the the __getattr__ overload
@@ -225,42 +197,10 @@ class GribWrapper(object):
             # of the current message due to the grib-api reading the message.
             proxy = GribDataProxy(shape, np.zeros(.0).dtype, np.nan,
                                   grib_fh.name,
-                                  offset - message_length,
-                                  auto_regularise)
+                                  offset - message_length)
             self._data = biggus.NumpyArrayAdapter(proxy)
         else:
             self.data = _message_values(grib_message, shape)
-
-    @staticmethod
-    def _regularise_shape(grib_message):
-        """
-        Calculate the regularised shape of the reduced message and push
-        dummy regularised values into the message to force the gribapi
-        to update the message grid type from reduced to regular.
-
-        """
-        # Make sure to read any missing values as NaN.
-        gribapi.grib_set_double(grib_message, "missingValue", np.nan)
-
-        # Get full longitude values, these describe the longitude value of
-        # *every* point in the grid, they are not 1d monotonic coordinates.
-        lons = gribapi.grib_get_double_array(grib_message, "longitudes")
-
-        # Compute the new longitude coordinate for the regular grid.
-        new_nx = max(gribapi.grib_get_long_array(grib_message, "pl"))
-        new_x_step = (max(lons) - min(lons)) / (new_nx - 1)
-        if gribapi.grib_get_long(grib_message, "iScansNegatively"):
-            new_x_step *= -1
-
-        gribapi.grib_set_long(grib_message, "Nx", int(new_nx))
-        gribapi.grib_set_double(grib_message, "iDirectionIncrementInDegrees",
-                                float(new_x_step))
-        # Spoof gribapi with false regularised values.
-        nj = gribapi.grib_get_long(grib_message, 'Nj')
-        temp = np.zeros((nj * new_nx,), dtype=np.float)
-        gribapi.grib_set_double_array(grib_message, 'values', temp)
-        gribapi.grib_set_long(grib_message, "jPointsAreConsecutive", 0)
-        gribapi.grib_set_long(grib_message, "PLPresent", 0)
 
     def _confirm_in_scope(self):
         """Ensure we have a grib flavour that we choose to support."""
@@ -669,105 +609,14 @@ def _message_values(grib_message, shape):
     return data
 
 
-def _is_quasi_regular_grib(grib_message):
-    """Detect GRIB 'thinned' a.k.a 'reduced' a.k.a 'quasi-regular' grid."""
-    reduced_grids = ("reduced_ll", "reduced_gg")
-    return gribapi.grib_get(grib_message, 'gridType') in reduced_grids
-
-
-def _regularise(grib_message):
-    """
-    Transform a reduced grid to a regular grid using interpolation.
-
-    Uses 1d linear interpolation at constant latitude to make the grid
-    regular. If the longitude dimension is circular then this is taken
-    into account by the interpolation. If the longitude dimension is not
-    circular then extrapolation is allowed to make sure all end regular
-    grid points get a value. In practice this extrapolation is likely to
-    be minimal.
-
-    """
-    # Make sure to read any missing values as NaN.
-    gribapi.grib_set_double(grib_message, "missingValue", np.nan)
-
-    # Get full longitude values, these describe the longitude value of
-    # *every* point in the grid, they are not 1d monotonic coordinates.
-    lons = gribapi.grib_get_double_array(grib_message, "longitudes")
-
-    # Compute the new longitude coordinate for the regular grid.
-    new_nx = max(gribapi.grib_get_long_array(grib_message, "pl"))
-    new_x_step = (max(lons) - min(lons)) / (new_nx - 1)
-    if gribapi.grib_get_long(grib_message, "iScansNegatively"):
-        new_x_step *= -1
-
-    new_lons = np.arange(new_nx) * new_x_step + lons[0]
-    # Get full latitude and data values, these describe the latitude and
-    # data values of *every* point in the grid, they are not 1d monotonic
-    # coordinates.
-    lats = gribapi.grib_get_double_array(grib_message, "latitudes")
-    values = gribapi.grib_get_double_array(grib_message, "values")
-
-    # Retrieve the distinct latitudes from the GRIB message. GRIBAPI docs
-    # don't specify if these points are guaranteed to be oriented correctly so
-    # the safe option is to sort them into ascending (south-to-north) order
-    # and then reverse the order if necessary.
-    new_lats = gribapi.grib_get_double_array(grib_message, "distinctLatitudes")
-    new_lats.sort()
-    if not gribapi.grib_get_long(grib_message, "jScansPositively"):
-        new_lats = new_lats[::-1]
-    ny = new_lats.shape[0]
-
-    # Use 1d linear interpolation along latitude circles to regularise the
-    # reduced data.
-    cyclic = _longitude_is_cyclic(new_lons)
-    new_values = np.empty([ny, new_nx], dtype=values.dtype)
-    for ilat, lat in enumerate(new_lats):
-        idx = np.where(lats == lat)
-        llons = lons[idx]
-        vvalues = values[idx]
-        if cyclic:
-            # For cyclic data we insert dummy points at each end to ensure
-            # we can interpolate to all output longitudes using pure
-            # interpolation.
-            cgap = (360 - llons[-1] - llons[0])
-            llons = np.concatenate(
-                (llons[0:1] - cgap, llons, llons[-1:] + cgap))
-            vvalues = np.concatenate(
-                (vvalues[-1:], vvalues, vvalues[0:1]))
-            fixed_latitude_interpolator = scipy.interpolate.interp1d(
-                llons, vvalues)
-        else:
-            # Allow extrapolation for non-cyclic data sets to ensure we can
-            # interpolate to all output longitudes.
-            fixed_latitude_interpolator = Linear1dExtrapolator(
-                scipy.interpolate.interp1d(llons, vvalues))
-        new_values[ilat] = fixed_latitude_interpolator(new_lons)
-    new_values = new_values.flatten()
-
-    # Set flags for the regularised data.
-    if np.isnan(new_values).any():
-        # Account for any missing data.
-        gribapi.grib_set_double(grib_message, "missingValue", np.inf)
-        gribapi.grib_set(grib_message, "bitmapPresent", 1)
-        new_values = np.where(np.isnan(new_values), np.inf, new_values)
-
-    gribapi.grib_set_long(grib_message, "Nx", int(new_nx))
-    gribapi.grib_set_double(grib_message,
-                            "iDirectionIncrementInDegrees", float(new_x_step))
-    gribapi.grib_set_double_array(grib_message, "values", new_values)
-    gribapi.grib_set_long(grib_message, "jPointsAreConsecutive", 0)
-    gribapi.grib_set_long(grib_message, "PLPresent", 0)
-
-
-def _load_generate(filename, auto_regularise=True):
+def _load_generate(filename):
     messages = GribMessage.messages_from_filename(filename)
     for message in messages:
         editionNumber = message.sections[0]['editionNumber']
         if editionNumber == 1:
             message_id = message._raw_message._message_id
             grib_fh = message._file_ref.open_file
-            message = GribWrapper(message_id, grib_fh=grib_fh,
-                                  auto_regularise=auto_regularise)
+            message = GribWrapper(message_id, grib_fh=grib_fh)
         elif editionNumber != 2:
             emsg = 'GRIB edition {} is not supported by {!r}.'
             raise TranslationError(emsg.format(editionNumber,
@@ -775,7 +624,7 @@ def _load_generate(filename, auto_regularise=True):
         yield message
 
 
-def load_cubes(filenames, callback=None, auto_regularise=True):
+def load_cubes(filenames, callback=None):
     """
     Returns a generator of cubes from the given list of filenames.
 
@@ -789,21 +638,9 @@ def load_cubes(filenames, callback=None, auto_regularise=True):
     * callback (callable function):
         Function which can be passed on to :func:`iris.io.run_callback`.
 
-    * auto_regularise (*True* | *False*):
-        If *True*, any cube defined on a reduced grid will be interpolated
-        to an equivalent regular grid. If *False*, any cube defined on a
-        reduced grid will be loaded on the raw reduced grid with no shape
-        information. If `iris.FUTURE.strict_grib_load` is `True` then this
-        keyword has no effect, raw grids are always used. If the older GRIB
-        loader is in use then the default behaviour is to interpolate cubes
-        on a reduced grid to an equivalent regular grid.
-
-        .. deprecated:: 1.8. Please use strict_grib_load and regrid instead.
-
-
     """
     grib_loader = iris_rules.Loader(_load_generate,
-                                    {'auto_regularise': auto_regularise},
+                                    {},
                                     load_convert)
     return iris_rules.load_cubes(filenames, callback, grib_loader)
 
