@@ -116,23 +116,6 @@ TIME_CODES_EDITION1 = {
     254: ('seconds', 1),
 }
 
-TIME_CODES_EDITION2 = {
-    0: ('minutes', 60),
-    1: ('hours', 60*60),
-    2: ('days', 24*60*60),
-    # NOTE: do *not* support calendar-dependent units at all.
-    # So the following possible keys remain unsupported:
-    #  3: 'months',
-    #  4: 'years',
-    #  5: 'decades',
-    #  6: '30 years',
-    #  7: 'century',
-    10: ('3 hours', 3*60*60),
-    11: ('6 hours', 6*60*60),
-    12: ('12 hours', 12*60*60),
-    13: ('seconds', 1),
-}
-
 unknown_string = "???"
 
 
@@ -195,6 +178,12 @@ class GribWrapper(object):
         warn_deprecated('Deprecated at version 1.10')
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
+
+        if self.edition != 1:
+            emsg = 'GRIB edition {} is not supported by {!r}.'
+            raise TranslationError(emsg.format(self.edition,
+                                               type(self).__name__))
+
         deferred = grib_fh is not None
 
         # Store the file pointer and message length from the current
@@ -318,16 +307,12 @@ class GribWrapper(object):
 
     def _timeunit_detail(self):
         """Return the (string, seconds) describing the message time unit."""
-        if self.edition == 1:
-            code_to_detail = TIME_CODES_EDITION1
-        else:
-            code_to_detail = TIME_CODES_EDITION2
         unit_code = self.indicatorOfUnitOfTimeRange
-        if unit_code not in code_to_detail:
+        if unit_code not in TIME_CODES_EDITION1:
             message = 'Unhandled time unit for forecast ' \
                       'indicatorOfUnitOfTimeRange : ' + str(unit_code)
             raise NotYetImplementedError(message)
-        return code_to_detail[unit_code]
+        return TIME_CODES_EDITION1[unit_code]
 
     def _timeunit_string(self):
         """Get the udunits string for the message time unit."""
@@ -342,10 +327,6 @@ class GribWrapper(object):
         global unknown_string
 
         self.extra_keys = {}
-
-        # work out stuff based on these values from the message
-        edition = self.edition
-
         forecastTime = self.startStep
 
         #regular or rotated grid?
@@ -375,25 +356,14 @@ class GribWrapper(object):
             '_cf_data':None}
 
         # cf phenomenon translation
-        if edition == 1:
-            # Get centre code (N.B. self.centre has default type = string)
-            centre_number = gribapi.grib_get_long(self.grib_message, "centre")
-            # Look for a known grib1-to-cf translation (or None).
-            cf_data = gptx.grib1_phenom_to_cf_info(
-                table2_version=self.table2Version,
-                centre_number=centre_number,
-                param_number=self.indicatorOfParameter)
-            self.extra_keys['_cf_data'] = cf_data
-        elif edition == 2:
-            # Don't attempt to interpret params if 'master tables version' is
-            # 255, as local params may then have same codes as standard ones.
-            if self.tablesVersion != 255:
-                # Look for a known grib2-to-cf translation (or None).
-                cf_data = gptx.grib2_phenom_to_cf_info(
-                    param_discipline=self.discipline,
-                    param_category=self.parameterCategory,
-                    param_number=self.parameterNumber)
-                self.extra_keys['_cf_data'] = cf_data
+        # Get centre code (N.B. self.centre has default type = string)
+        centre_number = gribapi.grib_get_long(self.grib_message, "centre")
+        # Look for a known grib1-to-cf translation (or None).
+        cf_data = gptx.grib1_phenom_to_cf_info(
+            table2_version=self.table2Version,
+            centre_number=centre_number,
+            param_number=self.indicatorOfParameter)
+        self.extra_keys['_cf_data'] = cf_data
 
         #reference date
         self.extra_keys['_referenceDateTime'] = \
@@ -407,20 +377,13 @@ class GribWrapper(object):
         processingDone = self._get_processing_done()
         #time processed?
         if processingDone.startswith("time"):
-            if self.edition == 1:
-                validityDate = str(self.validityDate)
-                validityTime = "{:04}".format(int(self.validityTime))
-                endYear   = int(validityDate[:4])
-                endMonth  = int(validityDate[4:6])
-                endDay    = int(validityDate[6:8])
-                endHour   = int(validityTime[:2])
-                endMinute = int(validityTime[2:4])
-            elif self.edition == 2:
-                endYear   = self.yearOfEndOfOverallTimeInterval
-                endMonth  = self.monthOfEndOfOverallTimeInterval
-                endDay    = self.dayOfEndOfOverallTimeInterval
-                endHour   = self.hourOfEndOfOverallTimeInterval
-                endMinute = self.minuteOfEndOfOverallTimeInterval
+            validityDate = str(self.validityDate)
+            validityTime = "{:04}".format(int(self.validityTime))
+            endYear   = int(validityDate[:4])
+            endMonth  = int(validityDate[4:6])
+            endDay    = int(validityDate[6:8])
+            endHour   = int(validityTime[:2])
+            endMinute = int(validityTime[2:4])
 
             # fixed forecastTime in hours
             self.extra_keys['_periodStartDateTime'] = \
@@ -532,10 +495,7 @@ class GribWrapper(object):
             self.extra_keys['_x_coord_name'] = "projection_x_coordinate"
             self.extra_keys['_y_coord_name'] = "projection_y_coordinate"
 
-            if self.edition == 1:
-                flag_name = "projectionCenterFlag"
-            else:
-                flag_name = "projectionCentreFlag"
+            flag_name = "projectionCenterFlag"
 
             if getattr(self, flag_name) == 0:
                 pole_lat = 90
@@ -614,67 +574,40 @@ class GribWrapper(object):
         """Determine the type of processing that was done on the data."""
 
         processingDone = 'unknown'
-        edition = self.edition
-
-        #grib1
-        if edition == 1:
-            timeRangeIndicator = self.timeRangeIndicator
-            processingDone = TIME_RANGE_INDICATORS.get(timeRangeIndicator,
-                                'time _grib1_process_unknown_%i' % timeRangeIndicator)
-
-        #grib2
-        else:
-
-            pdt = self.productDefinitionTemplateNumber
-
-            #pdt 4.0? (standard forecast)
-            if pdt == 0:
-                processingDone = 'none'
-
-            #pdt 4.8 or 4.9? (time-processed)
-            elif pdt in (8, 9):
-                typeOfStatisticalProcessing = self.typeOfStatisticalProcessing
-                processingDone = PROCESSING_TYPES.get(typeOfStatisticalProcessing,
-                                    'time _grib2_process_unknown_%i' % typeOfStatisticalProcessing)
+        timeRangeIndicator = self.timeRangeIndicator
+        default = 'time _grib1_process_unknown_%i' % timeRangeIndicator
+        processingDone = TIME_RANGE_INDICATORS.get(timeRangeIndicator, default)
 
         return processingDone
 
     def _get_verification_date(self):
         reference_date_time = self._referenceDateTime
 
-        # calculate start time (edition-dependent)
-        if self.edition == 1:
-            time_range_indicator = self.timeRangeIndicator
-            P1 = self.P1
-            P2 = self.P2
-            if time_range_indicator == 0:    time_diff = P1       #Forecast product valid at reference time + P1 P1>0), or Uninitialized analysis product for reference time (P1=0). Or Image product for reference time (P1=0)
-            elif time_range_indicator == 1:    time_diff = P1     #Initialized analysis product for reference time (P1=0).
-            elif time_range_indicator == 2:    time_diff = (P1 + P2) * 0.5    #Product with a valid time ranging between reference time + P1 and reference time + P2
-            elif time_range_indicator == 3:    time_diff = (P1 + P2) * 0.5    #Average(reference time + P1 to reference time + P2)
-            elif time_range_indicator == 4:    time_diff = P2     #Accumulation (reference time + P1 to reference time + P2) product considered valid at reference time + P2
-            elif time_range_indicator == 5:    time_diff = P2     #Difference(reference time + P2 minus reference time + P1) product considered valid at reference time + P2
-            elif time_range_indicator == 10:   time_diff = P1 * 256 + P2    #P1 occupies octets 19 and 20; product valid at reference time + P1
-            elif time_range_indicator == 51:                      #Climatological Mean Value: multiple year averages of quantities which are themselves means over some period of time (P2) less than a year. The reference time (R) indicates the date and time of the start of a period of time, given by R to R + P2, over which a mean is formed; N indicates the number of such period-means that are averaged together to form the climatological value, assuming that the N period-mean fields are separated by one year. The reference time indicates the start of the N-year climatology. N is given in octets 22-23 of the PDS. If P1 = 0 then the data averaged in the basic interval P2 are assumed to be continuous, i.e., all available data are simply averaged together. If P1 = 1 (the units of time - octet 18, code table 4 - are not relevant here) then the data averaged together in the basic interval P2 are valid only at the time (hour, minute) given in the reference time, for all the days included in the P2 period. The units of P2 are given by the contents of octet 18 and Table 4.
-                raise TranslationError("unhandled grib1 timeRangeIndicator "
-                                       "= 51 (avg of avgs)")
-            elif time_range_indicator == 113:    time_diff = P1    #Average of N forecasts (or initialized analyses); each product has forecast period of P1 (P1=0 for initialized analyses); products have reference times at intervals of P2, beginning at the given reference time.
-            elif time_range_indicator == 114:    time_diff = P1    #Accumulation of N forecasts (or initialized analyses); each product has forecast period of P1 (P1=0 for initialized analyses); products have reference times at intervals of P2, beginning at the given reference time.
-            elif time_range_indicator == 115:    time_diff = P1    #Average of N forecasts, all with the same reference time; the first has a forecast period of P1, the remaining forecasts follow at intervals of P2.
-            elif time_range_indicator == 116:    time_diff = P1    #Accumulation of N forecasts, all with the same reference time; the first has a forecast period of P1, the remaining follow at intervals of P2.
-            elif time_range_indicator == 117:    time_diff = P1    #Average of N forecasts, the first has a period of P1, the subsequent ones have forecast periods reduced from the previous one by an interval of P2; the reference time for the first is given in octets 13-17, the subsequent ones have reference times increased from the previous one by an interval of P2. Thus all the forecasts have the same valid time, given by the initial reference time + P1.
-            elif time_range_indicator == 118:    time_diff = P1    #Temporal variance, or covariance, of N initialized analyses; each product has forecast period P1=0; products have reference times at intervals of P2, beginning at the given reference time.
-            elif time_range_indicator == 123:    time_diff = P1    #Average of N uninitialized analyses, starting at the reference time, at intervals of P2.
-            elif time_range_indicator == 124:    time_diff = P1    #Accumulation of N uninitialized analyses, starting at the reference time, at intervals of P2.
-            else:
-                raise TranslationError("unhandled grib1 timeRangeIndicator "
-                                       "= %i" % time_range_indicator)
-        elif self.edition == 2:
-            time_diff = int(self.stepRange)  # gribapi gives us a string!
-
+        # calculate start time
+        time_range_indicator = self.timeRangeIndicator
+        P1 = self.P1
+        P2 = self.P2
+        if time_range_indicator == 0:    time_diff = P1       #Forecast product valid at reference time + P1 P1>0), or Uninitialized analysis product for reference time (P1=0). Or Image product for reference time (P1=0)
+        elif time_range_indicator == 1:    time_diff = P1     #Initialized analysis product for reference time (P1=0).
+        elif time_range_indicator == 2:    time_diff = (P1 + P2) * 0.5    #Product with a valid time ranging between reference time + P1 and reference time + P2
+        elif time_range_indicator == 3:    time_diff = (P1 + P2) * 0.5    #Average(reference time + P1 to reference time + P2)
+        elif time_range_indicator == 4:    time_diff = P2     #Accumulation (reference time + P1 to reference time + P2) product considered valid at reference time + P2
+        elif time_range_indicator == 5:    time_diff = P2     #Difference(reference time + P2 minus reference time + P1) product considered valid at reference time + P2
+        elif time_range_indicator == 10:   time_diff = P1 * 256 + P2    #P1 occupies octets 19 and 20; product valid at reference time + P1
+        elif time_range_indicator == 51:                      #Climatological Mean Value: multiple year averages of quantities which are themselves means over some period of time (P2) less than a year. The reference time (R) indicates the date and time of the start of a period of time, given by R to R + P2, over which a mean is formed; N indicates the number of such period-means that are averaged together to form the climatological value, assuming that the N period-mean fields are separated by one year. The reference time indicates the start of the N-year climatology. N is given in octets 22-23 of the PDS. If P1 = 0 then the data averaged in the basic interval P2 are assumed to be continuous, i.e., all available data are simply averaged together. If P1 = 1 (the units of time - octet 18, code table 4 - are not relevant here) then the data averaged together in the basic interval P2 are valid only at the time (hour, minute) given in the reference time, for all the days included in the P2 period. The units of P2 are given by the contents of octet 18 and Table 4.
+            raise TranslationError("unhandled grib1 timeRangeIndicator "
+                                   "= 51 (avg of avgs)")
+        elif time_range_indicator == 113:    time_diff = P1    #Average of N forecasts (or initialized analyses); each product has forecast period of P1 (P1=0 for initialized analyses); products have reference times at intervals of P2, beginning at the given reference time.
+        elif time_range_indicator == 114:    time_diff = P1    #Accumulation of N forecasts (or initialized analyses); each product has forecast period of P1 (P1=0 for initialized analyses); products have reference times at intervals of P2, beginning at the given reference time.
+        elif time_range_indicator == 115:    time_diff = P1    #Average of N forecasts, all with the same reference time; the first has a forecast period of P1, the remaining forecasts follow at intervals of P2.
+        elif time_range_indicator == 116:    time_diff = P1    #Accumulation of N forecasts, all with the same reference time; the first has a forecast period of P1, the remaining follow at intervals of P2.
+        elif time_range_indicator == 117:    time_diff = P1    #Average of N forecasts, the first has a period of P1, the subsequent ones have forecast periods reduced from the previous one by an interval of P2; the reference time for the first is given in octets 13-17, the subsequent ones have reference times increased from the previous one by an interval of P2. Thus all the forecasts have the same valid time, given by the initial reference time + P1.
+        elif time_range_indicator == 118:    time_diff = P1    #Temporal variance, or covariance, of N initialized analyses; each product has forecast period P1=0; products have reference times at intervals of P2, beginning at the given reference time.
+        elif time_range_indicator == 123:    time_diff = P1    #Average of N uninitialized analyses, starting at the reference time, at intervals of P2.
+        elif time_range_indicator == 124:    time_diff = P1    #Accumulation of N uninitialized analyses, starting at the reference time, at intervals of P2.
         else:
-            raise TranslationError(
-                "unhandled grib edition = {}".format(self.edition)
-            )
+            raise TranslationError("unhandled grib1 timeRangeIndicator "
+                                   "= %i" % time_range_indicator)
 
         # Get the timeunit interval.
         interval_secs = self._timeunit_seconds()
@@ -836,8 +769,9 @@ def _load_generate(filename, auto_regularise=True):
             message = GribWrapper(message_id, grib_fh=grib_fh,
                                   auto_regularise=auto_regularise)
         elif editionNumber != 2:
-            emsg = 'GRIB edition {} is not supported.'
-            raise TranslationError(emsg.format(editionNumber))
+            emsg = 'GRIB edition {} is not supported by {!r}.'
+            raise TranslationError(emsg.format(editionNumber,
+                                               type(message).__name__))
         yield message
 
 

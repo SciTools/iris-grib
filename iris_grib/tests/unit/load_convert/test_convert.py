@@ -28,7 +28,7 @@ import mock
 from iris.exceptions import TranslationError
 
 from iris_grib._load_convert import convert
-from iris_grib.tests.unit import _make_test_message, FakeGribMessage
+from iris_grib.tests.unit import _make_test_message
 
 
 class TestGribMessage(tests.IrisGribTest):
