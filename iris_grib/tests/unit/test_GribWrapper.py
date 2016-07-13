@@ -80,11 +80,10 @@ class Test_edition(tests.IrisGribTest):
             with self.assertRaisesRegexp(TranslationError, emsg):
                 GribWrapper(None)
 
-    def test_edtion_1(self):
+    def test_edition_1(self):
         grib_message = 'regular_ll'
         grib_fh = mock.Mock(tell=self.tell)
-        auto_regularise = False
-        wrapper = GribWrapper(grib_message, grib_fh, auto_regularise)
+        wrapper = GribWrapper(grib_message, grib_fh)
         self.assertEqual(wrapper.grib_message, grib_message)
 
 
