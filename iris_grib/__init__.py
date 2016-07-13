@@ -37,16 +37,6 @@ import numpy as np
 import numpy.ma as ma
 
 import iris
-
-
-# Define a dumb replacement for the iris deprecation helper routine.
-# This way we are compatibile back to Iris v1.9.0.
-# (Must do before we import load_rules.)
-# TODO: remove when the existing deprecated code is cleaned out.
-def warn_deprecated(msg, **kwargs):  # nopep8
-    warnings.warn(msg)               # nopep8
-
-
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 import iris.fileformats.rules as iris_rules
@@ -150,14 +140,11 @@ class GribWrapper(object):
     """
     Contains a pygrib object plus some extra keys of our own.
 
-    .. deprecated:: 1.10
-
     The class :class:`iris_grib.message.GribMessage`
     provides alternative means of working with GRIB message instances.
 
     """
     def __init__(self, grib_message, grib_fh=None):
-        warn_deprecated('Deprecated at version 1.10')
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
 
