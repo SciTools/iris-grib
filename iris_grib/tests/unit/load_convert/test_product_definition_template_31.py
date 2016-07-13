@@ -47,6 +47,9 @@ class Test(tests.IrisGribTest):
 
     def _check(self, request_warning=False, value=10, factor=1):
         # Prepare the arguments.
+        def unscale(v, f):
+            return v / 10.0 ** f
+
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
@@ -70,7 +73,6 @@ class Test(tests.IrisGribTest):
         expected['aux_coords_and_dims'].append((coord, None))
         coord = AuxCoord(instrument, long_name='instrument_type')
         expected['aux_coords_and_dims'].append((coord, None))
-        unscale = lambda v, f: v / 10.0 ** f
         standard_name = 'sensor_band_central_radiation_wavenumber'
         coord = AuxCoord(unscale(value, factor),
                          standard_name=standard_name,

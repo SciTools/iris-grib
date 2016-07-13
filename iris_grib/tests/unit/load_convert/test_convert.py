@@ -33,11 +33,13 @@ from iris_grib.tests.unit import _make_test_message
 
 class TestGribMessage(tests.IrisGribTest):
     def test_edition_2(self):
+        def func(field, metadata):
+            return metadata['factories'].append(factory)
+
         sections = [{'editionNumber': 2}]
         field = _make_test_message(sections)
         this = 'iris_grib._load_convert.grib2_convert'
         factory = mock.sentinel.factory
-        func = lambda field, metadata: metadata['factories'].append(factory)
         with mock.patch(this, side_effect=func) as grib2_convert:
             # The call being tested.
             result = convert(field)

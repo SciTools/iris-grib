@@ -37,11 +37,13 @@ from iris_grib._load_convert import product_definition_template_11
 
 class Test(tests.IrisGribTest):
     def setUp(self):
+        def func(s, m, f):
+            return m['cell_methods'].append(self.cell_method)
+
         module = 'iris_grib._load_convert'
         self.patch('warnings.warn')
         this_module = '{}.product_definition_template_11'.format(module)
         self.cell_method = mock.sentinel.cell_method
-        func = lambda s, m, f: m['cell_methods'].append(self.cell_method)
         self.patch(this_module, side_effect=func)
         self.patch_statistical_fp_coord = self.patch(
             module + '.statistical_forecast_period_coord',

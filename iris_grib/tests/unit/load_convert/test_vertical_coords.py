@@ -47,11 +47,13 @@ class Test(tests.IrisGribTest):
                          'aux_coords_and_dims': []}
 
     def test_hybrid_factories(self):
+        def func(section, metadata):
+            return metadata['factories'].append(factory)
+
         metadata = deepcopy(self.metadata)
         section = {'NV': 1}
         this = 'iris_grib._load_convert.hybrid_factories'
         factory = mock.sentinel.factory
-        func = lambda section, metadata: metadata['factories'].append(factory)
         with mock.patch(this, side_effect=func) as hybrid_factories:
             vertical_coords(section, metadata)
             self.assertTrue(hybrid_factories.called)

@@ -35,6 +35,9 @@ from iris_grib._load_convert import grid_definition_template_5
 
 class Test(tests.IrisGribTest):
     def setUp(self):
+        def func(s, m, y, x, c):
+            return m['dim_coords_and_dims'].append(item)
+
         module = 'iris_grib._load_convert'
 
         self.major = mock.sentinel.major
@@ -53,7 +56,6 @@ class Test(tests.IrisGribTest):
         self.coord = mock.sentinel.coord
         self.dim = mock.sentinel.dim
         item = (self.coord, self.dim)
-        func = lambda s, m, y, x, c: m['dim_coords_and_dims'].append(item)
         self.patch(mfunc, side_effect=func)
 
         mclass = 'iris.coord_systems.RotatedGeogCS'
