@@ -16,7 +16,7 @@
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 Unit tests for
-:func:`iris_grib._save_rules._product_definition_template_8_and_11`
+:func:`iris_grib._save_rules._product_definition_template_8_10_and_11`
 
 """
 
@@ -34,7 +34,7 @@ import mock
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
 
-from iris_grib._save_rules import _product_definition_template_8_and_11
+from iris_grib._save_rules import _product_definition_template_8_10_and_11
 
 
 class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
@@ -52,7 +52,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cell_method = CellMethod(method='sum', coords=['time'])
         cube.add_cell_method(cell_method)
 
-        _product_definition_template_8_and_11(cube, mock.sentinel.grib)
+        _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "typeOfStatisticalProcessing", 1)
 
@@ -62,7 +62,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cell_method = CellMethod(method='95th percentile', coords=['time'])
         cube.add_cell_method(cell_method)
 
-        _product_definition_template_8_and_11(cube, mock.sentinel.grib)
+        _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "typeOfStatisticalProcessing", 255)
 
@@ -74,7 +74,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cube.add_cell_method(cell_method)
         with self.assertRaisesRegexp(ValueError,
                                      'Cannot handle multiple coordinate name'):
-            _product_definition_template_8_and_11(cube, mock.sentinel.grib)
+            _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_cell_method_coord_name_fail(self, mock_set):
@@ -84,7 +84,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         with self.assertRaisesRegexp(
                 ValueError, "Expected a cell method with a coordinate "
                 "name of 'time'"):
-            _product_definition_template_8_and_11(cube, mock.sentinel.grib)
+            _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
 
 
 class TestTimeCoordPrerequisites(tests.IrisGribTest):
@@ -102,8 +102,8 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         self.cube.add_aux_coord(coord, 0)
         with self.assertRaisesRegexp(
                 ValueError, 'Expected length one time coordinate'):
-            _product_definition_template_8_and_11(self.cube,
-                                                  mock.sentinel.grib)
+            _product_definition_template_8_10_and_11(self.cube,
+                                                     mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_no_bounds(self, mock_set):
@@ -114,8 +114,8 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         with self.assertRaisesRegexp(
                 ValueError, 'Expected time coordinate with two bounds, '
                 'got 0 bounds'):
-            _product_definition_template_8_and_11(self.cube,
-                                                  mock.sentinel.grib)
+            _product_definition_template_8_10_and_11(self.cube,
+                                                     mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_more_than_two_bounds(self, mock_set):
@@ -126,8 +126,8 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         with self.assertRaisesRegexp(
                 ValueError, 'Expected time coordinate with two bounds, '
                 'got 3 bounds'):
-            _product_definition_template_8_and_11(self.cube,
-                                                  mock.sentinel.grib)
+            _product_definition_template_8_10_and_11(self.cube,
+                                                     mock.sentinel.grib)
 
 
 class TestEndOfOverallTimeInterval(tests.IrisGribTest):
@@ -147,7 +147,7 @@ class TestEndOfOverallTimeInterval(tests.IrisGribTest):
         cube.add_aux_coord(coord)
 
         grib = mock.sentinel.grib
-        _product_definition_template_8_and_11(cube, grib)
+        _product_definition_template_8_10_and_11(cube, grib)
 
         mock_set.assert_any_call(
             grib, "yearOfEndOfOverallTimeInterval", 1972)
@@ -171,7 +171,7 @@ class TestEndOfOverallTimeInterval(tests.IrisGribTest):
         cube.add_aux_coord(coord)
 
         grib = mock.sentinel.grib
-        _product_definition_template_8_and_11(cube, grib)
+        _product_definition_template_8_10_and_11(cube, grib)
 
         mock_set.assert_any_call(
             grib, "yearOfEndOfOverallTimeInterval", 1972)
@@ -202,7 +202,7 @@ class TestNumberOfTimeRange(tests.IrisGribTest):
         cell_method = CellMethod(method='sum', coords=['time'])
         cube.add_cell_method(cell_method)
 
-        _product_definition_template_8_and_11(cube, mock.sentinel.grib)
+        _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib, 'numberOfTimeRange', 1)
 
 

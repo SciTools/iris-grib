@@ -1926,6 +1926,35 @@ def product_definition_template_9(section, metadata, frt_coord):
     return probability_type
 
 
+def product_definition_template_10(section, metadata, frt_coord):
+    """
+    Translate template representing percentile forecasts at a horizontal level
+    or in a horizontal layer in a continuous or non-continuous time interval.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 4 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+
+    * frt_coord:
+        The scalar forecast reference time :class:`iris.coords.DimCoord`.
+
+    """
+    product_definition_template_8(section, metadata, frt_coord)
+
+    percentile = DimCoord(section['percentileValue'],
+                          long_name='percentile_over_time',
+                          units='no_unit')
+
+    # Add the percentile data info
+    metadata['aux_coords_and_dims'].append((percentile, None))
+
+
 def product_definition_template_11(section, metadata, frt_coord):
     """
     Translate template representing individual ensemble forecast, control
@@ -2089,6 +2118,8 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     elif template == 9:
         probability = \
             product_definition_template_9(section, metadata, rt_coord)
+    elif template == 10:
+        product_definition_template_10(section, metadata, rt_coord)
     elif template == 11:
         product_definition_template_11(section, metadata, rt_coord)
     elif template == 31:
