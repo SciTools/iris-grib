@@ -1762,9 +1762,17 @@ def product_definition_template_0(section, metadata, rt_coord):
     data_cutoff(section['hoursAfterDataCutoff'],
                 section['minutesAfterDataCutoff'])
 
+    if 'forecastTime' in section.keys():
+        forecast_time = section['forecastTime']
+    # The gribapi encodes the forecast time as 'startStep' for pdt 4.4x;
+    # product_definition_template_40 makes use of this function. The
+    # following will be removed once the suspected bug is fixed.
+    elif 'startStep' in section.keys():
+        forecast_time = section['startStep']
+
     # Calculate the forecast period coordinate.
     fp_coord = forecast_period_coord(section['indicatorOfUnitOfTimeRange'],
-                                     section['forecastTime'])
+                                     forecast_time)
     # Add the forecast period coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((fp_coord, None))
 
@@ -2007,6 +2015,36 @@ def product_definition_template_31(section, metadata, rt_coord):
         metadata['aux_coords_and_dims'].append((rt_coord, None))
 
 
+def product_definition_template_40(section, metadata, frt_coord):
+    """
+    Translate template representing an analysis or forecast at a horizontal
+    level or in a horizontal layer at a point in time for atmospheric chemical
+    constituents.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 4 of the message.
+
+    * metadata:
+        :class:`collectins.OrderedDict` of metadata.
+
+    * frt_coord:
+        The scalar forecast reference time :class:`iris.coords.DimCoord`.
+
+    """
+    # Perform identical message processing.
+    product_definition_template_0(section, metadata, frt_coord)
+
+    # Reference GRIB2 Code Table 4.230.
+    constituent_type = section['constituentType']
+
+    # Add the constituent type as  an attribute.
+    metadata['attributes']['WMO_constituent_type'] = constituent_type
+
+
 def product_definition_section(section, metadata, discipline, tablesVersion,
                                rt_coord):
     """
@@ -2056,6 +2094,8 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     elif template == 31:
         # Process satellite product.
         product_definition_template_31(section, metadata, rt_coord)
+    elif template == 40:
+        product_definition_template_40(section, metadata, rt_coord)
     else:
         msg = 'Product definition template [{}] is not ' \
             'supported'.format(template)
