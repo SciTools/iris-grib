@@ -28,11 +28,20 @@ import gribapi
 import mock
 
 import iris
+from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
 from iris_grib import GribWrapper
 from iris_grib.load_rules import grib1_convert
 from iris_grib.tests.unit import TestField
+
+
+class TestBadEdition(tests.IrisGribTest):
+    def test(self):
+        message = mock.Mock(edition=2)
+        emsg = 'GRIB edition 2 is not supported'
+        with self.assertRaisesRegexp(TranslationError, emsg):
+            grib1_convert(message)
 
 
 class TestBoundedTime(TestField):

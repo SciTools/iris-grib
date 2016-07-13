@@ -29,6 +29,7 @@ import numpy as np
 from . import warn_deprecated
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
+from iris.exceptions import TranslationError
 from iris.fileformats.rules import (ConversionMetadata, Factory, Reference,
                                     ReferenceTarget)
 
@@ -50,6 +51,11 @@ def grib1_convert(grib):
         A :class:`iris.fileformats.rules.ConversionMetadata` object.
 
     """
+    if grib.edition != 1:
+        emsg = 'GRIB edition {} is not supported by {!r}.'
+        raise TranslationError(emsg.format(grib.edition,
+                                           type(grib).__name__))
+
     factories = []
     references = []
     standard_name = None
