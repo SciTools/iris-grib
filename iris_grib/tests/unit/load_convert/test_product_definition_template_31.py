@@ -38,9 +38,7 @@ from iris_grib._load_convert import product_definition_template_31
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        patch = mock.patch('warnings.warn')
-        patch.start()
-        self.addCleanup(patch.stop)
+        self.patch('warnings.warn')
         self.metadata = {'factories': [], 'references': [],
                          'standard_name': None,
                          'long_name': None, 'units': None, 'attributes': None,

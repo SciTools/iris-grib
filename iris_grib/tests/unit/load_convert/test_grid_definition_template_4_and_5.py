@@ -43,11 +43,8 @@ RESOLUTION = 1e6
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        patch = []
-        patch.append(mock.patch('warnings.warn'))
-        module = 'iris_grib._load_convert'
-        this = '{}._is_circular'.format(module)
-        patch.append(mock.patch(this, return_value=False))
+        self.patch('warnings.warn')
+        self.patch('iris_grib._load_convert._is_circular', return_value=False)
         self.metadata = {'factories': [], 'references': [],
                          'standard_name': None,
                          'long_name': None, 'units': None, 'attributes': {},
@@ -55,9 +52,6 @@ class Test(tests.IrisGribTest):
                          'aux_coords_and_dims': []}
         self.cs = mock.sentinel.coord_system
         self.data = np.arange(10, dtype=np.float64)
-        for p in patch:
-            p.start()
-            self.addCleanup(p.stop)
 
     def _check(self, section, request_warning,
                expect_warning=False, y_dim=0, x_dim=1):
