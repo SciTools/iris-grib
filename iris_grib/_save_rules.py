@@ -572,14 +572,6 @@ def _non_missing_forecast_period(cube):
                       "scaling required.")
     fp = int(fp)
 
-    # Turn negative forecast times into grib negative numbers?
-    from . import hindcast_workaround
-    if hindcast_workaround and fp < 0:
-        msg = "Encoding negative forecast period from {} to ".format(fp)
-        fp = 2**31 + abs(fp)
-        msg += "{}".format(np.int32(fp))
-        warnings.warn(msg)
-
     return rt, rt_meaning, fp, grib_time_code
 
 
