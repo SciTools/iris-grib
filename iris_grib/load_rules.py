@@ -26,7 +26,6 @@ import warnings
 from cf_units import CALENDAR_GREGORIAN, Unit
 import numpy as np
 
-from . import warn_deprecated
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris.exceptions import TranslationError
