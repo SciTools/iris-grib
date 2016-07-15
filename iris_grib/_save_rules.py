@@ -884,7 +884,7 @@ def product_definition_template_10(cube, grib):
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 10)
     if not (cube.coords('percentile_over_time') and
             len(cube.coord('percentile_over_time').points) == 1):
-        raise ValueError("A cube 'percentile_over_time' coordinate with one"
+        raise ValueError("A cube 'percentile_over_time' coordinate with one "
                          "point is required, but not present.")
     gribapi.grib_set(grib, "percentileValue",
                      int(cube.coord('percentile_over_time').points[0]))
