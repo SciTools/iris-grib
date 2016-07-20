@@ -47,7 +47,7 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = '0.1.0.dev0'
+__version__ = '0.1.0.dev1'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages', 'GribWrapper']
