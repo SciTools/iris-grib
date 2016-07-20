@@ -869,16 +869,35 @@ def product_definition_template_8(cube, grib):
 
     """
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 8)
-    _product_definition_template_8_and_11(cube, grib)
+    _product_definition_template_8_10_and_11(cube, grib)
+
+
+def product_definition_template_10(cube, grib):
+    """
+    Set keys within the provided grib message based on Product Definition
+    Template 4.10.
+
+    Template 4.10 is used to represent a percentile forecast over a time
+    interval.
+
+    """
+    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 10)
+    if not (cube.coords('percentile_over_time') and
+            len(cube.coord('percentile_over_time').points) == 1):
+        raise ValueError("A cube 'percentile_over_time' coordinate with one "
+                         "point is required, but not present.")
+    gribapi.grib_set(grib, "percentileValue",
+                     int(cube.coord('percentile_over_time').points[0]))
+    _product_definition_template_8_10_and_11(cube, grib)
 
 
 def product_definition_template_11(cube, grib):
     """
     Set keys within the provided grib message based on Product
-    Definition Template 4.8.
+    Definition Template 4.11.
 
-    Template 4.8 is used to represent an aggregation over a time
-    interval.
+    Template 4.11 is used to represent an aggregation over a time
+    interval for an ensemble member.
 
     """
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 11)
@@ -891,10 +910,10 @@ def product_definition_template_11(cube, grib):
     # no encoding at present in iris-grib, set to missing
     gribapi.grib_set(grib, "numberOfForecastsInEnsemble", 255)
     gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
-    _product_definition_template_8_and_11(cube, grib)
+    _product_definition_template_8_10_and_11(cube, grib)
 
 
-def _product_definition_template_8_and_11(cube, grib):
+def _product_definition_template_8_10_and_11(cube, grib):
     """
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
@@ -916,22 +935,6 @@ def _product_definition_template_8_and_11(cube, grib):
         msg = 'Expected time coordinate with two bounds, got {} bounds'
         raise ValueError(msg.format(time_coord.nbounds))
 
-    # Check that there is one and only one cell method related to the
-    # time coord.
-    time_cell_methods = [cell_method for cell_method in cube.cell_methods if
-                         'time' in cell_method.coord_names]
-    if not time_cell_methods:
-        raise ValueError("Expected a cell method with a coordinate name "
-                         "of 'time'")
-    if len(time_cell_methods) > 1:
-        raise ValueError("Cannot handle multiple 'time' cell methods")
-    cell_method, = time_cell_methods
-
-    if len(cell_method.coord_names) > 1:
-        raise ValueError("Cannot handle multiple coordinate names in "
-                         "the time related cell method. Expected ('time',), "
-                         "got {!r}".format(cell_method.coord_names))
-
     # Extract the datetime-like object corresponding to the end of
     # the overall processing interval.
     end = time_coord.units.num2date(time_coord.bounds[0, -1])
@@ -951,15 +954,34 @@ def _product_definition_template_8_and_11(cube, grib):
     gribapi.grib_set(grib, "numberOfTimeRange", 1)
     gribapi.grib_set(grib, "numberOfMissingInStatisticalProcess", 0)
 
-    # Type of statistical process (see code table 4.10)
-    statistic_type = _STATISTIC_TYPE_NAMES.get(cell_method.method, 255)
-    gribapi.grib_set(grib, "typeOfStatisticalProcessing", statistic_type)
-
     # Period over which statistical processing is performed.
     set_time_range(time_coord, grib)
 
-    # Time increment i.e. interval of cell method (if any)
-    set_time_increment(cell_method, grib)
+    # Check that there is one and only one cell method related to the
+    # time coord.
+    if cube.cell_methods:
+        time_cell_methods = [
+            cell_method for cell_method in cube.cell_methods if 'time' in
+            cell_method.coord_names]
+        if not time_cell_methods:
+            raise ValueError("Expected a cell method with a coordinate name "
+                             "of 'time'")
+        if len(time_cell_methods) > 1:
+            raise ValueError("Cannot handle multiple 'time' cell methods")
+        cell_method, = time_cell_methods
+
+        if len(cell_method.coord_names) > 1:
+            raise ValueError("Cannot handle multiple coordinate names in "
+                             "the time related cell method. Expected "
+                             "('time',), got {!r}".format(
+                                 cell_method.coord_names))
+
+        # Type of statistical process (see code table 4.10)
+        statistic_type = _STATISTIC_TYPE_NAMES.get(cell_method.method, 255)
+        gribapi.grib_set(grib, "typeOfStatisticalProcessing", statistic_type)
+
+        # Time increment i.e. interval of cell method (if any)
+        set_time_increment(cell_method, grib)
 
 
 def product_definition_template_40(cube, grib):
