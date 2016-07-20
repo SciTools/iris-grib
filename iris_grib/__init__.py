@@ -39,7 +39,6 @@ import numpy.ma as ma
 import iris
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
-import iris.fileformats.rules as iris_rules
 
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
@@ -721,6 +720,7 @@ def load_cubes(filenames, callback=None):
         Function which can be passed on to :func:`iris.io.run_callback`.
 
     """
+    import iris.fileformats.rules as iris_rules
     grib_loader = iris_rules.Loader(_load_generate,
                                     {},
                                     load_convert)
@@ -774,6 +774,7 @@ def load_pairs_from_fields(grib_messages):
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     """
+    import iris.fileformats.rules as iris_rules
     return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
 
 
