@@ -1850,8 +1850,11 @@ def product_definition_template_8(section, metadata, frt_coord):
     # Add the forecast cell method to the metadata.
     metadata['cell_methods'].append(time_statistic_cell_method)
 
-    # Add the forecast reference time coordinate to the metadata aux coords.
-    metadata['aux_coords_and_dims'].append((frt_coord, None))
+    # Add the forecast reference time coordinate to the metadata aux coords,
+    # if it is a forecast reference time, not a time coord, as defined by
+    # significanceOfReferenceTime.
+    if frt_coord.name != 'time':
+        metadata['aux_coords_and_dims'].append((frt_coord, None))
 
     # Add a bounded forecast period coordinate.
     fp_coord = statistical_forecast_period_coord(section, frt_coord)
