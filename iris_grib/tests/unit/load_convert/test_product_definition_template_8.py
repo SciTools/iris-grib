@@ -55,7 +55,7 @@ class Test(tests.IrisGribTest):
         self.section = {}
         self.section['hoursAfterDataCutoff'] = mock.sentinel.cutoff_hours
         self.section['minutesAfterDataCutoff'] = mock.sentinel.cutoff_mins
-        self.frt_coord = mock.sentinel.frt_coord
+        self.frt_coord = mock.Mock()
         self.metadata = {'cell_methods': [], 'aux_coords_and_dims': []}
 
     def test_basic(self):

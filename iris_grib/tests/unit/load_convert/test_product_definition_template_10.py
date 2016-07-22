@@ -62,7 +62,7 @@ class Test(tests.IrisGribTest):
                    'hourOfEndOfOverallTimeInterval': 1,
                    'minuteOfEndOfOverallTimeInterval': 0,
                    'secondOfEndOfOverallTimeInterval': 1}
-        forecast_reference_time = mock.sentinel.forecast_reference_time
+        forecast_reference_time = mock.Mock()
         # The called being tested.
         product_definition_template_10(section, metadata,
                                        forecast_reference_time)

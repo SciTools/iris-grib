@@ -1853,7 +1853,7 @@ def product_definition_template_8(section, metadata, frt_coord):
     # Add the forecast reference time coordinate to the metadata aux coords,
     # if it is a forecast reference time, not a time coord, as defined by
     # significanceOfReferenceTime.
-    if frt_coord.name != 'time':
+    if frt_coord.name() != 'time':
         metadata['aux_coords_and_dims'].append((frt_coord, None))
 
     # Add a bounded forecast period coordinate.
