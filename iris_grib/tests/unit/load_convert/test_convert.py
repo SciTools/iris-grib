@@ -57,13 +57,15 @@ class TestGribMessage(tests.IrisGribTest):
 
 class TestGribWrapper(tests.IrisGribTest):
     def test_edition_2_bad(self):
-        field = mock.Mock(edition=2)
+        # Test object with no '.sections', and '.edition' ==2.
+        field = mock.Mock(edition=2, spec=('edition'))
         emsg = 'edition 2 is not supported'
         with self.assertRaisesRegexp(TranslationError, emsg):
             convert(field)
 
     def test_edition_1(self):
-        field = mock.Mock(edition=1)
+        # Test object with no '.sections', and '.edition' ==1.
+        field = mock.Mock(edition=1, spec=('edition'))
         func = 'iris_grib._load_convert.grib1_convert'
         metadata = mock.sentinel.metadata
         with mock.patch(func, return_value=metadata) as grib1_convert:
