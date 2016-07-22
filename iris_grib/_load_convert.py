@@ -2258,7 +2258,7 @@ def convert(field):
         A :class:`iris.fileformats.rules.ConversionMetadata` object.
 
     """
-    if isinstance(field, GribMessage):
+    if hasattr(field, 'sections'):
         editionNumber = field.sections[0]['editionNumber']
 
         if editionNumber != 2:
