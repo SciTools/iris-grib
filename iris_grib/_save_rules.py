@@ -1017,6 +1017,9 @@ def product_definition_section(cube, grib):
         if cube.coords('realization'):
             # time processed (template 4.11)
             pdt = product_definition_template_11
+        elif cube.coords('percentile_over_time'):
+            # time processed as percentile (template 4.10)
+            pdt = product_definition_template_10
         else:
             # time processed (template 4.8)
             pdt = product_definition_template_8
