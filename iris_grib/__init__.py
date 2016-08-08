@@ -711,13 +711,16 @@ def load_cubes(filenames, callback=None):
 
     Args:
 
-    * filenames (string/list):
+    * filenames:
         One or more GRIB filenames to load from.
 
     Kwargs:
 
-    * callback (callable function):
+    * callback:
         Function which can be passed on to :func:`iris.io.run_callback`.
+
+    Returns:
+        A generator containing Iris cubes loaded from the GRIB files.
 
     """
     import iris.fileformats.rules as iris_rules
@@ -731,15 +734,6 @@ def load_pairs_from_fields(grib_messages):
     """
     Convert an iterable of GRIB messages into an iterable of
     (Cube, Grib message) tuples.
-
-    Args:
-
-    * grib_messages:
-        An iterable of :class:`iris_grib.message.GribMessage`.
-
-    Returns:
-        An iterable of tuples of (:class:`iris.cube.Cube`,
-        :class:`iris_grib.message.GribMessage`).
 
     This capability can be used to filter out fields before they are passed to
     the load pipeline, and amend the cubes once they are created, using
@@ -773,6 +767,15 @@ def load_pairs_from_fields(grib_messages):
         ...         message.sections[1]['productionStatusOfProcessedData'] = 4
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
+    Args:
+
+    * grib_messages:
+        An iterable of :class:`iris_grib.message.GribMessage`.
+
+    Returns:
+        An iterable of tuples of (:class:`iris.cube.Cube`,
+        :class:`iris_grib.message.GribMessage`).
+
     """
     import iris.fileformats.rules as iris_rules
     return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
@@ -784,16 +787,19 @@ def save_grib2(cube, target, append=False):
 
     Args:
 
-        * cube      - A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
-                      list of cubes.
-        * target    - A filename or open file handle.
+    * cube:
+        The :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or list of
+        cubes to save to a GRIB2 file.
+    * target:
+        A filename or open file handle specifying the GRIB2 file to save
+        to.
 
     Kwargs:
 
-        * append    - Whether to start a new file afresh or add the cube(s) to
-                      the end of the file.
-                      Only applicable when target is a filename, not a file
-                      handle. Default is False.
+    * append:
+        Whether to start a new file afresh or add the cube(s) to the end of
+        the file. Only applicable when target is a filename, not a file
+        handle. Default is False.
 
     """
     messages = (message for _, message in save_pairs_from_cube(cube))
@@ -808,7 +814,9 @@ def save_pairs_from_cube(cube):
     save rules.
 
     Args:
-        * cube      - A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
+
+    * cube:
+        A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
         list of cubes.
 
     """
@@ -831,15 +839,17 @@ def save_messages(messages, target, append=False):
 
     Args:
 
-        * messages  - An iterable of grib_api message IDs.
-        * target    - A filename or open file handle.
+    * messages:
+        An iterable of grib_api message IDs.
+    * target:
+        A filename or open file handle.
 
     Kwargs:
 
-        * append    - Whether to start a new file afresh or add the cube(s) to
-                      the end of the file.
-                      Only applicable when target is a filename, not a file
-                      handle. Default is False.
+    * append:
+        Whether to start a new file afresh or add the cube(s) to the end of
+        the file. Only applicable when target is a filename, not a file
+        handle. Default is False.
 
     """
     # grib file (this bit is common to the pp and grib savers...)
@@ -860,3 +870,4 @@ def save_messages(messages, target, append=False):
         # (this bit is common to the pp and grib savers...)
         if isinstance(target, six.string_types):
             grib_file.close()
+
