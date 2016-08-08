@@ -7,13 +7,13 @@ The documentation for iris-grib
 ===============================
 
 The library ``iris-grib`` provides functionality for converting between weather and
-climate datasets that are stored as GRIB files and `Iris cubes`. GRIB files can be
-loaded as Iris cubes using ``iris-grib`` so that you can use Iris for analysing
-and visualising the contents of the GRIB files. Iris cubes can be saved to
+climate datasets that are stored as GRIB files and :class:`Iris cubes <iris.cube.Cube>`.
+GRIB files can be loaded as Iris cubes using ``iris-grib`` so that you can use Iris
+for analysing and visualising the contents of the GRIB files. Iris cubes can be saved to
 GRIB files using ``iris-grib``.
 
 The contents of ``iris-grib`` represent the former grib loading and saving capabilities
-of `Iris` itself. These capabilities have been separated into a discrete library
+of :mod:`Iris <iris>` itself. These capabilities have been separated into a discrete library
 so that Iris becomes less monolithic as a library.
 
 

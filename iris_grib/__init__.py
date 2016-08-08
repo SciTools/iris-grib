@@ -870,4 +870,3 @@ def save_messages(messages, target, append=False):
         # (this bit is common to the pp and grib savers...)
         if isinstance(target, six.string_types):
             grib_file.close()
-
