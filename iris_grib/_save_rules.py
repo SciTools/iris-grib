@@ -797,33 +797,38 @@ def _cube_is_time_statistic(cube):
     """
     Test whether we can identify this cube as a statistic over time.
 
-    At present, accept anything whose latest cell method operates over a single
-    coordinate that "looks like" a time factor (i.e. some specific names).
-    In particular, we recognise the coordinate names defined in
-    :py:mod:`iris.coord_categorisation`.
+    We need to know whether our cube represents a time statistic. This is
+    almost always captured in the cell methods. The exception is when a
+    percentage statistic has been calculated (i.e. for PDT10). This is
+    captured in a `percentage_over_time` scalar coord, which must be handled
+    here too.
 
     """
-    # The *only* relevant information is in cell_methods, as coordinates or
-    # dimensions of aggregation may no longer exist.  So it's not possible to
-    # be definitive, but we handle *some* useful cases.
-    # In other cases just say "no", which is safe even when not ideal.
+    result = False
+    stat_coord_name = 'percentile_over_time'
+    cube_coord_names = [coord.name() for coord in cube.coords()]
 
-    # Identify a single coordinate from the latest cell_method.
-    if not cube.cell_methods:
-        return False
-    latest_coordnames = cube.cell_methods[-1].coord_names
-    if len(latest_coordnames) != 1:
-        return False
-    coord_name = latest_coordnames[0]
+    # Check our cube for time statistic indicators.
+    has_percentile_statistic = stat_coord_name in cube_coord_names
+    has_cell_methods = cube.cell_methods
 
-    # Define accepted time names, including those from coord_categorisations.
-    recognised_time_names = ['time', 'year', 'month', 'day', 'weekday',
-                             'season']
+    # Determine whether we have a time statistic.
+    if has_percentile_statistic:
+        result = True
+    elif has_cell_methods:
+        # Define accepted time names, including from coord_categorisations.
+        recognised_time_names = ['time', 'year', 'month', 'day', 'weekday',
+                                 'season']
+        latest_coordnames = cube.cell_methods[-1].coord_names
+        if len(latest_coordnames) != 1:
+            result = False
+        else:
+            coord_name = latest_coordnames[0]
+            result = coord_name in recognised_time_names
+    else:
+        result = False
 
-    # Accept it if the name is recognised.
-    # Currently does *not* recognise related names like 'month_number' or
-    # 'years', as that seems potentially unsafe.
-    return coord_name in recognised_time_names
+    return result
 
 
 def product_definition_template_common(cube, grib):
@@ -1017,6 +1022,9 @@ def product_definition_section(cube, grib):
         if cube.coords('realization'):
             # time processed (template 4.11)
             pdt = product_definition_template_11
+        elif cube.coords('percentile_over_time'):
+            # time processed as percentile (template 4.10)
+            pdt = product_definition_template_10
         else:
             # time processed (template 4.8)
             pdt = product_definition_template_8
