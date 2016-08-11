@@ -50,7 +50,7 @@ from .message import GribMessage
 __version__ = '0.9.0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
-           'save_pairs_from_cube', 'save_messages', 'GribWrapper']
+           'save_pairs_from_cube', 'save_messages']
 
 
 CENTRE_TITLES = {'egrr': 'U.K. Met Office - Exeter',
