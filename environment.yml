@@ -2,4 +2,4 @@ channels:
     - scitools
 dependencies:
     - iris=1.*
-    - grib_api=1.14.7
+    - ecmwf_grib=1.14
