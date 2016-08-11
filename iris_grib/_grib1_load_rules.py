@@ -33,10 +33,6 @@ from iris.fileformats.rules import (ConversionMetadata, Factory, Reference,
                                     ReferenceTarget)
 
 
-# Restrict the names imported from this namespace.
-__all__ = ['grib1_convert']
-
-
 def grib1_convert(grib):
     """
     Converts a GRIB1 message into the corresponding items of Cube metadata.

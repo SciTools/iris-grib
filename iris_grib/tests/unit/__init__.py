@@ -230,5 +230,5 @@ class TestGribSimple(tests.IrisGribTest):
                 grib_message = FakeGribMessage(**grib.__dict__)
                 wrapped_msg = iris_grib.GribWrapper(grib_message)
                 cube, _, _ = iris.fileformats.rules._make_cube(
-                    wrapped_msg, iris_grib.load_rules.grib1_convert)
+                    wrapped_msg, iris_grib._grib1_load_rules.grib1_convert)
         return cube
