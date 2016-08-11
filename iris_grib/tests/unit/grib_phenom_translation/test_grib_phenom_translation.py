@@ -31,11 +31,12 @@ import iris_grib.tests as tests
 import cf_units
 
 import iris_grib.grib_phenom_translation as gptx
+from iris_grib.grib_phenom_translation import _LookupTable
 
 
 class TestGribLookupTableType(tests.IrisTest):
     def test_lookuptable_type(self):
-        ll = gptx.LookupTable([('a', 1), ('b', 2)])
+        ll = _LookupTable([('a', 1), ('b', 2)])
         assert ll['a'] == 1
         assert ll['q'] is None
         ll['q'] = 15
