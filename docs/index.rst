@@ -72,6 +72,25 @@ To use ``iris-grib`` to save Iris cubes to a GRIB file we can make use of the
     As the function name suggests, only saving to GRIB2 is supported.
 
 
+Interconnectivity with Iris
+---------------------------
+
+You can use the functionality provided by ``iris-grib`` directly within Iris
+without having to explicitly import ``iris-grib``, as long as you have both Iris
+and ``iris-grib`` available to your Python interpreter.
+
+For example::
+
+    >>> import iris
+    >>> import iris_sample_data
+    >>> cube = iris.load_cube(iris.sample_data_path('polar_stereo.grib2'))
+
+Similarly, you can save your cubes to a GRIB file directly from Iris
+using ``iris-grib``::
+
+    >>> iris.save(my_cube, 'my_file.grib2')
+
+
 Indices and tables
 ==================
 
