@@ -1,4 +1,5 @@
 channels:
-    - conda-forge
+    - scitools
 dependencies:
     - iris=1.*
+    - grib_api=1.14.7
