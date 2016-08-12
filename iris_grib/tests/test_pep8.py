@@ -33,7 +33,7 @@ import iris_grib
 class Test(unittest.TestCase):
     def test_pep8_conformance(self):
         pep8style = pep8.StyleGuide(quiet=False)
-        excluded = ['_grib_cf_map.py', 'load_rules.py']
+        excluded = ['_grib_cf_map.py', '_grib1_load_rules.py']
         for fname in excluded:
             path = '*{}{}'.format(os.path.sep, fname)
             pep8style.options.exclude.append(path)

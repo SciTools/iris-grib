@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Unit tests for :func:`iris_grib.load_rules.grib1_convert`."""
+"""Unit tests for :func:`iris_grib._grib1_load_rules.grib1_convert`."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa
@@ -32,7 +32,7 @@ from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
 from iris_grib import GribWrapper
-from iris_grib.load_rules import grib1_convert
+from iris_grib._grib1_load_rules import grib1_convert
 from iris_grib.tests.unit import TestField
 
 

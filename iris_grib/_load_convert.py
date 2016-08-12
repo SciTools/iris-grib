@@ -42,7 +42,7 @@ from . import grib_phenom_translation as itranslation
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 from iris.util import _is_circular
 
-from .load_rules import grib1_convert
+from ._grib1_load_rules import grib1_convert
 from .message import GribMessage
 
 
