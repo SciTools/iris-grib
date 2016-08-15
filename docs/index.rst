@@ -78,9 +78,12 @@ Indices and tables
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   ref/index
+   ref/iris_grib
+   ref/message/message
+   ref/grib_phenom_translation/grib_phenom_translation
+
 
 See also:
 
