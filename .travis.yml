@@ -2,11 +2,10 @@ language: python
 sudo: false
 env:
   - python=2.7
-    iris=1.9
+    iris=1.10
 
   - python=2.7
     iris_from_source=master
-    grib_api=1.14.7
 
 #  - python=3.4
 #    iris=master
@@ -25,14 +24,16 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set show_channel_urls True
-  - conda config --add channels conda-forge
+  - conda config --add channels scitools
+  - conda config --add channels defaults
 
   # Install iris-grib's dependencies
   # --------------------------------
   - |
      conda install --quiet --yes python=${python} pep8 pip nomkl \
             iris=${iris}* \
-            python-ecmwf_grib=${grib_api}*
+            ecmwf_grib \
+            nc_time_axis
 
   # Fetch and install Iris from source
   # ----------------------------------
