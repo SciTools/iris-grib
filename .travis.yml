@@ -2,19 +2,10 @@ language: python
 sudo: false
 env:
   - python=2.7
-    iris=1.10
+    iris=v1.10.0
 
   - python=2.7
-    iris_from_source=master
-
-#  - python=3.4
-#    iris=master
-#    grib_api=1.14.7
-
-#  - python=3.5
-#    iris=master
-#    grib_api=1.14.7
-
+    iris=master
 
 install:
   # Fetch and install conda
@@ -29,22 +20,16 @@ install:
 
   # Install iris-grib's dependencies
   # --------------------------------
-  - |
-     conda install --quiet --yes python=${python} pep8 pip nomkl \
-            iris=${iris}* \
-            ecmwf_grib \
-            nc_time_axis
-
-  # Fetch and install Iris from source
-  # ----------------------------------
-  - |
-     if [ -n "$iris_from_source" ]; then
-        conda remove --yes iris;
-        wget https://github.com/scitools/iris/archive/${iris_from_source}.tar.gz -O iris.tar.gz;
-        tar xzf iris.tar.gz && rm -rf iris.tar.gz && mv iris-${iris_from_source} iris_source;
-        pip install ./iris_source --no-deps;
-        rm -rf iris_source;
-     fi
+  - wget https://github.com/scitools/iris/archive/${iris}.tar.gz -O iris.tar.gz;
+  - if [ ${iris:0:1} == "v" ]; then
+       iris="${iris:1:${#iris}-1}";
+    fi
+  - tar xzf iris.tar.gz && rm -rf iris.tar.gz && mv iris-${iris} iris_source;
+  - conda install --quiet --yes python=${python} --file=./iris_source/minimal-conda-requirements.txt;
+  - conda install --quiet --yes ecmwf_grib;
+  - pip install ./iris_source --no-deps;
+  - rm -rf iris_source;
+  - conda list
 
   # Download iris-test-data
   # --------------------------------
