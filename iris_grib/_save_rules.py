@@ -831,6 +831,23 @@ def _cube_is_time_statistic(cube):
     return result
 
 
+def set_ensemble(cube, grib):
+    """
+    Set keys in the provided grib based message relating to ensemble
+    information.
+
+    """
+    if not (cube.coords('realization') and
+            len(cube.coord('realization').points) == 1):
+        raise ValueError("A cube 'realization' coordinate with one "
+                         "point is required, but not present")
+    gribapi.grib_set(grib, "perturbationNumber",
+                     int(cube.coord('realization').points[0]))
+    # no encoding at present in iris-grib, set to missing
+    gribapi.grib_set(grib, "numberOfForecastsInEnsemble", 255)
+    gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
+
+
 def product_definition_template_common(cube, grib):
     """
     Set keys within the provided grib message that are common across
@@ -862,6 +879,21 @@ def product_definition_template_0(cube, grib):
     """
     gribapi.grib_set_long(grib, "productDefinitionTemplateNumber", 0)
     product_definition_template_common(cube, grib)
+
+
+def product_definition_template_1(cube, grib):
+    """
+    Set keys within the provided grib message based on Product
+    Definition Template 4.1.
+
+    Template 4.1 is used to represent an individual ensemble forecast, control
+    and perturbed, at a horizontal level or in a horizontal layer at a point
+    in time.
+
+    """
+    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 1)
+    product_definition_template_common(cube, grib)
+    set_ensemble(cube, grib)
 
 
 def product_definition_template_8(cube, grib):
@@ -906,15 +938,7 @@ def product_definition_template_11(cube, grib):
 
     """
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 11)
-    if not (cube.coords('realization') and
-            len(cube.coord('realization').points) == 1):
-        raise ValueError("A cube 'realization' coordinate with one"
-                         "point is required, but not present")
-    gribapi.grib_set(grib, "perturbationNumber",
-                     int(cube.coord('realization').points[0]))
-    # no encoding at present in iris-grib, set to missing
-    gribapi.grib_set(grib, "numberOfForecastsInEnsemble", 255)
-    gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
+    set_ensemble(cube, grib)
     _product_definition_template_8_10_and_11(cube, grib)
 
 
@@ -1012,7 +1036,10 @@ def product_definition_section(cube, grib):
 
     """
     if not cube.coord("time").has_bounds():
-        if 'WMO_constituent_type' in cube.attributes:
+        if cube.coords('realization'):
+            # ensemble forecast (template 4.1)
+            pdt = product_definition_template_1(cube, grib)
+        elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
             product_definition_template_40(cube, grib)
         else:
