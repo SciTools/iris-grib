@@ -30,10 +30,6 @@ for d, _, _ in os.walk(os.path.join(here, name)):
     if os.path.exists(os.path.join(d, '__init__.py')):
         packages.append(d[len(here)+1:].replace(os.path.sep, '.'))
 
-package_data = {
-    'iris_grib': ['iris_grib/tests/results/*'],
-}
-
 
 def extract_version():
     version = None
@@ -48,11 +44,25 @@ def extract_version():
     return version
 
 
+def file_walk_relative(top, remove=''):
+    """
+    Returns a generator of files from the top of the tree, removing
+    the given prefix from the root/file result.
+
+    """
+    top = top.replace('/', os.path.sep)
+    remove = remove.replace('/', os.path.sep)
+    for root, dirs, files in os.walk(top):
+        for file in files:
+            yield os.path.join(root, file).replace(remove, '')
+
+
 setup_args = dict(
     name             = name,
     version          = extract_version(),
     packages         = packages,
-    package_data     = package_data,
+    package_data     = {'iris_grib': list(file_walk_relative('iris_grib/tests/results',
+                                          remove='iris_grib/'))},
     description      = "GRIB loading for Iris",
     long_description = LONG_DESCRIPTION,
     url              = 'https://github.com/SciTools/iris-grib',
