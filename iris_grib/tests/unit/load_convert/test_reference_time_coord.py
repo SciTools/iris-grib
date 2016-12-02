@@ -62,6 +62,11 @@ class Test(tests.IrisGribTest):
 
     def test_start_of_forecast(self):
         section = deepcopy(self.section)
+        section['significanceOfReferenceTime'] = 0
+        self._check(section, 'forecast_reference_time')
+
+    def test_start_of_forecast(self):
+        section = deepcopy(self.section)
         section['significanceOfReferenceTime'] = 1
         self._check(section, 'forecast_reference_time')
 

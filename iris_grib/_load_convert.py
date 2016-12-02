@@ -277,7 +277,7 @@ def reference_time_coord(section):
 
     """
     # Look-up standard name by significanceOfReferenceTime.
-    _lookup = {0: 'time',
+    _lookup = {0: 'forecast_reference_time',
                1: 'forecast_reference_time',
                2: 'time',
                3: 'time'}
