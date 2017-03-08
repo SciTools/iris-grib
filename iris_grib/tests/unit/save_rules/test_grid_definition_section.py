@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -26,7 +26,7 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris.coord_systems import LambertConformal
+from iris.coord_systems import Orthographic
 from iris.exceptions import TranslationError
 
 from iris_grib._save_rules import grid_definition_section
@@ -46,7 +46,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
             grid_definition_section(test_cube, self.mock_grib)
 
     def test__fail_unsupported_coord_system(self):
-        cs = LambertConformal()
+        cs = Orthographic(0, 0)
         test_cube = self._make_test_cube(cs=cs)
         with self.assertRaisesRegexp(
                 ValueError,
