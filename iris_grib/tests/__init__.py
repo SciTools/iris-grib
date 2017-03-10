@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2010 - 2016, Met Office
+# (C) British Crown Copyright 2010 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -31,7 +31,12 @@ import inspect
 import os
 import os.path
 
-from iris.tests import IrisTest, main, skip_data, get_data_path
+try:
+    from iris.tests import IrisTest_nometa as IrisTest
+except ImportError:
+    from iris.tests import IrisTest
+
+from iris.tests import main, skip_data, get_data_path
 
 
 #: Basepath for iris-grib test results.
