@@ -527,15 +527,15 @@ def grid_definition_template_30(cube, grib):
     first_x = first_x % 360
     central_lon = cs.central_lon % 360
 
-    gribapi.grib_set_long(grib, "latitudeOfFirstGridPoint",
-                          int(first_y * 1e6))
-    gribapi.grib_set_long(grib, "longitudeOfFirstGridPoint",
-                          int(first_x * 1e6))
-    gribapi.grib_set_long(grib, "LaD", cs.central_lat * 1e6)
-    gribapi.grib_set_long(grib, "LoV", central_lon * 1e6)
+    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
+                     int(np.round(first_y * 1e6)))
+    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
+                     int(np.round(first_x * 1e6)))
+    gribapi.grib_set(grib, "LaD", cs.central_lat * 1e6)
+    gribapi.grib_set(grib, "LoV", central_lon * 1e6)
     latin1, latin2 = cs.secant_latitudes
-    gribapi.grib_set_long(grib, "Latin1", latin1 * 1e6)
-    gribapi.grib_set_long(grib, "Latin2", latin2 * 1e6)
+    gribapi.grib_set(grib, "Latin1", latin1 * 1e6)
+    gribapi.grib_set(grib, "Latin2", latin2 * 1e6)
     gribapi.grib_set(grib, 'resolutionAndComponentFlags',
                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
@@ -543,9 +543,9 @@ def grid_definition_template_30(cube, grib):
     # that the cone converges.
     poliest_sec = latin1 if abs(latin1) > abs(latin2) else latin2
     centre_flag = 0x0 if poliest_sec > 0 else 0x1
-    gribapi.grib_set_long(grib, 'projectionCentreFlag', centre_flag)
-    gribapi.grib_set_long(grib, "latitudeOfSouthernPole", 0)
-    gribapi.grib_set_long(grib, "longitudeOfSouthernPole", 0)
+    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
+    gribapi.grib_set(grib, "latitudeOfSouthernPole", 0)
+    gribapi.grib_set(grib, "longitudeOfSouthernPole", 0)
 
 
 def grid_definition_section(cube, grib):
