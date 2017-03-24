@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2016, Met Office
+# (C) British Crown Copyright 2016 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -49,7 +49,8 @@ class Test(tests.IrisGribTest):
     def test_percentile_coord(self):
         metadata = empty_metadata()
         percentileValue = 75
-        section = {'percentileValue': percentileValue,
+        section = {'productDefinitionTemplateNumber': 10,
+                   'percentileValue': percentileValue,
                    'hoursAfterDataCutoff': 1,
                    'minutesAfterDataCutoff': 1,
                    'numberOfTimeRange': 1,
