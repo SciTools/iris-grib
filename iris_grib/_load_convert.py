@@ -2105,35 +2105,14 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     # Reference GRIB2 Code Table 4.0.
     template = section['productDefinitionTemplateNumber']
 
-    probability = None
-    if template == 0:
-        # Process analysis or forecast at a horizontal level or
-        # in a horizontal layer at a point in time.
-        product_definition_template_0(section, metadata, rt_coord)
-    elif template == 1:
-        # Process individual ensemble forecast, control and perturbed, at
-        # a horizontal level or in a horizontal layer at a point in time.
-        product_definition_template_1(section, metadata, rt_coord)
-    elif template == 8:
-        # Process statistically processed values at a horizontal level or in a
-        # horizontal layer in a continuous or non-continuous time interval.
-        product_definition_template_8(section, metadata, rt_coord)
-    elif template == 9:
-        probability = \
-            product_definition_template_9(section, metadata, rt_coord)
-    elif template == 10:
-        product_definition_template_10(section, metadata, rt_coord)
-    elif template == 11:
-        product_definition_template_11(section, metadata, rt_coord)
-    elif template == 31:
-        # Process satellite product.
-        product_definition_template_31(section, metadata, rt_coord)
-    elif template == 40:
-        product_definition_template_40(section, metadata, rt_coord)
-    else:
+    try:
+        handler = ProductDefinitionTemplateHandlers[template]
+    except KeyError:
         msg = 'Product definition template [{}] is not ' \
             'supported'.format(template)
         raise TranslationError(msg)
+
+    probability = handler(section, metadata, rt_coord)
 
     # Translate GRIB2 phenomenon to CF phenomenon.
     if tablesVersion != _CODE_TABLES_MISSING:
@@ -2293,3 +2272,12 @@ def convert(field):
         result = grib1_convert(field)
 
     return result
+
+ProductDefinitionTemplateHandlers = {0: product_definition_template_0,
+                                     1: product_definition_template_1,
+                                     8: product_definition_template_8,
+                                     9: product_definition_template_9,
+                                     10: product_definition_template_10,
+                                     11: product_definition_template_11,
+                                     31: product_definition_template_31,
+                                     40: product_definition_template_40}
