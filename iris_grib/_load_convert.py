@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -1351,7 +1351,7 @@ def hybrid_factories(section, metadata):
                              units='Pa')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset += NV / 2
+            offset += NV // 2
             coord = AuxCoord(pv[offset], long_name='sigma')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
