@@ -1653,14 +1653,15 @@ def time_coords(section, metadata, rt_coord):
     metadata['aux_coords_and_dims'].append((rt_coord, None))
 
 
-def generating_process(section):
+def generating_process(section, include_forecast_process=True):
     if options.warn_on_unsupported:
         # Reference Code Table 4.3.
         warnings.warn('Unable to translate type of generating process.')
         warnings.warn('Unable to translate background generating '
                       'process identifier.')
-        warnings.warn('Unable to translate forecast generating '
-                      'process identifier.')
+        if include_forecast_process:
+            warnings.warn('Unable to translate forecast generating '
+                          'process identifier.')
 
 
 def data_cutoff(hoursAfterDataCutoff, minutesAfterDataCutoff):
@@ -2042,10 +2043,7 @@ def product_definition_template_31(section, metadata, rt_coord):
         The scalar observation time :class:`iris.coords.DimCoord'.
 
     """
-    if options.warn_on_unsupported:
-        warnings.warn('Unable to translate type of generating process.')
-        warnings.warn('Unable to translate observation generating '
-                      'process identifier.')
+    generating_process(section, include_forecast_process=False)
 
     satellite_common(section, metadata)
 
@@ -2073,10 +2071,7 @@ def product_definition_template_32(section, metadata, rt_coord):
         The scalar observation time :class:`iris.coords.DimCoord'.
 
     """
-    if options.warn_on_unsupported:
-        warnings.warn('Unable to translate type of generating process.')
-        warnings.warn('Unable to translate observation generating '
-                      'process identifier.')
+    generating_process(section, include_forecast_process=False)
 
     # Handle the data cutoff.
     data_cutoff(section['hoursAfterDataCutoff'],

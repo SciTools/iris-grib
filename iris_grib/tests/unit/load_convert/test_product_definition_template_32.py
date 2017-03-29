@@ -32,6 +32,7 @@ import numpy as np
 import warnings
 
 from iris.coords import AuxCoord, DimCoord
+from iris_grib.tests.unit.load_convert import empty_metadata
 
 from iris_grib._load_convert import product_definition_template_32
 
@@ -41,79 +42,43 @@ MDI = 0xffffffff
 class Test(tests.IrisGribTest):
     def setUp(self):
         self.patch('warnings.warn')
-        self.metadata = {'factories': [], 'references': [],
-                         'standard_name': None,
-                         'long_name': None, 'units': None, 'attributes': None,
-                         'cell_methods': [], 'dim_coords_and_dims': [],
-                         'aux_coords_and_dims': []}
+        self.generating_process_patch = self.patch(
+            'iris_grib._load_convert.generating_process')
+        self.satellite_common_patch = self.patch(
+            'iris_grib._load_convert.satellite_common')
+        self.time_coords_patch = self.patch(
+            'iris_grib._load_convert.time_coords')
+        self.data_cutoff_patch = self.patch(
+            'iris_grib._load_convert.data_cutoff')
 
-    def _check(self, request_warning=False, value=10, factor=1):
+    def test(self, value=10, factor=1):
         # Prepare the arguments.
-        def unscale(v, f):
-            return v / 10.0 ** f
-
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
-        rt_coord = AuxCoord(24, standard_name='time',
-                            units='hours since epoch')
-        section = {'indicatorOfUnitOfTimeRange': 1,
-                   'forecastTime': 24,
-                   'hoursAfterDataCutoff': MDI,
-                   'minutesAfterDataCutoff': MDI,
-                   'NB': 1,
+        rt_coord = mock.sentinel.observation_time
+        section = {'NB': 1,
+                   'hoursAfterDataCutoff': None,
+                   'minutesAfterDataCutoff': None,
                    'satelliteSeries': series,
                    'satelliteNumber': number,
                    'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': factor,
-                   'scaledValueOfCentralWaveNumber': value}
-        metadata = deepcopy(self.metadata)
-        this = 'iris_grib._load_convert.options'
-        with mock.patch(this, warn_on_unsupported=request_warning):
-            # The call being tested.
-            product_definition_template_32(section, metadata, rt_coord)
-        # Check the result.
-        expected = deepcopy(self.metadata)
-        coord = DimCoord(24, 'forecast_period', units='hours')
-        expected['aux_coords_and_dims'].append((coord, None))
-        coord = DimCoord(0, 'forecast_reference_time',
-                         units='hours since epoch')
-        expected['aux_coords_and_dims'].append((coord, None))
-        expected['aux_coords_and_dims'].append((rt_coord, None))
-        coord = AuxCoord(series, long_name='satellite_series')
-        expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(number, long_name='satellite_number')
-        expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(instrument, long_name='instrument_type')
-        expected['aux_coords_and_dims'].append((coord, None))
-        standard_name = 'sensor_band_central_radiation_wavenumber'
-        coord = AuxCoord(unscale(value, factor),
-                         standard_name=standard_name,
-                         units='m-1')
-        expected['aux_coords_and_dims'].append((coord, None))
-        self.assertEqual(metadata, expected)
-        if request_warning:
-            warn_msgs = [arg[1][0] for arg in warnings.warn.mock_calls]
-            expected_msgs = ['type of generating process',
-                             'observation generating process identifier']
-            for emsg in expected_msgs:
-                matches = [wmsg for wmsg in warn_msgs if emsg in wmsg]
-                self.assertEqual(len(matches), 1)
-                warn_msgs.remove(matches[0])
-        else:
-            self.assertEqual(len(warnings.warn.mock_calls), 0)
+                   'scaleFactorOfCentralWaveNumber': 1,
+                   'scaledValueOfCentralWaveNumber': 12,
+                   }
 
-    def test_pdt_no_warn(self):
-        self._check(request_warning=False)
+        # Call the function.
+        metadata = empty_metadata()
+        product_definition_template_32(section, metadata, rt_coord)
 
-    def test_pdt_warn(self):
-        self._check(request_warning=True)
-
-    def test_wavelength_array(self):
-        value = np.array([1, 10, 100, 1000])
-        for i in range(value.size):
-            factor = np.ones(value.shape) * i
-            self._check(value=value, factor=factor)
+        # Check that 'satellite_common' was called.
+        self.assertEqual(self.satellite_common_patch.call_count, 1)
+        # Check that 'generating_process' was called.
+        self.assertEqual(self.generating_process_patch.call_count, 1)
+        # Check that 'data_cutoff' was called.
+        self.assertEqual(self.data_cutoff_patch.call_count, 1)
+        # Check that 'time_coords' was called.
+        self.assertEqual(self.time_coords_patch.call_count, 1)
 
 
 if __name__ == '__main__':
