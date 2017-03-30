@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# (C) British Crown Copyright 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Tests for `iris_grib._load_convert.product_definition_template_31`.
+Tests for `iris_grib._load_convert.product_definition_template_32`.
 
 """
 
@@ -31,43 +31,54 @@ import mock
 import numpy as np
 import warnings
 
-from iris.coords import AuxCoord
+from iris.coords import AuxCoord, DimCoord
 from iris_grib.tests.unit.load_convert import empty_metadata
 
-from iris_grib._load_convert import product_definition_template_31
+from iris_grib._load_convert import product_definition_template_32
+
+MDI = 0xffffffff
 
 
 class Test(tests.IrisGribTest):
     def setUp(self):
         self.patch('warnings.warn')
-        self.satellite_common_patch = self.patch(
-            'iris_grib._load_convert.satellite_common')
         self.generating_process_patch = self.patch(
             'iris_grib._load_convert.generating_process')
+        self.satellite_common_patch = self.patch(
+            'iris_grib._load_convert.satellite_common')
+        self.time_coords_patch = self.patch(
+            'iris_grib._load_convert.time_coords')
+        self.data_cutoff_patch = self.patch(
+            'iris_grib._load_convert.data_cutoff')
 
-    def test(self):
+    def test(self, value=10, factor=1):
         # Prepare the arguments.
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
         rt_coord = mock.sentinel.observation_time
         section = {'NB': 1,
+                   'hoursAfterDataCutoff': None,
+                   'minutesAfterDataCutoff': None,
                    'satelliteSeries': series,
                    'satelliteNumber': number,
                    'instrumentType': instrument,
                    'scaleFactorOfCentralWaveNumber': 1,
-                   'scaledValueOfCentralWaveNumber': 12}
+                   'scaledValueOfCentralWaveNumber': 12,
+                   }
 
         # Call the function.
         metadata = empty_metadata()
-        product_definition_template_31(section, metadata, rt_coord)
+        product_definition_template_32(section, metadata, rt_coord)
 
         # Check that 'satellite_common' was called.
         self.assertEqual(self.satellite_common_patch.call_count, 1)
         # Check that 'generating_process' was called.
         self.assertEqual(self.generating_process_patch.call_count, 1)
-        # Check that the scalar time coord was added in.
-        self.assertIn((rt_coord, None), metadata['aux_coords_and_dims'])
+        # Check that 'data_cutoff' was called.
+        self.assertEqual(self.data_cutoff_patch.call_count, 1)
+        # Check that 'time_coords' was called.
+        self.assertEqual(self.time_coords_patch.call_count, 1)
 
 
 if __name__ == '__main__':

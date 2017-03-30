@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Tests for `iris_grib._load_convert.product_definition_template_31`.
+Tests for `iris_grib._load_convert.satellite_common`.
 
 """
 
@@ -34,40 +34,50 @@ import warnings
 from iris.coords import AuxCoord
 from iris_grib.tests.unit.load_convert import empty_metadata
 
-from iris_grib._load_convert import product_definition_template_31
+from iris_grib._load_convert import satellite_common
 
 
 class Test(tests.IrisGribTest):
-    def setUp(self):
-        self.patch('warnings.warn')
-        self.satellite_common_patch = self.patch(
-            'iris_grib._load_convert.satellite_common')
-        self.generating_process_patch = self.patch(
-            'iris_grib._load_convert.generating_process')
-
-    def test(self):
+    def _check(self, factors=1, values=111):
         # Prepare the arguments.
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
-        rt_coord = mock.sentinel.observation_time
         section = {'NB': 1,
                    'satelliteSeries': series,
                    'satelliteNumber': number,
                    'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': 1,
-                   'scaledValueOfCentralWaveNumber': 12}
+                   'scaleFactorOfCentralWaveNumber': factors,
+                   'scaledValueOfCentralWaveNumber': values}
 
         # Call the function.
         metadata = empty_metadata()
-        product_definition_template_31(section, metadata, rt_coord)
+        satellite_common(section, metadata)
 
-        # Check that 'satellite_common' was called.
-        self.assertEqual(self.satellite_common_patch.call_count, 1)
-        # Check that 'generating_process' was called.
-        self.assertEqual(self.generating_process_patch.call_count, 1)
-        # Check that the scalar time coord was added in.
-        self.assertIn((rt_coord, None), metadata['aux_coords_and_dims'])
+        # Check the result.
+        expected = empty_metadata()
+        coord = AuxCoord(series, long_name='satellite_series')
+        expected['aux_coords_and_dims'].append((coord, None))
+        coord = AuxCoord(number, long_name='satellite_number')
+        expected['aux_coords_and_dims'].append((coord, None))
+        coord = AuxCoord(instrument, long_name='instrument_type')
+        expected['aux_coords_and_dims'].append((coord, None))
+        standard_name = 'sensor_band_central_radiation_wavenumber'
+        coord = AuxCoord(values / (10.0 ** factors),
+                         standard_name=standard_name,
+                         units='m-1')
+        expected['aux_coords_and_dims'].append((coord, None))
+        self.assertEqual(metadata, expected)
+
+    def test_basic(self):
+        self._check()
+
+    def test_multiple_wavelengths(self):
+        # Check with multiple values, and several different scaling factors.
+        values = np.array([1, 11, 123, 1975])
+        for i_factor in (-3, -1, 0, 1, 3):
+            factors = np.ones(values.shape) * i_factor
+            self._check(values=values, factors=factors)
 
 
 if __name__ == '__main__':
