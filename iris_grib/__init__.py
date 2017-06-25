@@ -29,7 +29,6 @@ import datetime
 import math  # for fmod
 import warnings
 
-import biggus
 import cartopy.crs as ccrs
 import cf_units
 import gribapi
@@ -37,6 +36,7 @@ import numpy as np
 import numpy.ma as ma
 
 import iris
+from iris._lazy_data import as_lazy_data, convert_nans_array
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 
@@ -99,12 +99,11 @@ unknown_string = "???"
 class GribDataProxy(object):
     """A reference to the data payload of a single Grib message."""
 
-    __slots__ = ('shape', 'dtype', 'fill_value', 'path', 'offset')
+    __slots__ = ('shape', 'dtype', 'path', 'offset')
 
-    def __init__(self, shape, dtype, fill_value, path, offset):
+    def __init__(self, shape, dtype, path, offset):
         self.shape = shape
         self.dtype = dtype
-        self.fill_value = fill_value
         self.path = path
         self.offset = offset
 
@@ -123,7 +122,7 @@ class GribDataProxy(object):
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
-            'dtype={self.dtype!r} fill_value={self.fill_value!r} ' \
+            'dtype={self.dtype!r} ' \
             'path={self.path!r} offset={self.offset}>'
         return msg.format(self=self)
 
@@ -146,6 +145,7 @@ class GribWrapper(object):
     def __init__(self, grib_message, grib_fh=None):
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
+        self.realised_dtype = np.array([0.]).dtype
 
         if self.edition != 1:
             emsg = 'GRIB edition {} is not supported by {!r}.'
@@ -184,12 +184,14 @@ class GribWrapper(object):
             # The byte offset requires to be reset back to the first byte
             # of this message. The file pointer offset is always at the end
             # of the current message due to the grib-api reading the message.
-            proxy = GribDataProxy(shape, np.zeros(0).dtype, np.nan,
-                                  grib_fh.name,
+            proxy = GribDataProxy(shape, self.realised_dtype, grib_fh.name,
                                   offset - message_length)
-            self._data = biggus.NumpyArrayAdapter(proxy)
+            self._data = as_lazy_data(proxy)
         else:
-            self.data = _message_values(grib_message, shape)
+            values_array = _message_values(grib_message, shape)
+            # mask where the values are nan
+            self.data = convert_nans_array(values_array,
+                                           nans_replacement=ma.masked)
 
     def _confirm_in_scope(self):
         """Ensure we have a grib flavour that we choose to support."""
@@ -640,6 +642,19 @@ class GribWrapper(object):
         # Return validity_time = (reference_time + start_offset*time_unit).
         return reference_date_time + interval_delta
 
+    @property
+    def bmdi(self):
+        # Not sure of any cases where GRIB provides a fill value.
+        # Default for fill value is None.
+        return None
+
+    def core_data(self):
+        try:
+            data = self._data
+        except AttributeError:
+            data = self.data
+        return data
+
     def phenomenon_points(self, time_unit):
         """
         Return the phenomenon time point offset from the epoch time reference
@@ -683,10 +698,6 @@ def _message_values(grib_message, shape):
     data = gribapi.grib_get_double_array(grib_message, 'values')
     data = data.reshape(shape)
 
-    # Handle missing values in a sensible way.
-    mask = np.isnan(data)
-    if mask.any():
-        data = ma.array(data, mask=mask, fill_value=np.nan)
     return data
 
 
