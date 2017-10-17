@@ -1,5 +1,5 @@
 channels:
     - scitools
 dependencies:
-    - iris=1.*
+    - iris=2.*
     - ecmwf_grib=1.14

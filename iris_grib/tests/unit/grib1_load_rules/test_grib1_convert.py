@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# (C) British Crown Copyright 2013 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -61,7 +61,9 @@ class TestBoundedTime(TestField):
                       '_forecastTimeUnit': 'hours',
                       'phenomenon_bounds': lambda u: (80, 120),
                       '_phenomenonDateTime': -1,
-                      'table2Version': 9999}
+                      'table2Version': 9999,
+                      '_originatingCentre': 'xxx',
+                      }
         attributes.update(kwargs)
         message = mock.Mock(**attributes)
         self._test_for_coord(message, grib1_convert, self.is_forecast_period,
