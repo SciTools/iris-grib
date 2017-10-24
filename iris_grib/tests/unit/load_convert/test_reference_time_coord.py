@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -60,12 +60,12 @@ class Test(tests.IrisGribTest):
         coord = reference_time_coord(section)
         self.assertEqual(coord, expected)
 
-    def test_start_of_forecast(self):
+    def test_start_of_forecast__0(self):
         section = deepcopy(self.section)
         section['significanceOfReferenceTime'] = 0
         self._check(section, 'forecast_reference_time')
 
-    def test_start_of_forecast(self):
+    def test_start_of_forecast__1(self):
         section = deepcopy(self.section)
         section['significanceOfReferenceTime'] = 1
         self._check(section, 'forecast_reference_time')
