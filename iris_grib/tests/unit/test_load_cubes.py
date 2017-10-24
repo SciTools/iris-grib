@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -41,7 +41,7 @@ class Test(tests.IrisGribTest):
             rules_load.return_value = expected_result
             result = load_cubes(files, callback)
             kwargs = {}
-            loader = Loader(generator, kwargs, converter, None)
+            loader = Loader(generator, kwargs, converter)
             rules_load.assert_called_once_with(files, callback, loader)
             self.assertIs(result, expected_result)
 
