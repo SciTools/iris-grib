@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -32,11 +32,11 @@ import mock
 import iris.coords
 
 import iris_grib
-from iris_grib.tests.unit.load_convert import LoadConvertTest, empty_metadata
+from iris_grib.tests.unit.load_convert import empty_metadata
+from iris_grib.tests.unit.load_convert import LoadConvertTest
+from iris_grib._load_convert import _MDI as MDI
+
 from iris_grib._load_convert import product_definition_template_0
-
-
-MDI = 0xffffffff
 
 
 def section_4():

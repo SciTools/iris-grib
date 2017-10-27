@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2017, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -76,8 +76,8 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("longitudeOfLastGridPoint", 7000000)
         self._check_key("latitudeOfFirstGridPoint", 4000000)
         self._check_key("latitudeOfLastGridPoint", 9000000)
-        self._check_key("DxInDegrees", 2.0)
-        self._check_key("DyInDegrees", 5.0)
+        self._check_key("iDirectionIncrement", 2000000)
+        self._check_key("jDirectionIncrement", 5000000)
 
     def test__scanmode(self):
         grid_definition_template_0(self.test_cube, self.mock_grib)

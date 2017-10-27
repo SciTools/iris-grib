@@ -37,11 +37,11 @@ from iris.exceptions import TranslationError
 from iris.coords import CellMethod
 
 import iris_grib
-from iris_grib.tests.unit.load_convert import LoadConvertTest, empty_metadata
+from iris_grib.tests.unit.load_convert import empty_metadata
+from iris_grib.tests.unit.load_convert import LoadConvertTest
+from iris_grib._load_convert import _MDI as MDI
+
 from iris_grib._load_convert import product_definition_template_15
-
-
-MDI = 0xffffffff
 
 
 def section_4():

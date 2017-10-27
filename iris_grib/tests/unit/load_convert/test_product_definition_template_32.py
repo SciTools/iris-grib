@@ -33,10 +33,9 @@ import warnings
 
 from iris.coords import AuxCoord, DimCoord
 from iris_grib.tests.unit.load_convert import empty_metadata
+from iris_grib._load_convert import _MDI as MDI
 
 from iris_grib._load_convert import product_definition_template_32
-
-MDI = 0xffffffff
 
 
 class Test(tests.IrisGribTest):
