@@ -1,5 +1,5 @@
 channels:
-    - scitools
+    - conda-forge
 dependencies:
     - iris=2.*
-    - ecmwf_grib=1.14
+    - python-eccodes
