@@ -12,20 +12,12 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set show_channel_urls True
-  - conda config --add channels scitools
+  - conda config --add channels conda-forge
   - conda config --add channels defaults
 
   # Install iris-grib's dependencies
   # --------------------------------
-  - wget https://github.com/scitools/iris/archive/${iris}.tar.gz -O iris.tar.gz;
-  - if [ ${iris:0:1} == "v" ]; then
-       iris="${iris:1:${#iris}-1}";
-    fi
-  - tar xzf iris.tar.gz && rm -rf iris.tar.gz && mv iris-${iris} iris_source;
-  - conda install --quiet --yes python=${python} --file=./iris_source/minimal-conda-requirements.txt;
-  - conda install --quiet --yes ecmwf_grib;
-  - pip install ./iris_source --no-deps;
-  - rm -rf iris_source;
+  - conda install --quiet --yes python=${python} iris ecmwf_grib numpy=1.13 cartopy=0.15 mock filelock pep8;
   - conda list
 
   # Download iris-test-data
