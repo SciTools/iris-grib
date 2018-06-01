@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2016 - 2018, Met Office
+# (C) British Crown Copyright 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -16,7 +16,8 @@
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
 Unit tests for
-:func:`iris_grib._load_convert.grid_definition_template_20`.
+:func:`iris_grib._load_convert.grid_definition_template_10`.
+
 """
 
 from __future__ import (absolute_import, division, print_function)
@@ -26,68 +27,61 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # before importing anything else.
 import iris_grib.tests as tests
 
-import cartopy.crs as ccrs
 import numpy as np
 
 import iris.coord_systems
 import iris.coords
+import iris.exceptions
 
 from iris_grib.tests.unit.load_convert import empty_metadata
 from iris_grib._load_convert import _MDI as MDI
 
-from iris_grib._load_convert import grid_definition_template_20
+from iris_grib._load_convert import grid_definition_template_10
 
 
 class Test(tests.IrisGribTest):
-
     def section_3(self):
         section = {
-            'gridDefinitionTemplateNumber': 20,
-            'shapeOfTheEarth': 0,
+            'gridDefinitionTemplateNumber': 10,
+            'shapeOfTheEarth': 1,
             'scaleFactorOfRadiusOfSphericalEarth': 0,
-            'scaledValueOfRadiusOfSphericalEarth': 6367470,
+            'scaledValueOfRadiusOfSphericalEarth': 6371200,
             'scaleFactorOfEarthMajorAxis': 0,
-            'scaledValueOfEarthMajorAxis': MDI,
+            'scaledValueOfEarthMajorAxis': 0,
             'scaleFactorOfEarthMinorAxis': 0,
-            'scaledValueOfEarthMinorAxis': MDI,
-            'Nx': 15,
-            'Ny': 10,
-            'latitudeOfFirstGridPoint': 32549114,
-            'longitudeOfFirstGridPoint': 225385728,
-            'resolutionAndComponentFlags': 0b00001000,
-            'LaD': 60000000,
-            'orientationOfTheGrid': 262000000,
-            'Dx': 320000000,
-            'Dy': 320000000,
-            'projectionCentreFlag': 0b00000000,
-            'scanningMode': 0b01000000,
+            'scaledValueOfEarthMinorAxis': 0,
+            'Ni': 181,
+            'Nj': 213,
+            'latitudeOfFirstGridPoint': 2351555,
+            'latitudeOfLastGridPoint': 25088204,
+            'LaD': 14000000,
+            'longitudeOfFirstGridPoint': 114990304,
+            'longitudeOfLastGridPoint': 135009712,
+            'resolutionAndComponentFlags': 56,
+            'scanningMode': 64,
+            'Di': 12000000,
+            'Dj': 12000000
         }
         return section
 
     def expected(self, y_dim, x_dim):
         # Prepare the expectation.
         expected = empty_metadata()
-        ellipsoid = iris.coord_systems.GeogCS(6367470)
-        cs = iris.coord_systems.Stereographic(central_lat=90.,
-                                              central_lon=262.,
-                                              false_easting=0,
-                                              false_northing=0,
-                                              true_scale_lat=60.,
-                                              ellipsoid=ellipsoid)
-        lon0 = 225385728 * 1e-6
-        lat0 = 32549114 * 1e-6
-        x0m, y0m = cs.as_cartopy_crs().transform_point(
-            lon0, lat0, ccrs.Geodetic())
-        dxm = dym = 320000.
-        x_points = x0m + dxm * np.arange(15)
-        y_points = y0m + dym * np.arange(10)
-        x = iris.coords.DimCoord(x_points,
-                                 standard_name='projection_x_coordinate',
+        ellipsoid = iris.coord_systems.GeogCS(6371200.0)
+        cs = iris.coord_systems.Mercator(standard_parallel=14.,
+                                         ellipsoid=ellipsoid)
+        nx = 181
+        x_origin = 12406918.990644248
+        dx = 12000
+        x = iris.coords.DimCoord(np.arange(nx) * dx + x_origin,
+                                 'projection_x_coordinate',
                                  units='m',
-                                 coord_system=cs,
-                                 circular=False)
-        y = iris.coords.DimCoord(y_points,
-                                 standard_name='projection_y_coordinate',
+                                 coord_system=cs)
+        ny = 213
+        y_origin = 253793.10903714446
+        dy = 12000
+        y = iris.coords.DimCoord(np.arange(ny) * dy + y_origin,
+                                 'projection_y_coordinate',
                                  units='m',
                                  coord_system=cs)
         expected['dim_coords_and_dims'].append((y, y_dim))
@@ -97,7 +91,7 @@ class Test(tests.IrisGribTest):
     def test(self):
         section = self.section_3()
         metadata = empty_metadata()
-        grid_definition_template_20(section, metadata)
+        grid_definition_template_10(section, metadata)
         expected = self.expected(0, 1)
         self.assertEqual(metadata, expected)
 

@@ -10,6 +10,9 @@ Features
 * Added loading for data on Hybrid Height levels (surface type 118 in
   code table 4.5).
 
+* Added loading for data using Mercator projection (grid definition
+  template 10 in template table 3.1)
+
 Bug Fixes
 ---------
 

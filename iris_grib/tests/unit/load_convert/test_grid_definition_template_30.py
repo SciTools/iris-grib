@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2016 - 2017, Met Office
+# (C) British Crown Copyright 2016 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -42,6 +42,7 @@ class Test(tests.IrisGribTest):
 
     def section_3(self):
         section = {
+            'gridDefinitionTemplateNumber': 30,
             'shapeOfTheEarth': 0,
             'scaleFactorOfRadiusOfSphericalEarth': 0,
             'scaledValueOfRadiusOfSphericalEarth': 6367470,
