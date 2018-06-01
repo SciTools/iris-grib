@@ -839,7 +839,7 @@ def save_pairs_from_cube(cube):
     # Save each latlon slice2D in the cube
     for slice2D in cube.slices([y_coords[0], x_coords[0]]):
         grib_message = gribapi.grib_new_from_samples("GRIB2")
-        _save_rules.run(slice2D, grib_message)
+        _save_rules.run(slice2D, grib_message, cube)
         yield (slice2D, grib_message)
 
 
