@@ -733,7 +733,7 @@ def set_forecast_time(cube, grib):
     gribapi.grib_set(grib, "forecastTime", fp)
 
 
-def set_fixed_surfaces(cube, grib, full3d_cube):
+def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
     # Look for something we can export
     v_coord = grib_v_code = output_unit = None
@@ -982,7 +982,7 @@ def set_ensemble(cube, grib):
     gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
 
 
-def product_definition_template_common(cube, grib, full3d_cube):
+def product_definition_template_common(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message that are common across
     all of the supported product definition templates.
@@ -1002,7 +1002,7 @@ def product_definition_template_common(cube, grib, full3d_cube):
     set_fixed_surfaces(cube, grib, full3d_cube)
 
 
-def product_definition_template_0(cube, grib, full3d_cube):
+def product_definition_template_0(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.0.
@@ -1015,7 +1015,7 @@ def product_definition_template_0(cube, grib, full3d_cube):
     product_definition_template_common(cube, grib, full3d_cube)
 
 
-def product_definition_template_1(cube, grib, full3d_cube):
+def product_definition_template_1(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.1.
@@ -1030,7 +1030,7 @@ def product_definition_template_1(cube, grib, full3d_cube):
     set_ensemble(cube, grib)
 
 
-def product_definition_template_8(cube, grib, full3d_cube):
+def product_definition_template_8(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.8.
@@ -1043,7 +1043,7 @@ def product_definition_template_8(cube, grib, full3d_cube):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def product_definition_template_10(cube, grib, full3d_cube):
+def product_definition_template_10(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product Definition
     Template 4.10.
@@ -1062,7 +1062,7 @@ def product_definition_template_10(cube, grib, full3d_cube):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def product_definition_template_11(cube, grib, full3d_cube):
+def product_definition_template_11(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.11.
@@ -1076,7 +1076,7 @@ def product_definition_template_11(cube, grib, full3d_cube):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def _product_definition_template_8_10_and_11(cube, grib, full3d_cube):
+def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
@@ -1147,7 +1147,7 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube):
         set_time_increment(cell_method, grib)
 
 
-def product_definition_template_40(cube, grib, full3d_cube):
+def product_definition_template_40(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.40.
@@ -1163,7 +1163,7 @@ def product_definition_template_40(cube, grib, full3d_cube):
     gribapi.grib_set(grib, "constituentType", constituent_type)
 
 
-def product_definition_section(cube, grib, full3d_cube):
+def product_definition_section(cube, grib, full3d_cube=None):
     """
     Set keys within the product definition section of the provided
     grib message based on the properties of the cube.

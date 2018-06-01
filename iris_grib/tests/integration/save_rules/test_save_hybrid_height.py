@@ -40,7 +40,7 @@ class TestSaveHybridHeight(tests.IrisGribTest):
                 not iris.FUTURE.netcdf_promote):
             iris.FUTURE.netcdf_promote = True
         data_cube = iris.load_cube(reference_data_filepath,
-                              'air_potential_temperature')
+                                   'air_potential_temperature')
         # Only use 3 levels.
         data_cube = data_cube[:3]
         self.test_hh_data_cube = data_cube
