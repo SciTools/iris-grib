@@ -177,12 +177,12 @@ class Test(tests.IrisGribTest):
 class TestRealData(tests.IrisGribTest):
     def test_hybrid_height(self):
         """
-        Temporary test for development.  Replace with proper test before making PR.
+        Temporary test for development.  Replace with proper test  or tidy up
+        for public consumption before making final PR.
         """
-        filepath = '/net/home/h05/itpp/Iris/sprints/newer/' \
-                   'period_20180528_grib/generate_test_data/' \
-                   'faked_sample_hh_grib_data.grib2'
-        cube = load_cube(filepath, 'air_temperature')
+        filepath = '../../../test_data/'
+        fname = 'faked_sample_hh_grib_data.grib2'
+        cube = load_cube(filepath + fname, 'air_temperature')
         print(cube)
         print(cube.aux_factories)
 
