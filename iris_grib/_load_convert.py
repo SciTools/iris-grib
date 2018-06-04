@@ -1275,12 +1275,12 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
 
-    if (discipline == 2
-            and parameterCategory == 0
-            and parameterNumber == 7
-            and typeOfFirstFixedSurface == 1
-            and scaledValueOfFirstFixedSurface == 0
-            and typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
+    if (discipline == 2 and
+            parameterCategory == 0 and
+            parameterNumber == 7 and
+            typeOfFirstFixedSurface == 1 and
+            scaledValueOfFirstFixedSurface == 0 and
+            typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
         metadata['references'].append(ReferenceTarget('orography', None))
 
 

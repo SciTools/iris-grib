@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -180,7 +180,9 @@ class TestRealData(tests.IrisGribTest):
         Temporary test for development.  Replace with proper test  or tidy up
         for public consumption before making final PR.
         """
-        filepath = '../../../test_data/'
+        import os.path
+        here_dirpath = os.path.dirname(__file__)
+        filepath = here_dirpath + '/../../../test_data/'
         fname = 'faked_sample_hh_grib_data.grib2'
         cube = load_cube(filepath + fname, 'air_temperature')
         print(cube)
