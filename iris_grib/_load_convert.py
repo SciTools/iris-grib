@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# (C) British Crown Copyright 2014 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -34,12 +34,13 @@ from cf_units import CALENDAR_GREGORIAN, date2num, Unit
 import numpy as np
 import numpy.ma as ma
 
-from iris.aux_factory import HybridPressureFactory
+from iris.aux_factory import HybridPressureFactory, HybridHeightFactory
 import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
-from iris.fileformats.rules import ConversionMetadata, Factory, Reference
+from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
+    ReferenceTarget
 from iris.util import _is_circular
 
 from ._grib1_load_rules import grib1_convert
@@ -1221,7 +1222,9 @@ def grid_definition_section(section, metadata):
 ###############################################################################
 
 def translate_phenomenon(metadata, discipline, parameterCategory,
-                         parameterNumber, probability=None):
+                         parameterNumber, typeOfFirstFixedSurface,
+                         scaledValueOfFirstFixedSurface,
+                         typeOfSecondFixedSurface, probability=None):
     """
     Translate GRIB2 phenomenon to CF phenomenon.
 
@@ -1271,6 +1274,14 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['standard_name'] = None
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
+
+    if (discipline == 2 and
+            parameterCategory == 0 and
+            parameterNumber == 7 and
+            typeOfFirstFixedSurface == 1 and
+            scaledValueOfFirstFixedSurface == 0 and
+            typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
+        metadata['references'].append(ReferenceTarget('orography', None))
 
 
 def time_range_unit(indicatorOfUnitOfTimeRange):
@@ -1330,8 +1341,9 @@ def hybrid_factories(section, metadata):
                 'of second fixed surface [{}]'.format(typeOfSecondFixedSurface)
             raise TranslationError(msg)
 
-        if typeOfFirstFixedSurface in [105, 119]:
-            # Hybrid level (105) and Hybrid pressure level (119).
+        if typeOfFirstFixedSurface in [105, 118, 119]:
+            # Hybrid level (105), Hybrid height level (118) and Hybrid
+            # pressure level (119).
             scaleFactor = section['scaleFactorOfFirstFixedSurface']
             if scaleFactor != 0:
                 msg = 'Product definition section 4 contains invalid scale ' \
@@ -1343,21 +1355,38 @@ def hybrid_factories(section, metadata):
             coord = DimCoord(scaledValue, standard_name='model_level_number',
                              attributes=dict(positive='up'))
             metadata['aux_coords_and_dims'].append((coord, None))
+
+            if typeOfFirstFixedSurface == 118:
+                # height
+                level_value_name = 'level_height'
+                level_value_units = 'm'
+                factory_class = HybridHeightFactory
+                factory_args = [{'long_name': level_value_name},
+                                {'long_name': 'sigma'},
+                                Reference('orography')]
+            else:
+                # pressure
+                level_value_name = 'level_pressure'
+                level_value_units = 'Pa'
+                factory_class = HybridPressureFactory
+                factory_args = [{'long_name': level_value_name},
+                                {'long_name': 'sigma'},
+                                Reference('surface_air_pressure')]
+
             # Create the level pressure scalar coordinate.
             pv = section['pv']
             offset = scaledValue
-            coord = DimCoord(pv[offset], long_name='level_pressure',
-                             units='Pa')
+            coord = DimCoord(pv[offset], long_name=level_value_name,
+                             units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset += NV // 2
+            offset = scaledValue + NV // 2
             coord = AuxCoord(pv[offset], long_name='sigma')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
-            args = [{'long_name': 'level_pressure'}, {'long_name': 'sigma'},
-                    Reference('surface_air_pressure')]
-            factory = Factory(HybridPressureFactory, args)
+            factory = Factory(factory_class, factory_args)
             metadata['factories'].append(factory)
+
         else:
             msg = 'Product definition section 4 contains unsupported ' \
                 'first fixed surface [{}]'.format(typeOfFirstFixedSurface)
@@ -2241,6 +2270,9 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         translate_phenomenon(metadata, discipline,
                              section['parameterCategory'],
                              section['parameterNumber'],
+                             section['typeOfFirstFixedSurface'],
+                             section['scaledValueOfFirstFixedSurface'],
+                             section['typeOfSecondFixedSurface'],
                              probability=probability)
 
 

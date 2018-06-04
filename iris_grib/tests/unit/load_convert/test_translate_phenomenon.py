@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -47,8 +47,8 @@ class Test_probability(tests.IrisGribTest):
         self.metadata = {'aux_coords_and_dims': []}
 
     def test_basic(self):
-        result = translate_phenomenon(self.metadata, None, None, None,
-                                      probability=self.probability)
+        result = translate_phenomenon(self.metadata, None, None, None, None,
+                                      None, None, probability=self.probability)
         # Check metadata.
         thresh_coord = DimCoord([22.0],
                                 standard_name='air_temperature',
@@ -62,8 +62,8 @@ class Test_probability(tests.IrisGribTest):
     def test_no_phenomenon(self):
         original_metadata = deepcopy(self.metadata)
         self.phenom_lookup_patch.return_value = None
-        result = translate_phenomenon(self.metadata, None, None, None,
-                                      probability=self.probability)
+        result = translate_phenomenon(self.metadata, None, None, None, None,
+                                      None, None, probability=self.probability)
         self.assertEqual(self.metadata, original_metadata)
 
 

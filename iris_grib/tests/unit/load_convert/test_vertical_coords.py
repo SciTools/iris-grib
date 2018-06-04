@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# (C) British Crown Copyright 2014 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -29,6 +29,8 @@ import iris_grib.tests as tests
 from copy import deepcopy
 import mock
 
+from iris import load_cube
+from iris.aux_factory import HybridHeightFactory
 from iris.coords import DimCoord
 from iris.exceptions import TranslationError
 
@@ -171,6 +173,20 @@ class Test(tests.IrisGribTest):
         expected = deepcopy(self.metadata)
         expected['aux_coords_and_dims'].append((coord, None))
         self.assertEqual(metadata, expected)
+
+
+class TestRealData(tests.IrisGribTest):
+    def test_load_hybrid_height(self):
+        """
+        Temporary test for development.  Replace with proper test  or tidy up
+        for public consumption before making final PR.
+        """
+        import os.path
+        here_dirpath = os.path.dirname(__file__)
+        filepath = here_dirpath + '/../../../test_data/'
+        fname = 'faked_sample_hh_grib_data.grib2'
+        cube = load_cube(filepath + fname, 'air_temperature')
+        self.assertIsInstance(cube.aux_factories[0], HybridHeightFactory)
 
 
 if __name__ == '__main__':
