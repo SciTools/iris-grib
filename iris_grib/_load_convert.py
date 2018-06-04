@@ -1369,7 +1369,7 @@ def hybrid_factories(section, metadata):
                 level_value_name = 'level_pressure'
                 level_value_units = 'Pa'
                 factory_class = HybridPressureFactory
-                factory_args = [{'long_name': 'level_pressure'},
+                factory_args = [{'long_name': level_value_name},
                                 {'long_name': 'sigma'},
                                 Reference('surface_air_pressure')]
 
@@ -1380,13 +1380,12 @@ def hybrid_factories(section, metadata):
                              units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset += NV // 2
+            offset = scaledValue + NV // 2
             coord = AuxCoord(pv[offset], long_name='sigma')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
             factory = Factory(factory_class, factory_args)
             metadata['factories'].append(factory)
-            # metadata['references'].append(factory_args[Reference])
 
         else:
             msg = 'Product definition section 4 contains unsupported ' \
