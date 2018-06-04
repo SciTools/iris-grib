@@ -179,7 +179,8 @@ class TestRealData(tests.IrisGribTest):
         """
         Temporary test for development.  Replace with proper test before making PR.
         """
-        filepath = '/net/home/h05/itpp/Iris/sprints/newer/period_20180528_grib/generate_test_data/' \
+        filepath = '/net/home/h05/itpp/Iris/sprints/newer/' \
+                   'period_20180528_grib/generate_test_data/' \
                    'faked_sample_hh_grib_data.grib2'
         cube = load_cube(filepath, 'air_temperature')
         print(cube)
