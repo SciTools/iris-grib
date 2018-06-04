@@ -39,7 +39,8 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
-from iris.fileformats.rules import ConversionMetadata, Factory, Reference, ReferenceTarget
+from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
+    ReferenceTarget
 from iris.util import _is_circular
 
 from ._grib1_load_rules import grib1_convert
@@ -1221,8 +1222,9 @@ def grid_definition_section(section, metadata):
 ###############################################################################
 
 def translate_phenomenon(metadata, discipline, parameterCategory,
-                         parameterNumber, typeOfFirstFixedSurface, scaledValueOfFirstFixedSurface,
-                         typeOfSecondFixedSurface,probability=None):
+                         parameterNumber, typeOfFirstFixedSurface,
+                         scaledValueOfFirstFixedSurface,
+                         typeOfSecondFixedSurface, probability=None):
     """
     Translate GRIB2 phenomenon to CF phenomenon.
 
@@ -1273,8 +1275,12 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
 
-    if (discipline == 2 and parameterCategory == 0 and parameterNumber == 7 and typeOfFirstFixedSurface == 1
-            and scaledValueOfFirstFixedSurface == 0 and typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
+    if (discipline == 2
+            and parameterCategory == 0
+            and parameterNumber == 7
+            and typeOfFirstFixedSurface == 1
+            and scaledValueOfFirstFixedSurface == 0
+            and typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
         metadata['references'].append(ReferenceTarget('orography', None))
 
 
@@ -1336,7 +1342,8 @@ def hybrid_factories(section, metadata):
             raise TranslationError(msg)
 
         if typeOfFirstFixedSurface in [105, 118, 119]:
-            # Hybrid level (105), Hybrid height level (118) and Hybrid pressure level (119).
+            # Hybrid level (105), Hybrid height level (118) and Hybrid
+            # pressure level (119).
             scaleFactor = section['scaleFactorOfFirstFixedSurface']
             if scaleFactor != 0:
                 msg = 'Product definition section 4 contains invalid scale ' \
@@ -1354,20 +1361,23 @@ def hybrid_factories(section, metadata):
                 level_value_name = 'level_height'
                 level_value_units = 'm'
                 factory_class = HybridHeightFactory
-                factory_args = [{'long_name': level_value_name}, {'long_name': 'sigma'},
+                factory_args = [{'long_name': level_value_name},
+                                {'long_name': 'sigma'},
                                 Reference('orography')]
             else:
                 # pressure
                 level_value_name = 'level_pressure'
                 level_value_units = 'Pa'
                 factory_class = HybridPressureFactory
-                factory_args = [{'long_name': 'level_pressure'}, {'long_name': 'sigma'},
+                factory_args = [{'long_name': 'level_pressure'},
+                                {'long_name': 'sigma'},
                                 Reference('surface_air_pressure')]
 
             # Create the level pressure scalar coordinate.
             pv = section['pv']
             offset = scaledValue
-            coord = DimCoord(pv[offset], long_name=level_value_name, units=level_value_units)
+            coord = DimCoord(pv[offset], long_name=level_value_name,
+                             units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
             offset += NV // 2
