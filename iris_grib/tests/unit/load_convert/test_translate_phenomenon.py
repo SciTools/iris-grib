@@ -48,7 +48,7 @@ class Test_probability(tests.IrisGribTest):
 
     def test_basic(self):
         result = translate_phenomenon(self.metadata, None, None, None, None,
-                                      None, probability=self.probability)
+                                      None, None, probability=self.probability)
         # Check metadata.
         thresh_coord = DimCoord([22.0],
                                 standard_name='air_temperature',
@@ -63,7 +63,7 @@ class Test_probability(tests.IrisGribTest):
         original_metadata = deepcopy(self.metadata)
         self.phenom_lookup_patch.return_value = None
         result = translate_phenomenon(self.metadata, None, None, None, None,
-                                      None, probability=self.probability)
+                                      None, None, probability=self.probability)
         self.assertEqual(self.metadata, original_metadata)
 
 
