@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# (C) British Crown Copyright 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -43,8 +43,8 @@ class TestRealData(tests.IrisGribTest):
         cube = load_cube(filepath, 'air_temperature')
 
         # check actual model level values.
-        self.assertArrayAllClose(cube.coord('model_level_number').points,
-                                 [1, 11, 21])
+        self.assertArrayEqual(cube.coord('model_level_number').points,
+                              [1, 11, 21])
 
         # check sigma values correctly loaded from indices 1, 11, 21.
         # NOTE: level[0] == 1, so sigma[0] == 1.0 :  This makes sense !
