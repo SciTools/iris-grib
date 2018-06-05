@@ -64,23 +64,26 @@ class TestSaveHybridHeight(tests.IrisGribTest):
             # Check 3 messages were saved.
             self.assertEqual(len(msgs), 3)
 
-            # Check one message has correctly encoded hybrid height.
-            msg_lev2 = msgs[1]
+            # Check message 2/3 has the correctly encoded hybrid height.
+            model_levels = \
+                self.test_hh_data_cube.coord('model_level_number').points
+            msg_2of3 = msgs[1]
+            model_level_2of3 = model_levels[1]
             #  first surface type = 118  (i.e. hybrid height).
             self.assertEqual(
-                msg_lev2.sections[4]['typeOfFirstFixedSurface'],
+                msg_2of3.sections[4]['typeOfFirstFixedSurface'],
                 118)
             #  first surface scaling = 0.
             self.assertEqual(
-                msg_lev2.sections[4]['scaleFactorOfFirstFixedSurface'],
+                msg_2of3.sections[4]['scaleFactorOfFirstFixedSurface'],
                 0)
-            #  first surface value = 2  (i.e. model level).
+            #  first surface value = 2  (i.e. model level #2).
             self.assertEqual(
-                msg_lev2.sections[4]['scaledValueOfFirstFixedSurface'],
-                2)
+                msg_2of3.sections[4]['scaledValueOfFirstFixedSurface'],
+                model_level_2of3)
             #  second surface type = NONE  (i.e. unbounded level).
             self.assertEqual(
-                msg_lev2.sections[4]['typeOfSecondFixedSurface'],
+                msg_2of3.sections[4]['typeOfSecondFixedSurface'],
                 255)
 
 
