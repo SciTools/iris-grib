@@ -837,18 +837,39 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         # need to record ALL the level coefficents in a 'PV' vector.
         level_height_coord = hybrid_height_factory.delta
         sigma_coord = hybrid_height_factory.sigma
-        n_levels, = full3d_cube.coords(axis='z')[0].shape
+        model_levels = full3d_cube.coord('model_level_number').points
+        # Just check these make some kind of sense (!)
+        if model_levels.dtype.kind not in 'iu':
+            msg = 'model_level_number is not an integer: dtype={}.'
+            raise ValueError(msg.format(model_levels.dtype))
+        if np.min(model_levels) < 1:
+            msg = 'model_level_number must be > 0: mininum value = {}.'
+            raise ValueError(msg.format(np.min(model_levels)))
+        # Need to save enough levels for indexes up to  [max(model_levels)]
+        n_levels = np.max(model_levels)
+        max_valid_nlevels = 9999
+        if n_levels > max_valid_nlevels:
+            msg = ('model_level_number values are > {} : '
+                   'maximum value = {}.')
+            raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
         # value after each set of n-levels coefficients.
         # For now, we retain that encoding. This should not cause problems as
         # values are indexed according to model-level-number,
         # as in sigma, delta = PV[i], PV[NV/2+i]
-        n_pv = n_levels + 1
-        coeffs_array = np.zeros(n_pv * 2, dtype=np.float32)
-        coeffs_array[:n_levels] = level_height_coord.points
-        coeffs_array[n_pv:n_pv + n_levels] = sigma_coord.points
+        n_coeffs = n_levels + 1
+        coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
+        for n_lev, height, sigma in zip(model_levels,
+                                        level_height_coord.points,
+                                        sigma_coord.points):
+            # Record all the level coefficients coming from the 'full' cube.
+            # Note: if some model levels are missing, we must still have the
+            # coeffs at the correct index according to the model_level_number
+            # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            coeffs_array[n_lev - 1] = height
+            coeffs_array[n_coeffs + n_lev - 1] = sigma
         pv_values = [float(el) for el in coeffs_array]
-        gribapi.grib_set(grib, "NV", n_pv * 2)
+        gribapi.grib_set(grib, "NV", n_coeffs * 2)
         gribapi.grib_set_array(grib, "pv", pv_values)
 
 
