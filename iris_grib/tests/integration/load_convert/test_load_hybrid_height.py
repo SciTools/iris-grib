@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Test function :func:`iris_grib._load_convert.vertical_coords`.
+Integration test for loading hybrid height data.
 
 """
 
@@ -33,15 +33,8 @@ from iris.aux_factory import HybridHeightFactory
 
 class TestRealData(tests.IrisGribTest):
     def test_load_hybrid_height(self):
-        """
-        Temporary test for development.  Replace with proper test  or tidy up
-        for public consumption before making final PR.
-        """
-        import os.path
-        here_dirpath = os.path.dirname(__file__)
-        filepath = here_dirpath + '/../../testdata/'
-        fname = 'faked_sample_hh_grib_data.grib2'
-        cube = load_cube(filepath + fname, 'air_temperature')
+        filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
+        cube = load_cube(filepath, 'air_temperature')
         self.assertIsInstance(cube.aux_factories[0], HybridHeightFactory)
 
 

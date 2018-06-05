@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2010 - 2017, Met Office
+# (C) British Crown Copyright 2010 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -41,6 +41,9 @@ from iris.tests import main, skip_data, get_data_path
 
 #: Basepath for iris-grib test results.
 _RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
+
+#: Basepath for iris-grib loadable test files.
+_TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'testdata')
 
 
 class IrisGribTest(IrisTest):
@@ -92,3 +95,14 @@ class IrisGribTest(IrisTest):
                               self.__class__.__name__.replace('Test_', ''),
                               filename)
         return result
+
+    @staticmethod
+    def get_testdata_path(relative_path):
+        """
+        Returns the absolute path to a loadable test data file, when given the
+        relative path as a string, or sequence of strings.
+
+        """
+        if not isinstance(relative_path, six.string_types):
+            relative_path = os.path.join(*relative_path)
+        return os.path.abspath(os.path.join(_TESTDATA_PATH, relative_path))
