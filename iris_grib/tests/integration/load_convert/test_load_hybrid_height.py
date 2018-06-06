@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# (C) British Crown Copyright 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -35,7 +35,27 @@ class TestRealData(tests.IrisGribTest):
     def test_load_hybrid_height(self):
         filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
         cube = load_cube(filepath, 'air_temperature')
+        # Check that it loads right, and creates a factory.
         self.assertIsInstance(cube.aux_factories[0], HybridHeightFactory)
+
+    def test_levels_values(self):
+        filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
+        cube = load_cube(filepath, 'air_temperature')
+
+        # check actual model level values.
+        self.assertArrayEqual(cube.coord('model_level_number').points,
+                              [1, 11, 21])
+
+        # check sigma values correctly loaded from indices 1, 11, 21.
+        # NOTE: level[0] == 1, so sigma[0] == 1.0 :  This makes sense !
+        self.assertArrayAllClose(cube.coord('sigma').points,
+                                 [1.0, 0.911, 0.694],
+                                 atol=0.001)
+
+        # check height values too.
+        self.assertArrayAllClose(cube.coord('level_height').points,
+                                 [0., 800.,  2933.],
+                                 atol=0.5)
 
 
 if __name__ == '__main__':
