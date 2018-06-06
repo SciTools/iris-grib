@@ -1,4 +1,4 @@
-What's new in Iris-grib v0.13
+What's new in iris-grib v0.13
 =============================
 
 :Release: 0.13.0
@@ -21,34 +21,38 @@ Bug Fixes
 
   .. note::
 
-      This changes loading behaviour : previous results were simply wrong.
+      This changes loading behaviour for data on hybrid pressure levels only.
+      This is an incompatible change, but the coefficent values previously
+      returned were essentially useless, with some values missing.
 
 
-What's new in Iris-grib v0.12
+What's new in iris-grib v0.12
 =============================
 
 :Release: 0.12
 :Date: 25 Oct 2017
 
-Use `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ for
-the file interface.
+Updated to work with
+`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ as its
+interface to GRIB files.
 This is ECMWF's replacement for the older GRIB-API, which is now deprecated.
 
 
-What's new in Iris-grib v0.11
+What's new in iris-grib v0.11
 =============================
 
 :Release: 0.11
 :Date: 25 Oct 2017
 
-Update for Iris v2.0+, using Dask instead of Biggus
+Update for Iris v2.0+, using `dask <https://dask.pydata.org>`_ in place of
+`biggus <https://github.com/SciTools/biggus>`_ for deferred loading.
 
 
-What's new in Iris-grib v0.9
+What's new in iris-grib v0.9
 =============================
 
 :Release: 0.9.0
 :Date: 25 Jul 2016
 
-Stable release of iris_grib to support iris v1.10
+Stable release of iris-grib to support iris v1.10
 
