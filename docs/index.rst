@@ -95,7 +95,8 @@ Getting Started
 ===============
 
 To ensure all ``iris-grib`` dependencies, it is sufficient to have installed
-:mod:`Iris <iris>` itself.
+:mod:`Iris <iris>` itself, and
+`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ .
 
 The simplest way to install is with
 `conda <https://conda.io/miniconda.html>`_ ,
