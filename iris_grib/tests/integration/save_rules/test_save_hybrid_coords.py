@@ -30,10 +30,18 @@ import iris_grib.tests as tests
 from iris import load_cube
 from iris.aux_factory import HybridHeightFactory
 
-
-class TestRealData(tests.IrisGribTest):
 # TODO: Make some tests to check that the data has saved.
-# TODO: Combine hybrid height and pressure test files? (Keep loading and saving separate)
+
+
+class TestHybridHeight(tests.IrisGribTest):
+    def test_save_hybrid_height(self):
+        pass
+
+
+class TestHybridPressure(tests.IrisGribTest):
+    def test_save_hybrid_pressure(self):
+        pass
+
 
 if __name__ == '__main__':
     tests.main()

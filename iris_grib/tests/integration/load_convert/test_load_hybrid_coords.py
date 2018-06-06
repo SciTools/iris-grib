@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Integration test for loading hybrid pressure data.
+Integration test for loading hybrid height data.
 
 """
 
@@ -28,15 +28,12 @@ import iris_grib.tests as tests
 
 
 from iris import load_cube
-from iris.aux_factory import HybridHeightFactory
+from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
-# TODO: Rename tests to reflect loading of hybrid pressure
-# TODO: Rename cube to load (ask Patrick)
-# TODO: Check all other things that need changing...
-# TODO: Combine hybrid height and pressure test files? (Keep loading and saving separate)
-class TestRealData(tests.IrisGribTest):
+
+class TestHybridHeight(tests.IrisGribTest):
     def test_load_hybrid_height(self):
-        filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')
+        filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
         cube = load_cube(filepath, 'air_temperature')
         # Check that it loads right, and creates a factory.
         self.assertIsInstance(cube.aux_factories[0], HybridHeightFactory)
@@ -60,6 +57,15 @@ class TestRealData(tests.IrisGribTest):
                                  [0., 800.,  2933.],
                                  atol=0.5)
 
+
+class TestHybridPressure(tests.IrisGribTest):
+    def test_load_hybrid_pressure(self):
+        filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')
+        cube = load_cube(filepath, 'air_pressure')
+        # cubes = load(filepath)
+        # print(cube)
+        # Check that it loads right, and creates a factory.
+        self.assertIsInstance(cube.aux_factories[0], HybridPressureFactory)
 
 if __name__ == '__main__':
     tests.main()
