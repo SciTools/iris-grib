@@ -91,6 +91,30 @@ using ``iris-grib``::
     >>> iris.save(my_cube, 'my_file.grib2')
 
 
+Getting Started
+===============
+
+To ensure all ``iris-grib`` dependencies, it is sufficient to have installed
+:mod:`Iris <iris>` itself, and
+`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ .
+
+The simplest way to install is with
+`conda <https://conda.io/miniconda.html>`_ ,
+using the `conda-forge channel <https://anaconda.org/conda-forge>`_ ,
+with the command
+
+    $ conda install iris-grib -c conda-forge
+
+Development sources are hosted at `<https://github.com/SciTools/iris-grib>`_ .
+
+Releases
+--------
+
+The latest release is v0.12.x .
+
+For recent changes, see `Release Notes <ref/release_notes.html>`_ .
+
+
 Indices and tables
 ==================
 
