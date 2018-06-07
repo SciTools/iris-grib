@@ -523,7 +523,7 @@ def grid_definition_template_12(cube, grib):
         x_step = step(x_cm, atol=1)
         y_step = step(y_cm, atol=1)
     except ValueError:
-        msg = ('Irregular coordinates not supported for transverse '
+        msg = ('Irregular coordinates not supported for Transverse '
                'Mercator.')
         raise iris.exceptions.TranslationError(msg)
     gribapi.grib_set(grib, 'Di', abs(x_step))
@@ -611,14 +611,14 @@ def grid_definition_template_30(cube, grib):
     central_lon = cs.central_lon % 360
 
     gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y * 1e6)))
+                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x * 1e6)))
-    gribapi.grib_set(grib, "LaD", cs.central_lat * 1e6)
-    gribapi.grib_set(grib, "LoV", central_lon * 1e6)
+                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
+    gribapi.grib_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
     latin1, latin2 = cs.secant_latitudes
-    gribapi.grib_set(grib, "Latin1", latin1 * 1e6)
-    gribapi.grib_set(grib, "Latin2", latin2 * 1e6)
+    gribapi.grib_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
+    gribapi.grib_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
     gribapi.grib_set(grib, 'resolutionAndComponentFlags',
                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
