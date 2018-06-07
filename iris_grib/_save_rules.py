@@ -759,6 +759,11 @@ def set_fixed_surfaces(cube, grib):
         output_unit = cf_units.Unit('K')
         v_coord = cube.coord("air_potential_temperature")
 
+    elif cube.coords("model_level_number"):
+        grib_v_code = 119
+        output_unit = None
+        v_coord = cube.coord("model_level_number")
+
     # unknown / absent
     else:
         # check for *ANY* height coords at all...
