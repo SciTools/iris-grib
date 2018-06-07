@@ -1367,7 +1367,7 @@ def hybrid_factories(section, metadata):
 
             if typeOfFirstFixedSurface == 118:
                 # height
-                level_value_name = 'level_height'
+               level_value_name = 'level_height'
                 level_value_units = 'm'
                 factory_class = HybridHeightFactory
                 factory_args = [{'long_name': level_value_name},
