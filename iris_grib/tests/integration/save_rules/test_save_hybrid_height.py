@@ -39,8 +39,8 @@ class TestSaveHybridHeight(tests.IrisGribTest):
             iris.FUTURE.netcdf_promote = True
         data_cube = iris.load_cube(reference_data_filepath,
                                    'air_potential_temperature')
-        # Only use 3 levels and a single timestep.
-        data_cube = data_cube[0, :3]
+        # Use only 3 (non-contiguous) levels, and a single timestep.
+        data_cube = data_cube[0, :6:2]
         self.test_hh_data_cube = data_cube
 
     def test_save(self):
@@ -64,26 +64,31 @@ class TestSaveHybridHeight(tests.IrisGribTest):
             # Check 3 messages were saved.
             self.assertEqual(len(msgs), 3)
 
-            # Check message 2/3 has the correctly encoded hybrid height.
-            model_levels = \
-                self.test_hh_data_cube.coord('model_level_number').points
-            msg_2of3 = msgs[1]
-            model_level_2of3 = model_levels[1]
+            # Check that the PV vector (same in all messages) is as expected.
+            # Note: gaps here are because we took model levels = (1, 3, 5).
+            self.assertArrayAllClose(
+                msgs[0].sections[4]['pv'],
+                [5., 0, 45., 0, 111.667, 0,
+                 0.999, 0, 0.995, 0, 0.987, 0],
+                atol=0.0015)
+
+            # Check message #2-of-3 has the correctly encoded hybrid height.
+            msg = msgs[1]
             #  first surface type = 118  (i.e. hybrid height).
             self.assertEqual(
-                msg_2of3.sections[4]['typeOfFirstFixedSurface'],
+                msg.sections[4]['typeOfFirstFixedSurface'],
                 118)
             #  first surface scaling = 0.
             self.assertEqual(
-                msg_2of3.sections[4]['scaleFactorOfFirstFixedSurface'],
+                msg.sections[4]['scaleFactorOfFirstFixedSurface'],
                 0)
-            #  first surface value = 2  (i.e. model level #2).
+            #  first surface value = 3  -- i.e. #2 of (1, 3, 5).
             self.assertEqual(
-                msg_2of3.sections[4]['scaledValueOfFirstFixedSurface'],
-                model_level_2of3)
-            #  second surface type = NONE  (i.e. unbounded level).
+                msg.sections[4]['scaledValueOfFirstFixedSurface'],
+                3)
+            #  second surface type = "NONE"  -- i.e. unbounded level.
             self.assertEqual(
-                msg_2of3.sections[4]['typeOfSecondFixedSurface'],
+                msg.sections[4]['typeOfSecondFixedSurface'],
                 255)
 
 

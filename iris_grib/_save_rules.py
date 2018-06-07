@@ -738,16 +738,17 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
     # Look for something we can export
     v_coord = grib_v_code = output_unit = None
 
-    # checkout factories for hybrid vertical coordinates.
+    # Detect factories for hybrid vertical coordinates.
     hybrid_height_factories = [
         factory for factory in cube.aux_factories
         if isinstance(factory, HybridHeightFactory)]
     if not hybrid_height_factories:
         hybrid_height_factory = None
     else:
-        # N.B. get the matching 'complete' factory from the full 3d cube, so we
-        # have all the level information.
+        # If any, there should be just one.
         factory, = hybrid_height_factories
+        # Fetch the matching 'complete' factory from the *full* 3d cube, so we
+        # have all the level information.
         hybrid_height_factory = full3d_cube.aux_factory(factory.name())
 
     # hybrid pressure
@@ -834,7 +835,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                          int(output_v[1]))
 
     if hybrid_height_factory:
-        # need to record ALL the level coefficents in a 'PV' vector.
+        # Need to record ALL the level coefficents in a 'PV' vector.
         level_height_coord = hybrid_height_factory.delta
         sigma_coord = hybrid_height_factory.sigma
         model_levels = full3d_cube.coord('model_level_number').points
@@ -856,7 +857,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         # value after each set of n-levels coefficients.
         # For now, we retain that encoding. This should not cause problems as
         # values are indexed according to model-level-number,
-        # as in sigma, delta = PV[i], PV[NV/2+i]
+        # I.E. sigma, delta = PV[i], PV[NV/2+i]
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
