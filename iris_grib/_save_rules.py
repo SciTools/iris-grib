@@ -36,7 +36,7 @@ import cartopy.crs as ccrs
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, TransverseMercator,
-                                LambertConformal)
+                                LambertConformal, Mercator)
 import iris.exceptions
 
 from . import grib_phenom_translation as gptx
@@ -426,6 +426,74 @@ def grid_definition_template_5(cube, grib):
     latlon_points_irregular(cube, grib)
 
 
+def grid_definition_template_10(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.10.
+
+    Template 3.10 is used to represent a Mercator grid.
+
+    """
+    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 10)
+
+    # Retrieve some information from the cube.
+    y_coord = cube.coord(dimensions=[0])
+    x_coord = cube.coord(dimensions=[1])
+    cs = y_coord.coord_system
+
+    # Normalise the coordinate values to millimetres - the resolution
+    # used in the GRIB message.
+    y_mm = points_in_unit(y_coord, 'mm')
+    x_mm = points_in_unit(x_coord, 'mm')
+
+    # Encode the horizontal points.
+
+    # NB. Since we're already in millimetres, our tolerance for
+    # discrepancy in the differences is 1.
+    try:
+        x_step = step(x_mm, atol=1)
+        y_step = step(y_mm, atol=1)
+    except ValueError:
+        msg = 'Irregular coordinates not supported for Mercator.'
+        raise iris.exceptions.TranslationError(msg)
+
+    gribapi.grib_set(grib, 'Di', abs(x_step))
+    gribapi.grib_set(grib, 'Dj', abs(y_step))
+
+    horizontal_grid_common(cube, grib)
+
+    # Transform first and last points into geographic CS
+    geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
+    first_x, first_y, = geog.as_cartopy_crs().transform_point(
+        x_coord.points[0],
+        y_coord.points[0],
+        cs.as_cartopy_crs())
+    last_x, last_y = geog.as_cartopy_crs().transform_point(
+        x_coord.points[-1],
+        y_coord.points[-1],
+        cs.as_cartopy_crs())
+    first_x = first_x % 360
+    last_x = last_x % 360
+
+    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
+                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
+                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "latitudeOfLastGridPoint",
+                     int(np.round(last_y / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "longitudeOfLastGridPoint",
+                     int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
+
+    # Encode the latitude at which the projection intersects the Earth
+    # should this be cs.central_lat or cs.standard parallel?
+    gribapi.grib_set(grib, 'LaD',
+                     cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
+
+    # Encode resolution and component flags
+    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
+                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+
+
 def grid_definition_template_12(cube, grib):
     """
     Set keys within the provided grib message based on
@@ -589,6 +657,10 @@ def grid_definition_section(cube, grib):
             grid_definition_template_1(cube, grib)
         else:
             grid_definition_template_5(cube, grib)
+
+    elif isinstance(cs, Mercator):
+        # Mercator coordinate system (template 3.10)
+        grid_definition_template_10(cube, grib)
 
     elif isinstance(cs, TransverseMercator):
         # Transverse Mercator coordinate system (template 3.12).
