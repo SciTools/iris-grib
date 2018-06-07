@@ -1289,8 +1289,8 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
         elif (discipline == 0 and
               parameterCategory == 3 and
               parameterNumber == 0):
-            metadata['references'].append(ReferenceTarget('surface_air_pressure',
-                                                          None))
+            metadata['references'].append(ReferenceTarget(
+                'surface_air_pressure', None))
 
 
 def time_range_unit(indicatorOfUnitOfTimeRange):
@@ -1380,7 +1380,7 @@ def hybrid_factories(section, metadata):
                 factory_class = HybridPressureFactory
                 factory_args = [{'long_name': level_value_name},
                                 {'long_name': 'sigma'},
-                                Reference('surface_air_pressure')]
+                                Reference('air_pressure')]
 
             # Create the level pressure scalar coordinate.
             pv = section['pv']
