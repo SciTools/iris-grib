@@ -867,6 +867,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             # Note: if some model levels are missing, we must still have the
             # coeffs at the correct index according to the model_level_number
             # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            # Thus, we can *not* paste the values in a block: each one needs to
+            # go in the index corresponding to its 'model_level_number' value.
             coeffs_array[n_lev - 1] = height
             coeffs_array[n_coeffs + n_lev - 1] = sigma
         pv_values = [float(el) for el in coeffs_array]
