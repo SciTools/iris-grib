@@ -1275,13 +1275,22 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
 
-    if (discipline == 2 and
-            parameterCategory == 0 and
-            parameterNumber == 7 and
-            typeOfFirstFixedSurface == 1 and
+    # Identify hybrid height and pressure reference fields.
+    # Look for fields at surface level first.
+    if (typeOfFirstFixedSurface == 1 and
             scaledValueOfFirstFixedSurface == 0 and
             typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
-        metadata['references'].append(ReferenceTarget('orography', None))
+        # Land surface products for model terrain height:
+        if (discipline == 2 and
+                parameterCategory == 0 and
+                parameterNumber == 7):
+            metadata['references'].append(ReferenceTarget('orography', None))
+        # Meteorological mass products for pressure:
+        elif (discipline == 0 and
+              parameterCategory == 3 and
+              parameterNumber == 0):
+            metadata['references'].append(ReferenceTarget(
+                'surface_air_pressure', None))
 
 
 def time_range_unit(indicatorOfUnitOfTimeRange):
@@ -1371,7 +1380,7 @@ def hybrid_factories(section, metadata):
                 factory_class = HybridPressureFactory
                 factory_args = [{'long_name': level_value_name},
                                 {'long_name': 'sigma'},
-                                Reference('surface_air_pressure')]
+                                Reference('air_pressure')]
 
             # Create the level pressure scalar coordinate.
             pv = section['pv']
