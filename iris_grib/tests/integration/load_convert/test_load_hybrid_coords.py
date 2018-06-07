@@ -32,15 +32,17 @@ from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
 
 class TestHybridHeight(tests.IrisGribTest):
-    def test_load_hybrid_height(self):
+    def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
-        cube = load_cube(filepath, 'air_temperature')
-        # Check that it loads right, and creates a factory.
-        self.assertIsInstance(cube.aux_factories[0], HybridHeightFactory)
+        self.testdata_cube = load_cube(filepath, 'air_temperature')
 
-    def test_levels_values(self):
-        filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
-        cube = load_cube(filepath, 'air_temperature')
+    def test_load_hybrid_height(self):
+        # Check that it loads right, and creates a factory.
+        self.assertIsInstance(self.testdata_cube.aux_factories[0],
+                              HybridHeightFactory)
+
+    def test_hybrid_height_coords_values(self):
+        cube = self.testdata_cube
 
         # check actual model level values.
         self.assertArrayEqual(cube.coord('model_level_number').points,
@@ -59,11 +61,36 @@ class TestHybridHeight(tests.IrisGribTest):
 
 
 class TestHybridPressure(tests.IrisGribTest):
-    def test_load_hybrid_pressure(self):
+    def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')
-        cube = load_cube(filepath, 'air_pressure')
+        self.testdata_cube = load_cube(filepath, 'air_temperature')
+
+    def test_load_hybrid_pressure(self):
         # Check that it loads right, and creates a factory.
-        self.assertIsInstance(cube.aux_factories[0], HybridPressureFactory)
+        self.assertIsInstance(self.testdata_cube.aux_factories[0],
+                              HybridPressureFactory)
+
+    def test_hybrid_pressure_coords_values(self):
+        cube = self.testdata_cube
+
+        # Check existence, and some values, of the loaded coefficients.
+        self.assertArrayEqual(cube.coord('model_level_number').points,
+                              [1, 51, 91])
+        self.assertArrayAllClose(cube.coord('sigma').points,
+                                 [0., 0.036, 0.998], atol=0.001)
+        self.assertArrayAllClose(cube.coord('level_pressure').points,
+                                 [0., 18191.0, 0.00316], rtol=0.001)
+        self.assertArrayAllClose(
+            cube.coord('surface_air_pressure')[:2, :3].points,
+            [[103493.8, 103493.8, 103493.8],
+             [103401.0, 103407.4, 103412.2]], atol=0.1)
+
+        # Also check a few values from the derived coord.
+        self.assertArrayAllClose(
+            cube.coord('air_pressure')[:, :3, 0].points,
+            [[0., 0., 0.],
+             [21940.3, 21936.9, 21932.8],
+             [103248.5, 103156.0, 103041.0]], atol=0.1)
 
 
 if __name__ == '__main__':
