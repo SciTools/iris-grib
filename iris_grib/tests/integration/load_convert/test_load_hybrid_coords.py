@@ -27,7 +27,7 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import iris_grib.tests as tests
 
 
-from iris import load_cube
+from iris import load_cube, load
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
 
@@ -62,10 +62,9 @@ class TestHybridPressure(tests.IrisGribTest):
     def test_load_hybrid_pressure(self):
         filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')
         cube = load_cube(filepath, 'air_pressure')
-        # cubes = load(filepath)
-        # print(cube)
         # Check that it loads right, and creates a factory.
         self.assertIsInstance(cube.aux_factories[0], HybridPressureFactory)
+
 
 if __name__ == '__main__':
     tests.main()

@@ -1289,7 +1289,7 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
         elif (discipline == 0 and
               parameterCategory == 3 and
               parameterNumber == 0):
-            metadata['references'].append(ReferenceTarget('surface_pressure',
+            metadata['references'].append(ReferenceTarget('surface_air_pressure',
                                                           None))
 
 
