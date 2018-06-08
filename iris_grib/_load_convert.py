@@ -1275,13 +1275,44 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
 
-    if (discipline == 2 and
-            parameterCategory == 0 and
-            parameterNumber == 7 and
-            typeOfFirstFixedSurface == 1 and
+    # Identify hybrid height and pressure reference fields.
+    # Look for fields at surface level first.
+    if (typeOfFirstFixedSurface == 1 and
             scaledValueOfFirstFixedSurface == 0 and
             typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING):
-        metadata['references'].append(ReferenceTarget('orography', None))
+        # Land surface products for model terrain height:
+        if (discipline == 2 and
+                parameterCategory == 0 and
+                parameterNumber == 7):
+            metadata['references'].append(ReferenceTarget('orography', None))
+        # Meteorological mass products for pressure:
+        elif (discipline == 0 and
+              parameterCategory == 3 and
+              parameterNumber == 0):
+            metadata['references'].append(ReferenceTarget(
+                'surface_air_pressure', ensure_surface_air_pressure_name))
+
+
+def ensure_surface_air_pressure_name(cube):
+    # A 'transform' function for a iris.fileformats.rules.ReferenceTarget,
+    # instructing the rules code to rename the reference as
+    # 'surface_air_pressure'.
+    #
+    # Needed because the surface-air-pressure (reference) message normally
+    # loads as a plain 'air_pressure' cube.
+    # As references for factory construction are identified by .name(), in this
+    # case that can get confused with the derived coordinate produced by the
+    # HybridPressureFactory itself, which is also named 'air_pressure'.
+    # This will cause an infinite loop when building the derived coord (!)
+    name = cube.name()
+    # Just check the passed cube is of the sort expected.
+    expected_names = ('air_pressure', 'surface_air_pressure')
+    if name not in expected_names:
+        msg = ('Unexpected cube name for hybrid-pressure reference data : '
+               'Expected one of {}, got {!r}.')
+        raise ValueError(msg.format(expected_names, name))
+    # Get the caller (in rules.py) to rename it.
+    return {'standard_name': 'surface_air_pressure'}
 
 
 def time_range_unit(indicatorOfUnitOfTimeRange):
