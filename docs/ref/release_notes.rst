@@ -7,6 +7,9 @@ What's new in iris-grib v0.13
 Features
 --------
 
+* Added saving of data on Hybrid Pressure levels (surface type 119 in
+  code table 4.5).
+
 * Added loading and saving of data on Hybrid Height levels (surface type 118 in
   code table 4.5).
 
