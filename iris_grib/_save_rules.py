@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2010 - 2017, Met Office
+# (C) British Crown Copyright 2010 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -34,9 +34,11 @@ import numpy.ma as ma
 import cartopy.crs as ccrs
 
 import iris
-import iris.exceptions
+from iris.aux_factory import HybridHeightFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, TransverseMercator,
                                 LambertConformal)
+import iris.exceptions
+
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
 from iris.util import is_regular, regular_step
@@ -731,13 +733,35 @@ def set_forecast_time(cube, grib):
     gribapi.grib_set(grib, "forecastTime", fp)
 
 
-def set_fixed_surfaces(cube, grib):
+def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
     # Look for something we can export
     v_coord = grib_v_code = output_unit = None
 
+    # Detect factories for hybrid vertical coordinates.
+    hybrid_height_factories = [
+        factory for factory in cube.aux_factories
+        if isinstance(factory, HybridHeightFactory)]
+    if not hybrid_height_factories:
+        hybrid_height_factory = None
+    else:
+        # If any, there should be just one.
+        factory, = hybrid_height_factories
+        # Fetch the matching 'complete' factory from the *full* 3d cube, so we
+        # have all the level information.
+        hybrid_height_factory = full3d_cube.aux_factory(factory.name())
+
+    # Handle various different styles of vertical coordinate.
+    # hybrid height
+    if hybrid_height_factory:
+        # N.B. in this case, there are additional operations, besides just
+        # encoding v_coord : see below at end ..
+        grib_v_code = 118
+        output_unit = cf_units.Unit("1")
+        v_coord = cube.coord('model_level_number')
+
     # pressure
-    if cube.coords("air_pressure") or cube.coords("pressure"):
+    elif cube.coords("air_pressure") or cube.coords("pressure"):
         grib_v_code = 100
         output_unit = cf_units.Unit("Pa")
         v_coord = (cube.coords("air_pressure") or cube.coords("pressure"))[0]
@@ -810,6 +834,47 @@ def set_fixed_surfaces(cube, grib):
                          int(output_v[0]))
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
                          int(output_v[1]))
+
+    if hybrid_height_factory:
+        # Need to record ALL the level coefficents in a 'PV' vector.
+        level_height_coord = hybrid_height_factory.delta
+        sigma_coord = hybrid_height_factory.sigma
+        model_levels = full3d_cube.coord('model_level_number').points
+        # Just check these make some kind of sense (!)
+        if model_levels.dtype.kind not in 'iu':
+            msg = 'model_level_number is not an integer: dtype={}.'
+            raise ValueError(msg.format(model_levels.dtype))
+        if np.min(model_levels) < 1:
+            msg = 'model_level_number must be > 0: mininum value = {}.'
+            raise ValueError(msg.format(np.min(model_levels)))
+        # Need to save enough levels for indexes up to  [max(model_levels)]
+        n_levels = np.max(model_levels)
+        max_valid_nlevels = 9999
+        if n_levels > max_valid_nlevels:
+            msg = ('model_level_number values are > {} : '
+                   'maximum value = {}.')
+            raise ValueError(msg.format(max_valid_nlevels, n_levels))
+        # In sample data we have seen, there seems to be an extra missing data
+        # value after each set of n-levels coefficients.
+        # For now, we retain that encoding. This should not cause problems as
+        # values are indexed according to model-level-number,
+        # I.E. sigma, delta = PV[i], PV[NV/2+i]
+        n_coeffs = n_levels + 1
+        coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
+        for n_lev, height, sigma in zip(model_levels,
+                                        level_height_coord.points,
+                                        sigma_coord.points):
+            # Record all the level coefficients coming from the 'full' cube.
+            # Note: if some model levels are missing, we must still have the
+            # coeffs at the correct index according to the model_level_number
+            # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            # Thus, we can *not* paste the values in a block: each one needs to
+            # go in the index corresponding to its 'model_level_number' value.
+            coeffs_array[n_lev - 1] = height
+            coeffs_array[n_coeffs + n_lev - 1] = sigma
+        pv_values = [float(el) for el in coeffs_array]
+        gribapi.grib_set(grib, "NV", n_coeffs * 2)
+        gribapi.grib_set_array(grib, "pv", pv_values)
 
 
 def set_time_range(time_coord, grib):
@@ -942,7 +1007,7 @@ def set_ensemble(cube, grib):
     gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
 
 
-def product_definition_template_common(cube, grib):
+def product_definition_template_common(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message that are common across
     all of the supported product definition templates.
@@ -959,10 +1024,10 @@ def product_definition_template_common(cube, grib):
     set_forecast_time(cube, grib)
 
     # Handle vertical coords.
-    set_fixed_surfaces(cube, grib)
+    set_fixed_surfaces(cube, grib, full3d_cube)
 
 
-def product_definition_template_0(cube, grib):
+def product_definition_template_0(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.0.
@@ -972,10 +1037,10 @@ def product_definition_template_0(cube, grib):
 
     """
     gribapi.grib_set_long(grib, "productDefinitionTemplateNumber", 0)
-    product_definition_template_common(cube, grib)
+    product_definition_template_common(cube, grib, full3d_cube)
 
 
-def product_definition_template_1(cube, grib):
+def product_definition_template_1(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.1.
@@ -990,7 +1055,7 @@ def product_definition_template_1(cube, grib):
     set_ensemble(cube, grib)
 
 
-def product_definition_template_8(cube, grib):
+def product_definition_template_8(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.8.
@@ -1003,7 +1068,7 @@ def product_definition_template_8(cube, grib):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def product_definition_template_10(cube, grib):
+def product_definition_template_10(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product Definition
     Template 4.10.
@@ -1022,7 +1087,7 @@ def product_definition_template_10(cube, grib):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def product_definition_template_11(cube, grib):
+def product_definition_template_11(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.11.
@@ -1036,7 +1101,7 @@ def product_definition_template_11(cube, grib):
     _product_definition_template_8_10_and_11(cube, grib)
 
 
-def _product_definition_template_8_10_and_11(cube, grib):
+def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
@@ -1045,7 +1110,7 @@ def _product_definition_template_8_10_and_11(cube, grib):
     interval.
 
     """
-    product_definition_template_common(cube, grib)
+    product_definition_template_common(cube, grib, full3d_cube)
 
     # Check for time coordinate.
     time_coord = cube.coord('time')
@@ -1107,7 +1172,7 @@ def _product_definition_template_8_10_and_11(cube, grib):
         set_time_increment(cell_method, grib)
 
 
-def product_definition_template_40(cube, grib):
+def product_definition_template_40(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
     Definition Template 4.40.
@@ -1123,7 +1188,7 @@ def product_definition_template_40(cube, grib):
     gribapi.grib_set(grib, "constituentType", constituent_type)
 
 
-def product_definition_section(cube, grib):
+def product_definition_section(cube, grib, full3d_cube=None):
     """
     Set keys within the product definition section of the provided
     grib message based on the properties of the cube.
@@ -1132,13 +1197,13 @@ def product_definition_section(cube, grib):
     if not cube.coord("time").has_bounds():
         if cube.coords('realization'):
             # ensemble forecast (template 4.1)
-            pdt = product_definition_template_1(cube, grib)
+            pdt = product_definition_template_1(cube, grib, full3d_cube)
         elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
-            product_definition_template_40(cube, grib)
+            product_definition_template_40(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
-            product_definition_template_0(cube, grib)
+            product_definition_template_0(cube, grib, full3d_cube)
     elif _cube_is_time_statistic(cube):
         if cube.coords('realization'):
             # time processed (template 4.11)
@@ -1150,7 +1215,7 @@ def product_definition_section(cube, grib):
             # time processed (template 4.8)
             pdt = product_definition_template_8
         try:
-            pdt(cube, grib)
+            pdt(cube, grib, full3d_cube)
         except ValueError as e:
             raise ValueError('Saving to GRIB2 failed: the cube is not suitable'
                              ' for saving as a time processed statistic GRIB'
@@ -1229,30 +1294,36 @@ def gribbability_check(cube):
         raise iris.exceptions.TranslationError("time coord not found")
 
 
-def run(cube, grib):
+def run(slice2d_cube, grib, full3d_cube):
     """
-    Set the keys of the grib message based on the contents of the cube.
+    Set the keys of the grib message based on the contents of the slice2d_cube.
 
     Args:
 
-    * cube:
-        An instance of :class:`iris.cube.Cube`.
+    * slice2d_cube:
+        A :class:`iris.slice2d_cube.Cube` representing a 2d field.
 
     * grib_message_id:
         ID of a grib message in memory. This is typically the return value of
         :func:`gribapi.grib_new_from_samples`.
 
+    * full3d_cube:
+        A :class:`iris.slice2d_cube.Cube` representing the entire save cube.
+        This is required to write data with hybrid vertical coordinates, as
+        the GRIB2 spec records hybrid coefficients for *all* the levels in
+        every message.
+
     """
-    gribbability_check(cube)
+    gribbability_check(slice2d_cube)
 
     # Section 1 - Identification Section.
-    identification(cube, grib)
+    identification(slice2d_cube, grib)
 
     # Section 3 - Grid Definition Section (Grid Definition Template)
-    grid_definition_section(cube, grib)
+    grid_definition_section(slice2d_cube, grib)
 
     # Section 4 - Product Definition Section (Product Definition Template)
-    product_definition_section(cube, grib)
+    product_definition_section(slice2d_cube, grib, full3d_cube)
 
     # Section 5 - Data Representation Section (Data Representation Template)
-    data_section(cube, grib)
+    data_section(slice2d_cube, grib)

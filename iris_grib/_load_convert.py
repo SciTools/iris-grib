@@ -1284,13 +1284,14 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
         if (discipline == 2 and
                 parameterCategory == 0 and
                 parameterNumber == 7):
-            metadata['references'].append(ReferenceTarget('orography', None))
+            metadata['references'].append(ReferenceTarget(
+                'ref_orography', None))
         # Meteorological mass products for pressure:
         elif (discipline == 0 and
               parameterCategory == 3 and
               parameterNumber == 0):
             metadata['references'].append(ReferenceTarget(
-                'surface_air_pressure', ensure_surface_air_pressure_name))
+                'ref_surface_pressure', ensure_surface_air_pressure_name))
 
 
 def ensure_surface_air_pressure_name(cube):
@@ -1394,7 +1395,7 @@ def hybrid_factories(section, metadata):
                 factory_class = HybridHeightFactory
                 factory_args = [{'long_name': level_value_name},
                                 {'long_name': 'sigma'},
-                                Reference('orography')]
+                                Reference('ref_orography')]
             else:
                 # pressure
                 level_value_name = 'level_pressure'
@@ -1402,7 +1403,7 @@ def hybrid_factories(section, metadata):
                 factory_class = HybridPressureFactory
                 factory_args = [{'long_name': level_value_name},
                                 {'long_name': 'sigma'},
-                                Reference('surface_air_pressure')]
+                                Reference('ref_surface_pressure')]
 
             # Create the level pressure scalar coordinate.
             pv = section['pv']
