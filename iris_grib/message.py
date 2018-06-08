@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# (C) British Crown Copyright 2014 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -32,6 +32,8 @@ import numpy.ma as ma
 
 from iris._lazy_data import as_lazy_data
 from iris.exceptions import TranslationError
+
+_SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
 
 
 class _OpenFileRef(object):
@@ -147,7 +149,7 @@ class GribMessage(object):
             raise TranslationError('Grid definition Section 3 contains '
                                    'unsupported quasi-regular grid.')
 
-        if template in (0, 1, 5, 12, 20, 30, 40, 90):
+        if template in _SUPPORTED_GRID_DEFINITIONS:
             # We can ignore the first two bits (i-neg, j-pos) because
             # that is already captured in the coordinate values.
             if grid_section['scanningMode'] & 0x3f:

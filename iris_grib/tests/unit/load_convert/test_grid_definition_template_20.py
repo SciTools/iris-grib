@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2016 - 2017, Met Office
+# (C) British Crown Copyright 2016 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -42,6 +42,7 @@ class Test(tests.IrisGribTest):
 
     def section_3(self):
         section = {
+            'gridDefinitionTemplateNumber': 20,
             'shapeOfTheEarth': 0,
             'scaleFactorOfRadiusOfSphericalEarth': 0,
             'scaledValueOfRadiusOfSphericalEarth': 6367470,
@@ -66,14 +67,13 @@ class Test(tests.IrisGribTest):
     def expected(self, y_dim, x_dim):
         # Prepare the expectation.
         expected = empty_metadata()
-        cs = iris.coord_systems.GeogCS(6367470)
-        cs = iris.coord_systems.Stereographic(
-            central_lat=90.,
-            central_lon=262.,
-            false_easting=0,
-            false_northing=0,
-            true_scale_lat=60.,
-            ellipsoid=iris.coord_systems.GeogCS(6367470))
+        ellipsoid = iris.coord_systems.GeogCS(6367470)
+        cs = iris.coord_systems.Stereographic(central_lat=90.,
+                                              central_lon=262.,
+                                              false_easting=0,
+                                              false_northing=0,
+                                              true_scale_lat=60.,
+                                              ellipsoid=ellipsoid)
         lon0 = 225385728 * 1e-6
         lat0 = 32549114 * 1e-6
         x0m, y0m = cs.as_cartopy_crs().transform_point(

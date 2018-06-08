@@ -131,6 +131,11 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 Probability = namedtuple('Probability',
                          ('probability_type_name', 'threshold'))
 
+# List of grid definition template numbers which use either (i,j) or (x,y)
+# for (lat,lon)
+_IJGRIDLENGTH_GDT_NUMBERS = (10,)
+_XYGRIDLENGTH_GDT_NUMBERS = (20, 30, 31, 110, 140)
+
 
 # Regulation 92.1.12
 def unscale(value, factor):
@@ -719,6 +724,45 @@ def grid_definition_template_5(section, metadata):
                                      'grid_latitude', 'grid_longitude', cs)
 
 
+def grid_definition_template_10(section, metadata):
+    """
+    Translate template representing a Mercator grid.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 3 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+
+    """
+    major, minor, radius = ellipsoid_geometry(section)
+    geog_cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
+
+    # standard_parallel is the latitude at which the Mercator projection
+    # intersects the Earth
+    standard_parallel = section['LaD'] * _GRID_ACCURACY_IN_DEGREES
+
+    cs = icoord_systems.Mercator(standard_parallel=standard_parallel,
+                                 ellipsoid=geog_cs)
+
+    # Create the X and Y coordinates.
+    x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
+                                                                      cs)
+
+    # Determine the lat/lon dimensions.
+    y_dim, x_dim = 0, 1
+    if scan.j_consecutive:
+        y_dim, x_dim = 1, 0
+
+    # Add the X and Y coordinates to the metadata dim coords.
+    metadata['dim_coords_and_dims'].append((y_coord, y_dim))
+    metadata['dim_coords_and_dims'].append((x_coord, x_dim))
+
+
 def grid_definition_template_12(section, metadata):
     """
     Translate template representing transverse Mercator.
@@ -790,7 +834,6 @@ def grid_definition_template_12(section, metadata):
 
     # Determine the lat/lon dimensions.
     y_dim, x_dim = 0, 1
-    scan = scanning_mode(section['scanningMode'])
     if scan.j_consecutive:
         y_dim, x_dim = 1, 0
 
@@ -832,7 +875,8 @@ def grid_definition_template_20(section, metadata):
                                       central_lon=central_lon,
                                       true_scale_lat=true_scale_lat,
                                       ellipsoid=geog_cs)
-    x_coord, y_coord, scan = _calculate_proj_coords_from_lon_lat(section, cs)
+    x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
+                                                                      cs)
 
     # Determine the order of the dimensions.
     y_dim, x_dim = 0, 1
@@ -844,22 +888,38 @@ def grid_definition_template_20(section, metadata):
     metadata['dim_coords_and_dims'].append((x_coord, x_dim))
 
 
-def _calculate_proj_coords_from_lon_lat(section, cs):
+def _calculate_proj_coords_from_grid_lengths(section, cs):
     # Construct the coordinate points, the start point is given in millidegrees
     # but the distance measurement is in 10-3 m, so a conversion is necessary
     # to find the origin in m.
+
+    # Conversion factor millimetres to metres
+    mm_to_m = 1e-3
+
+    if section['gridDefinitionTemplateNumber'] in _XYGRIDLENGTH_GDT_NUMBERS:
+        dx = section['Dx']
+        dy = section['Dy']
+        nx = section['Nx']
+        ny = section['Ny']
+    elif section['gridDefinitionTemplateNumber'] in _IJGRIDLENGTH_GDT_NUMBERS:
+        dx = section['Di']
+        dy = section['Dj']
+        nx = section['Ni']
+        ny = section['Nj']
+    else:
+        raise TranslationError('Unsupported lat-lon point parameters')
 
     scan = scanning_mode(section['scanningMode'])
     lon_0 = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     lat_0 = section['latitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x0_m, y0_m = cs.as_cartopy_crs().transform_point(
         lon_0, lat_0, ccrs.Geodetic())
-    dx_m = section['Dx'] * 1e-3
-    dy_m = section['Dy'] * 1e-3
+    dx_m = dx * mm_to_m
+    dy_m = dy * mm_to_m
     x_dir = -1 if scan.i_negative else 1
     y_dir = 1 if scan.j_positive else -1
-    x_points = x0_m + dx_m * x_dir * np.arange(section['Nx'], dtype=np.float64)
-    y_points = y0_m + dy_m * y_dir * np.arange(section['Ny'], dtype=np.float64)
+    x_points = x0_m + dx_m * x_dir * np.arange(nx, dtype=np.float64)
+    y_points = y0_m + dy_m * y_dir * np.arange(ny, dtype=np.float64)
 
     # Create the dimension coordinates.
     x_coord = DimCoord(x_points, standard_name='projection_x_coordinate',
@@ -919,7 +979,8 @@ def grid_definition_template_30(section, metadata):
         msg = 'Unable to translate resolution and component flags.'
         warnings.warn(msg)
 
-    x_coord, y_coord, scan = _calculate_proj_coords_from_lon_lat(section, cs)
+    x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
+                                                                      cs)
 
     # Determine the order of the dimensions.
     y_dim, x_dim = 0, 1
@@ -1196,6 +1257,9 @@ def grid_definition_section(section, metadata):
     elif template == 5:
         # Process variable resolution rotated latitude/longitude.
         grid_definition_template_5(section, metadata)
+    elif template == 10:
+        # Process Mercator.
+        grid_definition_template_10(section, metadata)
     elif template == 12:
         # Process transverse Mercator.
         grid_definition_template_12(section, metadata)
