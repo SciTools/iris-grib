@@ -34,7 +34,7 @@ import numpy.ma as ma
 import cartopy.crs as ccrs
 
 import iris
-from iris.aux_factory import HybridHeightFactory
+from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, TransverseMercator,
                                 LambertConformal)
 import iris.exceptions
@@ -739,26 +739,34 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
     v_coord = grib_v_code = output_unit = None
 
     # Detect factories for hybrid vertical coordinates.
-    hybrid_height_factories = [
+    hybrid_factories = [
         factory for factory in cube.aux_factories
-        if isinstance(factory, HybridHeightFactory)]
-    if not hybrid_height_factories:
-        hybrid_height_factory = None
+        if isinstance(factory, (HybridHeightFactory, HybridPressureFactory))]
+    if not hybrid_factories:
+        hybrid_factory = None
+    elif len(hybrid_factories) > 1:
+        msg = 'Data contains >1 vertical coordinate factory : {}'
+        raise ValueError(msg.format(hybrid_factories))
     else:
-        # If any, there should be just one.
-        factory, = hybrid_height_factories
+        factory = hybrid_factories[0]
         # Fetch the matching 'complete' factory from the *full* 3d cube, so we
         # have all the level information.
-        hybrid_height_factory = full3d_cube.aux_factory(factory.name())
+        hybrid_factory = full3d_cube.aux_factory(factory.name())
 
     # Handle various different styles of vertical coordinate.
-    # hybrid height
-    if hybrid_height_factory:
+    # hybrid height / pressure
+    if hybrid_factory is not None:
         # N.B. in this case, there are additional operations, besides just
         # encoding v_coord : see below at end ..
-        grib_v_code = 118
-        output_unit = cf_units.Unit("1")
         v_coord = cube.coord('model_level_number')
+        output_unit = cf_units.Unit("1")
+        if isinstance(hybrid_factory, HybridHeightFactory):
+            grib_v_code = 118
+        elif isinstance(hybrid_factory, HybridPressureFactory):
+            grib_v_code = 119
+        else:
+            msg = 'Unrecognised factory type : {}'
+            raise ValueError(msg.format(hybrid_factory))
 
     # pressure
     elif cube.coords("air_pressure") or cube.coords("pressure"):
@@ -835,10 +843,10 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
                          int(output_v[1]))
 
-    if hybrid_height_factory:
+    if hybrid_factory is not None:
         # Need to record ALL the level coefficents in a 'PV' vector.
-        level_height_coord = hybrid_height_factory.delta
-        sigma_coord = hybrid_height_factory.sigma
+        level_delta_coord = hybrid_factory.delta
+        sigma_coord = hybrid_factory.sigma
         model_levels = full3d_cube.coord('model_level_number').points
         # Just check these make some kind of sense (!)
         if model_levels.dtype.kind not in 'iu':
@@ -862,7 +870,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
-                                        level_height_coord.points,
+                                        level_delta_coord.points,
                                         sigma_coord.points):
             # Record all the level coefficients coming from the 'full' cube.
             # Note: if some model levels are missing, we must still have the
