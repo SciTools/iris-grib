@@ -751,7 +751,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         # have all the level information.
         hybrid_height_factory = full3d_cube.aux_factory(factory.name())
 
-    # hybrid pressure
+    # Handle various different styles of vertical coordinate.
+    # hybrid height
     if hybrid_height_factory:
         # N.B. in this case, there are additional operations, besides just
         # encoding v_coord : see below at end ..
