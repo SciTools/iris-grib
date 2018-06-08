@@ -132,9 +132,9 @@ class TestSaveHybridPressure(tests.IrisGribTest):
             self.assertArrayAllClose(
                 msgs[0].sections[4]['pv'], pv_expected, atol=0.001)
 
-            # Check message #2-of-3 has the correctly encoded hybrid height.
+            # Check message #2-of-3 has the correctly encoded hybrid pressure.
             msg = msgs[1]
-            #  first surface type = 118  (i.e. hybrid height).
+            #  first surface type = 119  (i.e. hybrid pressure).
             self.assertEqual(
                 msg.sections[4]['typeOfFirstFixedSurface'],
                 119)
