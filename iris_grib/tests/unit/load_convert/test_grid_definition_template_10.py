@@ -92,7 +92,7 @@ class Test(tests.IrisGribTest):
         section = self.section_3()
         metadata = empty_metadata()
         grid_definition_template_10(section, metadata)
-        expected = self.expected(0, 1)
+        expected = self.expected(y_dim=0, x_dim=1)
         self.assertEqual(metadata, expected)
 
 

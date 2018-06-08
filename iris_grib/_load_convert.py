@@ -893,7 +893,8 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
     # but the distance measurement is in 10-3 m, so a conversion is necessary
     # to find the origin in m.
 
-    MM_TO_M = 1e-3
+    # Conversion factor millimetres to metres
+    mm_to_m = 1e-3
 
     if section['gridDefinitionTemplateNumber'] in _XYGRIDLENGTH_GDT_NUMBERS:
         dx = section['Dx']
@@ -913,8 +914,8 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
     lat_0 = section['latitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x0_m, y0_m = cs.as_cartopy_crs().transform_point(
         lon_0, lat_0, ccrs.Geodetic())
-    dx_m = dx * MM_TO_M
-    dy_m = dy * MM_TO_M
+    dx_m = dx * mm_to_m
+    dy_m = dy * mm_to_m
     x_dir = -1 if scan.i_negative else 1
     y_dir = 1 if scan.j_positive else -1
     x_points = x0_m + dx_m * x_dir * np.arange(nx, dtype=np.float64)
