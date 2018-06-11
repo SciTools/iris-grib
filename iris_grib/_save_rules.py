@@ -1059,7 +1059,7 @@ def product_definition_template_1(cube, grib, full3d_cube=None):
 
     """
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 1)
-    product_definition_template_common(cube, grib)
+    product_definition_template_common(cube, grib, full3d_cube)
     set_ensemble(cube, grib)
 
 
