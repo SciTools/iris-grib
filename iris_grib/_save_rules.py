@@ -661,10 +661,10 @@ def grid_definition_section(cube, grib):
     regular_x_and_y = is_regular(x_coord) and is_regular(y_coord)
 
     if isinstance(cs, GeogCS):
-        if not regular_x_and_y:
+        if regular_x_and_y:
+            grid_definition_template_0(cube, grib)
+        else:
             grid_definition_template_4(cube, grib)
-
-        grid_definition_template_0(cube, grib)
 
     elif isinstance(cs, RotatedGeogCS):
         # Rotated coordinate system cases.
