@@ -37,11 +37,16 @@ class TestHybridHeightRoundTrip(tests.IrisGribTest):
     def test_hh_round_trip(self):
         filepath = self.get_testdata_path(
             'faked_sample_hh_grib_data.grib2')
+        # Load and save temperature cube and reference (orography) cube
+        # separately because this is the only way to save the hybrid height
+        # coordinate.
         cube, ref_cube = load_cubes(filepath,
                                     ('air_temperature', 'surface_altitude'))
 
         with self.temp_filename() as tmp_save_path:
             save([cube, ref_cube], tmp_save_path, saver='grib2')
+            # Only need to reload temperature cube to compare with unsaved
+            # temperature cube.
             saved_cube = load_cube(tmp_save_path, 'air_temperature')
             self.assertTrue(saved_cube == cube)
 
@@ -50,11 +55,16 @@ class TestHybridPressureRoundTrip(tests.IrisGribTest):
     def test_hybrid_pressure(self):
         filepath = self.get_testdata_path(
             'faked_sample_hp_grib_data.grib2')
+        # Load and save temperature cube and reference (air_pressure at
+        # surface) cube separately because this is the only way to save the
+        # hybrid pressure coordinate.
         cube, ref_cube = load_cubes(filepath,
                                     ('air_temperature', 'air_pressure'))
 
         with self.temp_filename() as tmp_save_path:
             save([cube, ref_cube], tmp_save_path, saver='grib2')
+            # Only need to reload temperature cube to compare with unsaved
+            # temperature cube.
             saved_cube = load_cube(tmp_save_path, 'air_temperature')
 
             # Currently all attributes are lost when saving to grib, so we must
