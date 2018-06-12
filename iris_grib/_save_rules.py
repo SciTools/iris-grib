@@ -35,8 +35,8 @@ import cartopy.crs as ccrs
 
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
-from iris.coord_systems import (GeogCS, RotatedGeogCS, TransverseMercator,
-                                LambertConformal, Mercator)
+from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
+                                TransverseMercator, LambertConformal)
 import iris.exceptions
 
 from . import grib_phenom_translation as gptx
@@ -214,6 +214,10 @@ def shape_of_the_earth(cube, grib):
         gribapi.grib_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
         gribapi.grib_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
                               ellipsoid.semi_major_axis)
+        gribapi.grib_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
+        gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
+        gribapi.grib_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
+        gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis", 0)
     # Oblate spheroid earth.
     else:
         gribapi.grib_set_long(grib, "shapeOfTheEarth", 7)
@@ -462,7 +466,7 @@ def grid_definition_template_10(cube, grib):
 
     horizontal_grid_common(cube, grib)
 
-    # Transform first and last points into geographic CS
+    # Transform first and last points into geographic CS.
     geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
     first_x, first_y, = geog.as_cartopy_crs().transform_point(
         x_coord.points[0],
@@ -484,8 +488,7 @@ def grid_definition_template_10(cube, grib):
     gribapi.grib_set(grib, "longitudeOfLastGridPoint",
                      int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
 
-    # Encode the latitude at which the projection intersects the Earth
-    # should this be cs.central_lat or cs.standard parallel?
+    # Encode the latitude at which the projection intersects the Earth.
     gribapi.grib_set(grib, 'LaD',
                      cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
 

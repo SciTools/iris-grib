@@ -30,14 +30,9 @@ import numpy as np
 
 import iris.coords
 from iris.coord_systems import GeogCS, Mercator
-from iris.exceptions import TranslationError
 
 from iris_grib._save_rules import grid_definition_template_10
 from iris_grib.tests.unit.save_rules import GdtTestMixin
-
-
-class FakeGribError(Exception):
-    pass
 
 
 class Test(tests.IrisGribTest, GdtTestMixin):
@@ -83,24 +78,28 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key('scaledValueOfEarthMinorAxis', 0)
 
     def test__grid_shape(self):
-        test_cube = self._make_test_cube(x_points=np.arange(13),
-                                         y_points=np.arange(6))
+        n_x_points = 13
+        n_y_points = 6
+        test_cube = self._make_test_cube(x_points=np.arange(n_x_points),
+                                         y_points=np.arange(n_y_points))
         grid_definition_template_10(test_cube, self.mock_grib)
-        self._check_key('Nx', 13)
-        self._check_key('Ny', 6)
+        self._check_key('Ni', n_x_points)
+        self._check_key('Nj', n_y_points)
 
     def test__grid_points(self):
         test_cube = self._make_test_cube(x_points=[1e6, 3e6, 5e6, 7e6],
                                          y_points=[4e6, 9e6])
         grid_definition_template_10(test_cube, self.mock_grib)
-        self._check_key("latitudeOfFirstGridPoint", 71676530)
-        self._check_key("longitudeOfFirstGridPoint", 287218188)
-        self._check_key("Dx", 2e9)
-        self._check_key("Dy", 5e9)
+        self._check_key("latitudeOfFirstGridPoint", 34727738)
+        self._check_key("longitudeOfFirstGridPoint", 9268240)
+        self._check_key("latitudeOfLastGridPoint", 63746266)
+        self._check_key("longitudeOfLastGridPoint", 64877681)
+        self._check_key("Di", 2e9)
+        self._check_key("Dj", 5e9)
 
     def test__template_specifics(self):
         grid_definition_template_10(self.test_cube, self.mock_grib)
-        self._check_key("LaD", 39e6)
+        self._check_key("LaD", 14e6)
 
     def test__scanmode(self):
         grid_definition_template_10(self.test_cube, self.mock_grib)
@@ -112,10 +111,6 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         grid_definition_template_10(test_cube, self.mock_grib)
         self._check_key('iScansPositively', 0)
         self._check_key('jScansPositively', 1)
-
-    def test_projection_centre(self):
-        grid_definition_template_10(self.test_cube, self.mock_grib)
-        self._check_key('resolutionAndComponentFlags', 56)
 
 
 if __name__ == "__main__":
