@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
 """
-Integration test for loading and saving hybrid height and hybrid pressure data.
+Integration test for round-trip loading and saving of hybrid height and
+hybrid pressure cubes.
 
 """
 
@@ -26,9 +27,8 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # before importing anything else.
 import iris_grib.tests as tests
 
-
-from iris import load_cube, save
-from iris.coords import DimCoord
+from iris import load_cube, load_cubes, save
+from iris.experimental.equalise_cubes import equalise_attributes
 
 
 class TestHybridHeightRoundTrip(tests.IrisGribTest):
@@ -40,27 +40,38 @@ class TestHybridHeightRoundTrip(tests.IrisGribTest):
         self.out_name = '/hybrid_height_cube.grib2'
         self.outfile = self.out_path + self.out_name
 
-    def test_hybrid_height_load(self):
-        # Load air temperature cube and ensure that 'model_level_number' is a
-        # dim coord and that 'altitude' is a derived coord.
-        cube = load_cube(self.filepath, 'air_temperature')
-        self.assertIsInstance(cube.coord('model_level_number'),
-                              DimCoord)
-        self.assertTrue(cube.derived_coords[0].name() == 'altitude')
-        save(cube, self.outfile)
-
-    def test_hybrid_height_save(self):
-        # Save air temperature cube as a grib2 file, then reload it and
-        # repeat coord checks.
-        saved_cube = load_cube(self.outfile)
-        self.assertTrue(isinstance(saved_cube.coord('model_level_number'),
-                                                    DimCoord))
-        self.assertTrue(saved_cube.derived_coords[0].name() == 'altitude')
+    def test_hybrid_height(self):
+        # Load air temperature cube.
+        cube, ref_cube = load_cubes(self.filepath,
+                                    ('air_temperature', 'surface_altitude'))
+        # Save cubes separately
+        save([cube, ref_cube], self.outfile)
+        saved_cube = load_cube(self.outfile, 'air_temperature')
+        self.assertTrue(saved_cube == cube)
 
 
+class TestHybridPressureRoundTrip(tests.IrisGribTest):
+    def setUp(self):
+        self.filepath = self.get_testdata_path(
+            'faked_sample_hp_grib_data.grib2')
+        self.out_path = self.get_result_path(
+            '../results/integration/round_trips')
+        self.out_name = '/hybrid_pressure_cube.grib2'
+        self.outfile = self.out_path + self.out_name
 
+    def test_hybrid_pressure(self):
+        # Load air temperature cube and surface air pressure reference cube
+        cube, ref_cube = load_cubes(self.filepath,
+                                    ('air_temperature', 'air_pressure'))
+        # Save cubes separately
+        save([cube, ref_cube], self.outfile)
+        saved_cube = load_cube(self.outfile, 'air_temperature')
 
+        # Currently all attributes are lost when saving to grib, so we must
+        # equalise them in order to successfully compare all other aspects.
+        equalise_attributes([saved_cube, cube])
 
+        self.assertTrue(saved_cube == cube)
 
 
 
