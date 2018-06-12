@@ -686,8 +686,9 @@ def grid_definition_section(cube, grib):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
     else:
-        raise ValueError('Grib saving is not supported for coordinate system: '
-                         '{}'.format(cs))
+        name = cs.grid_mapping_name.replace('_', ' ').title()
+        emsg = 'Grib saving is not supported for coordinate system {!r}'
+        raise ValueError(emsg.format(name))
 
 
 ###############################################################################
