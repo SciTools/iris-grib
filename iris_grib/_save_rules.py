@@ -36,7 +36,8 @@ import cartopy.crs as ccrs
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
-                                TransverseMercator, LambertConformal)
+                                TransverseMercator, Stereographic,
+                                LambertConformal)
 from iris.exceptions import TranslationError
 
 
@@ -588,17 +589,13 @@ def grid_definition_template_12(cube, grib):
     gribapi.grib_set(grib, "scaleFactorAtReferencePoint", value)
 
 
-def grid_definition_template_30(cube, grib):
+def _perspective_projection_common(cube, grib):
     """
-    Set keys within the provided grib message based on
-    Grid Definition Template 3.30.
-
-    Template 3.30 is used to represent a Lambert Conformal grid.
+    Common functionality for setting grid keys for the perspective projection
+    grid definition templates (20 and 30; Polar Stereographic and Lambert
+    Conformal.
 
     """
-
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 30)
-
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
@@ -610,22 +607,24 @@ def grid_definition_template_30(cube, grib):
     x_mm = points_in_unit(x_coord, 'mm')
 
     # Encode the horizontal points.
-
     # NB. Since we're already in millimetres, our tolerance for
     # discrepancy in the differences is 1.
     try:
         x_step = step(x_mm, atol=1)
         y_step = step(y_mm, atol=1)
     except ValueError:
-        msg = ('Irregular coordinates not supported for Lambert '
-               'Conformal.')
-        raise TranslationError(msg)
+        cs_name = cs.grid_mapping_name.replace('_', ' ').title()
+        msg = 'Irregular coordinates not supported for {!r}.'
+        raise TranslationError(msg.format(cs_name))
     gribapi.grib_set(grib, 'Dx', abs(x_step))
     gribapi.grib_set(grib, 'Dy', abs(y_step))
 
     horizontal_grid_common(cube, grib, xy=True)
 
-    # Transform first point into geographic CS
+    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
+                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+
+    # Transform first point into geographic CS.
     geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
     first_x, first_y = geog.as_cartopy_crs().transform_point(
         x_coord.points[0],
@@ -640,17 +639,46 @@ def grid_definition_template_30(cube, grib):
                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     gribapi.grib_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
     gribapi.grib_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
-    latin1, latin2 = cs.secant_latitudes
-    gribapi.grib_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
     # Which pole are the parallels closest to? That is the direction
     # that the cone converges.
-    poliest_sec = latin1 if abs(latin1) > abs(latin2) else latin2
-    centre_flag = 0x0 if poliest_sec > 0 else 0x1
+    latin1, latin2 = cs.secant_latitudes
+    poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
+    centre_flag = 0x0 if poliest_secant > 0 else 0x1
     gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
+
+
+def grid_definition_template_20(cube, grib):
+    """
+    Set keys within the provided GRIB message based on
+    Grid Definition Template 3.20.
+
+    Template 3.20 is used to represent a Polar Stereographic grid.
+
+    """
+    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 20)
+    _perspective_projection_common(cube, grib)
+
+
+def grid_definition_template_30(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.30.
+
+    Template 3.30 is used to represent a Lambert Conformal grid.
+
+    """
+
+    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 30)
+
+    # Retrieve the cube coord system.
+    cs = cube.coord(dimensions=[0]).coord_system
+
+    _perspective_projection_common(cube, grib)
+
+    latin1, latin2 = cs.secant_latitudes
+    gribapi.grib_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
+    gribapi.grib_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
     gribapi.grib_set(grib, "latitudeOfSouthernPole", 0)
     gribapi.grib_set(grib, "longitudeOfSouthernPole", 0)
 
@@ -688,9 +716,14 @@ def grid_definition_section(cube, grib):
         # Transverse Mercator coordinate system (template 3.12).
         grid_definition_template_12(cube, grib)
 
+    elif isinstance(cs, Stereographic):
+        # Stereographic coordinate system (template 3.20).
+        grid_definition_template_20(cube, grib)
+
     elif isinstance(cs, LambertConformal):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
+
     else:
         name = cs.grid_mapping_name.replace('_', ' ').title()
         emsg = 'Grib saving is not supported for coordinate system {!r}'
