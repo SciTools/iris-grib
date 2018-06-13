@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# (C) British Crown Copyright 2013 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -26,7 +26,9 @@ import iris_grib.tests as tests
 import mock
 import numpy as np
 
-import iris
+from iris.coords import DimCoord
+from iris.coord_systems import GeogCS
+from iris.cube import Cube
 from iris.fileformats.pp import EARTH_RADIUS as PP_DEFAULT_EARTH_RADIUS
 
 
@@ -57,7 +59,7 @@ class GdtTestMixin(object):
         self.test_cube = self._make_test_cube()
 
     def _default_coord_system(self):
-        return iris.coord_systems.GeogCS(PP_DEFAULT_EARTH_RADIUS)
+        return GeogCS(PP_DEFAULT_EARTH_RADIUS)
 
     def _default_x_points(self):
         # Define simple, regular coordinate points.
@@ -66,7 +68,8 @@ class GdtTestMixin(object):
     def _default_y_points(self):
         return [7.0, 8.0]  # N.B. is_regular will *fail* on length-1 coords.
 
-    def _make_test_cube(self, cs=None, x_points=None, y_points=None):
+    def _make_test_cube(self, cs=None, x_points=None, y_points=None,
+                        coord_units='degrees'):
         # Create a cube with given properties, or minimal defaults.
         if cs is None:
             cs = self._default_coord_system()
@@ -75,13 +78,11 @@ class GdtTestMixin(object):
         if y_points is None:
             y_points = self._default_y_points()
 
-        x_coord = iris.coords.DimCoord(x_points, standard_name='longitude',
-                                       units='degrees',
-                                       coord_system=cs)
-        y_coord = iris.coords.DimCoord(y_points, standard_name='latitude',
-                                       units='degrees',
-                                       coord_system=cs)
-        test_cube = iris.cube.Cube(np.zeros((len(y_points), len(x_points))))
+        x_coord = DimCoord(x_points, long_name='longitude',
+                           units=coord_units, coord_system=cs)
+        y_coord = DimCoord(y_points, long_name='latitude',
+                           units=coord_units, coord_system=cs)
+        test_cube = Cube(np.zeros((len(y_points), len(x_points))))
         test_cube.add_dim_coord(y_coord, 0)
         test_cube.add_dim_coord(x_coord, 1)
         return test_cube
