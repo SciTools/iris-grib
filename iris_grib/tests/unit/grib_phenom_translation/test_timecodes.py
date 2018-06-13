@@ -31,11 +31,14 @@ import iris_grib.tests as tests
 
 import cf_units
 import datetime
+import gribapi
 
 import iris_grib.grib_phenom_translation as gptx
+import numpy as np
 
-from iris.exceptions import NotYetImplementedError
+from iris.exceptions import NotYetImplementedError, TranslationError
 from iris_grib import GribWrapper
+from iris_grib import load_cubes
 
 # define seconds in an hour, for general test usage
 _hour_secs = 3600.0
@@ -260,10 +263,12 @@ class TestGribTimecodes(tests.IrisGribTest):
                 gribapi.grib_write(grib_message, temp_gribfile)
 
             # Load the message from the file as a cube.
-            cube_generator = iris_grib.load_cubes(
-                temp_gribfile_path)
-            with self.assertRaises(iris.exceptions.TranslationError) as te:
+            cube_generator = load_cubes(temp_gribfile_path)
+            with self.assertRaises(TranslationError) as te:
                 cube = next(cube_generator)
             self.assertEqual('Product definition template [5]'
                              ' is not supported', str(te.exception))
 
+
+if __name__ == "__main__":
+    tests.main()
