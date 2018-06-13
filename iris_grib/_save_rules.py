@@ -640,13 +640,6 @@ def _perspective_projection_common(cube, grib):
     gribapi.grib_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
     gribapi.grib_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
 
-    # Which pole are the parallels closest to? That is the direction
-    # that the cone converges.
-    latin1, latin2 = cs.secant_latitudes
-    poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
-    centre_flag = 0x0 if poliest_secant > 0 else 0x1
-    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
-
 
 def grid_definition_template_20(cube, grib):
     """
@@ -657,7 +650,24 @@ def grid_definition_template_20(cube, grib):
 
     """
     gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 20)
+
+    # Retrieve the cube coord system.
+    cs = cube.coord(dimensions=[0]).coord_system
+
     _perspective_projection_common(cube, grib)
+
+    # Is this a north or south polar stereographic projection?
+    if cs.central_lat == -90.0:
+        # XXX: is this the correct value? We read bit 0x80 in load, but set bit
+        #      0x1 when saving GDT30...
+        centre_flag = 0x1
+    elif cs.central_lat == 90.0:
+        centre_flag = 0x0
+    else:
+        emsg = ('Bipolar and symmetric polar stereo projections '
+                'are not supported.')
+        raise ValueError(emsg)
+    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
 
 
 def grid_definition_template_30(cube, grib):
@@ -676,9 +686,16 @@ def grid_definition_template_30(cube, grib):
 
     _perspective_projection_common(cube, grib)
 
+    # Which pole are the parallels closest to? That is the direction
+    # that the cone converges.
     latin1, latin2 = cs.secant_latitudes
     gribapi.grib_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
     gribapi.grib_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
+
+    poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
+    centre_flag = 0x0 if poliest_secant > 0 else 0x1
+    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
+
     gribapi.grib_set(grib, "latitudeOfSouthernPole", 0)
     gribapi.grib_set(grib, "longitudeOfSouthernPole", 0)
 

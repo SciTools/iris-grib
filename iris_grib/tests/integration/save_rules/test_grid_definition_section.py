@@ -27,14 +27,13 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris.coords import DimCoord
 from iris.coord_systems import (GeogCS,
                                 RotatedGeogCS,
                                 Mercator,
                                 TransverseMercator,
+                                Stereographic,
                                 LambertConformal,
                                 AlbersEqualArea)
-from iris.cube import Cube
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_section
@@ -105,6 +104,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
         self._check_key('gridDefinitionTemplateNumber', 12)
+
+    def test_grid_definition_template_20(self):
+        # Stereographic grid.
+        x_points = np.arange(3)
+        y_points = np.arange(3)
+        coord_units = 'm'
+        cs = Stereographic(90.0, 0, ellipsoid=self.ellipsoid)
+        test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
+        grid_definition_section(test_cube, self.mock_grib)
+        self._check_key('gridDefinitionTemplateNumber', 20)
 
     def test_grid_definition_template_30(self):
         # Lambert Conformal grid.
