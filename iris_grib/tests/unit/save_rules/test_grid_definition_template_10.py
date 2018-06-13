@@ -38,38 +38,20 @@ from iris_grib.tests.unit.save_rules import GdtTestMixin
 class Test(tests.IrisGribTest, GdtTestMixin):
     def setUp(self):
         self.default_ellipsoid = GeogCS(semi_major_axis=6371200.0)
-        self.test_cube = self._make_test_cube()
+        self.mercator_test_cube = self._make_test_cube(coord_units='m')
 
         GdtTestMixin.setUp(self)
-
-    def _make_test_cube(self, cs=None, x_points=None, y_points=None):
-        # Create a cube with given properties, or minimal defaults.
-        if cs is None:
-            cs = self._default_coord_system()
-        if x_points is None:
-            x_points = self._default_x_points()
-        if y_points is None:
-            y_points = self._default_y_points()
-
-        x_coord = iris.coords.DimCoord(x_points, 'projection_x_coordinate',
-                                       units='m', coord_system=cs)
-        y_coord = iris.coords.DimCoord(y_points, 'projection_y_coordinate',
-                                       units='m', coord_system=cs)
-        test_cube = iris.cube.Cube(np.zeros((len(y_points), len(x_points))))
-        test_cube.add_dim_coord(y_coord, 0)
-        test_cube.add_dim_coord(x_coord, 1)
-        return test_cube
 
     def _default_coord_system(self):
         return Mercator(standard_parallel=14.,
                         ellipsoid=self.default_ellipsoid)
 
     def test__template_number(self):
-        grid_definition_template_10(self.test_cube, self.mock_grib)
+        grid_definition_template_10(self.mercator_test_cube, self.mock_grib)
         self._check_key('gridDefinitionTemplateNumber', 10)
 
     def test__shape_of_earth(self):
-        grid_definition_template_10(self.test_cube, self.mock_grib)
+        grid_definition_template_10(self.mercator_test_cube, self.mock_grib)
         self._check_key('shapeOfTheEarth', 1)
         self._check_key('scaleFactorOfRadiusOfSphericalEarth', 0)
         self._check_key('scaleFactorOfEarthMajorAxis', 0)
@@ -81,14 +63,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         n_x_points = 13
         n_y_points = 6
         test_cube = self._make_test_cube(x_points=np.arange(n_x_points),
-                                         y_points=np.arange(n_y_points))
+                                         y_points=np.arange(n_y_points),
+                                         coord_units='m')
         grid_definition_template_10(test_cube, self.mock_grib)
         self._check_key('Ni', n_x_points)
         self._check_key('Nj', n_y_points)
 
     def test__grid_points(self):
         test_cube = self._make_test_cube(x_points=[1e6, 3e6, 5e6, 7e6],
-                                         y_points=[4e6, 9e6])
+                                         y_points=[4e6, 9e6],
+                                         coord_units='m')
         grid_definition_template_10(test_cube, self.mock_grib)
         self._check_key("latitudeOfFirstGridPoint", 34727738)
         self._check_key("longitudeOfFirstGridPoint", 9268240)
@@ -98,16 +82,17 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("Dj", 5e9)
 
     def test__template_specifics(self):
-        grid_definition_template_10(self.test_cube, self.mock_grib)
+        grid_definition_template_10(self.mercator_test_cube, self.mock_grib)
         self._check_key("LaD", 14e6)
 
     def test__scanmode(self):
-        grid_definition_template_10(self.test_cube, self.mock_grib)
+        grid_definition_template_10(self.mercator_test_cube, self.mock_grib)
         self._check_key('iScansPositively', 1)
         self._check_key('jScansPositively', 1)
 
     def test__scanmode_reverse(self):
-        test_cube = self._make_test_cube(x_points=np.arange(7e6, 0, -1e6))
+        test_cube = self._make_test_cube(x_points=np.arange(7e6, 0, -1e6),
+                                         coord_units='m')
         grid_definition_template_10(test_cube, self.mock_grib)
         self._check_key('iScansPositively', 0)
         self._check_key('jScansPositively', 1)
