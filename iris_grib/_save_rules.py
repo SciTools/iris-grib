@@ -402,6 +402,21 @@ def grid_definition_template_1(cube, grib):
     latlon_points_regular(cube, grib)
 
 
+def grid_definition_template_4(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.4.
+
+    Template 3.4 is used to represent "variable resolution latitude/longitude".
+    The coordinates are irregularly spaced latitudes and longitudes.
+
+    """
+    # XXX: will we need to set `Ni` and `Nj`?
+    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 4)
+    horizontal_grid_common(cube, grib)
+    latlon_points_irregular(cube, grib)
+
+
 def grid_definition_template_5(cube, grib):
     """
     Set keys within the provided grib message based on
@@ -646,12 +661,10 @@ def grid_definition_section(cube, grib):
     regular_x_and_y = is_regular(x_coord) and is_regular(y_coord)
 
     if isinstance(cs, GeogCS):
-        if not regular_x_and_y:
-            raise iris.exceptions.TranslationError(
-                'Saving an irregular latlon grid to GRIB (PDT3.4) is not '
-                'yet supported.')
-
-        grid_definition_template_0(cube, grib)
+        if regular_x_and_y:
+            grid_definition_template_0(cube, grib)
+        else:
+            grid_definition_template_4(cube, grib)
 
     elif isinstance(cs, RotatedGeogCS):
         # Rotated coordinate system cases.
@@ -673,8 +686,9 @@ def grid_definition_section(cube, grib):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
     else:
-        raise ValueError('Grib saving is not supported for coordinate system: '
-                         '{}'.format(cs))
+        name = cs.grid_mapping_name.replace('_', ' ').title()
+        emsg = 'Grib saving is not supported for coordinate system {!r}'
+        raise ValueError(emsg.format(name))
 
 
 ###############################################################################
