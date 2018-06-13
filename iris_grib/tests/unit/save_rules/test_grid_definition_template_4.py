@@ -38,10 +38,6 @@ class Test(tests.IrisGribTest, GdtTestMixin):
     def setUp(self):
         GdtTestMixin.setUp(self)
 
-    def _default_x_points(self):
-        # Define an irregular x-coord, to force template 3.5 instead of 3.1.
-        return [1.0, 2.0, 5.0]
-
     def test__template_number(self):
         grid_definition_template_4(self.test_cube, self.mock_grib)
         self._check_key('gridDefinitionTemplateNumber', 4)
