@@ -19,6 +19,12 @@ Features
 * Added saving for data on irregular, non-rotated grids (grid definition
   template 4 in template table 3.1)
 
+  .. note::
+
+      Loading for the Mercator projection is only available using iris
+      versions greater than 2.1.0.
+
+
 Bug Fixes
 ---------
 
