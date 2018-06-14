@@ -57,6 +57,13 @@ def file_walk_relative(top, remove=''):
             yield os.path.join(root, file).replace(remove, '')
 
 
+def available_iris():
+    try:
+        return 'scitools-iris=2.1.*'
+    except:
+        return 'scitools-iris>=2.0.*'
+
+
 setup_args = dict(
     name             = name,
     version          = extract_version(),
@@ -79,10 +86,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    install_requires = [
-        #        'iris>=1.9,<2',
-        # Also: the ECMWF GRIB API
-    ],
+    install_requires = [available_iris(), 'python-eccodes'],
     extras_require = {
         'test:python_version=="2.7"': ['mock'],
     },
