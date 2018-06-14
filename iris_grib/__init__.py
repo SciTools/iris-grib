@@ -26,7 +26,6 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 import six
 
 import datetime
-import distutils.version
 import math  # for fmod
 import warnings
 
@@ -882,15 +881,3 @@ def save_messages(messages, target, append=False):
         # (this bit is common to the pp and grib savers...)
         if isinstance(target, six.string_types):
             grib_file.close()
-
-
-def _confirm_iris_mercator_support():
-    # Check that Iris version is at least 2.1, required for 'standard_parallel'
-    # support in the Mercator coord-system.
-    # This is a temporary fix allowing us to state Iris>=2.0 as a dependency,
-    # required for this release because Iris 2.1 is not yet available.
-    iris_version = distutils.version.LooseVersion(iris.__version__)
-    min_mercator_version = '2.1.0'
-    if iris_version < min_mercator_version:
-        msg = 'Support for Mercator projections requires Iris version >= {}'
-        raise ValueError(msg.format(min_mercator_version))
