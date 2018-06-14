@@ -39,6 +39,7 @@ from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
                                 TransverseMercator, LambertConformal)
 import iris.exceptions
 
+from . import _confirm_iris_mercator_support
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
 from iris.util import is_regular, regular_step
@@ -503,6 +504,9 @@ def grid_definition_template_10(cube, grib):
     gribapi.grib_set(grib, "longitudeOfLastGridPoint",
                      int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
 
+    # Check and raise a more intelligible error, if the Iris version is too old
+    # to support the Mercator 'standard_parallel' property.
+    _confirm_iris_mercator_support()
     # Encode the latitude at which the projection intersects the Earth.
     gribapi.grib_set(grib, 'LaD',
                      cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
