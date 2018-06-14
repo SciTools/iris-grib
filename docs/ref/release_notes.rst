@@ -16,6 +16,9 @@ Features
 * Added loading for data using Mercator projection (grid definition
   template 10 in template table 3.1)
 
+* Added saving for data on irregular, non-rotated grids using Lambert Conformal
+  projection (grid definition template 4 in template table 3.1)
+
 Bug Fixes
 ---------
 
