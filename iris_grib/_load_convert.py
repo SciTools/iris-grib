@@ -43,7 +43,7 @@ from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
 
-from . import _confirm_iris_mercator_support
+from ._iris_mercator_support import confirm_extended_mercator_supported
 from ._grib1_load_rules import grib1_convert
 from .message import GribMessage
 
@@ -749,7 +749,7 @@ def grid_definition_template_10(section, metadata):
 
     # Check and raise a more intelligible error, if the Iris version is too old
     # to support the Mercator 'standard_parallel' keyword.
-    _confirm_iris_mercator_support()
+    confirm_extended_mercator_supported()
     cs = icoord_systems.Mercator(standard_parallel=standard_parallel,
                                  ellipsoid=geog_cs)
 
