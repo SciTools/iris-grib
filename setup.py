@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
+import distutils
 import os
 import os.path
 from setuptools import setup
@@ -58,11 +59,11 @@ def file_walk_relative(top, remove=''):
 
 
 def available_iris():
-    try:
+    import iris
+    if iris.__version__ >= distutils.version.LooseVersion('2.1.0'):
         return 'scitools-iris==2.1.*'
-    except:
+    else:
         return 'scitools-iris>=2.0.*'
-
 
 setup_args = dict(
     name             = name,
