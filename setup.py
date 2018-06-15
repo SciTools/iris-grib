@@ -79,10 +79,12 @@ setup_args = dict(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    install_requires = [
-        #        'iris>=1.9,<2',
-        # Also: the ECMWF GRIB API
-    ],
+    # NOTE: This Iris version requirement is a purely temporary measure :
+    # Iris>=2.1 is needed for Mercator support, but this is not yet available,
+    # so 'iris_grib._confirm_iris_mercator_support' performs a runtime version
+    # check instead + raises an error if required.
+    # TODO: update Iris version and remove runtime checking, in future release.
+    install_requires = ['scitools-iris>=2.0.*', 'eccodes'],
     extras_require = {
         'test:python_version=="2.7"': ['mock'],
     },
