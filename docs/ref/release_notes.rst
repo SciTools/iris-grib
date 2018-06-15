@@ -1,11 +1,14 @@
+Release Notes
+=============
+
 What's new in iris-grib v0.13
-=============================
+-----------------------------
 
 :Release: 0.13.0
 :Date: 15 Jun 2018
 
 Features
---------
+^^^^^^^^
 
 * Added saving of data on Hybrid Pressure levels (surface type 119 in
   code table 4.5).
@@ -13,22 +16,22 @@ Features
 * Added loading and saving of data on Hybrid Height levels (surface type 118 in
   code table 4.5).
 
-* Added loading for data using Mercator projection (grid definition
+* Added loading and saving of data using Mercator projection (grid definition
   template 10 in template table 3.1)
-
-* Added saving for data on irregular, non-rotated grids (grid definition
-  template 4 in template table 3.1)
 
   .. note::
 
       Loading and saving for the Mercator projection is only available using
       iris versions greater than 2.1.0.
 
+* Added saving for data on irregular, non-rotated grids (grid definition
+  template 4 in template table 3.1)
+
 * Added release notes for versions since 0.9.
 
 
 Bug Fixes
----------
+^^^^^^^^^
 
 * Fixed a bug with loading data on Hybrid Pressure levels (surface types 105
   and 119 in code table 4.5).  
@@ -44,7 +47,7 @@ Bug Fixes
 
 
 What's new in iris-grib v0.12
-=============================
+-----------------------------
 
 :Release: 0.12
 :Date: 25 Oct 2017
@@ -56,7 +59,7 @@ This is ECMWF's replacement for the older GRIB-API, which is now deprecated.
 
 
 What's new in iris-grib v0.11
-=============================
+-----------------------------
 
 :Release: 0.11
 :Date: 25 Oct 2017
@@ -66,7 +69,7 @@ Update for Iris v2.0+, using `dask <https://dask.pydata.org>`_ in place of
 
 
 What's new in iris-grib v0.9
-=============================
+-----------------------------
 
 :Release: 0.9.0
 :Date: 25 Jul 2016

@@ -108,9 +108,7 @@ with the command
 Development sources are hosted at `<https://github.com/SciTools/iris-grib>`_ .
 
 Releases
---------
-
-The latest release is v0.12.x .
+========
 
 For recent changes, see `Release Notes <ref/release_notes.html>`_ .
 
