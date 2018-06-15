@@ -21,8 +21,8 @@ Features
 
   .. note::
 
-      Loading for the Mercator projection is only available using iris
-      versions greater than 2.1.0.
+      Loading and saving for the Mercator projection is only available using
+      iris versions greater than 2.1.0.
 
 
 Bug Fixes
