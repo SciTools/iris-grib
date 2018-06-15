@@ -2,7 +2,7 @@ What's new in iris-grib v0.13
 =============================
 
 :Release: 0.13.0
-:Date: T.B.D.
+:Date: 15 Jun 2018
 
 Features
 --------
@@ -23,6 +23,8 @@ Features
 
       Loading and saving for the Mercator projection is only available using
       iris versions greater than 2.1.0.
+
+* Added release notes for versions since 0.9.
 
 
 Bug Fixes

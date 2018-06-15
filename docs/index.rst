@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-The documentation for iris-grib
-===============================
+Iris-grib v0.13
+===============
 
 The library ``iris-grib`` provides functionality for converting between weather and
 climate datasets that are stored as GRIB files and :class:`Iris cubes <iris.cube.Cube>`.
