@@ -16,7 +16,7 @@ install:
 
   # Install iris-grib's dependencies
   # --------------------------------
-  - conda install --quiet --yes python=${python} iris ecmwf_grib numpy cartopy mock filelock pep8;
+  - conda install --quiet --yes python=${python} iris python-eccodes numpy cartopy mock filelock pep8;
   - conda list
 
   # Download iris-test-data
