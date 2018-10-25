@@ -41,7 +41,8 @@ import iris.exceptions
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
-from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
+                            _SPATIAL_PROCESSING_TYPES)
 from iris.util import is_regular, regular_step
 
 
@@ -49,6 +50,8 @@ from iris.util import is_regular, regular_step
 _STATISTIC_TYPE_NAMES = {val: key for key, val in
                          _STATISTIC_TYPE_NAMES.items()}
 _TIME_RANGE_UNITS = {val: key for key, val in _TIME_RANGE_UNITS.items()}
+_SPATIAL_PROCESSING_TYPES = {val: key for key, val in
+                             _SPATIAL_PROCESSING_TYPES.items()}
 
 
 def fixup_float32_as_int32(value):
@@ -1271,6 +1274,43 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
 
         # Time increment i.e. interval of cell method (if any)
         set_time_increment(cell_method, grib)
+
+
+def product_definition_template_15(cube, grib, full3d_cube=None):
+    """
+    Set keys within the provided grib message based on Product
+    Definition Template 4.15.
+
+    Template 4.15 represents the type of spatial processing used to
+    arrive at the given data value from the source data.
+
+    """
+    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
+    product_definition_template_common(cube, grib, full3d_cube)
+
+    # Check that there is one and only one cell method related to the
+    # spatial processing.
+    if cube.cell_methods:
+        spatial_cell_methods = [
+            cell_method for cell_method in cube.cell_methods if 'area' in
+            cell_method.coord_names]
+        if not spatial_cell_methods:
+            raise ValueError("Expected a cell method with a coordinate name "
+                             "of 'area'")
+        if len(spatial_cell_methods) > 1:
+            raise ValueError("Cannot handle multiple 'area' cell methods")
+        cell_method, = spatial_cell_methods
+
+        if len(cell_method.coord_names) > 1:
+            raise ValueError("Cannot handle multiple coordinate names in "
+                             "the spatial processing related cell method. "
+                             "Expected ('area',), got {!r}".format(
+                                 cell_method.coord_names))
+
+        # Type of spatial processing (see code table 4.15)
+        spatial_processing = _SPATIAL_PROCESSING_TYPES.get(cell_method.method,
+                                                           255)
+        gribapi.grib_set(grib, "typeOfSpatialProcessing", spatial_processing)
 
 
 def product_definition_template_40(cube, grib, full3d_cube=None):

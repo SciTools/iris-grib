@@ -128,6 +128,24 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 # NOTE: Our test data contains the value 2, which is all we currently support.
 # The exact interpretation of this is still unclear.
 
+# Reference Code Table 4.15
+_SPATIAL_PROCESSING_TYPES = {
+    0: 'Data is calculated directly from the source grid with no '
+       'interpolation',
+    1: 'Bilinear interpolation using the 4 source grid grid-point values '
+       'surrounding the nominal grid-point',
+    2: 'Bicubic interpolation using the 4 source grid grid-point values '
+       'surrounding the nominal grid-point',
+    3: 'Using the value from the source grid grid-point which is nearest to '
+       'the nominal grid-point',
+    4: 'Budget interpolation using the 4 source grid grid-point values '
+       'surrounding the nominal grid-point',
+    5: 'Spectral interpolation using the 4 source grid grid-point values '
+       'surrounding the nominal grid-point',
+    6: 'Neighbour-budget interpolation using the 4 source grid grid-point '
+       'values surrounding the nominal gridpoint'
+}
+
 # Class containing details of a probability analysis.
 Probability = namedtuple('Probability',
                          ('probability_type_name', 'threshold'))
