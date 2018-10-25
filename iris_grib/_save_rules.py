@@ -1310,7 +1310,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
         # Type of spatial processing (see code table 4.15)
         spatial_processing = _SPATIAL_PROCESSING_TYPES.get(cell_method.method,
                                                            255)
-        gribapi.grib_set(grib, "typeOfSpatialProcessing", spatial_processing)
+        gribapi.grib_set(grib, "spatialProcessing", spatial_processing_code)
 
 
 def product_definition_template_40(cube, grib, full3d_cube=None):
