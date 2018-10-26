@@ -58,7 +58,7 @@ def section_4_sample():
             'typeOfSecondFixedSurface': 255,
             'statisticalProcess': 2,  # method = maximum
             'spatialProcessing': 0,  # from source grid, no interpolation
-            'numberOfPointsUsed': 0  # unused?
+            'numberOfPointsUsed': 0  # no points used because no interpolation
             }
 
 
@@ -73,14 +73,14 @@ class Test(LoadConvertTest):
                                                  units='m')
 
     def _translate(self, section):
-        # Use pdt 15 to populate a metadata dict from the section 4 keys
+        # Use pdt 4.15 to populate a metadata dict from the section 4 keys
         metadata = empty_metadata()
         product_definition_template_15(section, metadata,
                                        self.time_coord)
         return metadata
 
     def test_time_coord(self):
-        # Generate metadata from running our sample section through pdt 15.
+        # Generate metadata from running our sample section through pdt 4.15.
         metadata = self._translate(section_4_sample())
 
         # Generate a fresh metadata dict and manually populate it with metadata
