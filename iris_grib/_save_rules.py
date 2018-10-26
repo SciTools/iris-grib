@@ -41,7 +41,8 @@ import iris.exceptions
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
-from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
+                            _SPATIAL_PROCESSING_TYPES)
 from iris.util import is_regular, regular_step
 
 
@@ -1091,6 +1092,65 @@ def _cube_is_time_statistic(cube):
     return result
 
 
+def _cube_is_spatial_statistic(cube):
+    """
+    Test whether we can identify this cube as a statistic over space.
+
+    We need to know whether our cube represents a spatial statistic. This is
+    almost always captured in the cell methods.
+
+    """
+    result = False
+    spatial_cell_methods = []
+    has_cell_methods = cube.cell_methods
+
+    if has_cell_methods:
+        spatial_cell_methods = [
+            cell_method for cell_method in cube.cell_methods if 'area' in
+            cell_method.coord_names]
+    else:
+        raise ValueError("")
+
+    if not spatial_cell_methods:
+        result = False
+        raise ValueError("Expected a cell method with a coordinate name "
+                         "of 'area'")
+
+    elif len(spatial_cell_methods) > 1:
+        result = False
+        raise ValueError("Cannot handle multiple 'area' cell methods")
+
+    elif len(spatial_cell_methods[0].coord_names) > 1:
+        result = False
+        raise ValueError("Cannot handle multiple coordinate names in "
+                         "the spatial processing related cell method. "
+                         "Expected ('area',), got {!r}".format(
+                             spatial_cell_methods[0].coord_names))
+
+    else:
+        result = True
+
+    return result
+
+
+def get_cell_method_name(cube, type):
+
+    pass
+
+
+def statistical_method_code(cell_method_name):
+    """
+    Decode cell_method 'method' string as statistic code integer.
+    """
+
+    statistic_code = _STATISTIC_TYPE_NAMES.get(cell_method_name)
+    if statistic_code is None:
+        msg = ('Product definition section 4 contains an unsupported '
+               'statistical process type [{}] ')
+        raise TranslationError(msg.format(statistic_code))
+
+    return statistic_code
+
 def set_ensemble(cube, grib):
     """
     Set keys in the provided grib based message relating to ensemble
@@ -1285,44 +1345,32 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     # Type of spatial processing (see code table 4.15)
     spatial_processing_code = cube.attributes['spatial_processing_type']
 
-    # Only spatial processing with no interpolation is supported at save time.
-    if spatial_processing_code != 0:
+    # Statistical process and number of points (see template definition 4.15)
+    statistical_process = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0]
+    number_of_points = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][1]
+
+    # Only a limited number of spatial processing types are supported.
+    if spatial_processing_code not in _SPATIAL_PROCESSING_TYPES.keys():
         msg = ('Cannot save Product Definition Type 4.15 with spatial '
                'processing type {}'.format(spatial_processing_code))
         raise ValueError(msg)
 
+    if statistical_process == "cell_method":
+        if _cube_is_spatial_statistic(cube):
+            cell_method_name = get_cell_method_name(cube, 'area')
+            statistical_process = spatial_processing_code(cell_method_name)
+        else:
+            raise ValueError("Could not find a suitable cell_method to save "
+                             "as a spatial statistical process.")
+
+    # Set GRIB messages
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
     product_definition_template_common(cube, grib, full3d_cube)
-
-    # Check that there is one and only one cell method (statistical
-    # process) related to the spatial processing.
-    if cube.cell_methods:
-        spatial_cell_methods = [
-            cell_method for cell_method in cube.cell_methods if 'area' in
-            cell_method.coord_names]
-        if not spatial_cell_methods:
-            raise ValueError("Expected a cell method with a coordinate name "
-                             "of 'area'")
-        if len(spatial_cell_methods) > 1:
-            raise ValueError("Cannot handle multiple 'area' cell methods")
-        cell_method, = spatial_cell_methods
-
-        if len(cell_method.coord_names) > 1:
-            raise ValueError("Cannot handle multiple coordinate names in "
-                             "the spatial processing related cell method. "
-                             "Expected ('area',), got {!r}".format(
-                                 cell_method.coord_names))
-    else:
-        raise ValueError('Cannot save Product Definition Template 4.15 '
-                         'without cell method information.')
-
-    # For spatial processing code 0 there are zero points used in the
-    # interpolation.
-    number_of_points = 0
-
-    gribapi.grib_set(grib, "statisticalProcess", cell_method)
     gribapi.grib_set(grib, "spatialProcessing", spatial_processing_code)
-    gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
+    if statistical_process:
+        gribapi.grib_set(grib, "statisticalProcess", statistical_process)
+    if number_of_points:
+        gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
 
 
 def product_definition_template_40(cube, grib, full3d_cube=None):
