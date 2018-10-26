@@ -57,14 +57,15 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
 
         # If the cube has a cell method attached then it should not have any
         # interpolation on the data, so spatial processing code should be 0 and
-        # number of points used should be 1.
+        # number of points used should be 0 (because this specifically refers
+        # to the number of points used in the interpolation).
         product_definition_template_15(cube_0, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "productDefinitionTemplateNumber", 15)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "spatialProcessing", 0)
         mock_set.assert_any_call(mock.sentinel.grib,
-                                 "numberOfPointsUsed", 1)
+                                 "numberOfPointsUsed", 0)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_bilinear_interpolation(self, mock_set):
