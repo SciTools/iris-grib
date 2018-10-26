@@ -79,7 +79,7 @@ class Test(LoadConvertTest):
                                        self.time_coord)
         return metadata
 
-    def test_time_coord(self):
+    def test_translation(self):
         # Generate metadata from running our sample section through pdt 4.15.
         metadata = self._translate(section_4_sample())
 
@@ -102,14 +102,14 @@ class Test(LoadConvertTest):
     def test_bad_statistic_method(self):
         section = section_4_sample()
         section['statisticalProcess'] = 999
-        msg = ('unsupported statistical process type \[999\]')
+        msg = 'unsupported statistical process type \[999\]'
         with self.assertRaisesRegexp(TranslationError, msg):
             self._translate(section)
 
     def test_bad_spatial_processing_code(self):
         section = section_4_sample()
         section['spatialProcessing'] = 999
-        msg = ('unsupported spatial processing type \[999\]')
+        msg = 'unsupported spatial processing type \[999\]'
         with self.assertRaisesRegexp(TranslationError, msg):
             self._translate(section)
 
