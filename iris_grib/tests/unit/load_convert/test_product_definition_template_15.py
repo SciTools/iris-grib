@@ -34,7 +34,7 @@ import mock
 
 import iris.coords
 from iris.exceptions import TranslationError
-from iris.coords import CellMethod
+from iris.coords import CellMethod, DimCoord
 
 import iris_grib
 from iris_grib.tests.unit.load_convert import empty_metadata
@@ -44,7 +44,8 @@ from iris_grib._load_convert import _MDI as MDI
 from iris_grib._load_convert import product_definition_template_15
 
 
-def section_4():
+def section_4_sample():
+    # Create a dictionary representing a sample section 4 from a grib file.
     return {'productDefinitionTemplateNumber': 15,
             'hoursAfterDataCutoff': MDI,
             'minutesAfterDataCutoff': MDI,
@@ -63,46 +64,54 @@ def section_4():
 
 class Test(LoadConvertTest):
     def setUp(self):
-        self.ref_time_coord = iris.coords.DimCoord(24, 'time',
-                                                   units='hours since epoch')
+        self.time_coord = DimCoord(24, 'time', units='hours since epoch')
+        self.forecast_period_coord = DimCoord(6, 'forecast_period',
+                                              units='hours')
+        self.forecast_ref_time_coord = DimCoord(18, 'forecast_reference_time',
+                                                units='hours since epoch')
+        self.height_coord = iris.coords.DimCoord(9999, long_name='height',
+                                                 units='m')
 
-    def _check_translate(self, section):
+    def _translate(self, section):
+        # Use pdt 15 to populate a metadata dict from the section 4 keys
         metadata = empty_metadata()
         product_definition_template_15(section, metadata,
-                                       self.ref_time_coord)
+                                       self.time_coord)
         return metadata
 
-    def test_t(self):
-        metadata = self._check_translate(section_4())
+    def test_time_coord(self):
+        # Generate metadata from running our sample section through pdt 15.
+        metadata = self._translate(section_4_sample())
 
+        # Generate a fresh metadata dict and manually populate it with metadata
+        # that we expect will be generated from our sample section.
         expected = empty_metadata()
         aux = expected['aux_coords_and_dims']
-        aux.append((iris.coords.DimCoord(6, 'forecast_period', units='hours'),
-                    None))
-        aux.append((
-            iris.coords.DimCoord(18, 'forecast_reference_time',
-                                 units='hours since epoch'), None))
-        aux.append((self.ref_time_coord, None))
-        aux.append((iris.coords.DimCoord(9999, long_name='height', units='m'),
-                    None))
+        aux.append((self.forecast_period_coord, None))
+        aux.append((self.forecast_ref_time_coord, None))
+        aux.append((self.time_coord, None))
+        aux.append((self.height_coord, None))
+
         expected['cell_methods'] = [CellMethod(coords=('area',),
                                                method='maximum')]
 
+        # Now check that the section conversion produces the metadata we
+        # expect.
         self.assertMetadataEqual(metadata, expected)
 
     def test_bad_statistic_method(self):
-        section = section_4()
+        section = section_4_sample()
         section['statisticalProcess'] = 999
         msg = ('unsupported statistical process type \[999\]')
         with self.assertRaisesRegexp(TranslationError, msg):
-            self._check_translate(section)
+            self._translate(section)
 
     def test_bad_spatial_processing_code(self):
-        section = section_4()
+        section = section_4_sample()
         section['spatialProcessing'] = 999
         msg = ('unsupported spatial processing type \[999\]')
         with self.assertRaisesRegexp(TranslationError, msg):
-            self._check_translate(section)
+            self._translate(section)
 
 
 if __name__ == '__main__':
