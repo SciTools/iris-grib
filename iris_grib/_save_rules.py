@@ -1308,6 +1308,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
                                  cell_method.coord_names))
 
         # Type of spatial processing (see code table 4.15)
+        # TODO Figure out where I get the spatial processing code from
         spatial_processing = _SPATIAL_PROCESSING_TYPES.get(cell_method.method,
                                                            255)
         gribapi.grib_set(grib, "spatialProcessing", spatial_processing)
@@ -1342,6 +1343,9 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
             product_definition_template_40(cube, grib, full3d_cube)
+        elif 'area' in cube.cell_methods.coord_names:
+            # spatially processed (template 4.15)
+            product_definition_template_15(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
             product_definition_template_0(cube, grib, full3d_cube)

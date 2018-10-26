@@ -34,3 +34,29 @@ from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
 
 from iris_grib._save_rules import product_definition_template_15
+
+
+class TestSpatialProcessingIdentifier(tests.IrisGribTest):
+    def setUp(self):
+        self.cube = stock.lat_lon_cube()
+        # Rename cube to avoid warning about unknown discipline/parameter.
+        self.cube.rename('WAFC_CAT_potential')
+        coord = DimCoord(7, standard_name='pressure', bounds=[0, 10])
+        self.cube.add_dim_coord(coord)
+
+
+    @mock.patch.object(gribapi, 'grib_set')
+    def test_spatial_processing(self, mock_set):
+        cube = self.cube
+        cell_method = CellMethod(method='mean', coords=['area'])
+        cube.add_cell_method(cell_method)
+
+        product_definition_template_15(cube, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", # TODO: Get this.)
+
+
+if __name__ == "__main__":
+    tests.main()
