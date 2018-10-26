@@ -143,7 +143,7 @@ _SPATIAL_PROCESSING_TYPES = {
     5: 'Spectral interpolation using the 4 source grid grid-point values '
        'surrounding the nominal grid-point',
     6: 'Neighbour-budget interpolation using the 4 source grid grid-point '
-       'values surrounding the nominal gridpoint'
+       'values surrounding the nominal grid-point'
 }
 
 # Class containing details of a probability analysis.
@@ -2178,25 +2178,31 @@ def product_definition_template_15(section, metadata, frt_coord):
     # Check unique keys for this template.
     spatial_processing_code = section['spatialProcessing']
 
-    if spatial_processing_code != 0:
-        # For now, we only support the simplest case, representing a statistic
-        # over the whole notional area of a cell.
+    # Only a limited number of spatial processing codes are supported
+    if spatial_processing_code not in _SPATIAL_PROCESSING_TYPES.keys():
         msg = ('Product definition section 4 contains an unsupported '
                'spatial processing type [{}]'.format(spatial_processing_code))
         raise TranslationError(msg)
 
-    # NOTE: PDT 4.15 alse defines a 'numberOfPointsUsed' key, but we think this
-    # is irrelevant to the currently supported spatial-processing types.
+    # NOTE: PDT 4.15 also defines a 'numberOfPointsUsed' key, but we have
+    # not developed a way to interpret this in a CF-compliant way and code
+    # table 4.15 includes this information in each description of types 0-6.
 
-    # Process parts in common with pdt 4.0.
+    # Process parts in common with PDT 4.0.
     product_definition_template_0(section, metadata, frt_coord)
 
-    # Decode the statistic method name.
-    cell_method_name = statistical_method_name(section)
+    # Add spatial processing type as an attribute.
+    metadata['attributes']['spatial_processing_type'] = spatial_processing_code
 
-    # Record an 'area' cell-method using this statistic.
-    metadata['cell_methods'] = [CellMethod(coords=('area',),
-                                           method=cell_method_name)]
+    # Only statistics on non-interpolated data can currently be represented
+    # with cell-methods.
+    if spatial_processing_code == 0:
+        # Decode the statistical method name.
+        cell_method_name = statistical_method_name(section)
+
+        # Record an 'area' cell-method using this statistic.
+        metadata['cell_methods'] = [CellMethod(coords=('area',),
+                                               method=cell_method_name)]
 
 
 def satellite_common(section, metadata):
@@ -2317,7 +2323,7 @@ def product_definition_template_40(section, metadata, frt_coord):
     # Reference GRIB2 Code Table 4.230.
     constituent_type = section['constituentType']
 
-    # Add the constituent type as  an attribute.
+    # Add the constituent type as an attribute.
     metadata['attributes']['WMO_constituent_type'] = constituent_type
 
 

@@ -41,8 +41,7 @@ import iris.exceptions
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
-from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
-                            _SPATIAL_PROCESSING_TYPES)
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
 from iris.util import is_regular, regular_step
 
 
@@ -50,8 +49,6 @@ from iris.util import is_regular, regular_step
 _STATISTIC_TYPE_NAMES = {val: key for key, val in
                          _STATISTIC_TYPE_NAMES.items()}
 _TIME_RANGE_UNITS = {val: key for key, val in _TIME_RANGE_UNITS.items()}
-_SPATIAL_PROCESSING_TYPES = {val: key for key, val in
-                             _SPATIAL_PROCESSING_TYPES.items()}
 
 
 def fixup_float32_as_int32(value):
@@ -1210,7 +1207,7 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
 
-    Templates 4.8  and 4.11 are used to represent aggregations over a time
+    Templates 4.8 and 4.11 are used to represent aggregations over a time
     interval.
 
     """
@@ -1285,11 +1282,20 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     arrive at the given data value from the source data.
 
     """
+    # Type of spatial processing (see code table 4.15)
+    spatial_processing_code = cube.attributes['spatial_processing_type']
+
+    # Only spatial processing with no interpolation is supported at save time.
+    if spatial_processing_code != 0:
+        msg = ('Cannot save Product Definition Type 4.15 with spatial '
+               'processing type {}'.format(spatial_processing_code))
+        raise ValueError(msg)
+
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
     product_definition_template_common(cube, grib, full3d_cube)
 
-    # Check that there is one and only one cell method related to the
-    # spatial processing.
+    # Check that there is one and only one cell method (statistical
+    # process) related to the spatial processing.
     if cube.cell_methods:
         spatial_cell_methods = [
             cell_method for cell_method in cube.cell_methods if 'area' in
@@ -1306,12 +1312,17 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
                              "the spatial processing related cell method. "
                              "Expected ('area',), got {!r}".format(
                                  cell_method.coord_names))
+    else:
+        raise ValueError('Cannot save Product Definition Template 4.15 '
+                         'without cell method information.')
 
-        # Type of spatial processing (see code table 4.15)
-        # TODO Figure out where I get the spatial processing code from
-        spatial_processing = _SPATIAL_PROCESSING_TYPES.get(cell_method.method,
-                                                           255)
-        gribapi.grib_set(grib, "spatialProcessing", spatial_processing)
+    # For spatial processing code 0 there are zero points used in the
+    # interpolation.
+    number_of_points = 0
+
+    gribapi.grib_set(grib, "statisticalProcess", cell_method)
+    gribapi.grib_set(grib, "spatialProcessing", spatial_processing_code)
+    gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
 
 
 def product_definition_template_40(cube, grib, full3d_cube=None):
