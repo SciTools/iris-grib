@@ -1099,6 +1099,7 @@ def _cube_is_spatial_statistic(cube):
     We need to know whether our cube represents a spatial statistic. This is
     almost always captured in the cell methods.
 
+    WIP: UNFINISHED?
     """
     result = False
     spatial_cell_methods = []
@@ -1134,16 +1135,17 @@ def _cube_is_spatial_statistic(cube):
 
 
 def get_cell_method_name(cube, type):
-
+    """
+    Returns name of cell method in cube where cell_method.coord_names == type
+    """
     pass
 
 
 def statistical_method_code(cell_method_name):
     """
-    Decode cell_method 'method' string as statistic code integer.
+    Decode cell_method string as statistic code integer.
     """
-
-    statistic_code = _STATISTIC_TYPE_NAMES.get(cell_method_name)
+    statistic_code = _STATISTIC_TYPE_NAMES.get(cell_method_name, None)
     if statistic_code is None:
         msg = ('Product definition section 4 contains an unsupported '
                'statistical process type [{}] ')
@@ -1358,7 +1360,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     if statistical_process == "cell_method":
         if _cube_is_spatial_statistic(cube):
             cell_method_name = get_cell_method_name(cube, 'area')
-            statistical_process = spatial_processing_code(cell_method_name)
+            statistical_process = statistical_method_code(cell_method_name)
         else:
             raise ValueError("Could not find a suitable cell_method to save "
                              "as a spatial statistical process.")
