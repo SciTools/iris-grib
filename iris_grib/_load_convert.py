@@ -133,10 +133,10 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 
 # Reference Code Table 4.15
 _SPATIAL_PROCESSING_TYPES = {
-    0: InterpolationParameters('cell_method', 0),
+    0: InterpolationParameters('cell_method', 0),   # Statistic -> cell method
     1: InterpolationParameters(None, None),
     2: InterpolationParameters(None, None),
-    3: InterpolationParameters(0, 1),
+    3: InterpolationParameters(0, 1),       # Only reliable default values
     4: InterpolationParameters(None, None),
     5: InterpolationParameters(None, None),
     6: InterpolationParameters(None, None)
@@ -2190,9 +2190,9 @@ def product_definition_template_15(section, metadata, frt_coord):
     # Add spatial processing type as an attribute.
     metadata['attributes']['spatial_processing_type'] = spatial_processing_code
 
-    # Only statistics on non-interpolated data can currently be represented
-    # with cell-methods.
-    if spatial_processing_code == 0:
+    # Add a cell method if the spatial processing type supports a
+    # statistical process.
+    if _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0] == "cell_method":
         # Decode the statistical method name.
         cell_method_name = statistical_method_name(section)
 
