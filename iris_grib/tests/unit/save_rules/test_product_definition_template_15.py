@@ -57,8 +57,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
 
         # If the cube has a cell method attached then it should not have any
         # interpolation on the data, so spatial processing code should be 0 and
-        # number of points used should be 0 (because this specifically refers
-        # to the number of points used in the interpolation).
+        # number of points used should be 0.
         product_definition_template_15(cube_0, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "productDefinitionTemplateNumber", 15)
@@ -72,24 +71,31 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         cube_1 = self.cube
         cube_1.attributes = dict(spatial_processing_type=1)
 
-        # Currently no implemented recognition of spatial processing code 1,
-        # so check that an error is raised if we try and save it.
-        msg = ('Cannot save Product Definition Type 4.15 with spatial '
-               'processing type {}'.format(1))
-        with self.assertRaisesRegexp(ValueError, msg):
-            product_definition_template_15(cube_1, mock.sentinel.grib)
+        # If the cube has a bilinear interpolation attribute, spatial
+        # processing code should be 1 and number of points used should be 4.
+        product_definition_template_15(cube_1, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", 1)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "numberOfPointsUsed", 4)
+
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_bicubic_interpolation(self, mock_set):
         cube_2 = self.cube
         cube_2.attributes = dict(spatial_processing_type=2)
 
-        # Currently no implemented recognition of spatial processing code 2,
-        # so check that an error is raised if we try and save it.
-        msg = ('Cannot save Product Definition Type 4.15 with spatial '
-               'processing type {}'.format(2))
-        with self.assertRaisesRegexp(ValueError, msg):
-            product_definition_template_15(cube_2, mock.sentinel.grib)
+        # If the cube has a bicubic interpolation attribute, spatial
+        # processing code should be 2 and number of points used should be 4.
+        product_definition_template_15(cube_2, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", 2)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "numberOfPointsUsed", 4)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_nearest_neighbour_interpolation(self, mock_set):
@@ -111,36 +117,46 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         cube_4 = self.cube
         cube_4.attributes = dict(spatial_processing_type=4)
 
-        # Currently no implemented recognition of spatial processing code 4,
-        # so check that an error is raised if we try and save it.
-        msg = ('Cannot save Product Definition Type 4.15 with spatial '
-               'processing type {}'.format(4))
-        with self.assertRaisesRegexp(ValueError, msg):
-            product_definition_template_15(cube_4, mock.sentinel.grib)
+        # If the cube has a budget interpolation attribute, spatial
+        # processing code should be 4 and number of points used should be 4.
+        product_definition_template_15(cube_4, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", 4)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "numberOfPointsUsed", 4)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_spectral_interpolation(self, mock_set):
         cube_5 = self.cube
         cube_5.attributes = dict(spatial_processing_type=5)
 
-        # Currently no implemented recognition of spatial processing code 5,
-        # so check that an error is raised if we try and save it.
-        msg = ('Cannot save Product Definition Type 4.15 with spatial '
-               'processing type {}'.format(5))
-        with self.assertRaisesRegexp(ValueError, msg):
-            product_definition_template_15(cube_5, mock.sentinel.grib)
+        # If the cube has a spectral interpolation attribute, spatial
+        # processing code should be 5 and number of points used should be 4.
+        product_definition_template_15(cube_5, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", 5)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "numberOfPointsUsed", 4)
 
     @mock.patch.object(gribapi, 'grib_set')
-    def test_neighbour_budget__interpolation(self, mock_set):
+    def test_neighbour_budget_interpolation(self, mock_set):
         cube_6 = self.cube
         cube_6.attributes = dict(spatial_processing_type=6)
 
-        # Currently no implemented recognition of spatial processing code 6,
-        # so check that an error is raised if we try and save it.
-        msg = ('Cannot save Product Definition Type 4.15 with spatial '
-               'processing type {}'.format(6))
-        with self.assertRaisesRegexp(ValueError, msg):
-            product_definition_template_15(cube_6, mock.sentinel.grib)
+        # If the cube has a neighbour-budget interpolation attribute, spatial
+        # processing code should be 6 and number of points used should be 4.
+        product_definition_template_15(cube_6, mock.sentinel.grib)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "productDefinitionTemplateNumber", 15)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "spatialProcessing", 6)
+        mock_set.assert_any_call(mock.sentinel.grib,
+                                 "numberOfPointsUsed", 4)
+
 
 if __name__ == "__main__":
     tests.main()
