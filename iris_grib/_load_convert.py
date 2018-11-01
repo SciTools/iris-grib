@@ -140,7 +140,7 @@ _SPATIAL_PROCESSING_TYPES = {
     0: InterpolationParameters('cell_method', 0),  # No interpolation
     1: InterpolationParameters(None, 4),  # Bilinear interpolation
     2: InterpolationParameters(None, 4),  # Bicubic interpolation
-    3: InterpolationParameters(0, 1),  # Nearest neighbour interpolation
+    3: InterpolationParameters(None, 1),  # Nearest neighbour interpolation
     4: InterpolationParameters(None, 4),  # Budget interpolation
     5: InterpolationParameters(None, 4),  # Spectral interpolation
     6: InterpolationParameters(None, 4)  # Neighbour-budget interpolation
