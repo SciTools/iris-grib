@@ -73,6 +73,9 @@ FixedSurface = namedtuple('FixedSurface', ['standard_name',
                                            'long_name',
                                            'units'])
 
+InterpolationParameters = namedtuple('InterpolationParameters',
+                                     ['statistical_process',
+                                      'number_of_points_used'])
 # Regulations 92.1.6.
 _GRID_ACCURACY_IN_DEGREES = 1e-6  # 1/1,000,000 of a degree
 
@@ -130,20 +133,13 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 
 # Reference Code Table 4.15
 _SPATIAL_PROCESSING_TYPES = {
-    0: 'Data is calculated directly from the source grid with no '
-       'interpolation',
-    1: 'Bilinear interpolation using the 4 source grid grid-point values '
-       'surrounding the nominal grid-point',
-    2: 'Bicubic interpolation using the 4 source grid grid-point values '
-       'surrounding the nominal grid-point',
-    3: 'Using the value from the source grid grid-point which is nearest to '
-       'the nominal grid-point',
-    4: 'Budget interpolation using the 4 source grid grid-point values '
-       'surrounding the nominal grid-point',
-    5: 'Spectral interpolation using the 4 source grid grid-point values '
-       'surrounding the nominal grid-point',
-    6: 'Neighbour-budget interpolation using the 4 source grid grid-point '
-       'values surrounding the nominal grid-point'
+    0: InterpolationParameters('cell_method', 0),   # Statistic -> cell method
+    1: InterpolationParameters(None, None),
+    2: InterpolationParameters(None, None),
+    3: InterpolationParameters(0, 1),       # Only reliable default values
+    4: InterpolationParameters(None, None),
+    5: InterpolationParameters(None, None),
+    6: InterpolationParameters(None, None)
 }
 
 # Class containing details of a probability analysis.
@@ -2194,9 +2190,9 @@ def product_definition_template_15(section, metadata, frt_coord):
     # Add spatial processing type as an attribute.
     metadata['attributes']['spatial_processing_type'] = spatial_processing_code
 
-    # Only statistics on non-interpolated data can currently be represented
-    # with cell-methods.
-    if spatial_processing_code == 0:
+    # Add a cell method if the spatial processing type supports a
+    # statistical process.
+    if _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0] == "cell_method":
         # Decode the statistical method name.
         cell_method_name = statistical_method_name(section)
 
