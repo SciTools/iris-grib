@@ -131,15 +131,19 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 # NOTE: Our test data contains the value 2, which is all we currently support.
 # The exact interpretation of this is still unclear.
 
-# Reference Code Table 4.15
+# See Code Table 4.15 for full spatial processing type descriptors:
+# http://apps.ecmwf.int/codes/grib/format/grib2/ctables/4/15
+
+# InterpolationParameters(statistical process (octet 35), number of points
+# used in interpolation (octet 37))
 _SPATIAL_PROCESSING_TYPES = {
-    0: InterpolationParameters('cell_method', 0),   # Statistic -> cell method
-    1: InterpolationParameters(None, None),
-    2: InterpolationParameters(None, None),
-    3: InterpolationParameters(0, 1),       # Only reliable default values
-    4: InterpolationParameters(None, None),
-    5: InterpolationParameters(None, None),
-    6: InterpolationParameters(None, None)
+    0: InterpolationParameters('cell_method', 0),  # No interpolation
+    1: InterpolationParameters(None, 4),  # Bilinear interpolation
+    2: InterpolationParameters(None, 4),  # Bicubic interpolation
+    3: InterpolationParameters(0, 1),  # Nearest neighbour interpolation
+    4: InterpolationParameters(None, 4),  # Budget interpolation
+    5: InterpolationParameters(None, 4),  # Spectral interpolation
+    6: InterpolationParameters(None, 4)  # Neighbour-budget interpolation
 }
 
 # Class containing details of a probability analysis.
@@ -2180,14 +2184,11 @@ def product_definition_template_15(section, metadata, frt_coord):
                'spatial processing type [{}]'.format(spatial_processing_code))
         raise TranslationError(msg)
 
-    # NOTE: PDT 4.15 also defines a 'numberOfPointsUsed' key, but we have
-    # not developed a way to interpret this in a CF-compliant way and code
-    # table 4.15 includes this information in each description of types 0-6.
-
     # Process parts in common with PDT 4.0.
     product_definition_template_0(section, metadata, frt_coord)
 
     # Add spatial processing type as an attribute.
+    # TODO: Decide whether to set the value of this attribute as a code or something else
     metadata['attributes']['spatial_processing_type'] = spatial_processing_code
 
     # Add a cell method if the spatial processing type supports a

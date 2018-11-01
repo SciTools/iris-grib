@@ -1092,53 +1092,24 @@ def _cube_is_time_statistic(cube):
     return result
 
 
-def _cube_is_spatial_statistic(cube):
+def _spatial_statistic(cube):
     """
-    Test whether we can identify this cube as a statistic over space.
+    Gather and return the spatial statistic of the cube if it is present.
 
-    We need to know whether our cube represents a spatial statistic. This is
-    almost always captured in the cell methods.
-
-    WIP: UNFINISHED?
     """
-    result = False
-    spatial_cell_methods = []
-    has_cell_methods = cube.cell_methods
+    spatial_cell_methods = [
+        cell_method for cell_method in cube.cell_methods if 'area' in
+        cell_method.coord_names]
 
-    if has_cell_methods:
-        spatial_cell_methods = [
-            cell_method for cell_method in cube.cell_methods if 'area' in
-            cell_method.coord_names]
-    else:
-        raise ValueError("")
-
-    if not spatial_cell_methods:
-        result = False
-        raise ValueError("Expected a cell method with a coordinate name "
-                         "of 'area'")
-
-    elif len(spatial_cell_methods) > 1:
-        result = False
+    if len(spatial_cell_methods) > 1:
         raise ValueError("Cannot handle multiple 'area' cell methods")
-
     elif len(spatial_cell_methods[0].coord_names) > 1:
-        result = False
         raise ValueError("Cannot handle multiple coordinate names in "
                          "the spatial processing related cell method. "
-                         "Expected ('area',), got {!r}".format(
-                             spatial_cell_methods[0].coord_names))
+                         "Expected ('area',), got {!r}".format
+                         (spatial_cell_methods[0].coord_names))
 
-    else:
-        result = True
-
-    return result
-
-
-def get_cell_method_name(cube, type):
-    """
-    Returns name of cell method in cube where cell_method.coord_names == type
-    """
-    pass
+    return spatial_cell_methods
 
 
 def statistical_method_code(cell_method_name):
@@ -1344,7 +1315,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     arrive at the given data value from the source data.
 
     """
-    # Type of spatial processing (see code table 4.15)
+    # Encode type of spatial processing (see code table 4.15)
     spatial_processing_code = cube.attributes['spatial_processing_type']
 
     # Statistical process and number of points (see template definition 4.15)
@@ -1358,8 +1329,11 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
         raise ValueError(msg)
 
     if statistical_process == "cell_method":
-        if _cube_is_spatial_statistic(cube):
-            cell_method_name = get_cell_method_name(cube, 'area')
+        # Check the cube for statistical cell methods over area
+        spatial_stats = _spatial_statistic(cube)
+        # Identify the statistical method (i.e. 'mean') and encode it.
+        if len(spatial_stats) > 0:
+            cell_method_name = spatial_stats[0].method
             statistical_process = statistical_method_code(cell_method_name)
         else:
             raise ValueError("Could not find a suitable cell_method to save "
@@ -1404,8 +1378,8 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
             product_definition_template_40(cube, grib, full3d_cube)
-        elif 'area' in cube.cell_methods.coord_names:
-            # spatially processed (template 4.15)
+        elif cube.has_attribute('spatial_processing_type'):
+            # spatial process (template 4.15)
             product_definition_template_15(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
