@@ -1377,7 +1377,7 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
             product_definition_template_40(cube, grib, full3d_cube)
-        elif cube.has_attribute('spatial_processing_type'):
+        elif hasattr(cube, 'spatial_processing_type'):
             # spatial process (template 4.15)
             product_definition_template_15(cube, grib, full3d_cube)
         else:
