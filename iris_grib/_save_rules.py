@@ -1120,9 +1120,28 @@ def statistical_method_code(cell_method_name):
     if statistic_code is None:
         msg = ('Product definition section 4 contains an unsupported '
                'statistical process type [{}] ')
-        raise TranslationError(msg.format(statistic_code))
+        raise ValueError(msg.format(statistic_code))
 
     return statistic_code
+
+
+def spatial_process_code(sp_type):
+    """
+    Decode cell_method string as statistic code integer.
+    """
+    spatial_processing_code = None
+
+    for code, interp_params in _SPATIAL_PROCESSING_TYPES.items():
+        if interp_params.interpolation_type == sp_type:
+            spatial_processing_code = code
+            break
+
+    if spatial_processing_code is None:
+        msg = ('Product definition section 4 contains an unsupported '
+               'spacial processing or interpolation type: {} ')
+        raise ValueError(msg.format(sp_type))
+
+    return spatial_processing_code
 
 
 def set_ensemble(cube, grib):
@@ -1317,11 +1336,13 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
 
     """
     # Encode type of spatial processing (see code table 4.15)
-    spatial_processing_code = cube.attributes['spatial_processing_type']
+    sp_type = cube.attributes['spatial_processing_type']
+    spatial_processing_code = spatial_process_code(sp_type)
 
-    # Statistical process and number of points (see template definition 4.15)
-    statistical_process = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0]
-    number_of_points = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][1]
+    # Encode statistical process and number of points
+    # (see template definition 4.15)
+    statistical_process = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][1]
+    number_of_points = _SPATIAL_PROCESSING_TYPES[spatial_processing_code][2]
 
     # Only a limited number of spatial processing types are supported.
     if spatial_processing_code not in _SPATIAL_PROCESSING_TYPES.keys():
@@ -1332,7 +1353,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     if statistical_process:
         # Check the cube for statistical cell methods over area
         spatial_stats = _spatial_statistic(cube)
-        # Identify the statistical method (i.e. 'mean') and encode it.
+        # Identify the statistical method (e.g. 'mean') and encode it.
         if len(spatial_stats) > 0:
             cell_method_name = spatial_stats[0].method
             statistical_process = statistical_method_code(cell_method_name)
@@ -1344,7 +1365,8 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
     gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
     product_definition_template_common(cube, grib, full3d_cube)
     gribapi.grib_set(grib, "spatialProcessing", spatial_processing_code)
-    gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
+    if number_of_points:
+        gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
     if statistical_process:
         gribapi.grib_set(grib, "statisticalProcess", statistical_process)
 

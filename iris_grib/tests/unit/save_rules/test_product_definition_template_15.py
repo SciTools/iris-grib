@@ -46,12 +46,13 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
                                       calendar='gregorian'))
         self.cube.add_aux_coord(t_coord)
         # Rename cube to avoid warning about unknown discipline/parameter.
-        self.cube.rename('WAFC_CAT_potential')
+        self.cube.rename('air_temperature')
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_cell_method(self, mock_set):
         cube_0 = self.cube
-        cube_0.attributes = dict(spatial_processing_type=0)
+        cube_0.attributes = dict(spatial_processing_type=
+                                 'Statistical cell method')
         cell_method = CellMethod(method='mean', coords=['area'])
         cube_0.add_cell_method(cell_method)
 
@@ -69,7 +70,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_bilinear_interpolation(self, mock_set):
         cube_1 = self.cube
-        cube_1.attributes = dict(spatial_processing_type=1)
+        cube_1.attributes = dict(spatial_processing_type=
+                                 'Bilinear interpolation')
 
         # If the cube has a bilinear interpolation attribute, spatial
         # processing code should be 1 and number of points used should be 4.
@@ -84,7 +86,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_bicubic_interpolation(self, mock_set):
         cube_2 = self.cube
-        cube_2.attributes = dict(spatial_processing_type=2)
+        cube_2.attributes = dict(spatial_processing_type=
+                                 'Bicubic interpolation')
 
         # If the cube has a bicubic interpolation attribute, spatial
         # processing code should be 2 and number of points used should be 4.
@@ -99,7 +102,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_nearest_neighbour_interpolation(self, mock_set):
         cube_3 = self.cube
-        cube_3.attributes = dict(spatial_processing_type=3)
+        cube_3.attributes = dict(spatial_processing_type=
+                                 'Nearest neighbour interpolation')
 
         # If the cube has a nearest neighbour interpolation attribute, spatial
         # processing code should be 3 and number of points used should be 1.
@@ -114,7 +118,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_budget_interpolation(self, mock_set):
         cube_4 = self.cube
-        cube_4.attributes = dict(spatial_processing_type=4)
+        cube_4.attributes = dict(spatial_processing_type=
+                                 'Budget interpolation')
 
         # If the cube has a budget interpolation attribute, spatial
         # processing code should be 4 and number of points used should be 4.
@@ -129,7 +134,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_spectral_interpolation(self, mock_set):
         cube_5 = self.cube
-        cube_5.attributes = dict(spatial_processing_type=5)
+        cube_5.attributes = dict(spatial_processing_type=
+                                 'Spectral interpolation')
 
         # If the cube has a spectral interpolation attribute, spatial
         # processing code should be 5 and number of points used should be 4.
@@ -144,7 +150,8 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_neighbour_budget_interpolation(self, mock_set):
         cube_6 = self.cube
-        cube_6.attributes = dict(spatial_processing_type=6)
+        cube_6.attributes = dict(spatial_processing_type=
+                                 'Neighbour-budget interpolation')
 
         # If the cube has a neighbour-budget interpolation attribute, spatial
         # processing code should be 6 and number of points used should be 4.

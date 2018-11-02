@@ -74,7 +74,8 @@ FixedSurface = namedtuple('FixedSurface', ['standard_name',
                                            'units'])
 
 InterpolationParameters = namedtuple('InterpolationParameters',
-                                     ['statistical_process',
+                                     ['interpolation_type',
+                                      'statistical_process',
                                       'number_of_points_used'])
 # Regulations 92.1.6.
 _GRID_ACCURACY_IN_DEGREES = 1e-6  # 1/1,000,000 of a degree
@@ -134,16 +135,16 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 # See Code Table 4.15 for full spatial processing type descriptors:
 # http://apps.ecmwf.int/codes/grib/format/grib2/ctables/4/15
 
-# InterpolationParameters(statistical process (octet 35), number of points
-# used in interpolation (octet 37))
+# InterpolationParameters(spatial process descriptor, statistical process
+# (octet 35), number of points used in interpolation (octet 37))
 _SPATIAL_PROCESSING_TYPES = {
-    0: InterpolationParameters('cell_method', 0),  # No interpolation
-    1: InterpolationParameters(None, 4),  # Bilinear interpolation
-    2: InterpolationParameters(None, 4),  # Bicubic interpolation
-    3: InterpolationParameters(None, 1),  # Nearest neighbour interpolation
-    4: InterpolationParameters(None, 4),  # Budget interpolation
-    5: InterpolationParameters(None, 4),  # Spectral interpolation
-    6: InterpolationParameters(None, 4)  # Neighbour-budget interpolation
+    0: InterpolationParameters('Statistical cell method', 'cell_method', 0),
+    1: InterpolationParameters('Bilinear interpolation', None, 4),
+    2: InterpolationParameters('Bicubic interpolation', None, 4),
+    3: InterpolationParameters('Nearest neighbour interpolation', None, 1),
+    4: InterpolationParameters('Budget interpolation', None, 4),
+    5: InterpolationParameters('Spectral interpolation', None, 4),
+    6: InterpolationParameters('Neighbour-budget interpolation', None, 4)
 }
 
 # Class containing details of a probability analysis.
@@ -2188,12 +2189,12 @@ def product_definition_template_15(section, metadata, frt_coord):
     product_definition_template_0(section, metadata, frt_coord)
 
     # Add spatial processing type as an attribute.
-    # TODO: Decide what form to set this attribute as (code int/string/?)
-    metadata['attributes']['spatial_processing_type'] = spatial_processing_code
+    metadata['attributes']['spatial_processing_type'] = \
+        _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0]
 
     # Add a cell method if the spatial processing type supports a
     # statistical process.
-    if _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0] == "cell_method":
+    if _SPATIAL_PROCESSING_TYPES[spatial_processing_code][1] == "cell_method":
         # Decode the statistical method name.
         cell_method_name = statistical_method_name(section)
 

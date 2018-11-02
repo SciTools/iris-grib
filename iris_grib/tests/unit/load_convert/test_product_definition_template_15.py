@@ -94,7 +94,8 @@ class Test(LoadConvertTest):
 
         expected['cell_methods'] = [CellMethod(coords=('area',),
                                                method='maximum')]
-        expected['attributes']['spatial_processing_type'] = 0
+        expected['attributes']['spatial_processing_type'] = \
+            'Statistical cell method'
 
         # Now check that the section conversion produces the metadata we
         # expect.
