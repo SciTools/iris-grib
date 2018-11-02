@@ -1124,6 +1124,7 @@ def statistical_method_code(cell_method_name):
 
     return statistic_code
 
+
 def set_ensemble(cube, grib):
     """
     Set keys in the provided grib based message relating to ensemble

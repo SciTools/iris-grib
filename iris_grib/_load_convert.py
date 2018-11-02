@@ -2188,7 +2188,7 @@ def product_definition_template_15(section, metadata, frt_coord):
     product_definition_template_0(section, metadata, frt_coord)
 
     # Add spatial processing type as an attribute.
-    # TODO: Decide whether to set the value of this attribute as a code or something else
+    # TODO: Decide what form to set this attribute as (code int/string/?)
     metadata['attributes']['spatial_processing_type'] = spatial_processing_code
 
     # Add a cell method if the spatial processing type supports a

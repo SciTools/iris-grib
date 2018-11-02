@@ -81,7 +81,6 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 4)
 
-
     @mock.patch.object(gribapi, 'grib_set')
     def test_bicubic_interpolation(self, mock_set):
         cube_2 = self.cube
