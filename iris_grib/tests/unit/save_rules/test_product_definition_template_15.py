@@ -65,7 +65,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "spatialProcessing", 0)
         mock_set.assert_any_call(mock.sentinel.grib,
-                                 "numberOfPointsUsed", 0)
+                                 "statisticalProcess", 0)
 
     @mock.patch.object(gribapi, 'grib_set')
     def test_bilinear_interpolation(self, mock_set):
