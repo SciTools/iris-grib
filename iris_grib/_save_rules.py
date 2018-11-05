@@ -1133,7 +1133,7 @@ def get_spatial_process_code(spatial_processing_type):
     spatial_processing_code = None
 
     for code, interp_params in _SPATIAL_PROCESSING_TYPES.items():
-        if interp_params.interpolation_type == spacial_processing_type:
+        if interp_params.interpolation_type == spatial_processing_type:
             spatial_processing_code = code
             break
 
