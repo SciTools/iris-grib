@@ -1140,7 +1140,7 @@ def get_spatial_process_code(spatial_processing_type):
     if spatial_processing_code is None:
         msg = ('Product definition section 4 contains an unsupported '
                'spacial processing or interpolation type: {} ')
-        raise TranslationError(msg.format(spacial_processing_type))
+        raise TranslationError(msg.format(spatial_processing_type))
 
     return spatial_processing_code
 
