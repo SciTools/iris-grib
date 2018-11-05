@@ -138,7 +138,7 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 # InterpolationParameters(spatial process descriptor, statistical process
 # (octet 35), number of points used in interpolation (octet 37))
 _SPATIAL_PROCESSING_TYPES = {
-    0: InterpolationParameters('Statistical cell method', 'cell_method', 0),
+    0: InterpolationParameters('No interpolation', 'cell_method', 0),
     1: InterpolationParameters('Bilinear interpolation', None, 4),
     2: InterpolationParameters('Bicubic interpolation', None, 4),
     3: InterpolationParameters('Nearest neighbour interpolation', None, 1),
