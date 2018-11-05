@@ -73,6 +73,10 @@ FixedSurface = namedtuple('FixedSurface', ['standard_name',
                                            'long_name',
                                            'units'])
 
+InterpolationParameters = namedtuple('InterpolationParameters',
+                                     ['interpolation_type',
+                                      'statistical_process',
+                                      'number_of_points_used'])
 # Regulations 92.1.6.
 _GRID_ACCURACY_IN_DEGREES = 1e-6  # 1/1,000,000 of a degree
 
@@ -127,6 +131,21 @@ _STATISTIC_TYPE_OF_TIME_INTERVAL = {
 }
 # NOTE: Our test data contains the value 2, which is all we currently support.
 # The exact interpretation of this is still unclear.
+
+# See Code Table 4.15 for full spatial processing type descriptors:
+# http://apps.ecmwf.int/codes/grib/format/grib2/ctables/4/15
+
+# InterpolationParameters(spatial process descriptor, statistical process
+# (octet 35), number of points used in interpolation (octet 37))
+_SPATIAL_PROCESSING_TYPES = {
+    0: InterpolationParameters('No interpolation', 'cell_method', 0),
+    1: InterpolationParameters('Bilinear interpolation', None, 4),
+    2: InterpolationParameters('Bicubic interpolation', None, 4),
+    3: InterpolationParameters('Nearest neighbour interpolation', None, 1),
+    4: InterpolationParameters('Budget interpolation', None, 4),
+    5: InterpolationParameters('Spectral interpolation', None, 4),
+    6: InterpolationParameters('Neighbour-budget interpolation', None, 4)
+}
 
 # Class containing details of a probability analysis.
 Probability = namedtuple('Probability',
@@ -2160,25 +2179,28 @@ def product_definition_template_15(section, metadata, frt_coord):
     # Check unique keys for this template.
     spatial_processing_code = section['spatialProcessing']
 
-    if spatial_processing_code != 0:
-        # For now, we only support the simplest case, representing a statistic
-        # over the whole notional area of a cell.
+    # Only a limited number of spatial processing codes are supported
+    if spatial_processing_code not in _SPATIAL_PROCESSING_TYPES.keys():
         msg = ('Product definition section 4 contains an unsupported '
                'spatial processing type [{}]'.format(spatial_processing_code))
         raise TranslationError(msg)
 
-    # NOTE: PDT 4.15 alse defines a 'numberOfPointsUsed' key, but we think this
-    # is irrelevant to the currently supported spatial-processing types.
-
-    # Process parts in common with pdt 4.0.
+    # Process parts in common with PDT 4.0.
     product_definition_template_0(section, metadata, frt_coord)
 
-    # Decode the statistic method name.
-    cell_method_name = statistical_method_name(section)
+    # Add spatial processing type as an attribute.
+    metadata['attributes']['spatial_processing_type'] = \
+        _SPATIAL_PROCESSING_TYPES[spatial_processing_code][0]
 
-    # Record an 'area' cell-method using this statistic.
-    metadata['cell_methods'] = [CellMethod(coords=('area',),
-                                           method=cell_method_name)]
+    # Add a cell method if the spatial processing type supports a
+    # statistical process.
+    if _SPATIAL_PROCESSING_TYPES[spatial_processing_code][1] == "cell_method":
+        # Decode the statistical method name.
+        cell_method_name = statistical_method_name(section)
+
+        # Record an 'area' cell-method using this statistic.
+        metadata['cell_methods'] = [CellMethod(coords=('area',),
+                                               method=cell_method_name)]
 
 
 def satellite_common(section, metadata):
@@ -2299,7 +2321,7 @@ def product_definition_template_40(section, metadata, frt_coord):
     # Reference GRIB2 Code Table 4.230.
     constituent_type = section['constituentType']
 
-    # Add the constituent type as  an attribute.
+    # Add the constituent type as an attribute.
     metadata['attributes']['WMO_constituent_type'] = constituent_type
 
 

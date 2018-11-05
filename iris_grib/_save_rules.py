@@ -37,11 +37,13 @@ import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
                                 TransverseMercator, LambertConformal)
-import iris.exceptions
+from iris.exceptions import TranslationError
+
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
-from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS)
+from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
+                            _SPATIAL_PROCESSING_TYPES)
 from iris.util import is_regular, regular_step
 
 
@@ -207,7 +209,7 @@ def shape_of_the_earth(cube, grib):
         if ellipsoid is None:
             msg = "Could not determine shape of the earth from coord system "\
                   "of horizontal grid."
-            raise iris.exceptions.TranslationError(msg)
+            raise TranslationError(msg)
 
     # Spherical earth.
     if ellipsoid.inverse_flattening == 0.0:
@@ -334,7 +336,7 @@ def rotated_pole(cube, grib):
     cs = cube.coord(dimensions=[0]).coord_system
 
     if cs.north_pole_grid_longitude != 0.0:
-        raise iris.exceptions.TranslationError(
+        raise TranslationError(
             'Grib save does not yet support Rotated-pole coordinates with '
             'a rotated prime meridian.')
 # XXX Pending #1125
@@ -475,7 +477,7 @@ def grid_definition_template_10(cube, grib):
         y_step = step(y_mm, atol=1)
     except ValueError:
         msg = 'Irregular coordinates not supported for Mercator.'
-        raise iris.exceptions.TranslationError(msg)
+        raise TranslationError(msg)
 
     gribapi.grib_set(grib, 'Di', abs(x_step))
     gribapi.grib_set(grib, 'Dj', abs(y_step))
@@ -547,7 +549,7 @@ def grid_definition_template_12(cube, grib):
     except ValueError:
         msg = ('Irregular coordinates not supported for Transverse '
                'Mercator.')
-        raise iris.exceptions.TranslationError(msg)
+        raise TranslationError(msg)
     gribapi.grib_set(grib, 'Di', abs(x_step))
     gribapi.grib_set(grib, 'Dj', abs(y_step))
     horizontal_grid_common(cube, grib)
@@ -617,7 +619,7 @@ def grid_definition_template_30(cube, grib):
     except ValueError:
         msg = ('Irregular coordinates not supported for Lambert '
                'Conformal.')
-        raise iris.exceptions.TranslationError(msg)
+        raise TranslationError(msg)
     gribapi.grib_set(grib, 'Dx', abs(x_step))
     gribapi.grib_set(grib, 'Dy', abs(y_step))
 
@@ -742,14 +744,14 @@ def _non_missing_forecast_period(cube):
     elif fp_coord.units == cf_units.Unit("seconds"):
         grib_time_code = 13
     else:
-        raise iris.exceptions.TranslationError(
+        raise TranslationError(
             "Unexpected units for 'forecast_period' : %s" % fp_coord.units)
 
     if not t_coord.has_bounds():
         fp = fp_coord.points[0]
     else:
         if not fp_coord.has_bounds():
-            raise iris.exceptions.TranslationError(
+            raise TranslationError(
                 "bounds on 'time' coordinate requires bounds on"
                 " 'forecast_period'.")
         fp = fp_coord.bounds[0][0]
@@ -892,7 +894,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             # There are vertical coordinate(s), but we don't understand them...
             v_coords_str = ' ,'.join(["'{}'".format(c.name())
                                       for c in v_coords])
-            raise iris.exceptions.TranslationError(
+            raise TranslationError(
                 'The vertical-axis coordinate(s) ({}) '
                 'are not recognised or handled.'.format(v_coords_str))
 
@@ -1091,6 +1093,58 @@ def _cube_is_time_statistic(cube):
     return result
 
 
+def _spatial_statistic(cube):
+    """
+    Gather and return the spatial statistic of the cube if it is present.
+
+    """
+    spatial_cell_methods = [
+        cell_method for cell_method in cube.cell_methods if 'area' in
+        cell_method.coord_names]
+
+    if len(spatial_cell_methods) > 1:
+        raise ValueError("Cannot handle multiple 'area' cell methods")
+    elif len(spatial_cell_methods[0].coord_names) > 1:
+        raise ValueError("Cannot handle multiple coordinate names in "
+                         "the spatial processing related cell method. "
+                         "Expected ('area',), got {!r}".format
+                         (spatial_cell_methods[0].coord_names))
+
+    return spatial_cell_methods
+
+
+def statistical_method_code(cell_method_name):
+    """
+    Decode cell_method string as statistic code integer.
+    """
+    statistic_code = _STATISTIC_TYPE_NAMES.get(cell_method_name, None)
+    if statistic_code is None:
+        msg = ('Product definition section 4 contains an unsupported '
+               'statistical process type [{}] ')
+        raise TranslationError(msg.format(statistic_code))
+
+    return statistic_code
+
+
+def get_spatial_process_code(spatial_processing_type):
+    """
+    Decode spatial_processing_type string as spatial process code integer.
+    """
+    spatial_processing_code = None
+
+    for code, interp_params in _SPATIAL_PROCESSING_TYPES.items():
+        if interp_params.interpolation_type == spatial_processing_type:
+            spatial_processing_code = code
+            break
+
+    if spatial_processing_code is None:
+        msg = ('Product definition section 4 contains an unsupported '
+               'spacial processing or interpolation type: {} ')
+        raise TranslationError(msg.format(spatial_processing_type))
+
+    return spatial_processing_code
+
+
 def set_ensemble(cube, grib):
     """
     Set keys in the provided grib based message relating to ensemble
@@ -1207,7 +1261,7 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
 
-    Templates 4.8  and 4.11 are used to represent aggregations over a time
+    Templates 4.8 and 4.11 are used to represent aggregations over a time
     interval.
 
     """
@@ -1273,6 +1327,51 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
         set_time_increment(cell_method, grib)
 
 
+def product_definition_template_15(cube, grib, full3d_cube=None):
+    """
+    Set keys within the provided grib message based on Product
+    Definition Template 4.15.
+
+    Template 4.15 represents the type of spatial processing used to
+    arrive at the given data value from the source data.
+
+    """
+    # Encode type of spatial processing (see code table 4.15)
+    spacial_processing_type = cube.attributes['spatial_processing_type']
+    spatial_processing = get_spatial_process_code(spacial_processing_type)
+
+    # Encode statistical process and number of points
+    # (see template definition 4.15)
+    statistical_process = _SPATIAL_PROCESSING_TYPES[spatial_processing][1]
+    number_of_points = _SPATIAL_PROCESSING_TYPES[spatial_processing][2]
+
+    # Only a limited number of spatial processing types are supported.
+    if spatial_processing not in _SPATIAL_PROCESSING_TYPES.keys():
+        msg = ('Cannot save Product Definition Type 4.15 with spatial '
+               'processing type {}'.format(spatial_processing))
+        raise ValueError(msg)
+
+    if statistical_process is not None:
+        # Check the cube for statistical cell methods over area
+        spatial_stats = _spatial_statistic(cube)
+        # Identify the statistical method (e.g. 'mean') and encode it.
+        if len(spatial_stats) > 0:
+            cell_method_name = spatial_stats[0].method
+            statistical_process = statistical_method_code(cell_method_name)
+        else:
+            raise ValueError("Could not find a suitable cell_method to save "
+                             "as a spatial statistical process.")
+
+    # Set GRIB messages
+    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
+    product_definition_template_common(cube, grib, full3d_cube)
+    gribapi.grib_set(grib, "spatialProcessing", spatial_processing)
+    if number_of_points is not None:
+        gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
+    if statistical_process is not None:
+        gribapi.grib_set(grib, "statisticalProcess", statistical_process)
+
+
 def product_definition_template_40(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
@@ -1302,6 +1401,9 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'WMO_constituent_type' in cube.attributes:
             # forecast for atmospheric chemical constiuent (template 4.40)
             product_definition_template_40(cube, grib, full3d_cube)
+        elif 'spatial_processing_type' in cube.attributes:
+            # spatial process (template 4.15)
+            product_definition_template_15(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
             product_definition_template_0(cube, grib, full3d_cube)
@@ -1324,7 +1426,7 @@ def product_definition_section(cube, grib, full3d_cube=None):
     else:
         # Don't know how to handle this kind of data
         msg = 'A suitable product template could not be deduced'
-        raise iris.exceptions.TranslationError(msg)
+        raise TranslationError(msg)
 
 
 ###############################################################################
@@ -1386,13 +1488,13 @@ def gribbability_check(cube):
     cs0 = cube.coord(dimensions=[0]).coord_system
     cs1 = cube.coord(dimensions=[1]).coord_system
     if cs0 is None or cs1 is None:
-        raise iris.exceptions.TranslationError("CoordSystem not present")
+        raise TranslationError("CoordSystem not present")
     if cs0 != cs1:
-        raise iris.exceptions.TranslationError("Inconsistent CoordSystems")
+        raise TranslationError("Inconsistent CoordSystems")
 
     # Time period exists?
     if not cube.coords("time"):
-        raise iris.exceptions.TranslationError("time coord not found")
+        raise TranslationError("time coord not found")
 
 
 def run(slice2d_cube, grib, full3d_cube):
