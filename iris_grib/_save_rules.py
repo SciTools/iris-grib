@@ -1351,7 +1351,7 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
                'processing type {}'.format(spatial_processing))
         raise ValueError(msg)
 
-    if statistical_process:
+    if statistical_process is not None:
         # Check the cube for statistical cell methods over area
         spatial_stats = _spatial_statistic(cube)
         # Identify the statistical method (e.g. 'mean') and encode it.
