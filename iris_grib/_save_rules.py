@@ -1128,7 +1128,7 @@ def statistical_method_code(cell_method_name):
 
 def get_spatial_process_code(spatial_processing_type):
     """
-    Decode cell_method string as statistic code integer.
+    Decode spatial_processing_type string as spatial process code integer.
     """
     spatial_processing_code = None
 
