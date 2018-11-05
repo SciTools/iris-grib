@@ -95,7 +95,7 @@ class Test(LoadConvertTest):
         expected['cell_methods'] = [CellMethod(coords=('area',),
                                                method='maximum')]
         expected['attributes']['spatial_processing_type'] = \
-            'Statistical cell method'
+            'No interpolation'
 
         # Now check that the section conversion produces the metadata we
         # expect.
