@@ -51,7 +51,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(gribapi, 'grib_set')
     def test_cell_method(self, mock_set):
         cube_0 = self.cube
-        cube_0.attributes = dict(spatial_processing_type='Statistical '
+        cube_0.attributes = dict(spatial_processing_type='No interpolation')
                                                          'cell method')
         cell_method = CellMethod(method='mean', coords=['area'])
         cube_0.add_cell_method(cell_method)
