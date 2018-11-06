@@ -84,7 +84,7 @@ setup_args = dict(
     # so 'iris_grib._confirm_iris_mercator_support' performs a runtime version
     # check instead + raises an error if required.
     # TODO: update Iris version and remove runtime checking, in future release.
-    install_requires = ['scitools-iris>=2.0.*'],# 'eccodes'],
+    install_requires = ['scitools-iris>=2.0.*', 'eccodes'],
     extras_require = {
         'test:python_version=="2.7"': ['mock'],
     },
