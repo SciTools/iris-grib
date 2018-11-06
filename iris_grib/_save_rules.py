@@ -1139,7 +1139,7 @@ def get_spatial_process_code(spatial_processing_type):
 
     if spatial_processing_code is None:
         msg = ('Product definition section 4 contains an unsupported '
-               'spacial processing or interpolation type: {} ')
+               'spatial processing or interpolation type: {} ')
         raise TranslationError(msg.format(spatial_processing_type))
 
     return spatial_processing_code
@@ -1337,8 +1337,8 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
 
     """
     # Encode type of spatial processing (see code table 4.15)
-    spacial_processing_type = cube.attributes['spatial_processing_type']
-    spatial_processing = get_spatial_process_code(spacial_processing_type)
+    spatial_processing_type = cube.attributes['spatial_processing_type']
+    spatial_processing = get_spatial_process_code(spatial_processing_type)
 
     # Encode statistical process and number of points
     # (see template definition 4.15)
