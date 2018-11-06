@@ -46,7 +46,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         with self.temp_filename() as tmp_save_path:
             save(cube, tmp_save_path, saver='grib2')
             saved_cube = load_cube(tmp_save_path)
-            self.assertTrue(saved_cube == cube)
+            self.assertEqual(saved_cube.metadata, cube.metadata)
 
     def test_WAFC_CB_round_trip(self):
         cubelist = load(self.cb)
@@ -56,7 +56,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         with self.temp_filename() as tmp_save_path:
             save(cube, tmp_save_path, saver='grib2')
             saved_cube = load_cube(tmp_save_path)
-            self.assertTrue(saved_cube == cube)
+            self.assertEqual(saved_cube.metadata, cube.metadata)
 
     def test_WAFC_icing_round_trip(self):
         cubelist = load(self.icing)
@@ -66,7 +66,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         with self.temp_filename() as tmp_save_path:
             save(cube, tmp_save_path, saver='grib2')
             saved_cube = load_cube(tmp_save_path)
-            self.assertTrue(saved_cube == cube)
+            self.assertEqual(saved_cube.metadata, cube.metadata)
 
     def test_WAFC_turb_round_trip(self):
         cubelist = load(self.turb)
@@ -76,7 +76,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         with self.temp_filename() as tmp_save_path:
             save(cube, tmp_save_path, saver='grib2')
             saved_cube = load_cube(tmp_save_path)
-            self.assertTrue(saved_cube == cube)
+            self.assertEqual(saved_cube.metadata, cube.metadata)
 
 
 if __name__ == '__main__':
