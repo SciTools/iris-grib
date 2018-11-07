@@ -14,8 +14,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
-"""Integration tests for the :mod:`iris_grib._load_convert` and
-:mod:`iris_grib._save_rules` packages."""
+"""Round-trip integration tests for the :mod:`iris-grib` package."""
 
 from __future__ import (absolute_import, division, print_function)
 from six.moves import (filter, input, map, range, zip)  # noqa

@@ -27,8 +27,6 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # before importing anything else.
 import iris_grib.tests as tests
 
-import os
-
 from iris import load_cube, load_cubes, save
 from iris.experimental.equalise_cubes import equalise_attributes
 
@@ -72,3 +70,7 @@ class TestHybridPressureRoundTrip(tests.IrisGribTest):
             equalise_attributes([saved_cube, cube])
 
             self.assertTrue(saved_cube == cube)
+
+
+if __name__ == '__main__':
+    tests.main()

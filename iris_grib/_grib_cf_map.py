@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# (C) British Crown Copyright 2013 - 2018, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -115,11 +115,17 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 6, 5): CFName('high_type_cloud_area_fraction', None, '%'),
     G2Param(2, 0, 6, 6): CFName('atmosphere_mass_content_of_cloud_liquid_water', None, 'kg m-2'),
     G2Param(2, 0, 6, 7): CFName('cloud_area_fraction_in_atmosphere_layer', None, '%'),
+    G2Param(2, 0, 6, 25): CFName(None, 'WAFC_CB_horizontal_extent', '1'),
+    G2Param(2, 0, 6, 26): CFName(None, 'WAFC_ICAO_height_at_CB_base', 'm'),
+    G2Param(2, 0, 6, 27): CFName(None, 'WAFC_ICAO_height_at_CB_top', 'm'),
     G2Param(2, 0, 7, 6): CFName('atmosphere_specific_convective_available_potential_energy', None, 'J kg-1'),
     G2Param(2, 0, 7, 7): CFName(None, 'convective_inhibition', 'J kg-1'),
     G2Param(2, 0, 7, 8): CFName(None, 'storm_relative_helicity', 'J kg-1'),
     G2Param(2, 0, 14, 0): CFName('atmosphere_mole_content_of_ozone', None, 'Dobson'),
     G2Param(2, 0, 19, 1): CFName(None, 'grib_physical_atmosphere_albedo', '%'),
+    G2Param(2, 0, 19, 20): CFName(None, 'WAFC_icing_potential', '1'),
+    G2Param(2, 0, 19, 21): CFName(None, 'WAFC_in-cloud_turb_potential', '1'),
+    G2Param(2, 0, 19, 22): CFName(None, 'WAFC_CAT_potential', '1'),
     G2Param(2, 2, 0, 0): CFName('land_binary_mask', None, '1'),
     G2Param(2, 2, 0, 0): CFName('land_area_fraction', None, '1'),
     G2Param(2, 2, 0, 1): CFName('surface_roughness_length', None, 'm'),
@@ -220,6 +226,12 @@ CF_TO_GRIB2 = {
     CFName('surface_upward_latent_heat_flux', None, 'W m-2'): G2Param(2, 0, 0, 10),
     CFName('surface_upward_sensible_heat_flux', None, 'W m-2'): G2Param(2, 0, 0, 11),
     CFName('thickness_of_snowfall_amount', None, 'm'): G2Param(2, 0, 1, 11),
+    CFName(None, 'WAFC_CAT_potential', '1'): G2Param(2, 0, 19, 22),
+    CFName(None, 'WAFC_CB_horizontal_extent', '1'): G2Param(2, 0, 6, 25),
+    CFName(None, 'WAFC_ICAO_height_at_cloud_base', 'm'): G2Param(2, 0, 6, 26),
+    CFName(None, 'WAFC_ICAO_height_at_cloud_top', 'm'): G2Param(2, 0, 6, 27),
+    CFName(None, 'WAFC_icing_potential', '1'): G2Param(2, 0, 19, 20),
+    CFName(None, 'WAFC_in-cloud_turb_potential', '1'): G2Param(2, 0, 19, 21),
     CFName('wind_from_direction', None, 'degrees'): G2Param(2, 0, 2, 0),
     CFName('wind_speed', None, 'm s-1'): G2Param(2, 0, 2, 1),
     CFName('wind_speed_of_gust', None, 'm s-1'): G2Param(2, 0, 2, 22),
