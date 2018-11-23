@@ -141,6 +141,8 @@ _TYPE_OF_ENSEMBLE_FORECAST = {
     4: 'Multimodel forecast'
 }
 
+_TYPE_OF_ENSEMBLE_FORECAST_MISSING = 255
+
 # Reference Code Table 4.10.
 _STATISTIC_TYPE_NAMES = {
     0: 'mean',
@@ -1847,7 +1849,7 @@ def generating_process(section, metadata, include_forecast_process=True):
         raise TranslationError(msg)
 
     metadata['attributes']['generating_process'] = \
-        _TYPE_OF_GENERATING_PROCESS[generating_process_code.values()]
+        _TYPE_OF_GENERATING_PROCESS[generating_process_code]
 
 
 def satellite_common(section, metadata):
@@ -1986,27 +1988,33 @@ def statistical_cell_method(section):
     return cell_method
 
 
-def ensemble_identifier(section, metadata):
+def ensemble_identifier(section):
     if options.warn_on_unsupported:
         # Reference Code Table 4.6.
         warnings.warn('Unable to translate type of ensemble forecast.')
         warnings.warn('Unable to translate number of forecasts in ensemble.')
-
-    ensemble_forecast_code = section['typeOfEnsembleForecast']
-
-    if ensemble_forecast_code not in _TYPE_OF_ENSEMBLE_FORECAST.keys():
-        msg = ('Product definition section 4 contains an unsupported '
-               'ensemble forecast type [{}]'.format(ensemble_forecast_code))
-        raise TranslationError(msg)
-
-    metadata['attributes']['ensemble_forecast'] = \
-        _TYPE_OF_ENSEMBLE_FORECAST[ensemble_forecast_code.values()]
 
     # Create the realization coordinates.
     realization = DimCoord(section['perturbationNumber'],
                            standard_name='realization',
                            units='no_unit')
     return realization
+
+
+def ensemble_type(section, metadata):
+    ensemble_forecast_code = section['typeOfEnsembleForecast']
+
+    if ensemble_forecast_code == _TYPE_OF_ENSEMBLE_FORECAST_MISSING:
+        msg = 'Product definition section 4 contains missing type of ' \
+              'ensemble forecast.'
+        raise TranslationError(msg)
+    elif ensemble_forecast_code not in _TYPE_OF_ENSEMBLE_FORECAST.keys():
+        msg = ('Product definition section 4 contains an unsupported '
+               'ensemble forecast type [{}]'.format(ensemble_forecast_code))
+        raise TranslationError(msg)
+
+    metadata['attributes']['ensemble_forecast'] = \
+        _TYPE_OF_ENSEMBLE_FORECAST[ensemble_forecast_code]
 
 
 def product_definition_template_0(section, metadata, rt_coord):
@@ -2030,7 +2038,7 @@ def product_definition_template_0(section, metadata, rt_coord):
 
     """
     # Handle generating process details.
-    generating_process(section)
+    generating_process(section, metadata)
 
     # Handle the data cutoff.
     data_cutoff(section['hoursAfterDataCutoff'],
@@ -2065,7 +2073,7 @@ def product_definition_template_1(section, metadata, frt_coord):
     # Perform identical message processing.
     product_definition_template_0(section, metadata, frt_coord)
 
-    realization = ensemble_identifier(section, metadata)
+    realization = ensemble_identifier(section)
 
     # Add the realization coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((realization, None))
@@ -2092,7 +2100,7 @@ def product_definition_template_8(section, metadata, frt_coord):
 
     """
     # Handle generating process details.
-    generating_process(section)
+    generating_process(section, metadata)
 
     # Handle the data cutoff.
     data_cutoff(section['hoursAfterDataCutoff'],
@@ -2234,7 +2242,7 @@ def product_definition_template_11(section, metadata, frt_coord):
     """
     product_definition_template_8(section, metadata, frt_coord)
 
-    realization = ensemble_identifier(section, metadata)
+    realization = ensemble_identifier(section)
 
     # Add the realization coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((realization, None))
@@ -2306,7 +2314,7 @@ def product_definition_template_31(section, metadata, rt_coord):
         The scalar observation time :class:`iris.coords.DimCoord'.
 
     """
-    generating_process(section, include_forecast_process=False)
+    generating_process(section, metadata, include_forecast_process=False)
 
     satellite_common(section, metadata)
 
@@ -2334,7 +2342,7 @@ def product_definition_template_32(section, metadata, rt_coord):
         The scalar observation time :class:`iris.coords.DimCoord'.
 
     """
-    generating_process(section, include_forecast_process=False)
+    generating_process(section, metadata, include_forecast_process=False)
 
     # Handle the data cutoff.
     data_cutoff(section['hoursAfterDataCutoff'],
@@ -2399,9 +2407,13 @@ def product_definition_template_60(section, metadata, frt_coord):
     # Perform identical message processing.
     product_definition_template_0(section, metadata, frt_coord)
 
+    # Add type of generating process to attributes
     generating_process(section, metadata)
 
-    ensemble_identifier(section, metadata)
+    # Generate realization coordinate and store ensemble forecast type in
+    # attributes
+    ensemble_identifier(section)
+    ensemble_type(section, metadata)
     # TODO Make sure this is doing everything it should be
 
 
