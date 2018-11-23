@@ -1829,7 +1829,7 @@ def time_coords(section, metadata, rt_coord):
     metadata['aux_coords_and_dims'].append((rt_coord, None))
 
 
-def generating_process(section, include_forecast_process=True):
+def generating_process(section, metadata, include_forecast_process=True):
     if options.warn_on_unsupported:
         # Reference Code Table 4.3.
         warnings.warn('Unable to translate type of generating process.')
@@ -1838,6 +1838,51 @@ def generating_process(section, include_forecast_process=True):
         if include_forecast_process:
             warnings.warn('Unable to translate forecast generating '
                           'process identifier.')
+
+    generating_process_code = section['typeOfGeneratingProcess']
+
+    if generating_process_code not in _TYPE_OF_GENERATING_PROCESS.keys():
+        msg = ('Product definition section 4 contains an unsupported '
+               'generating process type [{}]'.format(generating_process_code))
+        raise TranslationError(msg)
+
+    metadata['attributes']['generating_process'] = \
+        _TYPE_OF_GENERATING_PROCESS[generating_process_code.values()]
+
+
+def satellite_common(section, metadata):
+    # Number of contributing spectral bands.
+    NB = section['NB']
+
+    if NB > 0:
+        # Create the satellite series coordinate.
+        satelliteSeries = section['satelliteSeries']
+        coord = AuxCoord(satelliteSeries, long_name='satellite_series')
+        # Add the satellite series coordinate to the metadata aux coords.
+        metadata['aux_coords_and_dims'].append((coord, None))
+
+        # Create the satellite number coordinate.
+        satelliteNumber = section['satelliteNumber']
+        coord = AuxCoord(satelliteNumber, long_name='satellite_number')
+        # Add the satellite number coordinate to the metadata aux coords.
+        metadata['aux_coords_and_dims'].append((coord, None))
+
+        # Create the satellite instrument type coordinate.
+        instrumentType = section['instrumentType']
+        coord = AuxCoord(instrumentType, long_name='instrument_type')
+        # Add the instrument type coordinate to the metadata aux coords.
+        metadata['aux_coords_and_dims'].append((coord, None))
+
+        # Create the central wave number coordinate.
+        scaleFactor = section['scaleFactorOfCentralWaveNumber']
+        scaledValue = section['scaledValueOfCentralWaveNumber']
+        wave_number = unscale(scaledValue, scaleFactor)
+        standard_name = 'sensor_band_central_radiation_wavenumber'
+        coord = AuxCoord(wave_number,
+                         standard_name=standard_name,
+                         units=Unit('m-1'))
+        # Add the central wave number coordinate to the metadata aux coords.
+        metadata['aux_coords_and_dims'].append((coord, None))
 
 
 def data_cutoff(hoursAfterDataCutoff, minutesAfterDataCutoff):
@@ -1941,11 +1986,21 @@ def statistical_cell_method(section):
     return cell_method
 
 
-def ensemble_identifier(section):
+def ensemble_identifier(section, metadata):
     if options.warn_on_unsupported:
         # Reference Code Table 4.6.
         warnings.warn('Unable to translate type of ensemble forecast.')
         warnings.warn('Unable to translate number of forecasts in ensemble.')
+
+    ensemble_forecast_code = section['typeOfEnsembleForecast']
+
+    if ensemble_forecast_code not in _TYPE_OF_ENSEMBLE_FORECAST.keys():
+        msg = ('Product definition section 4 contains an unsupported '
+               'ensemble forecast type [{}]'.format(ensemble_forecast_code))
+        raise TranslationError(msg)
+
+    metadata['attributes']['ensemble_forecast'] = \
+        _TYPE_OF_ENSEMBLE_FORECAST[ensemble_forecast_code.values()]
 
     # Create the realization coordinates.
     realization = DimCoord(section['perturbationNumber'],
@@ -2010,7 +2065,7 @@ def product_definition_template_1(section, metadata, frt_coord):
     # Perform identical message processing.
     product_definition_template_0(section, metadata, frt_coord)
 
-    realization = ensemble_identifier(section)
+    realization = ensemble_identifier(section, metadata)
 
     # Add the realization coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((realization, None))
@@ -2179,7 +2234,7 @@ def product_definition_template_11(section, metadata, frt_coord):
     """
     product_definition_template_8(section, metadata, frt_coord)
 
-    realization = ensemble_identifier(section)
+    realization = ensemble_identifier(section, metadata)
 
     # Add the realization coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((realization, None))
@@ -2231,40 +2286,6 @@ def product_definition_template_15(section, metadata, frt_coord):
         metadata['cell_methods'] = [CellMethod(coords=('area',),
                                                method=cell_method_name)]
 
-
-def satellite_common(section, metadata):
-    # Number of contributing spectral bands.
-    NB = section['NB']
-
-    if NB > 0:
-        # Create the satellite series coordinate.
-        satelliteSeries = section['satelliteSeries']
-        coord = AuxCoord(satelliteSeries, long_name='satellite_series')
-        # Add the satellite series coordinate to the metadata aux coords.
-        metadata['aux_coords_and_dims'].append((coord, None))
-
-        # Create the satellite number coordinate.
-        satelliteNumber = section['satelliteNumber']
-        coord = AuxCoord(satelliteNumber, long_name='satellite_number')
-        # Add the satellite number coordinate to the metadata aux coords.
-        metadata['aux_coords_and_dims'].append((coord, None))
-
-        # Create the satellite instrument type coordinate.
-        instrumentType = section['instrumentType']
-        coord = AuxCoord(instrumentType, long_name='instrument_type')
-        # Add the instrument type coordinate to the metadata aux coords.
-        metadata['aux_coords_and_dims'].append((coord, None))
-
-        # Create the central wave number coordinate.
-        scaleFactor = section['scaleFactorOfCentralWaveNumber']
-        scaledValue = section['scaledValueOfCentralWaveNumber']
-        wave_number = unscale(scaledValue, scaleFactor)
-        standard_name = 'sensor_band_central_radiation_wavenumber'
-        coord = AuxCoord(wave_number,
-                         standard_name=standard_name,
-                         units=Unit('m-1'))
-        # Add the central wave number coordinate to the metadata aux coords.
-        metadata['aux_coords_and_dims'].append((coord, None))
 
 
 def product_definition_template_31(section, metadata, rt_coord):
@@ -2375,6 +2396,13 @@ def product_definition_template_60(section, metadata, frt_coord):
 
 
     """
+    # Perform identical message processing.
+    product_definition_template_0(section, metadata, frt_coord)
+
+    generating_process(section, metadata)
+
+    ensemble_identifier(section, metadata)
+    # TODO Make sure this is doing everything it should be
 
 
 def product_definition_section(section, metadata, discipline, tablesVersion,
