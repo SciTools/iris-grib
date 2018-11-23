@@ -88,6 +88,26 @@ _CENTRES = {
 # Reference Code Table 1.0
 _CODE_TABLES_MISSING = 255
 
+# Reference Code Table 4.3
+_TYPE_OF_GENERATING_PROCESS = {
+    0: 'Analysis',
+    1: 'Initialization',
+    2: 'Forecast',
+    3: 'Bias corrected forecast',
+    4: 'Ensemble forecast',
+    5: 'Probability forecast',
+    6: 'Forecast error',
+    7: 'Analysis error',
+    8: 'Observation',
+    9: 'Climatological',
+    10: 'Probability-weighted forecast',
+    11: 'Bias-corrected ensemble forecast',
+    12: 'Post-processed analysis',
+    13: 'Post-processed forecast',
+    14: 'Nowcast',
+    15: 'Hindcast'
+}
+
 # UDUNITS-2 units time string. Reference GRIB2 Code Table 4.4.
 _TIME_RANGE_UNITS = {
     0: 'minutes',
@@ -112,9 +132,14 @@ _FIXED_SURFACE = {
 }
 _TYPE_OF_FIXED_SURFACE_MISSING = 255
 
-# Reference Code Table 6.0
-_BITMAP_CODE_PRESENT = 0
-_BITMAP_CODE_NONE = 255
+# Reference Code Table 4.6
+_TYPE_OF_ENSEMBLE_FORECAST = {
+    0: 'Unperturbed high-resolution control forecast',
+    1: 'Unperturbed low resolution control forecast',
+    2: 'Negatively perturbed forecast',
+    3: 'Positively perturbed forecast',
+    4: 'Multimodel forecast'
+}
 
 # Reference Code Table 4.10.
 _STATISTIC_TYPE_NAMES = {
@@ -146,6 +171,10 @@ _SPATIAL_PROCESSING_TYPES = {
     5: InterpolationParameters('Spectral interpolation', None, 4),
     6: InterpolationParameters('Neighbour-budget interpolation', None, 4)
 }
+
+# Reference Code Table 6.0
+_BITMAP_CODE_PRESENT = 0
+_BITMAP_CODE_NONE = 255
 
 # Class containing details of a probability analysis.
 Probability = namedtuple('Probability',
@@ -2325,6 +2354,29 @@ def product_definition_template_40(section, metadata, frt_coord):
     metadata['attributes']['WMO_constituent_type'] = constituent_type
 
 
+def product_definition_template_60(section, metadata, frt_coord):
+    """
+    Translate template representing individual ensemble re-forecast, control
+    and perturbed, at a horizontal level or in a horizontal level at a point
+    in time.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 4 of the message.
+
+    * metadata:
+        :class:`collectins.OrderedDict` of metadata.
+
+    * frt_coord:
+        The scalar forecast reference time :class:`iris.coords.DimCoord`.
+
+
+    """
+
+
 def product_definition_section(section, metadata, discipline, tablesVersion,
                                rt_coord):
     """
@@ -2382,6 +2434,8 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         product_definition_template_32(section, metadata, rt_coord)
     elif template == 40:
         product_definition_template_40(section, metadata, rt_coord)
+    elif template == 60:
+        product_definition_template_60(section, metadata, rt_coord)
     else:
         msg = 'Product definition template [{}] is not ' \
             'supported'.format(template)
