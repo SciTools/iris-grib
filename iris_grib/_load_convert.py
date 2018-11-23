@@ -108,6 +108,8 @@ _TYPE_OF_GENERATING_PROCESS = {
     15: 'Hindcast'
 }
 
+_TYPE_OF_GENERATING_PROCESS_MISSING = 255
+
 # UDUNITS-2 units time string. Reference GRIB2 Code Table 4.4.
 _TIME_RANGE_UNITS = {
     0: 'minutes',
@@ -1843,6 +1845,10 @@ def generating_process(section, metadata, include_forecast_process=True):
 
     generating_process_code = section['typeOfGeneratingProcess']
 
+    if generating_process_code == _TYPE_OF_GENERATING_PROCESS_MISSING:
+        msg = 'Product definition section 4 contains missing type of ' \
+              'generating process.'
+        raise TranslationError(msg)
     if generating_process_code not in _TYPE_OF_GENERATING_PROCESS.keys():
         msg = ('Product definition section 4 contains an unsupported '
                'generating process type [{}]'.format(generating_process_code))
