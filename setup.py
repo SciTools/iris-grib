@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import os
 import os.path
+import sys
 from setuptools import setup
 import textwrap
 
@@ -71,22 +72,19 @@ setup_args = dict(
     license          = 'LGPL',
     platforms        = "Linux, Mac OS X, Windows",
     keywords         = ['iris', 'GRIB'],
-    classifiers      = [
+    classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
     ],
-    # NOTE: This Iris version requirement is a purely temporary measure :
-    # Iris>=2.1 is needed for Mercator support, but this is not yet available,
-    # so 'iris_grib._confirm_iris_mercator_support' performs a runtime version
-    # check instead + raises an error if required.
-    # TODO: update Iris version and remove runtime checking, in future release.
-    install_requires = ['scitools-iris>=2.0.*', 'eccodes'],
-    extras_require = {
-        'test:python_version=="2.7"': ['mock'],
+    # XXX: This is a royal dependency mess at the moment. The PyPI eccodes
+    # package 2.10.0 is a wheel for win_amd64 only, so we'll only add that as
+    # a dependence for the relevant platform, otherwise unfortunately it's up
+    # to the user to provision themselves until ECMWF and PyPI provide the
+    # suitable package platform coverage.
+    install_requires=['scitools-iris>=2.0.*'] + [
+        'eccodes'] if 'win' in sys.platform else [],
+    extras_require={
+        'test:python_version=="2.7"': ['mock']
     },
     test_suite = 'iris_grib.tests',
 )
