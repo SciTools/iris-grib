@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+What's new in iris-grib v0.14
+-----------------------------
+
+:Release: 0.14.0
+:Date: 6 Mar 2019
+
+Features
+^^^^^^^^
+
+* Added support for WAFC aviation codes.
+
+* Added loading and saving of statistically processed values over a spatial
+  area at a horizontal level or in a horizontal layer at a point in time
+  (product definition template 15 in code table 4.0)
+
+
 What's new in iris-grib v0.13
 -----------------------------
 
