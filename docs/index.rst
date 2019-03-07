@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Iris-grib v0.13
+Iris-grib v0.14
 ===============
 
 The library ``iris-grib`` provides functionality for converting between weather and
@@ -103,7 +103,7 @@ The simplest way to install is with
 using the `conda-forge channel <https://anaconda.org/conda-forge>`_ ,
 with the command
 
-    $ conda install iris-grib -c conda-forge
+    $ conda install -c conda-forge iris-grib
 
 Development sources are hosted at `<https://github.com/SciTools/iris-grib>`_ .
 
