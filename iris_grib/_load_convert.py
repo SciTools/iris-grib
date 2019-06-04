@@ -2354,6 +2354,7 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     template = section['productDefinitionTemplateNumber']
 
     probability = None
+    includes_fixed_surface_keys = True
     if template == 0:
         # Process analysis or forecast at a horizontal level or
         # in a horizontal layer at a point in time.
@@ -2377,8 +2378,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         product_definition_template_15(section, metadata, rt_coord)
     elif template == 31:
         # Process satellite product.
+        includes_fixed_surface_keys = False
         product_definition_template_31(section, metadata, rt_coord)
     elif template == 32:
+        includes_fixed_surface_keys = False
         product_definition_template_32(section, metadata, rt_coord)
     elif template == 40:
         product_definition_template_40(section, metadata, rt_coord)
@@ -2389,13 +2392,23 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
 
     # Translate GRIB2 phenomenon to CF phenomenon.
     if tablesVersion != _CODE_TABLES_MISSING:
-        translate_phenomenon(metadata, discipline,
-                             section['parameterCategory'],
-                             section['parameterNumber'],
-                             section['typeOfFirstFixedSurface'],
-                             section['scaledValueOfFirstFixedSurface'],
-                             section['typeOfSecondFixedSurface'],
-                             probability=probability)
+        translation_kwargs = {
+            'metadata': metadata,
+            'discipline': discipline,
+            'parameterCategory': section['parameterCategory'],
+            'parameterNumber': section['parameterNumber'],
+            'probability': probability
+        }
+
+        # Won't always be able to populate the below arguments - missing from some template definitions.
+        for section_key in [
+            'typeOfFirstFixedSurface',
+            'scaledValueOfFirstFixedSurface',
+            'typeOfSecondFixedSurface'
+        ]:
+            translation_kwargs[section_key] = section[section_key] if includes_fixed_surface_keys else None
+
+        translate_phenomenon(**translation_kwargs)
 
 
 ###############################################################################
