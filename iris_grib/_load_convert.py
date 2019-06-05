@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# (C) British Crown Copyright 2014 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -2400,13 +2400,15 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
             'probability': probability
         }
 
-        # Won't always be able to populate the below arguments - missing from some template definitions.
+        # Won't always be able to populate the below arguments -
+        # missing from some template definitions.
         for section_key in [
             'typeOfFirstFixedSurface',
             'scaledValueOfFirstFixedSurface',
             'typeOfSecondFixedSurface'
         ]:
-            translation_kwargs[section_key] = section[section_key] if includes_fixed_surface_keys else None
+            translation_kwargs[section_key] = \
+                section[section_key] if includes_fixed_surface_keys else None
 
         translate_phenomenon(**translation_kwargs)
 
