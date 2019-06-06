@@ -225,7 +225,7 @@ class GribWrapper(object):
                 else:
                     emsg = "Unknown type for {} : {}"
                     raise ValueError(emsg.format(key, str(key_type)))
-        except gribapi.GribInternalError:
+        except gribapi.errors.GribInternalError:
             res = None
 
         # ...or is it in our list of extras?
