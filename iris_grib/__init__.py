@@ -44,7 +44,7 @@ from iris.exceptions import TranslationError, NotYetImplementedError
 from . import grib_phenom_translation as gptx
 from . import _save_rules
 from ._load_convert import convert as load_convert
-from .message import GribMessage
+from .message import GribMessage, grib_get_array_wrapper
 
 
 __version__ = '0.15.0dev0'
@@ -205,7 +205,8 @@ class GribWrapper(object):
             # we just get <type 'float'> as the type of the "values"
             # array...special case here...
             if key in ["values", "pv", "latitudes", "longitudes"]:
-                res = gribapi.grib_get_double_array(self.grib_message, key)
+                res = grib_get_array_wrapper(
+                        gribapi.grib_get_double_array(self.grib_message, key))
             elif key in ('typeOfFirstFixedSurface',
                          'typeOfSecondFixedSurface'):
                 res = np.int32(gribapi.grib_get_long(self.grib_message, key))
@@ -471,8 +472,9 @@ class GribWrapper(object):
             # get the distinct latitudes, and make sure they are sorted
             # (south-to-north) and then put them in the right direction
             # depending on the scan direction
-            latitude_points = gribapi.grib_get_double_array(
-                self.grib_message, 'distinctLatitudes').astype(np.float64)
+            latitude_points = grib_get_array_wrapper(
+                gribapi.grib_get_double_array(
+                    self.grib_message, 'distinctLatitudes')).astype(np.float64)
             latitude_points.sort()
             if not self.jScansPositively:
                 # we require latitudes north-to-south
@@ -691,7 +693,8 @@ def _longitude_is_cyclic(points):
 
 def _message_values(grib_message, shape):
     gribapi.grib_set_double(grib_message, 'missingValue', np.nan)
-    data = gribapi.grib_get_double_array(grib_message, 'values')
+    data = grib_get_array_wrapper(
+            gribapi.grib_get_double_array(grib_message, 'values'))
     data = data.reshape(shape)
 
     # Handle missing values in a sensible way.
