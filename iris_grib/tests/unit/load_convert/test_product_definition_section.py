@@ -56,11 +56,11 @@ class TestFixedSurfaces(Test):
         discipline = mock.sentinel.discipline
         tablesVersion = mock.sentinel.tablesVersion
         rt_coord = DimCoord(24, 'forecast_reference_time',
-                                        units='hours since epoch')
+                            units='hours since epoch')
         metadata = empty_metadata()
 
         # Use the section 4 from either product_definition_section #1 or #31.
-        # #1 contains fixed surface elements, #31 does not
+        # #1 contains fixed surface elements, #31 does not.
         templates = {0: template_0(), 31: template_31()}
         template_number = 0 if fs_is_expected else 31
         section_4 = templates[template_number]
