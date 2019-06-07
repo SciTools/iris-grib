@@ -38,7 +38,7 @@ from iris_grib._load_convert import product_definition_template_31
 
 
 def section_4():
-    # also needed for test_product_definition_section.py
+    # Also needed for test_product_definition_section.py.
     series = mock.sentinel.satelliteSeries
     number = mock.sentinel.satelliteNumber
     instrument = mock.sentinel.instrumentType
