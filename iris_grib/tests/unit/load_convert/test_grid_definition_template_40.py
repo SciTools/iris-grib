@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2015 - 2017, Met Office
+# (C) British Crown Copyright 2015 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -56,6 +56,7 @@ class Test_regular(tests.IrisGribTest):
             'scaledValueOfEarthMinorAxis': MDI,
             'iDirectionIncrement': 22500000,
             'longitudeOfFirstGridPoint': 0,
+            'resolutionAndComponentFlags': 32,
             'Ni': 16,
             'scanningMode': 0b01000000,
             'distinctLatitudes': np.array([-73.79921363, -52.81294319,
