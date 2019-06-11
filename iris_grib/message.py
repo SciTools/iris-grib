@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# (C) British Crown Copyright 2014 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -34,6 +34,22 @@ from iris._lazy_data import as_lazy_data
 from iris.exceptions import TranslationError
 
 _SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
+
+
+def _grib_get_array_wrapper(f):
+    """
+    Converts what f returns into an array.
+
+    When using eccodes-python, gribapi.grib_get_*array returns a list rather
+    than an array as expected.
+
+    This is intended as a *temporary* fix that wil be moved once eccodes-python
+    is fixed.
+
+    """
+    if not isinstance(f, np.ndarray):
+        f = np.asarray(f)
+    return f
 
 
 class _OpenFileRef(object):
@@ -446,12 +462,14 @@ class Section(object):
                        'scaledValueOfCentralWaveNumber',
                        'longitudes', 'latitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = _grib_get_array_wrapper(
+                    gribapi.grib_get_array(self._message_id, key))
         elif key == 'bitmap':
             # The bitmap is stored as contiguous boolean bits, one bit for each
             # data point. GRIBAPI returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
-            res = gribapi.grib_get_array(self._message_id, key, int)
+            res = _grib_get_array_wrapper(
+                    gribapi.grib_get_array(self._message_id, key, int))
         elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
             # By default these values are returned as unhelpful strings but
             # we can use int representation to compare against instead.
@@ -476,7 +494,8 @@ class Section(object):
         """
         vector_keys = ('longitudes', 'latitudes', 'distinctLatitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = _grib_get_array_wrapper(
+                    gribapi.grib_get_array(self._message_id, key))
         else:
             res = self._get_value_or_missing(key)
         return res

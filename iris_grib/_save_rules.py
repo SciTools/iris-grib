@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2010 - 2018, Met Office
+# (C) British Crown Copyright 2010 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -976,7 +976,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             coeffs_array[n_lev - 1] = height
             coeffs_array[n_coeffs + n_lev - 1] = sigma
         pv_values = [float(el) for el in coeffs_array]
-        gribapi.grib_set(grib, "NV", n_coeffs * 2)
+        # eccodes does not support writing numpy.int64, cast to python int
+        gribapi.grib_set(grib, "NV", int(n_coeffs * 2))
         gribapi.grib_set_array(grib, "pv", pv_values)
 
 

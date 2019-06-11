@@ -2,6 +2,7 @@ language: python
 sudo: false
 env:
   - python=2.7
+  - python=3.6
 
 install:
   # Fetch and install conda
@@ -16,7 +17,22 @@ install:
 
   # Install iris-grib's dependencies
   # --------------------------------
-  - conda install --quiet --yes python=${python} iris python-eccodes numpy cartopy mock filelock pep8;
+  # If running in Python 2, install Python2-only python-eccodes, otherwise we
+  # install the Python3-only eccodes-python via pip.
+  - if [[ "${python}" == "2.7" ]]; then
+        export ECCODES_DEPS="python-eccodes";
+    else
+        export ECCODES_DEPS="eccodes pip";
+    fi
+
+  - conda install --quiet --yes python=${python} iris numpy cartopy mock filelock pep8 ${ECCODES_DEPS};
+    
+  # If running in Python 3, install eccodes-python and check the installation.
+  - if [[ "${python}" != "2.7" ]]; then
+        pip install eccodes-python;
+        python -m eccodes selfcheck;
+    fi
+
   - conda list --explicit
 
   # Download iris-test-data
@@ -29,7 +45,7 @@ install:
 
   # Locate iris installation
   # ------------------------
-  - export IRIS_DIR=$(python -c "import iris; import os.path; print os.path.dirname(iris.__file__)")
+  - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
 
   # Poke site.cfg to reference iris-test-data
   - SITE_CFG=$IRIS_DIR/etc/site.cfg
