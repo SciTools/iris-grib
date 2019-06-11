@@ -17,20 +17,18 @@ install:
 
   # Install iris-grib's dependencies
   # --------------------------------
-  # If running in Python 2, install Python2-only python-eccodes.
-  - if [[ "$python" == "2.7" ]]; then
+  # If running in Python 2, install Python2-only python-eccodes, otherwise we
+  # install the Python3-only eccodes-python via pip.
+  - if [[ "${python}" == "2.7" ]]; then
         export ECCODES_DEPS="python-eccodes";
-    fi
-
-  # If running in Python 3, we will install Python3-only eccodes-python via pip.
-  - if [[ "$python" == "3.6" ]]; then
+    else
         export ECCODES_DEPS="eccodes pip";
     fi
 
-  - conda install --quiet --yes python=${python} iris numpy cartopy mock filelock pep8 $ECCODES_DEPS;
+  - conda install --quiet --yes python=${python} iris numpy cartopy mock filelock pep8 ${ECCODES_DEPS};
     
   # If running in Python 3, install eccodes-python and check the installation.
-  - if [[ "$python" == "3.6" ]]; then
+  - if [[ "${python}" != "2.7" ]]; then
         pip install eccodes-python;
         python -m eccodes selfcheck;
     fi

@@ -44,7 +44,7 @@ from iris.exceptions import TranslationError, NotYetImplementedError
 from . import grib_phenom_translation as gptx
 from . import _save_rules
 from ._load_convert import convert as load_convert
-from .message import GribMessage, grib_get_array_wrapper
+from .message import GribMessage, _grib_get_array_wrapper
 
 
 __version__ = '0.15.0dev0'
@@ -205,7 +205,7 @@ class GribWrapper(object):
             # we just get <type 'float'> as the type of the "values"
             # array...special case here...
             if key in ["values", "pv", "latitudes", "longitudes"]:
-                res = grib_get_array_wrapper(
+                res = _grib_get_array_wrapper(
                         gribapi.grib_get_double_array(self.grib_message, key))
             elif key in ('typeOfFirstFixedSurface',
                          'typeOfSecondFixedSurface'):
@@ -472,7 +472,7 @@ class GribWrapper(object):
             # get the distinct latitudes, and make sure they are sorted
             # (south-to-north) and then put them in the right direction
             # depending on the scan direction
-            latitude_points = grib_get_array_wrapper(
+            latitude_points = _grib_get_array_wrapper(
                 gribapi.grib_get_double_array(
                     self.grib_message, 'distinctLatitudes')).astype(np.float64)
             latitude_points.sort()
@@ -693,7 +693,7 @@ def _longitude_is_cyclic(points):
 
 def _message_values(grib_message, shape):
     gribapi.grib_set_double(grib_message, 'missingValue', np.nan)
-    data = grib_get_array_wrapper(
+    data = _grib_get_array_wrapper(
             gribapi.grib_get_double_array(grib_message, 'values'))
     data = data.reshape(shape)
 

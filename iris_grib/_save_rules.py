@@ -976,7 +976,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             coeffs_array[n_lev - 1] = height
             coeffs_array[n_coeffs + n_lev - 1] = sigma
         pv_values = [float(el) for el in coeffs_array]
-        # eccodes does not support writing numpy.it64, cast to python int
+        # eccodes does not support writing numpy.int64, cast to python int
         gribapi.grib_set(grib, "NV", int(n_coeffs * 2))
         gribapi.grib_set_array(grib, "pv", pv_values)
 

@@ -33,11 +33,10 @@ import numpy.ma as ma
 from iris._lazy_data import as_lazy_data
 from iris.exceptions import TranslationError
 
-
 _SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
 
 
-def grib_get_array_wrapper(f):
+def _grib_get_array_wrapper(f):
     """
     Converts what f returns into an array.
 
@@ -48,7 +47,9 @@ def grib_get_array_wrapper(f):
     is fixed.
 
     """
-    return np.array(f)
+    if not isinstance(f, np.ndarray):
+        f = np.asarray(f)
+    return f
 
 
 class _OpenFileRef(object):
@@ -461,13 +462,13 @@ class Section(object):
                        'scaledValueOfCentralWaveNumber',
                        'longitudes', 'latitudes')
         if key in vector_keys:
-            res = grib_get_array_wrapper(
+            res = _grib_get_array_wrapper(
                     gribapi.grib_get_array(self._message_id, key))
         elif key == 'bitmap':
             # The bitmap is stored as contiguous boolean bits, one bit for each
             # data point. GRIBAPI returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
-            res = grib_get_array_wrapper(
+            res = _grib_get_array_wrapper(
                     gribapi.grib_get_array(self._message_id, key, int))
         elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
             # By default these values are returned as unhelpful strings but
@@ -493,7 +494,7 @@ class Section(object):
         """
         vector_keys = ('longitudes', 'latitudes', 'distinctLatitudes')
         if key in vector_keys:
-            res = grib_get_array_wrapper(
+            res = _grib_get_array_wrapper(
                     gribapi.grib_get_array(self._message_id, key))
         else:
             res = self._get_value_or_missing(key)
