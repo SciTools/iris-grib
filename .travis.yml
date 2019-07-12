@@ -1,56 +1,70 @@
-language: python
-sudo: false
+language: minimal
+dist: xenial
+
 env:
-  - python=2.7
-  - python=3.6
+  matrix:
+    - PYTHON_VERSION=2.7
+    - PYTHON_VERSION=3.6
+    - PYTHON_VERSION=3.7
 
 install:
-  # Fetch and install conda
-  # -----------------------
-  - export CONDA_BASE=http://repo.continuum.io/miniconda/Miniconda3
-  - wget ${CONDA_BASE}-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda config --set show_channel_urls True
-  - conda config --add channels conda-forge
-  - conda config --add channels defaults
-
-  # Install iris-grib's dependencies
-  # --------------------------------
-  # If running in Python 2, install Python2-only python-eccodes, otherwise we
-  # install the Python3-only eccodes-python via pip.
-  - if [[ "${python}" == "2.7" ]]; then
-        export ECCODES_DEPS="python-eccodes";
+  # Install miniconda
+  # -----------------
+  - >
+    echo "Installing miniconda";
+    export CONDA_BASE="https://repo.continuum.io/miniconda/Miniconda";
+    if [[ "${PYTHON_VERSION}" == 2* ]]; then
+      wget --quiet ${CONDA_BASE}2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
-        export ECCODES_DEPS="eccodes pip";
-    fi
+      wget --quiet ${CONDA_BASE}3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi;
+    bash miniconda.sh -b -p ${HOME}/miniconda;
+    export PATH="${HOME}/miniconda/bin:${PATH}";
 
-  - conda install --quiet --yes python=${python} iris numpy cartopy mock filelock pep8 ${ECCODES_DEPS};
-    
-  # If running in Python 3, install eccodes-python and check the installation.
-  - if [[ "${python}" != "2.7" ]]; then
-        pip install eccodes-python;
-        python -m eccodes selfcheck;
-    fi
+  # Configure the test environment
+  # ------------------------------
+  - >
+    echo "Configuring testing environment";
+    conda config --set always_yes yes --set changeps1 no;
+    conda config --set show_channel_urls True;
+    conda config --add channels conda-forge;
+    conda update --quiet conda;
+    ENV_NAME='test-environment';
+    conda create --quiet -n ${ENV_NAME} python=${PYTHON_VERSION};
+    source activate ${ENV_NAME};
 
-  - conda list --explicit
+  # Customise the test environment
+  # ------------------------------
+  - >
+    if [[ "${PYTHON_VERSION}" == 2* ]]; then
+      export ECCODES_DEPS="python-eccodes";
+    else
+      export ECCODES_DEPS="eccodes pip";
+    fi;
+    conda install -n ${ENV_NAME} --quiet iris mock filelock pep8 ${ECCODES_DEPS};
+    if [[ "${PYTHON_VERSION}" == 3* ]]; then
+      pip install eccodes-python;
+      python -m eccodes selfcheck;
+    fi;
 
-  # Download iris-test-data
-  # --------------------------------
-  - export IRIS_TEST_DATA_REF=https://github.com/SciTools/iris-test-data/archive/master.zip
-  - export IRIS_TEST_DATA_LOCATION=$HOME/iris-test-data
-  - mkdir $IRIS_TEST_DATA_LOCATION
-  - wget -O $IRIS_TEST_DATA_LOCATION/iris-test-data.zip ${IRIS_TEST_DATA_REF}
-  - unzip -q $IRIS_TEST_DATA_LOCATION/iris-test-data.zip -d $IRIS_TEST_DATA_LOCATION
+  # Download and install iris-test-data
+  # -----------------------------------
+  - >
+    export IRIS_TEST_DATA_REF="https://github.com/SciTools/iris-test-data/archive/master.zip";
+    export IRIS_TEST_DATA_LOCATION="${HOME}/iris-test-data";
+    mkdir ${IRIS_TEST_DATA_LOCATION};
+    wget -O ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
+    unzip -q ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip -d ${IRIS_TEST_DATA_LOCATION};
 
   # Locate iris installation
   # ------------------------
   - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
 
   # Poke site.cfg to reference iris-test-data
-  - SITE_CFG=$IRIS_DIR/etc/site.cfg
-  - echo "[Resources]" > $SITE_CFG
-  - echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/iris-test-data-master/test_data" >> $SITE_CFG
+  - >
+    SITE_CFG="${IRIS_DIR}/etc/site.cfg";
+    echo "[Resources]" > ${SITE_CFG};
+    echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/iris-test-data-master/test_data" >> ${SITE_CFG};
 
   # Install iris-grib itself
   # ------------------------
@@ -62,7 +76,10 @@ install:
 
   # Summarise the environment
   # -------------------------
-  - conda list
+  - >
+    conda list -n ${ENV_NAME};
+    conda list -n ${ENV_NAME} --explicit;
+    conda info -a;
 
 script:
   # Ensure we can import iris_grib and that the tests pass
