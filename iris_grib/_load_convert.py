@@ -2402,11 +2402,13 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
 
         # Won't always be able to populate the below arguments -
         # missing from some template definitions.
-        for section_key in [
+        fixed_surface_keys = [
             'typeOfFirstFixedSurface',
             'scaledValueOfFirstFixedSurface',
             'typeOfSecondFixedSurface'
-        ]:
+        ]
+
+        for section_key in fixed_surface_keys:
             translation_kwargs[section_key] = \
                 section[section_key] if includes_fixed_surface_keys else None
 

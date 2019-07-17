@@ -25,74 +25,83 @@ from __future__ import (absolute_import, division, print_function)
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
 from iris.coords import DimCoord
-from iris_grib._load_convert import product_definition_section
+import mock
+import six
 
+from itertools import product
+
+from iris_grib._load_convert import product_definition_section
 from iris_grib.tests.unit.load_convert import empty_metadata
 from iris_grib.tests.unit.load_convert.test_product_definition_template_0 \
-    import section_4 as template_0
+    import section_4 as pdt_0_section_4
 from iris_grib.tests.unit.load_convert.test_product_definition_template_31 \
-    import section_4 as template_31
+    import section_4 as pdt_31_section_4
 
 
-class Test(tests.IrisGribTest):
+class TestFixedSurfaces(tests.IrisGribTest):
+    """
+    Tests focussing on the handling of fixed surface elements in section 4.
+    Expects/ignores depending on the template number.
+    """
     def setUp(self):
         self.patch('warnings.warn')
         self.translate_phenomenon_patch = self.patch(
             'iris_grib._load_convert.translate_phenomenon'
         )
 
-
-# Tests focussing on the handling of fixed surface elements in section 4.
-# Expects/ignores depending on the template number.
-class TestFixedSurfaces(Test):
-    def generic_fixed_surface_test(self, fs_is_expected, fs_is_present):
-        # Whether or not fixed surface elements are expected/present in the
-        # section 4 keys, most of the code is shared so we are using a single
-        # function with parameters.
-
         # Prep placeholder variables for product_definition_section.
-        discipline = mock.sentinel.discipline
-        tablesVersion = mock.sentinel.tablesVersion
-        rt_coord = DimCoord(24, 'forecast_reference_time',
-                            units='hours since epoch')
-        metadata = empty_metadata()
+        self.discipline = mock.sentinel.discipline
+        self.tablesVersion = mock.sentinel.tablesVersion
+        self.rt_coord = DimCoord(24, 'forecast_reference_time',
+                                 units='hours since epoch')
+        self.metadata = empty_metadata()
+
+        self.templates = {0: pdt_0_section_4(), 31: pdt_31_section_4()}
+        self.fixed_surface_keys = [
+            'typeOfFirstFixedSurface',
+            'scaledValueOfFirstFixedSurface',
+            'typeOfSecondFixedSurface'
+        ]
+
+    def _check_fixed_surface(self, fs_is_expected, fs_is_present):
+        """
+        Whether or not fixed surface elements are expected/present in the
+        section 4 keys, most of the code is shared so we are using a single
+        function with parameters.
+        """
 
         # Use the section 4 from either product_definition_section #1 or #31.
-        # #1 contains fixed surface elements, #31 does not.
-        templates = {0: template_0(), 31: template_31()}
+        # #0 contains fixed surface elements, #31 does not.
         template_number = 0 if fs_is_expected else 31
-        section_4 = templates[template_number]
+        section_4 = self.templates[template_number]
         section_4.update({
             'productDefinitionTemplateNumber': template_number,
             'parameterCategory': None,
             'parameterNumber': None
         })
 
-        fixed_surface_keys = [
-            'typeOfFirstFixedSurface',
-            'scaledValueOfFirstFixedSurface',
-            'typeOfSecondFixedSurface'
-        ]
-        for key in fixed_surface_keys:
+        for key in self.fixed_surface_keys:
             # Force the presence or absence of the fixed surface elements even
             # when they're respectively ignored or expected.
             if fs_is_present and key not in section_4:
-                section_4[key] = template_0()[key]
+                section_4[key] = pdt_0_section_4()[key]
             elif (not fs_is_present) and key in section_4:
                 del section_4[key]
 
         def run_function():
             # For re-use in every type of test below.
             product_definition_section(
-                section_4, metadata, discipline, tablesVersion, rt_coord)
+                section_4, self.metadata, self.discipline, self.tablesVersion,
+                self.rt_coord)
 
         if fs_is_expected and not fs_is_present:
             # Should error since the expected keys are missing.
-            with self.assertRaises(KeyError) as context:
+            error_message = 'FixedSurface'
+            # with self.assertRaises(KeyError) as context:
+            with six.assertRaisesRegex(self, KeyError, error_message):
                 run_function()
-            self.assertTrue('FixedSurface' in str(context.exception))
+            # self.assertTrue('FixedSurface' in str(context.exception))
         else:
             # Should have a successful run for all other circumstances.
             run_function()
@@ -101,33 +110,47 @@ class TestFixedSurfaces(Test):
             # arguments. So should always have run.
             self.assertEqual(self.translate_phenomenon_patch.call_count, 1)
             phenom_call_args = self.translate_phenomenon_patch.call_args[1]
-            for key in fixed_surface_keys:
+            for key in self.fixed_surface_keys:
                 # Check whether None or actual values have been passed for
                 # the fixed surface arguments.
                 if fs_is_expected:
                     self.assertEqual(phenom_call_args[key], section_4[key])
                 else:
-                    self.assertEqual(phenom_call_args[key], None)
+                    self.assertIsNone(phenom_call_args[key])
 
-    def test_fixed_surface_expected_present(self):
-        # Standard behaviour for most templates.
-        self.generic_fixed_surface_test(fs_is_expected=True,
-                                        fs_is_present=True)
+    def test_all(self):
+        """
+        Test all combinations of fixed surface being expected/present
 
-    def test_fixed_surface_ignored_absent(self):
-        # Standard behaviour for a few templates e.g. #31.
-        self.generic_fixed_surface_test(fs_is_expected=False,
-                                        fs_is_present=False)
+        a. Expected and Present - standard behaviour for most templates
+        b. Expected and Absent - unplanned combination, should error
+        c. Unexpected and Present - unplanned combination, should be handled
+            identically to (d)
+        d. Unexpected and Absent - standard behaviour for a few templates
+            e.g. #31
+        """
+        for pair in product([True, False], repeat=2):
+            self._check_fixed_surface(*pair)
 
-    def test_fixed_surface_expected_absent(self):
-        # Unplanned combination, should result in an error.
-        self.generic_fixed_surface_test(fs_is_expected=True,
-                                        fs_is_present=False)
-
-    def test_fixed_surface_ignored_present(self):
-        # Unplanned combination, should be handled same as 'ignored_absent'.
-        self.generic_fixed_surface_test(fs_is_expected=False,
-                                        fs_is_present=True)
+    # def test_fixed_surface_expected_present(self):
+    #     # Standard behaviour for most templates.
+    #     self._check_fixed_surface(fs_is_expected=True,
+    #                               fs_is_present=True)
+    #
+    # def test_fixed_surface_ignored_absent(self):
+    #     # Standard behaviour for a few templates e.g. #31.
+    #     self._check_fixed_surface(fs_is_expected=False,
+    #                               fs_is_present=False)
+    #
+    # def test_fixed_surface_expected_absent(self):
+    #     # Unplanned combination, should result in an error.
+    #     self._check_fixed_surface(fs_is_expected=True,
+    #                               fs_is_present=False)
+    #
+    # def test_fixed_surface_ignored_present(self):
+    #     # Unplanned combination, should be handled same as 'ignored_absent'.
+    #     self._check_fixed_surface(fs_is_expected=False,
+    #                               fs_is_present=True)
 
 
 if __name__ == '__main__':
