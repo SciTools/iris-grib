@@ -71,6 +71,11 @@ class TestFixedSurfaces(tests.IrisGribTest):
         function with parameters.
         """
 
+        string_expected = 'Expected' if fs_is_expected else 'Unexpected'
+        string_present = 'Present' if fs_is_present else 'Absent'
+        print('Fixed Surface Keys *{}* and *{}*... '.format(string_expected,
+                                                            string_present))
+
         # Use the section 4 from either product_definition_section #1 or #31.
         # #0 contains fixed surface elements, #31 does not.
         template_number = 0 if fs_is_expected else 31
@@ -98,17 +103,18 @@ class TestFixedSurfaces(tests.IrisGribTest):
         if fs_is_expected and not fs_is_present:
             # Should error since the expected keys are missing.
             error_message = 'FixedSurface'
-            # with self.assertRaises(KeyError) as context:
             with six.assertRaisesRegex(self, KeyError, error_message):
                 run_function()
-            # self.assertTrue('FixedSurface' in str(context.exception))
         else:
             # Should have a successful run for all other circumstances.
-            run_function()
+
             # Translate_phenomenon_patch is the end of the function,
             # and should be able to accept None for the fixed surface
             # arguments. So should always have run.
-            self.assertEqual(self.translate_phenomenon_patch.call_count, 1)
+            previous_call_count = self.translate_phenomenon_patch.call_count
+            run_function()
+            self.assertEqual(self.translate_phenomenon_patch.call_count,
+                             previous_call_count + 1)
             phenom_call_args = self.translate_phenomenon_patch.call_args[1]
             for key in self.fixed_surface_keys:
                 # Check whether None or actual values have been passed for
@@ -118,7 +124,9 @@ class TestFixedSurfaces(tests.IrisGribTest):
                 else:
                     self.assertIsNone(phenom_call_args[key])
 
-    def test_all(self):
+        print('passed')
+
+    def test_all_combinations(self):
         """
         Test all combinations of fixed surface being expected/present
 
@@ -131,26 +139,6 @@ class TestFixedSurfaces(tests.IrisGribTest):
         """
         for pair in product([True, False], repeat=2):
             self._check_fixed_surface(*pair)
-
-    # def test_fixed_surface_expected_present(self):
-    #     # Standard behaviour for most templates.
-    #     self._check_fixed_surface(fs_is_expected=True,
-    #                               fs_is_present=True)
-    #
-    # def test_fixed_surface_ignored_absent(self):
-    #     # Standard behaviour for a few templates e.g. #31.
-    #     self._check_fixed_surface(fs_is_expected=False,
-    #                               fs_is_present=False)
-    #
-    # def test_fixed_surface_expected_absent(self):
-    #     # Unplanned combination, should result in an error.
-    #     self._check_fixed_surface(fs_is_expected=True,
-    #                               fs_is_present=False)
-    #
-    # def test_fixed_surface_ignored_present(self):
-    #     # Unplanned combination, should be handled same as 'ignored_absent'.
-    #     self._check_fixed_surface(fs_is_expected=False,
-    #                               fs_is_present=True)
 
 
 if __name__ == '__main__':
