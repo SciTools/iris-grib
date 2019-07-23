@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# (C) British Crown Copyright 2014 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -37,6 +37,19 @@ from iris_grib.tests.unit.load_convert import empty_metadata
 from iris_grib._load_convert import product_definition_template_31
 
 
+def section_4():
+    # Also needed for test_product_definition_section.py.
+    series = mock.sentinel.satelliteSeries
+    number = mock.sentinel.satelliteNumber
+    instrument = mock.sentinel.instrumentType
+    return {'NB': 1,
+            'satelliteSeries': series,
+            'satelliteNumber': number,
+            'instrumentType': instrument,
+            'scaleFactorOfCentralWaveNumber': 1,
+            'scaledValueOfCentralWaveNumber': 12}
+
+
 class Test(tests.IrisGribTest):
     def setUp(self):
         self.patch('warnings.warn')
@@ -47,16 +60,8 @@ class Test(tests.IrisGribTest):
 
     def test(self):
         # Prepare the arguments.
-        series = mock.sentinel.satelliteSeries
-        number = mock.sentinel.satelliteNumber
-        instrument = mock.sentinel.instrumentType
         rt_coord = mock.sentinel.observation_time
-        section = {'NB': 1,
-                   'satelliteSeries': series,
-                   'satelliteNumber': number,
-                   'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': 1,
-                   'scaledValueOfCentralWaveNumber': 12}
+        section = section_4()
 
         # Call the function.
         metadata = empty_metadata()
