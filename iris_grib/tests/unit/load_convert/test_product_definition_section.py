@@ -71,11 +71,6 @@ class TestFixedSurfaces(tests.IrisGribTest):
         function with parameters.
         """
 
-        string_expected = 'Expected' if fs_is_expected else 'Unexpected'
-        string_present = 'Present' if fs_is_present else 'Absent'
-        print('Fixed Surface Keys *{}* and *{}*... '.format(string_expected,
-                                                            string_present))
-
         # Use the section 4 from either product_definition_section #1 or #31.
         # #0 contains fixed surface elements, #31 does not.
         template_number = 0 if fs_is_expected else 31
@@ -123,8 +118,6 @@ class TestFixedSurfaces(tests.IrisGribTest):
                     self.assertEqual(phenom_call_args[key], section_4[key])
                 else:
                     self.assertIsNone(phenom_call_args[key])
-
-        print('passed')
 
     def test_all_combinations(self):
         """
