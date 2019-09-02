@@ -82,7 +82,7 @@ setup_args = dict(
     # to the user to provision themselves until ECMWF and PyPI provide the
     # suitable package platform coverage.
     install_requires=['scitools-iris>=2.0.*'] + [
-        'eccodes'] if 'win' in sys.platform else [],
+        'eccodes-python'] if 'win' in sys.platform else [],
     extras_require={
         'test:python_version=="2.7"': ['mock']
     },
