@@ -18,7 +18,7 @@ from cf_units import Unit
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import Probability, translate_phenomenon
-from iris_grib.grib_phenom_translation import _GribToCfDataClass
+from iris_grib.grib_phenom_translation import _GribToCfDataClass, GribCode
 
 
 class Test_probability(tests.IrisGribTest):
@@ -48,8 +48,16 @@ class Test_probability(tests.IrisGribTest):
     def test_no_phenomenon(self):
         original_metadata = deepcopy(self.metadata)
         self.phenom_lookup_patch.return_value = None
-        result = translate_phenomenon(self.metadata, None, None, None, None,
-                                      None, None, probability=self.probability)
+        metadata = self.metadata.copy()
+        metadata['attributes'] = {'GRIB_CODING': GribCode(2, 7, 77, 777)}
+        result = translate_phenomenon(metadata,
+                                      discipline=7,
+                                      parameterCategory=77,
+                                      parameterNumber=777,
+                                      typeOfFirstFixedSurface=None,
+                                      scaledValueOfFirstFixedSurface=None,
+                                      typeOfSecondFixedSurface=None,
+                                      probability=self.probability)
         self.assertEqual(self.metadata, original_metadata)
 
 

@@ -30,6 +30,7 @@ from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
                             _SPATIAL_PROCESSING_TYPES)
+from .grib_phenom_translation import GribCode
 from iris.util import is_regular, regular_step
 
 
@@ -690,21 +691,45 @@ def grid_definition_section(cube, grib):
 ###############################################################################
 
 def set_discipline_and_parameter(cube, grib):
+    # Default values for parameter identity keys = effectively "MISSING".
+    discipline, category, number = 255, 255, 255
+    identity_found = False
+
+    # Translate a cube phenomenon, if possible.
     # NOTE: for now, can match by *either* standard_name or long_name.
     # This allows workarounds for data with no identified standard_name.
     grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
                                               cube.long_name)
     if grib2_info is not None:
-        gribapi.grib_set(grib, "discipline", grib2_info.discipline)
-        gribapi.grib_set(grib, "parameterCategory", grib2_info.category)
-        gribapi.grib_set(grib, "parameterNumber", grib2_info.number)
-    else:
-        gribapi.grib_set(grib, "discipline", 255)
-        gribapi.grib_set(grib, "parameterCategory", 255)
-        gribapi.grib_set(grib, "parameterNumber", 255)
+        discipline = grib2_info.discipline
+        category = grib2_info.category
+        number = grib2_info.number
+        identity_found = True
+
+    if not identity_found:
+        # See if we can find and interpret a 'GRIB_CODING' attribute.
+        attr = cube.attributes.get('GRIB_CODING', None)
+        if attr:
+            try:
+                # Convert to standard tuple-derived form.
+                # Late import to avoid circularity
+                gc = GribCode(attr)
+                if gc.edition == 2:
+                    discipline = gc.discipline
+                    category = gc.category
+                    number = gc.number
+                    identity_found = True
+            except:
+                pass
+
+    if not identity_found:
         warnings.warn('Unable to determine Grib2 parameter code for cube.\n'
                       'discipline, parameterCategory and parameterNumber '
                       'have been set to "missing".')
+
+    gribapi.grib_set(grib, "discipline", discipline)
+    gribapi.grib_set(grib, "parameterCategory", category)
+    gribapi.grib_set(grib, "parameterNumber", number)
 
 
 def _non_missing_forecast_period(cube):

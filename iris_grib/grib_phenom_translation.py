@@ -17,7 +17,12 @@ Currently supports only these ones:
 
 '''
 
-import collections
+from __future__ import (absolute_import, division, print_function)
+from six.moves import (filter, input, map, range, zip)  # noqa
+
+from collections import namedtuple
+import re
+import six
 import warnings
 
 import cf_units
@@ -54,12 +59,12 @@ class _LookupTable(dict):
 
 # Define namedtuples for keys+values of the Grib1 lookup table.
 
-_Grib1ToCfKeyClass = collections.namedtuple(
+_Grib1ToCfKeyClass = namedtuple(
     'Grib1CfKey',
     ('table2_version', 'centre_number', 'param_number'))
 
 # NOTE: this form is currently used for both Grib1 *and* Grib2
-_GribToCfDataClass = collections.namedtuple(
+_GribToCfDataClass = namedtuple(
     'Grib1CfData',
     ('standard_name', 'long_name', 'units', 'set_height'))
 
@@ -146,7 +151,7 @@ _GRIB1_CF_TABLE = _make_grib1_cf_table()
 
 # Define a namedtuple for the keys of the Grib2 lookup table.
 
-_Grib2ToCfKeyClass = collections.namedtuple(
+_Grib2ToCfKeyClass = namedtuple(
     'Grib2CfKey',
     ('param_discipline', 'param_category', 'param_number'))
 
@@ -205,11 +210,11 @@ _GRIB2_CF_TABLE = _make_grib2_to_cf_table()
 
 # Define namedtuples for key+values of the cf-to-grib2 lookup table.
 
-_CfToGrib2KeyClass = collections.namedtuple(
+_CfToGrib2KeyClass = namedtuple(
     'CfGrib2Key',
     ('standard_name', 'long_name'))
 
-_CfToGrib2DataClass = collections.namedtuple(
+_CfToGrib2DataClass = namedtuple(
     'CfGrib2Data',
     ('discipline', 'category', 'number', 'units'))
 
@@ -316,3 +321,59 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
     if standard_name is not None:
         long_name = None
     return _CF_GRIB2_TABLE[(standard_name, long_name)]
+
+
+class GribCode(namedtuple('GribCode',
+                          'edition discipline category number')):
+    """
+    An object representing a specific Grib phenomenon identity.
+
+    Basically a namedtuple of (edition, discipline, category, number).
+
+    Also provides a string representation, and supports creation from: another
+    similar object; a tuple of numbers; or any string with 4 separate decimal
+    numbers in it.
+
+    """
+    __slots__ = ()
+
+    def __new__(cls, edition_or_string,
+                discipline=None, category=None, number=None):
+        if (all(arg is None
+                for arg in (discipline, category, number))):
+            # Only 1 arg : can  be existing object, or a string.
+            # Convert to a string : also covers case of a GribCode to copy.
+            edition_or_string = str(edition_or_string)
+            edition, discipline, category, number = \
+                cls._fournums_from_gribcode_string(edition_or_string)
+        else:
+            edition = edition_or_string
+            edition, discipline, category, number = [
+                int(arg)
+                for arg in (edition, discipline, category, number)]
+        return super(GribCode, cls).__new__(
+            cls, edition, discipline, category, number)
+
+    RE_PARSE_FOURNUMS = re.compile(4 * r'[^\d]*(\d*)')
+
+    @classmethod
+    def _fournums_from_gribcode_string(cls, edcn_string):
+        nums_match = cls.RE_PARSE_FOURNUMS.match(edcn_string).groups()
+        parsed_ok = nums_match is not None
+        if parsed_ok:
+            try:
+                nums = [int(grp) for grp in nums_match]
+            except ValueError:
+                parsed_ok = False
+        if not parsed_ok:
+            msg = ('Invalid string for a GRIB_CODING attribute, {!s}: '
+                   'needs 4 numbers, separated with non-numerals.')
+            raise ValueError(msg.format(edcn_string))
+        return nums
+
+    PRINT_FORMAT = 'GRIB{:1d}:d{:d}.c{:d}.n{:d}'
+
+    def __str__(self):
+        result = self.PRINT_FORMAT.format(
+            self.edition, self.discipline, self.category, self.number)
+        return result

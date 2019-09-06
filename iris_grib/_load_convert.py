@@ -26,13 +26,13 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
+from .grib_phenom_translation import GribCode
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from ._grib1_load_rules import grib1_convert
-from .message import GribMessage
 
 
 # Restrict the names imported from this namespace.
@@ -1357,7 +1357,15 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
     cf = itranslation.grib2_phenom_to_cf_info(param_discipline=discipline,
                                               param_category=parameterCategory,
                                               param_number=parameterNumber)
-    if cf is not None:
+    if cf is None:
+        # Add a standard attribute recording the grib phenomenon identity.
+        # Note: deferred import to avoid circular import problem
+        metadata['attributes']['GRIB_CODING'] = GribCode(
+            edition_or_string=2,
+            discipline=discipline,
+            category=parameterCategory,
+            number=parameterNumber)
+    else:
         if probability is None:
             metadata['standard_name'] = cf.standard_name
             metadata['long_name'] = cf.long_name
