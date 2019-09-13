@@ -192,7 +192,7 @@ class TestGribCode(tests.IrisTest):
     def test_create_from_string(self):
         gribcode = GribCode('xxx12xs-34 -5,678qqqq')
         # NOTE: args 2 and 3 are *not* negative.
-        self.assertEqual(gribcode, GribCode(12,34,5,678))
+        self.assertEqual(gribcode, GribCode(12, 34, 5, 678))
 
     def test_create_from_tuple(self):
         gribcode = GribCode((4, 3, 2, 1))

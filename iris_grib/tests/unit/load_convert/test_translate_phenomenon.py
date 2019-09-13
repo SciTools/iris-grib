@@ -30,7 +30,7 @@ class Test_probability(tests.IrisGribTest):
             return_value=_GribToCfDataClass('air_temperature', '', 'K', None))
         # Construct dummy call arguments
         self.probability = Probability('<prob_type>', 22.0)
-        self.metadata = {'aux_coords_and_dims': [], 'attributes':{}}
+        self.metadata = {'aux_coords_and_dims': [], 'attributes': {}}
 
     def test_basic(self):
         translate_phenomenon(self.metadata, None, None, None, None,
