@@ -712,7 +712,6 @@ def set_discipline_and_parameter(cube, grib):
         if attr:
             try:
                 # Convert to standard tuple-derived form.
-                # Late import to avoid circularity
                 gc = GribCode(attr)
                 if gc.edition == 2:
                     discipline = gc.discipline

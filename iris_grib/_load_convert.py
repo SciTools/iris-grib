@@ -1359,7 +1359,6 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
                                               param_number=parameterNumber)
     if cf is None:
         # Add a standard attribute recording the grib phenomenon identity.
-        # Note: deferred import to avoid circular import problem
         metadata['attributes']['GRIB_CODING'] = GribCode(
             edition_or_string=2,
             discipline=discipline,

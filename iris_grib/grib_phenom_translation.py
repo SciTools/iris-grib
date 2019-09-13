@@ -339,18 +339,25 @@ class GribCode(namedtuple('GribCode',
 
     def __new__(cls, edition_or_string,
                 discipline=None, category=None, number=None):
-        if (all(arg is None
-                for arg in (discipline, category, number))):
-            # Only 1 arg : can  be existing object, or a string.
-            # Convert to a string : also covers case of a GribCode to copy.
+        args = (edition_or_string, discipline, category, number)
+        nargs = sum(arg is not None for arg in args)
+        if nargs == 1:
+            # Single argument: convert to a string and extract 4 integers.
+            # NOTE: this also allows input from a GribCode, or a plain tuple.
             edition_or_string = str(edition_or_string)
             edition, discipline, category, number = \
                 cls._fournums_from_gribcode_string(edition_or_string)
-        else:
+        elif nargs == 4:
             edition = edition_or_string
             edition, discipline, category, number = [
                 int(arg)
                 for arg in (edition, discipline, category, number)]
+        else:
+            msg = ('Cannot create GribCode from {} arguments, '
+                   '"GribCode{!r}" : '
+                   'expected either 1 or 4 non-None arguments.')
+            raise ValueError(msg.format(nargs, args))
+
         return super(GribCode, cls).__new__(
             cls, edition, discipline, category, number)
 
@@ -358,17 +365,21 @@ class GribCode(namedtuple('GribCode',
 
     @classmethod
     def _fournums_from_gribcode_string(cls, edcn_string):
+        parsed_ok = False
         nums_match = cls.RE_PARSE_FOURNUMS.match(edcn_string).groups()
-        parsed_ok = nums_match is not None
-        if parsed_ok:
+        if nums_match is not None:
             try:
                 nums = [int(grp) for grp in nums_match]
+                parsed_ok = True
             except ValueError:
-                parsed_ok = False
+                pass
+
         if not parsed_ok:
-            msg = ('Invalid string for a GRIB_CODING attribute, {!s}: '
-                   'needs 4 numbers, separated with non-numerals.')
+            msg = ('Invalid argument for GribCode creation, '
+                   '"GribCode({!r})" : '
+                   'requires 4 numbers, separated by non-numerals.')
             raise ValueError(msg.format(edcn_string))
+
         return nums
 
     PRINT_FORMAT = 'GRIB{:1d}:d{:d}.c{:d}.n{:d}'
