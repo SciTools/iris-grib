@@ -1,4 +1,4 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# (C) British Crown Copyright 2013 - 2019, Met Office
 #
 # This file is part of iris-grib.
 #
@@ -96,10 +96,6 @@ class Test(tests.IrisGribTest):
         self.assertEqual(
             gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"),
             106)
-
-
-
-        
 
 if __name__ == "__main__":
     tests.main()
