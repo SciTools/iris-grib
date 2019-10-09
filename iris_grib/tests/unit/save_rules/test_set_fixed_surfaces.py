@@ -77,6 +77,29 @@ class Test(tests.IrisGribTest):
             gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"),
             107)
 
+    def test_depth(self):
+        cube = iris.cube.Cube([0])
+        cube.add_aux_coord(iris.coords.AuxCoord(
+            1, long_name='depth', units='m',
+            bounds=np.array([0. , 2]), attributes={'positive': 'down'})
+        grib = gribapi.grib_new_from_samples("GRIB2")
+        set_fixed_surfaces(cube, grib)
+        self.assertEqual(
+            gribapi.grib_get_double(grib, "scaledValueOfFirstFixedSurface"),
+            0.)
+        self.assertEqual(
+            gribapi.grib_get_double(grib, "scaledValueOfSecondFixedSurface"),
+            2)
+        self.assertEqual(
+            gribapi.grib_get_long(grib, "typeOfFirstFixedSurface"),
+            106)
+        self.assertEqual(
+            gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"),
+            106)
+
+
+
+        
 
 if __name__ == "__main__":
     tests.main()
