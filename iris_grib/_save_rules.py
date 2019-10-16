@@ -886,7 +886,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         grib_v_code = 106
         output_unit = cf_units.Unit('m')
         v_coord = cube.coord("depth")
-        
+
     elif cube.coords("air_potential_temperature"):
         grib_v_code = 107
         output_unit = cf_units.Unit('K')
