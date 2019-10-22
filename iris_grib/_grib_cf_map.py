@@ -205,6 +205,7 @@ CF_TO_GRIB2 = {
     CFName('land_binary_mask', None, '1'): G2Param(2, 2, 0, 0),
     CFName('liquid_water_content_of_surface_snow', None, 'kg m-2'): G2Param(2, 0, 1, 13),
     CFName('low_type_cloud_area_fraction', None, '%'): G2Param(2, 0, 6, 3),
+    CFName('mass_fraction_of_cloud_ice_in_air', None, 'kg kg-1'): G2Param(2, 0, 1, 84),
     CFName('medium_type_cloud_area_fraction', None, '%'): G2Param(2, 0, 6, 4),
     CFName('moisture_content_of_soil_layer', None, 'kg m-2'): G2Param(2, 2, 0, 22),
     CFName('precipitation_amount', None, 'kg m-2'): G2Param(2, 0, 1, 49),
