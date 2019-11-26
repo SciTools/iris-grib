@@ -3,7 +3,6 @@ dist: xenial
 
 env:
   matrix:
-    - PYTHON_VERSION=2.7
     - PYTHON_VERSION=3.6
     - PYTHON_VERSION=3.7
 
@@ -30,22 +29,15 @@ install:
     conda config --add channels conda-forge;
     conda update --quiet conda;
     ENV_NAME='test-environment';
-    conda create --quiet -n ${ENV_NAME} python=${PYTHON_VERSION};
+    conda create --quiet -n ${ENV_NAME} python=${PYTHON_VERSION} mock filelock pep8;
     source activate ${ENV_NAME};
 
   # Customise the test environment
   # ------------------------------
   - >
-    if [[ "${PYTHON_VERSION}" == 2* ]]; then
-      export ECCODES_DEPS="python-eccodes";
-    else
-      export ECCODES_DEPS="eccodes pip";
-    fi;
-    conda install -n ${ENV_NAME} --quiet iris mock filelock pep8 ${ECCODES_DEPS};
-    if [[ "${PYTHON_VERSION}" == 3* ]]; then
-      pip install eccodes-python;
-      python -m eccodes selfcheck;
-    fi;
+    conda env update -n ${ENV_NAME} --quiet --file environment.yml;
+    # Check installation of eccodes.
+    python -m eccodes selfcheck;
 
   # Download and install iris-test-data
   # -----------------------------------
