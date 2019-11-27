@@ -59,18 +59,24 @@ class TestPhenomenonCoding(tests.IrisGribTest):
 
     def test_gribcode_attribute_string(self):
         cube = self.mock_cube
-        self.mock_cube.attributes = {'GRIB_CODING': '2, 9, 33, 177'}
+        cube.attributes = {'GRIB_CODING': '2, 9, 33, 177'}
         self._check_coding(cube, 9, 33, 177)
 
     def test_gribcode_attribute_tuple(self):
         cube = self.mock_cube
-        self.mock_cube.attributes = {'GRIB_CODING': (2, 33, 4, 12)}
+        cube.attributes = {'GRIB_CODING': (2, 33, 4, 12)}
         self._check_coding(cube, 33, 4, 12)
 
     def test_gribcode_attribute_not_edition_2(self):
         cube = self.mock_cube
         cube.attributes = {'GRIB_CODING': GribCode(1, 7, 12, 99)}
         self._check_coding(cube, 255, 255, 255)
+
+    def test_gribcode_attribute_overrides_phenomenon(self):
+        cube = self.mock_cube
+        cube.standard_name = 'sea_water_y_velocity'
+        cube.attributes = {'GRIB_CODING': '2, 9, 33, 177'}
+        self._check_coding(cube, 9, 33, 177)
 
 
 if __name__ == "__main__":
