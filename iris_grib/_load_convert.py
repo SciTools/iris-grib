@@ -1357,14 +1357,7 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
     cf = itranslation.grib2_phenom_to_cf_info(param_discipline=discipline,
                                               param_category=parameterCategory,
                                               param_number=parameterNumber)
-    if cf is None:
-        # Add a standard attribute recording the grib phenomenon identity.
-        metadata['attributes']['GRIB_CODING'] = GribCode(
-            edition_or_string=2,
-            discipline=discipline,
-            category=parameterCategory,
-            number=parameterNumber)
-    else:
+    if cf is not None:
         if probability is None:
             metadata['standard_name'] = cf.standard_name
             metadata['long_name'] = cf.long_name
@@ -1384,6 +1377,13 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['standard_name'] = None
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
+
+    # Add a standard attribute recording the grib phenomenon identity.
+    metadata['attributes']['GRIB_CODING'] = GribCode(
+        edition_or_string=2,
+        discipline=discipline,
+        category=parameterCategory,
+        number=parameterNumber)
 
     # Identify hybrid height and pressure reference fields.
     # Look for fields at surface level first.

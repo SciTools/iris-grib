@@ -695,31 +695,31 @@ def set_discipline_and_parameter(cube, grib):
     discipline, category, number = 255, 255, 255
     identity_found = False
 
-    # Translate a cube phenomenon, if possible.
-    # NOTE: for now, can match by *either* standard_name or long_name.
-    # This allows workarounds for data with no identified standard_name.
-    grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
-                                              cube.long_name)
-    if grib2_info is not None:
-        discipline = grib2_info.discipline
-        category = grib2_info.category
-        number = grib2_info.number
-        identity_found = True
+    # First, see if we can find and interpret a 'GRIB_CODING' attribute.
+    attr = cube.attributes.get('GRIB_CODING', None)
+    if attr:
+        try:
+            # Convert to standard tuple-derived form.
+            gc = GribCode(attr)
+            if gc.edition == 2:
+                discipline = gc.discipline
+                category = gc.category
+                number = gc.number
+                identity_found = True
+        except:
+            pass
 
     if not identity_found:
-        # See if we can find and interpret a 'GRIB_CODING' attribute.
-        attr = cube.attributes.get('GRIB_CODING', None)
-        if attr:
-            try:
-                # Convert to standard tuple-derived form.
-                gc = GribCode(attr)
-                if gc.edition == 2:
-                    discipline = gc.discipline
-                    category = gc.category
-                    number = gc.number
-                    identity_found = True
-            except:
-                pass
+        # Else, translate a cube phenomenon, if possible.
+        # NOTE: for now, can match by *either* standard_name or long_name.
+        # This allows workarounds for data with no identified standard_name.
+        grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
+                                                  cube.long_name)
+        if grib2_info is not None:
+            discipline = grib2_info.discipline
+            category = grib2_info.category
+            number = grib2_info.number
+            identity_found = True
 
     if not identity_found:
         warnings.warn('Unable to determine Grib2 parameter code for cube.\n'
