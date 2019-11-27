@@ -5,15 +5,13 @@
 # licensing details.
 """Unit tests for `iris_grib.grib_save_rules.reference_time`."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
+
 import gribapi
-import mock
 
 from iris_grib import load_cubes
 from iris_grib._save_rules import reference_time

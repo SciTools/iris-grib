@@ -9,15 +9,11 @@ Tests for function
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 from iris_grib._load_convert import product_definition_template_8
 
@@ -62,10 +58,10 @@ class Test(tests.IrisGribTest):
                          ['aux_coords_and_dims', 'cell_methods'])
         self.assertEqual(self.metadata['cell_methods'],
                          [mock.sentinel.dummy_cell_method])
-        six.assertCountEqual(self, self.metadata['aux_coords_and_dims'],
-                             [(self.frt_coord, None),
-                              (mock.sentinel.dummy_fp_coord, None),
-                              (mock.sentinel.dummy_time_coord, None)])
+        self.assertCountEqual(self.metadata['aux_coords_and_dims'],
+                              [(self.frt_coord, None),
+                               (mock.sentinel.dummy_fp_coord, None),
+                               (mock.sentinel.dummy_time_coord, None)])
 
 
 if __name__ == '__main__':

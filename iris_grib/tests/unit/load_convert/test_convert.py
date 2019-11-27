@@ -5,14 +5,11 @@
 # licensing details.
 """Test function :func:`iris_grib._load_convert.convert`."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 from iris.exceptions import TranslationError
 
@@ -40,7 +37,7 @@ class TestGribMessage(tests.IrisGribTest):
         sections = [{'editionNumber': 1}]
         field = _make_test_message(sections)
         emsg = 'edition 1 is not supported'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             convert(field)
 
 
@@ -49,7 +46,7 @@ class TestGribWrapper(tests.IrisGribTest):
         # Test object with no '.sections', and '.edition' ==2.
         field = mock.Mock(edition=2, spec=('edition'))
         emsg = 'edition 2 is not supported'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             convert(field)
 
     def test_edition_1(self):

@@ -8,9 +8,6 @@ Unit tests for :meth:`iris_grib._save_rules.grid_definition_template_5`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -102,7 +99,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
                            north_pole_grid_longitude=22.5,
                            ellipsoid=self.default_ellipsoid)
         test_cube = self._make_test_cube(cs=cs)
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 TranslationError,
                 'not yet support .* rotated prime meridian.'):
             grid_definition_template_5(test_cube, self.mock_grib)

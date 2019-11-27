@@ -9,9 +9,6 @@ Test function
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -124,7 +121,7 @@ class Test(tests.IrisGribTest):
         section = {'numberOfOctectsForNumberOfPoints': 1}
         cs = None
         metadata = None
-        with self.assertRaisesRegexp(TranslationError, 'quasi-regular'):
+        with self.assertRaisesRegex(TranslationError, 'quasi-regular'):
             grid_definition_template_0_and_1(section,
                                              metadata,
                                              'latitude',
@@ -136,7 +133,7 @@ class Test(tests.IrisGribTest):
                    'interpretationOfNumberOfPoints': 1}
         cs = None
         metadata = None
-        with self.assertRaisesRegexp(TranslationError, 'quasi-regular'):
+        with self.assertRaisesRegex(TranslationError, 'quasi-regular'):
             grid_definition_template_0_and_1(section,
                                              metadata,
                                              'latitude',

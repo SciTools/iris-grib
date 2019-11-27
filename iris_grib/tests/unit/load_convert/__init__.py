@@ -5,9 +5,6 @@
 # licensing details.
 """Unit tests for the :mod:`iris_grib._load_convert` package."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests

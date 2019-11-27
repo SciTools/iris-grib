@@ -8,14 +8,11 @@ Unit tests for the `iris.message._MessageLocation` class.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 from iris_grib.message import _MessageLocation
 

@@ -9,10 +9,6 @@ Unit tests for
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -117,7 +113,7 @@ class Test(tests.IrisGribTest):
             self.assertEqual(result_coord, expected_coord)
 
         # Ensure no other metadata was created.
-        for name in six.iterkeys(expected):
+        for name in expected.keys():
             if name == 'dim_coords_and_dims':
                 continue
             self.assertEqual(metadata[name], expected[name])
@@ -141,46 +137,46 @@ class Test(tests.IrisGribTest):
         section = self.uk()
         section['latitudeOfSubSatellitePoint'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'non-zero latitude'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'non-zero latitude'):
             grid_definition_template_90(section, metadata)
 
     def test_rotated_meridian(self):
         section = self.uk()
         section['orientationOfTheGrid'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orientation'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orientation'):
             grid_definition_template_90(section, metadata)
 
     def test_zero_height(self):
         section = self.uk()
         section['Nr'] = 0
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'zero'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'zero'):
             grid_definition_template_90(section, metadata)
 
     def test_orthographic(self):
         section = self.uk()
         section['Nr'] = MDI
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orthographic'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orthographic'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_positive_x(self):
         section = self.uk()
         section['scanningMode'] = 0b01000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, r'\+x'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, r'\+x'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_negative_y(self):
         section = self.uk()
         section['scanningMode'] = 0b10000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, '-y'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, '-y'):
             grid_definition_template_90(section, metadata)
 
 

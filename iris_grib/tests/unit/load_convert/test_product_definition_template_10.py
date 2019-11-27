@@ -8,15 +8,12 @@ Test function :func:`iris_grib._load_convert.product_definition_template_10`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
+from unittest import mock
 
 from iris.coords import DimCoord
 from iris_grib._load_convert import product_definition_template_10

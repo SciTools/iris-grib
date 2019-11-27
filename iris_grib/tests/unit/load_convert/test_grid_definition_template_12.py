@@ -9,9 +9,6 @@ Unit tests for
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -99,16 +96,16 @@ class Test(tests.IrisGribTest):
         section = self.section_3()
         section['scanningMode'] = 0b11000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     '-x scanning'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    '-x scanning'):
             grid_definition_template_12(section, metadata)
 
     def test_negative_y(self):
         section = self.section_3()
         section['scanningMode'] = 0b00000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     '-y scanning'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    '-y scanning'):
             grid_definition_template_12(section, metadata)
 
     def test_transposed(self):
@@ -135,8 +132,8 @@ class Test(tests.IrisGribTest):
         section = self.section_3()
         section['X2'] += 100
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'grid'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'grid'):
             grid_definition_template_12(section, metadata)
 
     def test_scale_workaround(self):

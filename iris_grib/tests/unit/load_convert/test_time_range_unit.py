@@ -8,9 +8,6 @@ Test function :func:`iris_grib._load_convert.time_range_unit.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -38,7 +35,7 @@ class Test(tests.IrisGribTest):
 
     def test_bad_indicator(self):
         emsg = 'unsupported time range'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             time_range_unit(-1)
 
 

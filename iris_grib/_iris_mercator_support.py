@@ -8,9 +8,6 @@ Temporary module to check for the extended Mercator class in Iris,
 which iris-grib requires for its Mercator support.
 
 """
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 import distutils.version
 

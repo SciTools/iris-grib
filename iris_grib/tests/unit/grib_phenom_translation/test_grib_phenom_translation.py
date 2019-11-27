@@ -10,8 +10,6 @@ Carried over from old iris/tests/test_grib_phenom_translation.py.
 Code is out of step with current test conventions and standards.
 
 '''
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.

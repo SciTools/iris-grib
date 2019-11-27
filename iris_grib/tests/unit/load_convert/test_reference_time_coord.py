@@ -10,9 +10,6 @@ Reference Code Table 1.2.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -68,7 +65,7 @@ class Test(tests.IrisGribTest):
         section = deepcopy(self.section)
         section['significanceOfReferenceTime'] = 5
         emsg = 'unsupported significance'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             self._check(section)
 
 

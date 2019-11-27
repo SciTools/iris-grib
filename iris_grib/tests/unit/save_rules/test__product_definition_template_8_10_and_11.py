@@ -9,16 +9,14 @@ Unit tests for
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
+
 from cf_units import Unit
 import gribapi
-import mock
 
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
@@ -61,8 +59,8 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cell_method = CellMethod(method='sum',
                                  coords=['time', 'forecast_period'])
         cube.add_cell_method(cell_method)
-        with self.assertRaisesRegexp(ValueError,
-                                     'Cannot handle multiple coordinate name'):
+        with self.assertRaisesRegex(ValueError,
+                                    'Cannot handle multiple coordinate name'):
             _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
@@ -70,7 +68,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cube = self.cube
         cell_method = CellMethod(method='mean', coords=['season'])
         cube.add_cell_method(cell_method)
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 ValueError, "Expected a cell method with a coordinate "
                 "name of 'time'"):
             _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
@@ -89,7 +87,7 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
                          bounds=[[22, 23], [23, 24], [24, 25]],
                          units=Unit('days since epoch', calendar='standard'))
         self.cube.add_aux_coord(coord, 0)
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 ValueError, 'Expected length one time coordinate'):
             _product_definition_template_8_10_and_11(self.cube,
                                                      mock.sentinel.grib)
@@ -100,7 +98,7 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         coord = DimCoord(23, 'time',
                          units=Unit('days since epoch', calendar='standard'))
         self.cube.add_aux_coord(coord)
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 ValueError, 'Expected time coordinate with two bounds, '
                 'got 0 bounds'):
             _product_definition_template_8_10_and_11(self.cube,
@@ -112,7 +110,7 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         coord = DimCoord(23, 'time', bounds=[21, 22, 23],
                          units=Unit('days since epoch', calendar='standard'))
         self.cube.add_aux_coord(coord)
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 ValueError, 'Expected time coordinate with two bounds, '
                 'got 3 bounds'):
             _product_definition_template_8_10_and_11(self.cube,

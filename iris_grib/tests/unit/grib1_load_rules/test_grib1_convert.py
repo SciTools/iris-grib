@@ -5,16 +5,13 @@
 # licensing details.
 """Unit tests for :func:`iris_grib._grib1_load_rules.grib1_convert`."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else
 import iris_grib.tests as tests
 
 import cf_units
 import gribapi
-import mock
+from unittest import mock
 
 import iris
 from iris.exceptions import TranslationError
@@ -29,7 +26,7 @@ class TestBadEdition(tests.IrisGribTest):
     def test(self):
         message = mock.Mock(edition=2)
         emsg = 'GRIB edition 2 is not supported'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             grib1_convert(message)
 
 

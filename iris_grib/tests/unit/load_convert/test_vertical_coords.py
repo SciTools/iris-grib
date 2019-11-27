@@ -8,15 +8,12 @@ Test function :func:`iris_grib._load_convert.vertical_coords`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
+from unittest import mock
 
 from iris.coords import DimCoord
 from iris.exceptions import TranslationError
@@ -115,7 +112,7 @@ class Test(tests.IrisGribTest):
                    'scaleFactorOfFirstFixedSurface': None,
                    'typeOfSecondFixedSurface': 0}
         emsg = 'different types of first and second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_same_fixed_surfaces_missing_second_scaled_value(self):
@@ -126,7 +123,7 @@ class Test(tests.IrisGribTest):
                    'typeOfSecondFixedSurface': 100,
                    'scaledValueOfSecondFixedSurface': MISSING_LEVEL}
         emsg = 'missing scaled value of second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_pressure_with_second_fixed_surface(self):

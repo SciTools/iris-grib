@@ -8,9 +8,6 @@ Unit tests for `iris_grib.message.Section`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -50,7 +47,7 @@ class Test___getitem__(tests.IrisGribTest):
 
     def test_invalid(self):
         section = Section(self.grib_id, None, ['Ni'])
-        with self.assertRaisesRegexp(KeyError, 'Nii'):
+        with self.assertRaisesRegex(KeyError, 'Nii'):
             section['Nii']
 
 
