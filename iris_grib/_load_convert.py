@@ -498,6 +498,14 @@ def ellipsoid_geometry(section):
     return major, minor, radius
 
 
+def _calculate_increment(first_grid_point, last_grid_point, num_intervals):
+    # Calculates the directional increment from the difference between
+    # the grid point values divided by the total number of intervals.
+    # Required by template 0 & 40 when no increment values are provided.
+
+    return math.fabs(last_grid_point - first_grid_point) / num_intervals
+
+
 def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     """
     Translate templates representing regularly spaced latitude/longitude
@@ -533,8 +541,16 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resoultion flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
@@ -544,7 +560,12 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     circular = _is_circular(x_points, 360.0)
 
     # Calculate latitude points.
-    y_inc = section['jDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    y_inc = (section['jDirectionIncrement']
+             if res_flags.j_increments_given
+             else _calculate_increment(section['latitudeOfFirstGridPoint'],
+                                       section['latitudeOfLastGridPoint'],
+                                       section['Nj'] - 1))
+    y_inc *= _GRID_ACCURACY_IN_DEGREES
     y_offset = section['latitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     y_direction = 1 if scan.j_positive else -1
     Nj = section['Nj']
@@ -1047,8 +1068,16 @@ def grid_definition_template_40_regular(section, metadata, cs):
     """
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resolution flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
