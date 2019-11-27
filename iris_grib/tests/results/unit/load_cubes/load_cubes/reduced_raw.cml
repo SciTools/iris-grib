@@ -2,6 +2,7 @@
 <cubes xmlns="urn:x-iris:cubeml-0.2">
   <cube dtype="float64" standard_name="geopotential" units="m2 s-2">
     <attributes>
+      <attribute name="GRIB_CODING" value="GRIB2:d0.c3.n4"/>
       <attribute name="centre" value="European Centre for Medium Range Weather Forecasts"/>
     </attributes>
     <coords>

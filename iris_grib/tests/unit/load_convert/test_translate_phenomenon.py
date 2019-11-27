@@ -33,7 +33,7 @@ class Test_probability(tests.IrisGribTest):
         self.metadata = {'aux_coords_and_dims': [], 'attributes': {}}
 
     def test_basic(self):
-        translate_phenomenon(self.metadata, None, None, None, None,
+        translate_phenomenon(self.metadata, 7, 8, 9, None,
                              None, None, probability=self.probability)
         # Check metadata.
         thresh_coord = DimCoord([22.0],
@@ -44,7 +44,7 @@ class Test_probability(tests.IrisGribTest):
             'long_name': 'probability_of_air_temperature_<prob_type>',
             'units': Unit(1),
             'aux_coords_and_dims': [(thresh_coord, None)],
-            'attributes': {}})
+            'attributes': {'GRIB_CODING': GribCode(2, 7, 8, 9)}})
 
     def test_no_phenomenon(self):
         self.phenom_lookup_patch.return_value = None
