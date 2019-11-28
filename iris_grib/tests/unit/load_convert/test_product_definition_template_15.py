@@ -12,14 +12,11 @@ testing for the statistical method and spatial-processing type.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 import iris.coords
 from iris.exceptions import TranslationError
@@ -94,14 +91,14 @@ class Test(LoadConvertTest):
         section = section_4_sample()
         section['statisticalProcess'] = 999
         msg = 'unsupported statistical process type \[999\]'
-        with self.assertRaisesRegexp(TranslationError, msg):
+        with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 
     def test_bad_spatial_processing_code(self):
         section = section_4_sample()
         section['spatialProcessing'] = 999
         msg = 'unsupported spatial processing type \[999\]'
-        with self.assertRaisesRegexp(TranslationError, msg):
+        with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 
 

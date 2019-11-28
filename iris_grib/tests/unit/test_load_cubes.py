@@ -5,12 +5,9 @@
 # licensing details.
 """Unit tests for the `iris_grib.load_cubes` function."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 import iris
 from iris.fileformats.rules import Loader

@@ -8,17 +8,14 @@ Unit tests for :func:`iris_grib._save_rules.data_section`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised before
 # importing anything else
 import iris_grib.tests as tests
 
-import mock
-import numpy as np
+from unittest import mock
 
 import iris.cube
+import numpy as np
 
 from iris_grib._save_rules import data_section
 

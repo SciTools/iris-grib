@@ -8,17 +8,14 @@ Tests for `iris_grib._load_convert.product_definition_section`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-from iris.coords import DimCoord
-import mock
-import six
-
 from itertools import product
+from unittest import mock
+
+from iris.coords import DimCoord
 
 from iris_grib._load_convert import product_definition_section
 from iris_grib.tests.unit.load_convert import empty_metadata
@@ -87,7 +84,7 @@ class TestFixedSurfaces(tests.IrisGribTest):
         if fs_is_expected and not fs_is_present:
             # Should error since the expected keys are missing.
             error_message = 'FixedSurface'
-            with six.assertRaisesRegex(self, KeyError, error_message):
+            with self.assertRaisesRegex(KeyError, error_message):
                 run_function()
         else:
             # Should have a successful run for all other circumstances.

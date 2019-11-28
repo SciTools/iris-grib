@@ -10,9 +10,6 @@ This imports iris.tests, which requires to be done before anything else for
 plot control reasons : see documentation there.
 
 """
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 import iris.tests
 
@@ -46,7 +43,7 @@ class IrisGribTest(IrisTest):
         as a string, or sequence of strings.
 
         """
-        if not isinstance(relative_path, six.string_types):
+        if not isinstance(relative_path, str):
             relative_path = os.path.join(*relative_path)
         return os.path.abspath(os.path.join(_RESULT_PATH, relative_path))
 
@@ -92,6 +89,6 @@ class IrisGribTest(IrisTest):
         relative path as a string, or sequence of strings.
 
         """
-        if not isinstance(relative_path, six.string_types):
+        if not isinstance(relative_path, str):
             relative_path = os.path.join(*relative_path)
         return os.path.abspath(os.path.join(_TESTDATA_PATH, relative_path))

@@ -8,9 +8,6 @@ Test function :func:`iris_grib._load_convert.other_time_coord.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -43,7 +40,7 @@ class TestInvalid(tests.IrisGribTest):
         rt = iris.coords.DimCoord(48, 'time', units='hours since epoch',
                                   bounds=[36, 60])
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'bounds'):
+        with self.assertRaisesRegex(ValueError, 'bounds'):
             other_time_coord(rt, fp)
 
     def test_frt_with_bounds(self):
@@ -51,58 +48,58 @@ class TestInvalid(tests.IrisGribTest):
                                   units='hours since epoch',
                                   bounds=[42, 54])
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'bounds'):
+        with self.assertRaisesRegex(ValueError, 'bounds'):
             other_time_coord(rt, fp)
 
     def test_fp_with_bounds(self):
         rt = iris.coords.DimCoord(48, 'time', units='hours since epoch')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours',
                                   bounds=[3, 9])
-        with self.assertRaisesRegexp(ValueError, 'bounds'):
+        with self.assertRaisesRegex(ValueError, 'bounds'):
             other_time_coord(rt, fp)
 
     def test_vector_t(self):
         rt = iris.coords.DimCoord([0, 3], 'time', units='hours since epoch')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'Vector'):
+        with self.assertRaisesRegex(ValueError, 'Vector'):
             other_time_coord(rt, fp)
 
     def test_vector_frt(self):
         rt = iris.coords.DimCoord([0, 3], 'forecast_reference_time',
                                   units='hours since epoch')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'Vector'):
+        with self.assertRaisesRegex(ValueError, 'Vector'):
             other_time_coord(rt, fp)
 
     def test_vector_fp(self):
         rt = iris.coords.DimCoord(48, 'time', units='hours since epoch')
         fp = iris.coords.DimCoord([6, 12], 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'Vector'):
+        with self.assertRaisesRegex(ValueError, 'Vector'):
             other_time_coord(rt, fp)
 
     def test_invalid_rt_name(self):
         rt = iris.coords.DimCoord(1, 'height')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'reference time'):
+        with self.assertRaisesRegex(ValueError, 'reference time'):
             other_time_coord(rt, fp)
 
     def test_invalid_t_unit(self):
         rt = iris.coords.DimCoord(1, 'time', units='Pa')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'unit.*Pa'):
+        with self.assertRaisesRegex(ValueError, 'unit.*Pa'):
             other_time_coord(rt, fp)
 
     def test_invalid_frt_unit(self):
         rt = iris.coords.DimCoord(1, 'forecast_reference_time', units='km')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='hours')
-        with self.assertRaisesRegexp(ValueError, 'unit.*km'):
+        with self.assertRaisesRegex(ValueError, 'unit.*km'):
             other_time_coord(rt, fp)
 
     def test_invalid_fp_unit(self):
         rt = iris.coords.DimCoord(48, 'forecast_reference_time',
                                   units='hours since epoch')
         fp = iris.coords.DimCoord(6, 'forecast_period', units='kg')
-        with self.assertRaisesRegexp(ValueError, 'unit.*kg'):
+        with self.assertRaisesRegex(ValueError, 'unit.*kg'):
             other_time_coord(rt, fp)
 
 

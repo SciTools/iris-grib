@@ -9,9 +9,6 @@ Tests for function
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -57,26 +54,26 @@ class Test(tests.IrisGribTest):
 
     def test_fail_bad_ranges(self):
         self.section['numberOfTimeRange'] = 0
-        with self.assertRaisesRegexp(TranslationError,
-                                     'aggregation over "0 time ranges"'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'aggregation over "0 time ranges"'):
             statistical_cell_method(self.section)
 
     def test_fail_multiple_ranges(self):
         self.section['numberOfTimeRange'] = 2
-        with self.assertRaisesRegexp(TranslationError,
-                                     'multiple time ranges \[2\]'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'multiple time ranges \[2\]'):
             statistical_cell_method(self.section)
 
     def test_fail_unknown_statistic(self):
         self.section['typeOfStatisticalProcessing'] = 17
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 TranslationError,
                 'contains an unsupported statistical process type \[17\]'):
             statistical_cell_method(self.section)
 
     def test_fail_bad_increment_type(self):
         self.section['typeOfTimeIncrement'] = 7
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 TranslationError,
                 'time-increment type \[7\] is not supported'):
             statistical_cell_method(self.section)
@@ -112,7 +109,7 @@ class Test(tests.IrisGribTest):
         # Rejects PDTs other than the ones tested above.
         self.section['productDefinitionTemplateNumber'] = 101
         msg = "can't get statistical method for unsupported pdt : 4.101"
-        with self.assertRaisesRegexp(ValueError, msg):
+        with self.assertRaisesRegex(ValueError, msg):
             statistical_cell_method(self.section)
 
 

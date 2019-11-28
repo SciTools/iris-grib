@@ -9,14 +9,11 @@ Tests for function
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 from iris.exceptions import TranslationError
 
@@ -54,22 +51,22 @@ class Test(tests.IrisGribTest):
 
     def test_fail_bad_probability_type(self):
         self.section['probabilityType'] = 17
-        with self.assertRaisesRegexp(TranslationError,
-                                     'unsupported probability type'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'unsupported probability type'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 
     def test_fail_bad_threshold_value(self):
         self.section['scaledValueOfUpperLimit'] = _MDI
-        with self.assertRaisesRegexp(TranslationError,
-                                     'missing scaled value'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'missing scaled value'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 
     def test_fail_bad_threshold_scalefactor(self):
         self.section['scaleFactorOfUpperLimit'] = _MDI
-        with self.assertRaisesRegexp(TranslationError,
-                                     'missing scale factor'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'missing scale factor'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 

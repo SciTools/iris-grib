@@ -8,9 +8,6 @@ Unit tests for the `iris.message._DataProxy` class.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -40,7 +37,7 @@ class Test__bitmap(tests.IrisGribTest):
     def test_bitmap__invalid_indicator(self):
         section_6 = {'bitMapIndicator': 100, 'bitmap': None}
         data_proxy = _DataProxy(0, 0, 0)
-        with self.assertRaisesRegexp(TranslationError, 'unsupported bitmap'):
+        with self.assertRaisesRegex(TranslationError, 'unsupported bitmap'):
             data_proxy._bitmap(section_6)
 
 

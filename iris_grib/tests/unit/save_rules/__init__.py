@@ -5,14 +5,12 @@
 # licensing details.
 """Unit tests for the :mod:`iris_grib.grib_save_rules` module."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
+
 import numpy as np
 
 from iris.coords import DimCoord
@@ -21,7 +19,7 @@ from iris.cube import Cube
 from iris.fileformats.pp import EARTH_RADIUS as PP_DEFAULT_EARTH_RADIUS
 
 
-class GdtTestMixin(object):
+class GdtTestMixin:
     """Some handy common test capabilities for grib grid-definition tests."""
     TARGET_MODULE = 'iris_grib._save_rules'
 

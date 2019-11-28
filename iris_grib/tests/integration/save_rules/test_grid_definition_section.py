@@ -9,9 +9,6 @@ to confirm that the correct grid_definition_template is being selected.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -115,7 +112,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
         exp_name = cs.grid_mapping_name.replace('_', ' ').title()
         exp_emsg = 'not supported for coordinate system {!r}'.format(exp_name)
-        with self.assertRaisesRegexp(ValueError, exp_emsg):
+        with self.assertRaisesRegex(ValueError, exp_emsg):
             grid_definition_section(test_cube, self.mock_grib)
 
 

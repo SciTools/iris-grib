@@ -8,9 +8,6 @@ Test function :func:`iris_grib._load_convert.ellipsoid.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -34,7 +31,7 @@ class Test(tests.IrisGribTest):
         unsupported = [8, 9, 10, MDI]
         emsg = 'unsupported shape of the earth'
         for shape in unsupported:
-            with self.assertRaisesRegexp(TranslationError, emsg):
+            with self.assertRaisesRegex(TranslationError, emsg):
                 ellipsoid(shape, MDI, MDI, MDI)
 
     def test_spherical_default_supported(self):
@@ -47,7 +44,7 @@ class Test(tests.IrisGribTest):
     def test_spherical_shape_1_no_radius(self):
         shape = 1
         emsg = 'radius to be specified'
-        with self.assertRaisesRegexp(ValueError, emsg):
+        with self.assertRaisesRegex(ValueError, emsg):
             ellipsoid(shape, MDI, MDI, MDI)
 
     def test_spherical_shape_1(self):
@@ -60,19 +57,19 @@ class Test(tests.IrisGribTest):
     def test_oblate_shape_3_7_no_axes(self):
         for shape in [3, 7]:
             emsg = 'axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, MDI, MDI, MDI)
 
     def test_oblate_shape_3_7_no_major(self):
         for shape in [3, 7]:
             emsg = 'major axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, MDI, 1, MDI)
 
     def test_oblate_shape_3_7_no_minor(self):
         for shape in [3, 7]:
             emsg = 'minor axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, 1, MDI, MDI)
 
     def test_oblate_shape_3_7(self):

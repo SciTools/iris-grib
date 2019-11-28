@@ -8,19 +8,15 @@ Unit tests for :func:`iris_grib._save_rules.set_time_range`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
 import warnings
 
 from cf_units import Unit
 import gribapi
-import mock
 
 from iris.coords import DimCoord
 
@@ -34,21 +30,21 @@ class Test(tests.IrisGribTest):
                                          calendar='standard'))
 
     def test_no_bounds(self):
-        with self.assertRaisesRegexp(ValueError, 'Expected time coordinate '
-                                     'with two bounds, got 0 bounds'):
+        with self.assertRaisesRegex(ValueError, 'Expected time coordinate '
+                                    'with two bounds, got 0 bounds'):
             set_time_range(self.coord, mock.sentinel.grib)
 
     def test_three_bounds(self):
         self.coord.bounds = [0, 1, 2]
-        with self.assertRaisesRegexp(ValueError, 'Expected time coordinate '
-                                     'with two bounds, got 3 bounds'):
+        with self.assertRaisesRegex(ValueError, 'Expected time coordinate '
+                                    'with two bounds, got 3 bounds'):
             set_time_range(self.coord, mock.sentinel.grib)
 
     def test_non_scalar(self):
         coord = DimCoord([0, 1], 'time', bounds=[[0, 1], [1, 2]],
                          units=Unit('hours since epoch', calendar='standard'))
-        with self.assertRaisesRegexp(ValueError, 'Expected length one time '
-                                     'coordinate, got 2 points'):
+        with self.assertRaisesRegex(ValueError, 'Expected length one time '
+                                    'coordinate, got 2 points'):
             set_time_range(coord, mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
@@ -86,7 +82,7 @@ class Test(tests.IrisGribTest):
         self.assertEqual(len(warn), 1)
         msg = 'Truncating floating point lengthOfTimeRange 10\.8?9+ ' \
               'to integer value 10'
-        six.assertRegex(self, str(warn[0].message), msg)
+        self.assertRegex(str(warn[0].message), msg)
         mock_set_long.assert_any_call(mock.sentinel.grib,
                                       'indicatorOfUnitForTimeRange', 1)
         mock_set_long.assert_any_call(mock.sentinel.grib,

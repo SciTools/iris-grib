@@ -8,19 +8,17 @@ Tests for `iris_grib._load_convert.satellite_common`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
-import numpy as np
+from unittest import mock
 import warnings
 
 from iris.coords import AuxCoord
+import numpy as np
+
 from iris_grib.tests.unit.load_convert import empty_metadata
 
 from iris_grib._load_convert import satellite_common

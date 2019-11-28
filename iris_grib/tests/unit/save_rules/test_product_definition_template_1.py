@@ -8,16 +8,14 @@ Unit tests for :func:`iris_grib._save_rules.product_definition_template_1`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
+
 from cf_units import Unit
 import gribapi
-import mock
 
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
@@ -57,7 +55,7 @@ class TestRealizationIdentifier(tests.IrisGribTest):
         cube.add_aux_coord(coord, 0)
 
         msg = "'realization' coordinate with one point is required"
-        with self.assertRaisesRegexp(ValueError, msg):
+        with self.assertRaisesRegex(ValueError, msg):
             product_definition_template_1(cube, mock.sentinel.grib)
 
 

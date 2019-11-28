@@ -5,12 +5,9 @@
 # licensing details.
 """Unit tests for the `iris_grib._load_generate` function."""
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 import iris
 from iris.exceptions import TranslationError
@@ -61,7 +58,7 @@ class Test(tests.IrisGribTest):
         mfunc = 'iris_grib.GribMessage.messages_from_filename'
         emsg = 'GRIB edition 0 is not supported'
         with mock.patch(mfunc, return_value=[message]):
-            with self.assertRaisesRegexp(TranslationError, emsg):
+            with self.assertRaisesRegex(TranslationError, emsg):
                 next(_load_generate(self.fname))
 
 

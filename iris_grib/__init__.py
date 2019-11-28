@@ -10,10 +10,6 @@ See: `ECMWF GRIB API <https://software.ecmwf.int/wiki/display/GRIB/Home>`_.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 import datetime
 import math  # for fmod
 import warnings
@@ -85,7 +81,7 @@ TIME_CODES_EDITION1 = {
 unknown_string = "???"
 
 
-class GribDataProxy(object):
+class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
     __slots__ = ('shape', 'dtype', 'path', 'offset')
@@ -119,11 +115,11 @@ class GribDataProxy(object):
         return {attr: getattr(self, attr) for attr in self.__slots__}
 
     def __setstate__(self, state):
-        for key, value in six.iteritems(state):
+        for key, value in state.items():
             setattr(self, key, value)
 
 
-class GribWrapper(object):
+class GribWrapper:
     """
     Contains a pygrib object plus some extra keys of our own.
 
@@ -856,7 +852,7 @@ def save_messages(messages, target, append=False):
 
     """
     # grib file (this bit is common to the pp and grib savers...)
-    if isinstance(target, six.string_types):
+    if isinstance(target, str):
         grib_file = open(target, "ab" if append else "wb")
     elif hasattr(target, "write"):
         if hasattr(target, "mode") and "b" not in target.mode:
@@ -871,5 +867,5 @@ def save_messages(messages, target, append=False):
             gribapi.grib_release(message)
     finally:
         # (this bit is common to the pp and grib savers...)
-        if isinstance(target, six.string_types):
+        if isinstance(target, str):
             grib_file.close()

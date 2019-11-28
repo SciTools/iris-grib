@@ -8,9 +8,6 @@ Test function :func:`iris_grib._load_convert.bitmap_section.`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
@@ -28,7 +25,7 @@ class Test(tests.IrisGribTest):
         # different things, but load_convert treats them identically.
         message = _make_test_message({6: {'bitMapIndicator': 100,
                                           'bitmap': None}})
-        with self.assertRaisesRegexp(TranslationError, 'unsupported bitmap'):
+        with self.assertRaisesRegex(TranslationError, 'unsupported bitmap'):
             bitmap_section(message.sections[6])
 
 
