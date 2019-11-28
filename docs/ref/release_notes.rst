@@ -16,6 +16,16 @@ Features
   area at a horizontal level or in a horizontal layer at a point in time
   (product definition template 15 in code table 4.0)
 
+:Release: 0.14.1
+:Date: 12 Jun 2019
+
+Bug Fixes
+^^^^^^^^^
+
+* Add fixes to get iris-grib working with the Python 3 compatible release of
+  eccodes. This included workarounds such that lists that are returned by
+  eccodes are converted to NumPy arrays as expected.
+
 
 What's new in iris-grib v0.13
 -----------------------------
