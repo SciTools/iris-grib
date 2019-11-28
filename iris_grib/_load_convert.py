@@ -10,7 +10,8 @@ cube metadata.
 """
 
 from argparse import Namespace
-from collections import namedtuple, Iterable, OrderedDict
+from collections import namedtuple, OrderedDict
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 import math
 import warnings
