@@ -138,9 +138,11 @@ class TestLicenseHeaders(unittest.TestCase):
         output = output.decode().split('\n')
         res = {}
         for fname, dt in TestLicenseHeaders.whatchanged_parse(output):
+            print(fname, dt)
             if fname not in res or dt > res[fname]:
                 res[fname] = dt
 
+        print('\n\nres:\n', res.items(), '\n\n')
         return res
 
     def test_license_headers(self):
