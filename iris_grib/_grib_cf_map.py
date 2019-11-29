@@ -5,24 +5,22 @@
 # licensing details.
 #
 # DO NOT EDIT: AUTO-GENERATED
-# Created on 22 May 2019 13:05 from 
+# Created on 29 November 2019 10:11 from 
 # http://www.metarelate.net/metOcean
-# at commit a3649e942198f014f0258d926678dbbff616feae
+# at commit 36da82fe65a1a37e6cf1fa49899107fc6dc908ed
 
-# https://github.com/metarelate/metOcean/commit/a3649e942198f014f0258d926678dbbff616feae
+# https://github.com/metarelate/metOcean/commit/36da82fe65a1a37e6cf1fa49899107fc6dc908ed
 
 """
 Provides GRIB/CF phenomenon translations.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 from collections import namedtuple
 
 
 CFName = namedtuple('CFName', 'standard_name long_name units')
+
 DimensionCoordinate = namedtuple('DimensionCoordinate',
                                  'standard_name units points')
 
@@ -78,6 +76,8 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 1, 53): CFName('snowfall_flux', None, 'kg m-2 s-1'),
     G2Param(2, 0, 1, 60): CFName('snowfall_amount', None, 'kg m-2'),
     G2Param(2, 0, 1, 64): CFName('atmosphere_mass_content_of_water_vapor', None, 'kg m-2'),
+    G2Param(2, 0, 1, 83): CFName('mass_fraction_of_cloud_liquid_water_in_air', None, 'kg kg-1'),
+    G2Param(2, 0, 1, 84): CFName('mass_fraction_of_cloud_ice_in_air', None, 'kg kg-1'),
     G2Param(2, 0, 2, 0): CFName('wind_from_direction', None, 'degrees'),
     G2Param(2, 0, 2, 1): CFName('wind_speed', None, 'm s-1'),
     G2Param(2, 0, 2, 2): CFName('x_wind', None, 'm s-1'),
@@ -194,6 +194,8 @@ CF_TO_GRIB2 = {
     CFName('land_binary_mask', None, '1'): G2Param(2, 2, 0, 0),
     CFName('liquid_water_content_of_surface_snow', None, 'kg m-2'): G2Param(2, 0, 1, 13),
     CFName('low_type_cloud_area_fraction', None, '%'): G2Param(2, 0, 6, 3),
+    CFName('mass_fraction_of_cloud_ice_in_air', None, 'kg kg-1'): G2Param(2, 0, 1, 84),
+    CFName('mass_fraction_of_cloud_liquid_water_in_air', None, 'kg kg-1'): G2Param(2, 0, 1, 83),
     CFName('medium_type_cloud_area_fraction', None, '%'): G2Param(2, 0, 6, 4),
     CFName('moisture_content_of_soil_layer', None, 'kg m-2'): G2Param(2, 2, 0, 22),
     CFName('precipitation_amount', None, 'kg m-2'): G2Param(2, 0, 1, 49),
