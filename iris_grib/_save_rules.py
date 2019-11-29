@@ -954,9 +954,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
         # value *before* each set of n-levels coefficients.
-        # Note: values are indexed according to model_level_number, using
-        # zero-based numbering,
-        # I.E. sigma, delta = PV[i], PV[NV/2+i]
+        # Note: values are indexed according to model_level_number,
+        # I.E. sigma, delta = PV[i], PV[NV/2+i] : where i=1..n_levels
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
