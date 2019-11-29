@@ -1,22 +1,11 @@
-# (C) British Crown Copyright 2013 - 2019, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 #
 # DO NOT EDIT: AUTO-GENERATED
-# Created on 28 November 2019 16:11 from 
+# Created on 29 November 2019 10:11 from 
 # http://www.metarelate.net/metOcean
 # at commit 36da82fe65a1a37e6cf1fa49899107fc6dc908ed
 
@@ -26,9 +15,6 @@
 Provides GRIB/CF phenomenon translations.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 from collections import namedtuple
 
