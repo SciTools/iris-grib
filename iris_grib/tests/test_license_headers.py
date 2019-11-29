@@ -111,7 +111,7 @@ class TestLicenseHeaders(unittest.TestCase):
                 # Non blank, non date, line -> must be the lines
                 # containing the file info.
                 fname = ' '.join(line.split('\t')[1:])
-                print(fname, dt)
+                print('\n', fname, dt)
                 yield fname, dt
 
     @staticmethod
@@ -166,6 +166,7 @@ class TestLicenseHeaders(unittest.TestCase):
                     not any(fnmatch(fname, pat) for pat in exclude_patterns):
                 with open(full_fname) as fh:
                     years = TestLicenseHeaders.years_of_license_in_file(fh)
+                    print('years':, years)
                     if years is None:
                         print('The file {} has no valid header license and '
                               'has not been excluded from the license header '
