@@ -111,6 +111,7 @@ class TestLicenseHeaders(unittest.TestCase):
                 # Non blank, non date, line -> must be the lines
                 # containing the file info.
                 fname = ' '.join(line.split('\t')[1:])
+                print(fname, dt)
                 yield fname, dt
 
     @staticmethod
