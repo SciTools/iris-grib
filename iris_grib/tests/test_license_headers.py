@@ -165,7 +165,7 @@ class TestLicenseHeaders(unittest.TestCase):
                     not any(fnmatch(fname, pat) for pat in exclude_patterns):
                 with open(full_fname) as fh:
                     years = TestLicenseHeaders.years_of_license_in_file(fh)
-                    print((fname, dt, years)
+                    print(fname, dt, years)
                     if years is None:
                         print('The file {} has no valid header license and '
                               'has not been excluded from the license header '
