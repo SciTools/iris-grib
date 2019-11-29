@@ -110,8 +110,9 @@ class TestLicenseHeaders(unittest.TestCase):
             else:
                 # Non blank, non date, line -> must be the lines
                 # containing the file info.
-                fname = ' '.join(line.split('\t')[1:])
-                yield fname, dt
+                fnames = line.split('\t')[1:]
+                for fname in fnames:
+                    yield fname, dt
 
     @staticmethod
     def last_change_by_fname():
