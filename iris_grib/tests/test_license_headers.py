@@ -136,6 +136,7 @@ class TestLicenseHeaders(unittest.TestCase):
                                           "--pretty=TIME:%ct"],
                                          cwd=REPO_DIR)
         output = output.decode().split('\n')
+        print('\n\noutput:\n', output, '\n\n')
         res = {}
         for fname, dt in TestLicenseHeaders.whatchanged_parse(output):
             print(fname, dt)
