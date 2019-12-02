@@ -30,7 +30,7 @@ from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
                             _SPATIAL_PROCESSING_TYPES)
-from .grib_phenom_translation import GribCode
+from .grib_phenom_translation import GRIBcode
 from iris.util import is_regular, regular_step
 
 
@@ -695,12 +695,12 @@ def set_discipline_and_parameter(cube, grib):
     discipline, category, number = 255, 255, 255
     identity_found = False
 
-    # First, see if we can find and interpret a 'GRIB_CODING' attribute.
-    attr = cube.attributes.get('GRIB_CODING', None)
+    # First, see if we can find and interpret a 'GRIB_PARAM' attribute.
+    attr = cube.attributes.get('GRIB_PARAM', None)
     if attr:
         try:
             # Convert to standard tuple-derived form.
-            gc = GribCode(attr)
+            gc = GRIBcode(attr)
             if gc.edition == 2:
                 discipline = gc.discipline
                 category = gc.category

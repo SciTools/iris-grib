@@ -11,7 +11,7 @@ from unittest import mock
 
 from iris.cube import Cube
 
-from iris_grib.grib_phenom_translation import GribCode
+from iris_grib.grib_phenom_translation import GRIBcode
 
 from iris_grib._save_rules import set_discipline_and_parameter
 
@@ -51,28 +51,28 @@ class TestPhenomenonCoding(tests.IrisGribTest):
 
     def test_gribcode_attribute_object(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_CODING': GribCode(2, 7, 12, 99)}
+        cube.attributes = {'GRIB_PARAM': GRIBcode(2, 7, 12, 99)}
         self._check_coding(cube, 7, 12, 99)
 
     def test_gribcode_attribute_string(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_CODING': '2, 9, 33, 177'}
+        cube.attributes = {'GRIB_PARAM': '2, 9, 33, 177'}
         self._check_coding(cube, 9, 33, 177)
 
     def test_gribcode_attribute_tuple(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_CODING': (2, 33, 4, 12)}
+        cube.attributes = {'GRIB_PARAM': (2, 33, 4, 12)}
         self._check_coding(cube, 33, 4, 12)
 
     def test_gribcode_attribute_not_edition_2(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_CODING': GribCode(1, 7, 12, 99)}
+        cube.attributes = {'GRIB_PARAM': GRIBcode(1, 7, 12, 99)}
         self._check_coding(cube, 255, 255, 255)
 
     def test_gribcode_attribute_overrides_phenomenon(self):
         cube = self.mock_cube
         cube.standard_name = 'sea_water_y_velocity'
-        cube.attributes = {'GRIB_CODING': '2, 9, 33, 177'}
+        cube.attributes = {'GRIB_PARAM': '2, 9, 33, 177'}
         self._check_coding(cube, 9, 33, 177)
 
 

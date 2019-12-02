@@ -20,7 +20,7 @@ import six
 import cf_units
 
 import iris_grib.grib_phenom_translation as gptx
-from iris_grib.grib_phenom_translation import GribCode
+from iris_grib.grib_phenom_translation import GRIBcode
 
 
 class TestGribLookupTableType(tests.IrisTest):
@@ -154,11 +154,11 @@ class TestGribPhenomenonLookup(tests.IrisTest):
                        expect_none=True)
 
 
-class TestGribCode(tests.IrisTest):
-    # GribCode is basically a namedtuple, so not all behaviour needs testing.
+class TestGRIBcode(tests.IrisTest):
+    # GRIBcode is basically a namedtuple, so not all behaviour needs testing.
     # However, creation is a bit special so exercise all those cases.
     def test_create_from_keys(self):
-        gribcode = GribCode(
+        gribcode = GRIBcode(
             edition_or_string=5,
             discipline=7,
             category=4,
@@ -169,86 +169,86 @@ class TestGribCode(tests.IrisTest):
         self.assertEqual(gribcode.number, 199)
 
     def test_create_from_args(self):
-        gribcode = GribCode(7, 3, 12, 99)
+        gribcode = GRIBcode(7, 3, 12, 99)
         self.assertEqual(gribcode.edition, 7)
         self.assertEqual(gribcode.discipline, 3)
         self.assertEqual(gribcode.category, 12)
         self.assertEqual(gribcode.number, 99)
 
     def test_create_is_copy(self):
-        gribcode1 = GribCode(7, 3, 12, 99)
-        gribcode2 = GribCode(7, 3, 12, 99)
+        gribcode1 = GRIBcode(7, 3, 12, 99)
+        gribcode2 = GRIBcode(7, 3, 12, 99)
         self.assertEqual(gribcode1, gribcode2)
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_from_gribcode(self):
-        gribcode1 = GribCode((4, 3, 2, 1))
-        gribcode2 = GribCode(gribcode1)
+        gribcode1 = GRIBcode((4, 3, 2, 1))
+        gribcode2 = GRIBcode(gribcode1)
         self.assertEqual(gribcode1, gribcode2)
         # NOTE: *not* passthrough : it creates a copy
         # (though maybe not too significant, as it is immutable anyway?)
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_from_string(self):
-        gribcode = GribCode('xxx12xs-34 -5,678qqqq')
+        gribcode = GRIBcode('xxx12xs-34 -5,678qqqq')
         # NOTE: args 2 and 3 are *not* negative.
-        self.assertEqual(gribcode, GribCode(12, 34, 5, 678))
+        self.assertEqual(gribcode, GRIBcode(12, 34, 5, 678))
 
     def test_create_from_tuple(self):
-        gribcode = GribCode((4, 3, 2, 1))
-        self.assertEqual(gribcode, GribCode(4, 3, 2, 1))
+        gribcode = GRIBcode((4, 3, 2, 1))
+        self.assertEqual(gribcode, GRIBcode(4, 3, 2, 1))
 
     def test_create_bad_nargs(self):
         # Between 1 and 4 args is not invalid call syntax, but it should fail.
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Cannot create GribCode from 2 arguments'):
-            GribCode(1, 2)
+                'Cannot create GRIBcode from 2 arguments'):
+            GRIBcode(1, 2)
 
     def test_create_bad_single_arg_None(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Cannot create GribCode from 0 arguments'):
-            GribCode(None)
+                'Cannot create GRIBcode from 0 arguments'):
+            GRIBcode(None)
 
     def test_create_bad_single_arg_empty_string(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Invalid argument for GribCode creation'):
-            GribCode('')
+                'Invalid argument for GRIBcode creation'):
+            GRIBcode('')
 
     def test_create_bad_single_arg_nonums(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Invalid argument for GribCode creation'):
-            GribCode('saas- dsa- ')
+                'Invalid argument for GRIBcode creation'):
+            GRIBcode('saas- dsa- ')
 
     def test_create_bad_single_arg_less_than_4_nums(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Invalid argument for GribCode creation'):
-            GribCode('1,2,3')
+                'Invalid argument for GRIBcode creation'):
+            GRIBcode('1,2,3')
 
     def test_create_bad_single_arg_number(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Invalid argument for GribCode creation'):
-            GribCode(4)
+                'Invalid argument for GRIBcode creation'):
+            GRIBcode(4)
 
     def test_create_bad_single_arg_single_numeric(self):
         with six.assertRaisesRegex(
                 self, ValueError,
-                'Invalid argument for GribCode creation'):
-            GribCode('44')
+                'Invalid argument for GRIBcode creation'):
+            GRIBcode('44')
 
     def test_create_string_more_than_4_nums(self):
         # Note: does not error, just discards the extra.
-        gribcode = GribCode('1,2,3,4,5,6,7,8')
-        self.assertEqual(gribcode, GribCode(1, 2, 3, 4))
+        gribcode = GRIBcode('1,2,3,4,5,6,7,8')
+        self.assertEqual(gribcode, GRIBcode(1, 2, 3, 4))
 
     def test__str__(self):
-        result = str(GribCode(2, 17, 3, 123))
-        self.assertEqual(result, 'GRIB2:d17.c3.n123')
+        result = str(GRIBcode(2, 17, 3, 123))
+        self.assertEqual(result, 'GRIB2:d017c003n123')
 
 
 if __name__ == '__main__':
