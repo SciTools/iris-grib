@@ -950,10 +950,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                    'maximum value = {}.')
             raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
-        # value after each set of n-levels coefficients.
-        # For now, we retain that encoding. This should not cause problems as
-        # values are indexed according to model-level-number,
-        # I.E. sigma, delta = PV[i], PV[NV/2+i]
+        # value *before* each set of n-levels coefficients.
+        # Note: values are indexed according to model_level_number,
+        # I.E. sigma, delta = PV[i], PV[NV/2+i] : where i=1..n_levels
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
@@ -962,11 +961,11 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             # Record all the level coefficients coming from the 'full' cube.
             # Note: if some model levels are missing, we must still have the
             # coeffs at the correct index according to the model_level_number
-            # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            # value, i.e. at [level] and [NV // 2 + level].
             # Thus, we can *not* paste the values in a block: each one needs to
             # go in the index corresponding to its 'model_level_number' value.
-            coeffs_array[n_lev - 1] = height
-            coeffs_array[n_coeffs + n_lev - 1] = sigma
+            coeffs_array[n_lev] = height
+            coeffs_array[n_coeffs + n_lev] = sigma
         pv_values = [float(el) for el in coeffs_array]
         # eccodes does not support writing numpy.int64, cast to python int
         gribapi.grib_set(grib, "NV", int(n_coeffs * 2))

@@ -35,14 +35,13 @@ class TestHybridHeight(tests.IrisGribTest):
                               [1, 11, 21])
 
         # check sigma values correctly loaded from indices 1, 11, 21.
-        # NOTE: level[0] == 1, so sigma[0] == 1.0 :  This makes sense !
         self.assertArrayAllClose(cube.coord('sigma').points,
-                                 [1.0, 0.911, 0.694],
+                                 [0.998, 0.894, 0.667],
                                  atol=0.001)
 
         # check height values too.
         self.assertArrayAllClose(cube.coord('level_height').points,
-                                 [0., 800.,  2933.],
+                                 [20., 953.3,  3220.],
                                  atol=0.5)
 
 
@@ -63,9 +62,9 @@ class TestHybridPressure(tests.IrisGribTest):
         self.assertArrayEqual(cube.coord('model_level_number').points,
                               [1, 51, 91])
         self.assertArrayAllClose(cube.coord('sigma').points,
-                                 [0., 0.036, 0.998], atol=0.001)
+                                 [0., 0.045, 1.], atol=0.001)
         self.assertArrayAllClose(cube.coord('level_pressure').points,
-                                 [0., 18191.0, 0.00316], rtol=0.001)
+                                 [2.00004, 18716.9688, 0.], rtol=0.0001)
         self.assertArrayAllClose(
             cube.coord('surface_air_pressure')[:2, :3].points,
             [[103493.8, 103493.8, 103493.8],
@@ -74,9 +73,9 @@ class TestHybridPressure(tests.IrisGribTest):
         # Also check a few values from the derived coord.
         self.assertArrayAllClose(
             cube.coord('air_pressure')[:, :3, 0].points,
-            [[0., 0., 0.],
-             [21940.3, 21936.9, 21932.8],
-             [103248.5, 103156.0, 103041.0]], atol=0.1)
+            [[2., 2., 2.],
+             [23389.3, 23385.1, 23379.9],
+             [103493.8, 103401.0, 103285.8]], atol=0.1)
 
 
 if __name__ == '__main__':

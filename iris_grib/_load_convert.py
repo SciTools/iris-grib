@@ -1508,14 +1508,17 @@ def hybrid_factories(section, metadata):
                                 {'long_name': 'sigma'},
                                 Reference('ref_surface_pressure')]
 
-            # Create the level pressure scalar coordinate.
+            # Create the level height/pressure scalar coordinate.
+            # scaledValue represents the level number, which is used to select
+            # the sigma and delta values as follows:
+            # sigma, delta = PV[i], PV[NV/2+i] : where i=1..level_number
             pv = section['pv']
-            offset = scaledValue - 1
+            offset = scaledValue
             coord = DimCoord(pv[offset], long_name=level_value_name,
                              units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset = NV // 2 + scaledValue - 1
+            offset = NV // 2 + scaledValue
             coord = AuxCoord(pv[offset], long_name='sigma')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
