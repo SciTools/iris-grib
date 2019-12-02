@@ -16,13 +16,8 @@ Currently supports only these ones:
 * cf --> grib2
 
 '''
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 from collections import namedtuple
 import re
-import six
 import warnings
 
 import cf_units
