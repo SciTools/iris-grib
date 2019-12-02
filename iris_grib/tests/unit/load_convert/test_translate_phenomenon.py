@@ -18,7 +18,7 @@ from cf_units import Unit
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import Probability, translate_phenomenon
-from iris_grib.grib_phenom_translation import _GribToCfDataClass, GRIBcode
+from iris_grib.grib_phenom_translation import _GribToCfDataClass, GRIBCode
 
 
 class Test_probability(tests.IrisGribTest):
@@ -44,7 +44,7 @@ class Test_probability(tests.IrisGribTest):
             'long_name': 'probability_of_air_temperature_<prob_type>',
             'units': Unit(1),
             'aux_coords_and_dims': [(thresh_coord, None)],
-            'attributes': {'GRIB_PARAM': GRIBcode(2, 7, 8, 9)}})
+            'attributes': {'GRIB_PARAM': GRIBCode(2, 7, 8, 9)}})
 
     def test_no_phenomenon(self):
         self.phenom_lookup_patch.return_value = None
@@ -58,7 +58,7 @@ class Test_probability(tests.IrisGribTest):
                              typeOfSecondFixedSurface=None,
                              probability=self.probability)
         expected_metadata['attributes']['GRIB_PARAM'] = \
-            GRIBcode(2, 7, 77, 777)
+            GRIBCode(2, 7, 77, 777)
         self.assertEqual(self.metadata, expected_metadata)
 
 

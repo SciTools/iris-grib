@@ -318,7 +318,7 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
     return _CF_GRIB2_TABLE[(standard_name, long_name)]
 
 
-class GRIBcode(namedtuple('GRIBcode',
+class GRIBCode(namedtuple('GRIBCode',
                           'edition discipline category number')):
     """
     An object representing a specific Grib phenomenon identity.
@@ -338,7 +338,7 @@ class GRIBcode(namedtuple('GRIBcode',
         nargs = sum(arg is not None for arg in args)
         if nargs == 1:
             # Single argument: convert to a string and extract 4 integers.
-            # NOTE: this also allows input from a GRIBcode, or a plain tuple.
+            # NOTE: this also allows input from a GRIBCode, or a plain tuple.
             edition_or_string = str(edition_or_string)
             edition, discipline, category, number = \
                 cls._fournums_from_gribcode_string(edition_or_string)
@@ -348,12 +348,12 @@ class GRIBcode(namedtuple('GRIBcode',
                 int(arg)
                 for arg in (edition, discipline, category, number)]
         else:
-            msg = ('Cannot create GRIBcode from {} arguments, '
-                   '"GRIBcode{!r}" : '
+            msg = ('Cannot create GRIBCode from {} arguments, '
+                   '"GRIBCode{!r}" : '
                    'expected either 1 or 4 non-None arguments.')
             raise ValueError(msg.format(nargs, args))
 
-        return super(GRIBcode, cls).__new__(
+        return super(GRIBCode, cls).__new__(
             cls, edition, discipline, category, number)
 
     RE_PARSE_FOURNUMS = re.compile(4 * r'[^\d]*(\d*)')
@@ -370,8 +370,8 @@ class GRIBcode(namedtuple('GRIBcode',
                 pass
 
         if not parsed_ok:
-            msg = ('Invalid argument for GRIBcode creation, '
-                   '"GRIBcode({!r})" : '
+            msg = ('Invalid argument for GRIBCode creation, '
+                   '"GRIBCode({!r})" : '
                    'requires 4 numbers, separated by non-numerals.')
             raise ValueError(msg.format(edcn_string))
 

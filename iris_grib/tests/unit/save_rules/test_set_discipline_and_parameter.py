@@ -11,7 +11,7 @@ from unittest import mock
 
 from iris.cube import Cube
 
-from iris_grib.grib_phenom_translation import GRIBcode
+from iris_grib.grib_phenom_translation import GRIBCode
 
 from iris_grib._save_rules import set_discipline_and_parameter
 
@@ -51,7 +51,7 @@ class TestPhenomenonCoding(tests.IrisGribTest):
 
     def test_gribcode_attribute_object(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_PARAM': GRIBcode(2, 7, 12, 99)}
+        cube.attributes = {'GRIB_PARAM': GRIBCode(2, 7, 12, 99)}
         self._check_coding(cube, 7, 12, 99)
 
     def test_gribcode_attribute_string(self):
@@ -66,7 +66,7 @@ class TestPhenomenonCoding(tests.IrisGribTest):
 
     def test_gribcode_attribute_not_edition_2(self):
         cube = self.mock_cube
-        cube.attributes = {'GRIB_PARAM': GRIBcode(1, 7, 12, 99)}
+        cube.attributes = {'GRIB_PARAM': GRIBCode(1, 7, 12, 99)}
         self._check_coding(cube, 255, 255, 255)
 
     def test_gribcode_attribute_overrides_phenomenon(self):

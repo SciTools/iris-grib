@@ -26,7 +26,7 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
-from .grib_phenom_translation import GRIBcode
+from .grib_phenom_translation import GRIBCode
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
@@ -1379,7 +1379,7 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['units'] = Unit(1)
 
     # Add a standard attribute recording the grib phenomenon identity.
-    metadata['attributes']['GRIB_PARAM'] = GRIBcode(
+    metadata['attributes']['GRIB_PARAM'] = GRIBCode(
         edition_or_string=2,
         discipline=discipline,
         category=parameterCategory,
