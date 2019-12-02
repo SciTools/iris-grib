@@ -22,7 +22,7 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* Add fixes to get iris-grib working with the Python 3 compatible release of
+* Added fixes to get iris-grib working with the Python 3 compatible release of
   eccodes. This included workarounds such that lists that are returned by
   eccodes are converted to NumPy arrays as expected.
 
@@ -101,4 +101,3 @@ What's new in iris-grib v0.9
 :Date: 25 Jul 2016
 
 Stable release of iris-grib to support iris v1.10
-
