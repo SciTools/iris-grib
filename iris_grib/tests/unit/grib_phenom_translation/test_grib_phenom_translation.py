@@ -194,6 +194,17 @@ class TestGRIBcode(tests.IrisTest):
         # NOTE: args 2 and 3 are *not* negative.
         self.assertEqual(gribcode, GRIBcode(12, 34, 5, 678))
 
+    def test_create_from_own_string(self):
+        # Check that GRIBcode string reprs are valid as create arguments.
+        gribcode = GRIBcode(
+            edition_or_string=2,
+            discipline=17,
+            category=94,
+            number=231)
+        grib_param_string = str(gribcode)
+        newcode = GRIBcode(grib_param_string)
+        self.assertEqual(newcode, gribcode)
+
     def test_create_from_tuple(self):
         gribcode = GRIBcode((4, 3, 2, 1))
         self.assertEqual(gribcode, GRIBcode(4, 3, 2, 1))
