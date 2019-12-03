@@ -15,8 +15,6 @@ Code is out of step with current test conventions and standards.
 # importing anything else.
 import iris_grib.tests as tests
 
-import six
-
 import cf_units
 
 import iris_grib.grib_phenom_translation as gptx
