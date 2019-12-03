@@ -1,6 +1,42 @@
 Release Notes
 =============
 
+
+What's new in iris-grib v0.15
+-----------------------------
+
+:Release: 0.15.0
+:Date: 4 Dec 2019
+
+Features
+^^^^^^^^
+
+* Updated translations between GRIB parameter code and CF standard_name or
+  long_name
+
+* Added support for loading GRIB messages with no fixed surface set in the
+  product definition section
+
+* Added support for loading GRIB messages where i or j increment are not set
+
+* Added support for saving cubes that have a "depth" coordinate
+
+* Cubes loaded from GRIB files now contain a new GRIB_PARAM attribute, the
+  value of which is an instance of
+  iris_grib.grib_phenom_translation.GRIBCode and represents the parameter code
+  
+Bug Fixes
+^^^^^^^^^
+
+* Reverted a bug that was fixed in v0.13 related to loading hybrid pressure 
+  levels. It was agreed that the initial behaviour was correct 
+
+Dependencies
+^^^^^^^^^^^^
+
+* Python 2 is no longer supported
+
+
 What's new in iris-grib v0.14
 -----------------------------
 
