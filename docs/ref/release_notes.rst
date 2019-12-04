@@ -1,7 +1,6 @@
 Release Notes
 =============
 
-
 What's new in iris-grib v0.15
 -----------------------------
 
@@ -133,3 +132,4 @@ What's new in iris-grib v0.9
 :Date: 25 Jul 2016
 
 Stable release of iris-grib to support iris v1.10
+
