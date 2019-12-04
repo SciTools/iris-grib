@@ -26,13 +26,13 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
+from .grib_phenom_translation import GRIBCode
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from ._grib1_load_rules import grib1_convert
-from .message import GribMessage
 
 
 # Restrict the names imported from this namespace.
@@ -1377,6 +1377,13 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['standard_name'] = None
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
+
+    # Add a standard attribute recording the grib phenomenon identity.
+    metadata['attributes']['GRIB_PARAM'] = GRIBCode(
+        edition_or_string=2,
+        discipline=discipline,
+        category=parameterCategory,
+        number=parameterNumber)
 
     # Identify hybrid height and pressure reference fields.
     # Look for fields at surface level first.
