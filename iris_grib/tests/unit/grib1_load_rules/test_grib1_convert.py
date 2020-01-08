@@ -118,13 +118,13 @@ class Test_GribLevels(tests.IrisTest):
 
         ml_ref = iris.coords.CoordDefn('model_level_number', None, None,
                                        cf_units.Unit('1'),
-                                       {'positive': 'up'}, None)
+                                       {'positive': 'up'}, None, False)
         lp_ref = iris.coords.CoordDefn(None, 'level_pressure', None,
                                        cf_units.Unit('Pa'),
-                                       {}, None)
+                                       {}, None, False)
         s_ref = iris.coords.CoordDefn(None, 'sigma', None,
                                       cf_units.Unit('1'),
-                                      {}, None)
+                                      {}, None, False)
 
         aux_coord_defns = [coord._as_defn() for coord, dim in results[8]]
         self.assertIn(ml_ref, aux_coord_defns)
