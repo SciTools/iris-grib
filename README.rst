@@ -17,7 +17,7 @@ Copyright and licence
 iris-grib may be freely distributed, modified and used commercially under the
 terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
 
-\(C) British Crown Copyright 2010 - 2019, Met Office
+\(C) British Crown Copyright 2010 - 2020, Met Office
 
 .. |Travis| image:: https://travis-ci.org/SciTools/iris-grib.svg?branch=master
 .. _Travis: https://travis-ci.org/SciTools/iris-grib
