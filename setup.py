@@ -75,7 +75,7 @@ setup_args = dict(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3 :: only',
+        'Programming Language :: Python :: 3 :: Only',
     ],
     # NOTE: The Python 3 bindings to eccodes (eccodes-python) is available on
     # PyPI, but the user is required to install eccodes itself manually. See 
