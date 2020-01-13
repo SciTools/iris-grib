@@ -3,3 +3,4 @@ channels:
 dependencies:
     - iris>=2
     - python-eccodes>=0.9.1,<2
+    - pep8
