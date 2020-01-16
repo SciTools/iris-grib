@@ -14,7 +14,13 @@ hybrid pressure cubes.
 import iris_grib.tests as tests
 
 from iris import load_cube, load_cubes, save
-from iris.util import equalise_attributes
+# Try except allows compatibility with current Iris (2.4) and also master.
+# TODO: simplify to just the iris.util import once we drop support for any
+# Iris versions with iris.experimental.equalise_cubes import
+try:
+    from iris.util import equalise_attributes
+except ImportError:
+    from iris.experimental.equalise_cubes import equalise_attributes
 
 
 class TestHybridHeightRoundTrip(tests.IrisGribTest):
