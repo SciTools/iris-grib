@@ -528,7 +528,7 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
     scan = scanning_mode(section['scanningMode'])
 
-    # Set resoultion flags
+    # Set resolution flags
     res_flags = resolution_flags(section['resolutionAndComponentFlags'])
 
     # Calculate longitude points.
