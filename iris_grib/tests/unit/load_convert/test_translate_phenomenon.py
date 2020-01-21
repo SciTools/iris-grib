@@ -1,26 +1,12 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Tests for function :func:`iris_grib._load_convert.translate_phenomenon`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
@@ -32,7 +18,7 @@ from cf_units import Unit
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import Probability, translate_phenomenon
-from iris_grib.grib_phenom_translation import _GribToCfDataClass
+from iris_grib.grib_phenom_translation import _GribToCfDataClass, GRIBCode
 
 
 class Test_probability(tests.IrisGribTest):
@@ -44,11 +30,11 @@ class Test_probability(tests.IrisGribTest):
             return_value=_GribToCfDataClass('air_temperature', '', 'K', None))
         # Construct dummy call arguments
         self.probability = Probability('<prob_type>', 22.0)
-        self.metadata = {'aux_coords_and_dims': []}
+        self.metadata = {'aux_coords_and_dims': [], 'attributes': {}}
 
     def test_basic(self):
-        result = translate_phenomenon(self.metadata, None, None, None, None,
-                                      None, None, probability=self.probability)
+        translate_phenomenon(self.metadata, 7, 8, 9, None,
+                             None, None, probability=self.probability)
         # Check metadata.
         thresh_coord = DimCoord([22.0],
                                 standard_name='air_temperature',
@@ -57,14 +43,23 @@ class Test_probability(tests.IrisGribTest):
             'standard_name': None,
             'long_name': 'probability_of_air_temperature_<prob_type>',
             'units': Unit(1),
-            'aux_coords_and_dims': [(thresh_coord, None)]})
+            'aux_coords_and_dims': [(thresh_coord, None)],
+            'attributes': {'GRIB_PARAM': GRIBCode(2, 7, 8, 9)}})
 
     def test_no_phenomenon(self):
-        original_metadata = deepcopy(self.metadata)
         self.phenom_lookup_patch.return_value = None
-        result = translate_phenomenon(self.metadata, None, None, None, None,
-                                      None, None, probability=self.probability)
-        self.assertEqual(self.metadata, original_metadata)
+        expected_metadata = self.metadata.copy()
+        translate_phenomenon(self.metadata,
+                             discipline=7,
+                             parameterCategory=77,
+                             parameterNumber=777,
+                             typeOfFirstFixedSurface=None,
+                             scaledValueOfFirstFixedSurface=None,
+                             typeOfSecondFixedSurface=None,
+                             probability=self.probability)
+        expected_metadata['attributes']['GRIB_PARAM'] = \
+            GRIBCode(2, 7, 77, 777)
+        self.assertEqual(self.metadata, expected_metadata)
 
 
 if __name__ == '__main__':

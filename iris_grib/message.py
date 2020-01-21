@@ -1,27 +1,12 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Defines a lightweight wrapper class to wrap a single GRIB message.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 from collections import namedtuple
 import re
@@ -36,7 +21,7 @@ from iris.exceptions import TranslationError
 _SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
 
 
-class _OpenFileRef(object):
+class _OpenFileRef:
     """
     A reference to an open file that ensures that the file is closed
     when the object is garbage collected.
@@ -49,7 +34,7 @@ class _OpenFileRef(object):
             self.open_file.close()
 
 
-class GribMessage(object):
+class GribMessage:
     """
     An in-memory representation of a GribMessage, providing
     access to the :meth:`~GribMessage.data` payload and the metadata
@@ -188,7 +173,7 @@ class _MessageLocation(namedtuple('_MessageLocation', 'filename offset')):
         return _RawGribMessage.from_file_offset(self.filename, self.offset)
 
 
-class _DataProxy(object):
+class _DataProxy:
     """A reference to the data payload of a single GRIB message."""
 
     __slots__ = ('shape', 'dtype', 'recreate_raw')
@@ -276,11 +261,11 @@ class _DataProxy(object):
         return {attr: getattr(self, attr) for attr in self.__slots__}
 
     def __setstate__(self, state):
-        for key, value in six.iteritems(state):
+        for key, value in state.items():
             setattr(self, key, value)
 
 
-class _RawGribMessage(object):
+class _RawGribMessage:
     """
     Lightweight GRIB message wrapper, containing **only** the coded keys
     of the input GRIB message.
@@ -381,7 +366,7 @@ class _RawGribMessage(object):
         return sections
 
 
-class Section(object):
+class Section:
     """
     A Section of a GRIB message, supporting dictionary like access to
     attributes using gribapi key strings.

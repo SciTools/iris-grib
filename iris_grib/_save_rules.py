@@ -1,19 +1,8 @@
-# (C) British Crown Copyright 2010 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Grib save implementation.
 
@@ -21,9 +10,6 @@ Grib save implementation.
 It is invoked from :meth:`iris_grib.save_grib2`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 import warnings
 
@@ -44,6 +30,7 @@ from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
                             _SPATIAL_PROCESSING_TYPES)
+from .grib_phenom_translation import GRIBCode
 from iris.util import is_regular, regular_step
 
 
@@ -704,21 +691,44 @@ def grid_definition_section(cube, grib):
 ###############################################################################
 
 def set_discipline_and_parameter(cube, grib):
-    # NOTE: for now, can match by *either* standard_name or long_name.
-    # This allows workarounds for data with no identified standard_name.
-    grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
-                                              cube.long_name)
-    if grib2_info is not None:
-        gribapi.grib_set(grib, "discipline", grib2_info.discipline)
-        gribapi.grib_set(grib, "parameterCategory", grib2_info.category)
-        gribapi.grib_set(grib, "parameterNumber", grib2_info.number)
-    else:
-        gribapi.grib_set(grib, "discipline", 255)
-        gribapi.grib_set(grib, "parameterCategory", 255)
-        gribapi.grib_set(grib, "parameterNumber", 255)
+    # Default values for parameter identity keys = effectively "MISSING".
+    discipline, category, number = 255, 255, 255
+    identity_found = False
+
+    # First, see if we can find and interpret a 'GRIB_PARAM' attribute.
+    attr = cube.attributes.get('GRIB_PARAM', None)
+    if attr:
+        try:
+            # Convert to standard tuple-derived form.
+            gc = GRIBCode(attr)
+            if gc.edition == 2:
+                discipline = gc.discipline
+                category = gc.category
+                number = gc.number
+                identity_found = True
+        except:
+            pass
+
+    if not identity_found:
+        # Else, translate a cube phenomenon, if possible.
+        # NOTE: for now, can match by *either* standard_name or long_name.
+        # This allows workarounds for data with no identified standard_name.
+        grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
+                                                  cube.long_name)
+        if grib2_info is not None:
+            discipline = grib2_info.discipline
+            category = grib2_info.category
+            number = grib2_info.number
+            identity_found = True
+
+    if not identity_found:
         warnings.warn('Unable to determine Grib2 parameter code for cube.\n'
                       'discipline, parameterCategory and parameterNumber '
                       'have been set to "missing".')
+
+    gribapi.grib_set(grib, "discipline", discipline)
+    gribapi.grib_set(grib, "parameterCategory", category)
+    gribapi.grib_set(grib, "parameterNumber", number)
 
 
 def _non_missing_forecast_period(cube):
@@ -881,6 +891,12 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         output_unit = cf_units.Unit("m")
         v_coord = cube.coord("height")
 
+    # depth
+    elif cube.coords("depth"):
+        grib_v_code = 106
+        output_unit = cf_units.Unit('m')
+        v_coord = cube.coord("depth")
+
     elif cube.coords("air_potential_temperature"):
         grib_v_code = 107
         output_unit = cf_units.Unit('K')
@@ -958,10 +974,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                    'maximum value = {}.')
             raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
-        # value after each set of n-levels coefficients.
-        # For now, we retain that encoding. This should not cause problems as
-        # values are indexed according to model-level-number,
-        # I.E. sigma, delta = PV[i], PV[NV/2+i]
+        # value *before* each set of n-levels coefficients.
+        # Note: values are indexed according to model_level_number,
+        # I.E. sigma, delta = PV[i], PV[NV/2+i] : where i=1..n_levels
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
@@ -970,13 +985,14 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             # Record all the level coefficients coming from the 'full' cube.
             # Note: if some model levels are missing, we must still have the
             # coeffs at the correct index according to the model_level_number
-            # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            # value, i.e. at [level] and [NV // 2 + level].
             # Thus, we can *not* paste the values in a block: each one needs to
             # go in the index corresponding to its 'model_level_number' value.
-            coeffs_array[n_lev - 1] = height
-            coeffs_array[n_coeffs + n_lev - 1] = sigma
+            coeffs_array[n_lev] = height
+            coeffs_array[n_coeffs + n_lev] = sigma
         pv_values = [float(el) for el in coeffs_array]
-        gribapi.grib_set(grib, "NV", n_coeffs * 2)
+        # eccodes does not support writing numpy.int64, cast to python int
+        gribapi.grib_set(grib, "NV", int(n_coeffs * 2))
         gribapi.grib_set_array(grib, "pv", pv_values)
 
 

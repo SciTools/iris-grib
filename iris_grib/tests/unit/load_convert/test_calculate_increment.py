@@ -4,7 +4,7 @@
 # See COPYING and COPYING.LESSER in the root of the repository for full
 # licensing details.
 """
-Unit tests for `iris_grib._load_convert.fixup_float32_from_int32`.
+Unit tests for `iris_grib._load_convert._calculate_increment`.
 
 """
 
@@ -12,21 +12,17 @@ Unit tests for `iris_grib._load_convert.fixup_float32_from_int32`.
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris_grib._load_convert import fixup_float32_from_int32
+from iris_grib._load_convert import _calculate_increment
 
 
 class Test(tests.IrisGribTest):
     def test_negative(self):
-        result = fixup_float32_from_int32(-0x3f000000)
-        self.assertEqual(result, -0.5)
-
-    def test_zero(self):
-        result = fixup_float32_from_int32(0)
-        self.assertEqual(result, 0)
+        result = _calculate_increment(-15, -5, 10)
+        self.assertEqual(result, 1)
 
     def test_positive(self):
-        result = fixup_float32_from_int32(0x3f000000)
-        self.assertEqual(result, 0.5)
+        result = _calculate_increment(-5, 5, 10)
+        self.assertEqual(result, 1)
 
 
 if __name__ == '__main__':

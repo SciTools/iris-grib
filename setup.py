@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
 import os
 import os.path
@@ -74,18 +73,14 @@ setup_args = dict(
     keywords         = ['iris', 'GRIB'],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3 :: Only',
     ],
-    # XXX: This is a royal dependency mess at the moment. The PyPI eccodes
-    # package 2.10.0 is a wheel for win_amd64 only, so we'll only add that as
-    # a dependence for the relevant platform, otherwise unfortunately it's up
-    # to the user to provision themselves until ECMWF and PyPI provide the
-    # suitable package platform coverage.
-    install_requires=['scitools-iris>=2.0.*'] + [
-        'eccodes'] if 'win' in sys.platform else [],
-    extras_require={
-        'test:python_version=="2.7"': ['mock']
-    },
+    # NOTE: The Python 3 bindings to eccodes (eccodes-python) is available on
+    # PyPI, but the user is required to install eccodes itself manually. See 
+    # ECMWF ecCodes installation documentation for more information.
+    install_requires=['scitools-iris>=2.0.*'] + ['eccodes-python'],
     test_suite = 'iris_grib.tests',
 )
 

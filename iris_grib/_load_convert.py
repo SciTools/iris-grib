@@ -1,30 +1,17 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Module to support the loading and convertion of a GRIB2 message into
 cube metadata.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 from argparse import Namespace
-from collections import namedtuple, Iterable, OrderedDict
+from collections import namedtuple, OrderedDict
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 import math
 import warnings
@@ -39,13 +26,13 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
+from .grib_phenom_translation import GRIBCode
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from ._grib1_load_rules import grib1_convert
-from .message import GribMessage
 
 
 # Restrict the names imported from this namespace.
@@ -498,6 +485,14 @@ def ellipsoid_geometry(section):
     return major, minor, radius
 
 
+def _calculate_increment(first_grid_point, last_grid_point, num_intervals):
+    # Calculates the directional increment from the difference between
+    # the grid point values divided by the total number of intervals.
+    # Required by template 0 & 40 when no increment values are provided.
+
+    return math.fabs(last_grid_point - first_grid_point) / num_intervals
+
+
 def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     """
     Translate templates representing regularly spaced latitude/longitude
@@ -533,8 +528,16 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resoultion flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
@@ -544,7 +547,12 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     circular = _is_circular(x_points, 360.0)
 
     # Calculate latitude points.
-    y_inc = section['jDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    y_inc = (section['jDirectionIncrement']
+             if res_flags.j_increments_given
+             else _calculate_increment(section['latitudeOfFirstGridPoint'],
+                                       section['latitudeOfLastGridPoint'],
+                                       section['Nj'] - 1))
+    y_inc *= _GRID_ACCURACY_IN_DEGREES
     y_offset = section['latitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     y_direction = 1 if scan.j_positive else -1
     Nj = section['Nj']
@@ -1047,8 +1055,16 @@ def grid_definition_template_40_regular(section, metadata, cs):
     """
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resolution flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
@@ -1362,6 +1378,13 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
 
+    # Add a standard attribute recording the grib phenomenon identity.
+    metadata['attributes']['GRIB_PARAM'] = GRIBCode(
+        edition_or_string=2,
+        discipline=discipline,
+        category=parameterCategory,
+        number=parameterNumber)
+
     # Identify hybrid height and pressure reference fields.
     # Look for fields at surface level first.
     if (typeOfFirstFixedSurface == 1 and
@@ -1492,14 +1515,17 @@ def hybrid_factories(section, metadata):
                                 {'long_name': 'sigma'},
                                 Reference('ref_surface_pressure')]
 
-            # Create the level pressure scalar coordinate.
+            # Create the level height/pressure scalar coordinate.
+            # scaledValue represents the level number, which is used to select
+            # the sigma and delta values as follows:
+            # sigma, delta = PV[i], PV[NV/2+i] : where i=1..level_number
             pv = section['pv']
-            offset = scaledValue - 1
+            offset = scaledValue
             coord = DimCoord(pv[offset], long_name=level_value_name,
                              units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset = NV // 2 + scaledValue - 1
+            offset = NV // 2 + scaledValue
             coord = AuxCoord(pv[offset], long_name='sigma')
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
@@ -2354,6 +2380,7 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     template = section['productDefinitionTemplateNumber']
 
     probability = None
+    includes_fixed_surface_keys = True
     if template == 0:
         # Process analysis or forecast at a horizontal level or
         # in a horizontal layer at a point in time.
@@ -2377,8 +2404,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         product_definition_template_15(section, metadata, rt_coord)
     elif template == 31:
         # Process satellite product.
+        includes_fixed_surface_keys = False
         product_definition_template_31(section, metadata, rt_coord)
     elif template == 32:
+        includes_fixed_surface_keys = False
         product_definition_template_32(section, metadata, rt_coord)
     elif template == 40:
         product_definition_template_40(section, metadata, rt_coord)
@@ -2389,13 +2418,27 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
 
     # Translate GRIB2 phenomenon to CF phenomenon.
     if tablesVersion != _CODE_TABLES_MISSING:
-        translate_phenomenon(metadata, discipline,
-                             section['parameterCategory'],
-                             section['parameterNumber'],
-                             section['typeOfFirstFixedSurface'],
-                             section['scaledValueOfFirstFixedSurface'],
-                             section['typeOfSecondFixedSurface'],
-                             probability=probability)
+        translation_kwargs = {
+            'metadata': metadata,
+            'discipline': discipline,
+            'parameterCategory': section['parameterCategory'],
+            'parameterNumber': section['parameterNumber'],
+            'probability': probability
+        }
+
+        # Won't always be able to populate the below arguments -
+        # missing from some template definitions.
+        fixed_surface_keys = [
+            'typeOfFirstFixedSurface',
+            'scaledValueOfFirstFixedSurface',
+            'typeOfSecondFixedSurface'
+        ]
+
+        for section_key in fixed_surface_keys:
+            translation_kwargs[section_key] = \
+                section[section_key] if includes_fixed_surface_keys else None
+
+        translate_phenomenon(**translation_kwargs)
 
 
 ###############################################################################

@@ -1,33 +1,19 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Test function :func:`iris_grib._load_convert.vertical_coords`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
+from unittest import mock
 
 from iris.coords import DimCoord
 from iris.exceptions import TranslationError
@@ -126,7 +112,7 @@ class Test(tests.IrisGribTest):
                    'scaleFactorOfFirstFixedSurface': None,
                    'typeOfSecondFixedSurface': 0}
         emsg = 'different types of first and second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_same_fixed_surfaces_missing_second_scaled_value(self):
@@ -137,7 +123,7 @@ class Test(tests.IrisGribTest):
                    'typeOfSecondFixedSurface': 100,
                    'scaledValueOfSecondFixedSurface': MISSING_LEVEL}
         emsg = 'missing scaled value of second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_pressure_with_second_fixed_surface(self):

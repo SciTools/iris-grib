@@ -1,28 +1,13 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Unit tests for
 :func:`iris_grib._load_convert.grid_definition_template_90`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
@@ -128,7 +113,7 @@ class Test(tests.IrisGribTest):
             self.assertEqual(result_coord, expected_coord)
 
         # Ensure no other metadata was created.
-        for name in six.iterkeys(expected):
+        for name in expected.keys():
             if name == 'dim_coords_and_dims':
                 continue
             self.assertEqual(metadata[name], expected[name])
@@ -152,46 +137,46 @@ class Test(tests.IrisGribTest):
         section = self.uk()
         section['latitudeOfSubSatellitePoint'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'non-zero latitude'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'non-zero latitude'):
             grid_definition_template_90(section, metadata)
 
     def test_rotated_meridian(self):
         section = self.uk()
         section['orientationOfTheGrid'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orientation'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orientation'):
             grid_definition_template_90(section, metadata)
 
     def test_zero_height(self):
         section = self.uk()
         section['Nr'] = 0
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'zero'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'zero'):
             grid_definition_template_90(section, metadata)
 
     def test_orthographic(self):
         section = self.uk()
         section['Nr'] = MDI
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orthographic'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orthographic'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_positive_x(self):
         section = self.uk()
         section['scanningMode'] = 0b01000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, r'\+x'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, r'\+x'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_negative_y(self):
         section = self.uk()
         section['scanningMode'] = 0b10000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, '-y'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, '-y'):
             grid_definition_template_90(section, metadata)
 
 

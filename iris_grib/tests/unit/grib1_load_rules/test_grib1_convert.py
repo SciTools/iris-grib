@@ -1,23 +1,9 @@
-# (C) British Crown Copyright 2013 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """Unit tests for :func:`iris_grib._grib1_load_rules.grib1_convert`."""
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else
@@ -25,7 +11,7 @@ import iris_grib.tests as tests
 
 import cf_units
 import gribapi
-import mock
+from unittest import mock
 
 import iris
 from iris.exceptions import TranslationError
@@ -40,7 +26,7 @@ class TestBadEdition(tests.IrisGribTest):
     def test(self):
         message = mock.Mock(edition=2)
         emsg = 'GRIB edition 2 is not supported'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             grib1_convert(message)
 
 
@@ -132,13 +118,13 @@ class Test_GribLevels(tests.IrisTest):
 
         ml_ref = iris.coords.CoordDefn('model_level_number', None, None,
                                        cf_units.Unit('1'),
-                                       {'positive': 'up'}, None)
+                                       {'positive': 'up'}, None, False)
         lp_ref = iris.coords.CoordDefn(None, 'level_pressure', None,
                                        cf_units.Unit('Pa'),
-                                       {}, None)
+                                       {}, None, False)
         s_ref = iris.coords.CoordDefn(None, 'sigma', None,
                                       cf_units.Unit('1'),
-                                      {}, None)
+                                      {}, None, False)
 
         aux_coord_defns = [coord._as_defn() for coord, dim in results[8]]
         self.assertIn(ml_ref, aux_coord_defns)
