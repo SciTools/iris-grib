@@ -1,34 +1,26 @@
-# (C) British Crown Copyright 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Integration test for round-trip loading and saving of hybrid height and
 hybrid pressure cubes.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from iris import load_cube, load_cubes, save
-from iris.experimental.equalise_cubes import equalise_attributes
+# Try except allows compatibility with current Iris (2.4) and also master.
+# TODO: simplify to just the iris.util import once we drop support for any
+# Iris versions with iris.experimental.equalise_cubes import
+try:
+    from iris.util import equalise_attributes
+except ImportError:
+    from iris.experimental.equalise_cubes import equalise_attributes
 
 
 class TestHybridHeightRoundTrip(tests.IrisGribTest):

@@ -1,35 +1,20 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Unit tests for the `iris_grib.message.GribMessage` class.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
 from abc import ABCMeta, abstractmethod
+from unittest import mock
 
-import mock
 import numpy as np
 import numpy.ma as ma
 
@@ -55,11 +40,9 @@ class Test_messages_from_filename(tests.IrisGribTest):
         filename = tests.get_data_path(('GRIB', '3_layer_viz',
                                         '3_layer.grib2'))
         my_file = open(filename)
-        if six.PY2:
-            self.patch('__builtin__.open', mock.Mock(return_value=my_file))
-        else:
-            import builtins
-            self.patch('builtins.open', mock.Mock(return_value=my_file))
+
+        import builtins
+        self.patch('builtins.open', mock.Mock(return_value=my_file))
 
         messages = list(GribMessage.messages_from_filename(filename))
         self.assertFalse(my_file.closed)
@@ -120,7 +103,7 @@ class Test_data__masked(tests.IrisGribTest):
                                       6: {'bitMapIndicator': 0,
                                           'bitmap': self.bitmap},
                                       7: {'codedValues': values}})
-        with self.assertRaisesRegexp(TranslationError, 'do not match'):
+        with self.assertRaisesRegex(TranslationError, 'do not match'):
             as_concrete_data(message.data)
 
     def test_bitmap__invalid_indicator(self):
@@ -129,7 +112,7 @@ class Test_data__masked(tests.IrisGribTest):
                                       6: {'bitMapIndicator': 100,
                                           'bitmap': None},
                                       7: {'codedValues': values}})
-        with self.assertRaisesRegexp(TranslationError, 'unsupported bitmap'):
+        with self.assertRaisesRegex(TranslationError, 'unsupported bitmap'):
             as_concrete_data(message.data)
 
 
@@ -137,7 +120,7 @@ class Test_data__unsupported(tests.IrisGribTest):
     def test_unsupported_grid_definition(self):
         message = _make_test_message({3: {'sourceOfGridDefinition': 1},
                                       6: SECTION_6_NO_BITMAP})
-        with self.assertRaisesRegexp(TranslationError, 'source'):
+        with self.assertRaisesRegex(TranslationError, 'source'):
             message.data
 
     def test_unsupported_quasi_regular__number_of_octets(self):
@@ -146,7 +129,7 @@ class Test_data__unsupported(tests.IrisGribTest):
                  'numberOfOctectsForNumberOfPoints': 1,
                  'gridDefinitionTemplateNumber': 0},
              6: SECTION_6_NO_BITMAP})
-        with self.assertRaisesRegexp(TranslationError, 'quasi-regular'):
+        with self.assertRaisesRegex(TranslationError, 'quasi-regular'):
             message.data
 
     def test_unsupported_quasi_regular__interpretation(self):
@@ -156,7 +139,7 @@ class Test_data__unsupported(tests.IrisGribTest):
                  'interpretationOfNumberOfPoints': 1,
                  'gridDefinitionTemplateNumber': 0},
              6: SECTION_6_NO_BITMAP})
-        with self.assertRaisesRegexp(TranslationError, 'quasi-regular'):
+        with self.assertRaisesRegex(TranslationError, 'quasi-regular'):
             message.data
 
     def test_unsupported_template(self):
@@ -165,13 +148,13 @@ class Test_data__unsupported(tests.IrisGribTest):
                  'numberOfOctectsForNumberOfPoints': 0,
                  'interpretationOfNumberOfPoints': 0,
                  'gridDefinitionTemplateNumber': 2}})
-        with self.assertRaisesRegexp(TranslationError, 'template'):
+        with self.assertRaisesRegex(TranslationError, 'template'):
             message.data
 
 
 # Abstract, mix-in class for testing the `data` attribute for various
 # grid definition templates.
-class Mixin_data__grid_template(six.with_metaclass(ABCMeta, object)):
+class Mixin_data__grid_template(metaclass=ABCMeta):
     @abstractmethod
     def section_3(self, scanning_mode):
         raise NotImplementedError()
@@ -180,7 +163,7 @@ class Mixin_data__grid_template(six.with_metaclass(ABCMeta, object)):
         message = _make_test_message(
             {3: self.section_3(1),
              6: SECTION_6_NO_BITMAP})
-        with self.assertRaisesRegexp(TranslationError, 'scanning mode'):
+        with self.assertRaisesRegex(TranslationError, 'scanning mode'):
             message.data
 
     def _test(self, scanning_mode):
@@ -278,8 +261,8 @@ class Test_data__unknown_grid_template(tests.IrisGribTest):
             {3: _example_section_3(999, 0),
              6: SECTION_6_NO_BITMAP,
              7: {'codedValues': np.arange(12)}})
-        with self.assertRaisesRegexp(TranslationError,
-                                     'template 999 is not supported'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'template 999 is not supported'):
             data = message.data
 
 

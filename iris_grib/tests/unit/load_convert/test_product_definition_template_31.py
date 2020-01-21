@@ -1,40 +1,40 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Tests for `iris_grib._load_convert.product_definition_template_31`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
-import numpy as np
+from unittest import mock
 import warnings
 
 from iris.coords import AuxCoord
+import numpy as np
+
 from iris_grib.tests.unit.load_convert import empty_metadata
 
 from iris_grib._load_convert import product_definition_template_31
+
+
+def section_4():
+    # Also needed for test_product_definition_section.py.
+    series = mock.sentinel.satelliteSeries
+    number = mock.sentinel.satelliteNumber
+    instrument = mock.sentinel.instrumentType
+    return {'NB': 1,
+            'satelliteSeries': series,
+            'satelliteNumber': number,
+            'instrumentType': instrument,
+            'scaleFactorOfCentralWaveNumber': 1,
+            'scaledValueOfCentralWaveNumber': 12}
 
 
 class Test(tests.IrisGribTest):
@@ -47,16 +47,8 @@ class Test(tests.IrisGribTest):
 
     def test(self):
         # Prepare the arguments.
-        series = mock.sentinel.satelliteSeries
-        number = mock.sentinel.satelliteNumber
-        instrument = mock.sentinel.instrumentType
         rt_coord = mock.sentinel.observation_time
-        section = {'NB': 1,
-                   'satelliteSeries': series,
-                   'satelliteNumber': number,
-                   'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': 1,
-                   'scaledValueOfCentralWaveNumber': 12}
+        section = section_4()
 
         # Call the function.
         metadata = empty_metadata()

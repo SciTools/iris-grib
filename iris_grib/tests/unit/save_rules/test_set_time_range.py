@@ -1,37 +1,22 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Unit tests for :func:`iris_grib._save_rules.set_time_range`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
 import warnings
 
 from cf_units import Unit
 import gribapi
-import mock
 
 from iris.coords import DimCoord
 
@@ -45,21 +30,21 @@ class Test(tests.IrisGribTest):
                                          calendar='standard'))
 
     def test_no_bounds(self):
-        with self.assertRaisesRegexp(ValueError, 'Expected time coordinate '
-                                     'with two bounds, got 0 bounds'):
+        with self.assertRaisesRegex(ValueError, 'Expected time coordinate '
+                                    'with two bounds, got 0 bounds'):
             set_time_range(self.coord, mock.sentinel.grib)
 
     def test_three_bounds(self):
         self.coord.bounds = [0, 1, 2]
-        with self.assertRaisesRegexp(ValueError, 'Expected time coordinate '
-                                     'with two bounds, got 3 bounds'):
+        with self.assertRaisesRegex(ValueError, 'Expected time coordinate '
+                                    'with two bounds, got 3 bounds'):
             set_time_range(self.coord, mock.sentinel.grib)
 
     def test_non_scalar(self):
         coord = DimCoord([0, 1], 'time', bounds=[[0, 1], [1, 2]],
                          units=Unit('hours since epoch', calendar='standard'))
-        with self.assertRaisesRegexp(ValueError, 'Expected length one time '
-                                     'coordinate, got 2 points'):
+        with self.assertRaisesRegex(ValueError, 'Expected length one time '
+                                    'coordinate, got 2 points'):
             set_time_range(coord, mock.sentinel.grib)
 
     @mock.patch.object(gribapi, 'grib_set')
@@ -97,7 +82,7 @@ class Test(tests.IrisGribTest):
         self.assertEqual(len(warn), 1)
         msg = 'Truncating floating point lengthOfTimeRange 10\.8?9+ ' \
               'to integer value 10'
-        six.assertRegex(self, str(warn[0].message), msg)
+        self.assertRegex(str(warn[0].message), msg)
         mock_set_long.assert_any_call(mock.sentinel.grib,
                                       'indicatorOfUnitForTimeRange', 1)
         mock_set_long.assert_any_call(mock.sentinel.grib,

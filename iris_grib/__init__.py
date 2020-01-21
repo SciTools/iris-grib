@@ -1,29 +1,14 @@
-# (C) British Crown Copyright 2010 - 2019, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the LGPL license.
+# See COPYING and COPYING.LESSER in the root of the repository for full
+# licensing details.
 """
 Conversion of cubes to/from GRIB.
 
 See: `ECMWF GRIB API <https://software.ecmwf.int/wiki/display/GRIB/Home>`_.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 import datetime
 import math  # for fmod
@@ -47,7 +32,7 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = '0.15.0dev0'
+__version__ = '0.16.0dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages']
@@ -96,7 +81,7 @@ TIME_CODES_EDITION1 = {
 unknown_string = "???"
 
 
-class GribDataProxy(object):
+class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
     __slots__ = ('shape', 'dtype', 'path', 'offset')
@@ -130,11 +115,11 @@ class GribDataProxy(object):
         return {attr: getattr(self, attr) for attr in self.__slots__}
 
     def __setstate__(self, state):
-        for key, value in six.iteritems(state):
+        for key, value in state.items():
             setattr(self, key, value)
 
 
-class GribWrapper(object):
+class GribWrapper:
     """
     Contains a pygrib object plus some extra keys of our own.
 
@@ -225,7 +210,7 @@ class GribWrapper(object):
                 else:
                     emsg = "Unknown type for {} : {}"
                     raise ValueError(emsg.format(key, str(key_type)))
-        except gribapi.GribInternalError:
+        except gribapi.errors.GribInternalError:
             res = None
 
         # ...or is it in our list of extras?
@@ -472,7 +457,7 @@ class GribWrapper(object):
             # (south-to-north) and then put them in the right direction
             # depending on the scan direction
             latitude_points = gribapi.grib_get_double_array(
-                self.grib_message, 'distinctLatitudes').astype(np.float64)
+                    self.grib_message, 'distinctLatitudes').astype(np.float64)
             latitude_points.sort()
             if not self.jScansPositively:
                 # we require latitudes north-to-south
@@ -864,7 +849,7 @@ def save_messages(messages, target, append=False):
 
     """
     # grib file (this bit is common to the pp and grib savers...)
-    if isinstance(target, six.string_types):
+    if isinstance(target, str):
         grib_file = open(target, "ab" if append else "wb")
     elif hasattr(target, "write"):
         if hasattr(target, "mode") and "b" not in target.mode:
@@ -879,5 +864,5 @@ def save_messages(messages, target, append=False):
             gribapi.grib_release(message)
     finally:
         # (this bit is common to the pp and grib savers...)
-        if isinstance(target, six.string_types):
+        if isinstance(target, str):
             grib_file.close()
