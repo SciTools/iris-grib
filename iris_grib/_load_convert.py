@@ -1344,7 +1344,7 @@ def grid_definition_section(section, metadata):
         # Process space view.
         grid_definition_template_90(section, metadata)
     elif template == 140:
-        #Process Lambert Azimuthal Equal Area.
+        # Process Lambert Azimuthal Equal Area.
         grid_definition_template_140(section, metadata)
     else:
         msg = 'Grid definition template [{}] is not supported'.format(template)
