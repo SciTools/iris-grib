@@ -141,8 +141,11 @@ class GribMessage:
                 msg = 'Unsupported scanning mode: {}'.format(
                     grid_section['scanningMode'])
                 raise TranslationError(msg)
-            if template in (20, 30, 90, 140):
+            if template in (20, 30, 90):
                 shape = (grid_section['Ny'], grid_section['Nx'])
+            elif template == 140:
+                shape = (grid_section['numberOfPointsAlongYAxis'],
+                            grid_section['numberOfPointsAlongXAxis'])
             elif template == 40 and reduced:
                 shape = (grid_section['numberOfDataPoints'],)
             else:

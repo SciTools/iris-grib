@@ -1277,6 +1277,12 @@ def grid_definition_template_140(section, metadata):
     major, minor, radius = ellipsoid_geometry(section)
     cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
 
+    # Set expected headers for coord calculations
+    section['Dx'] = section['xDirectionGridLengthInMillimetres']
+    section['Dy'] = section['yDirectionGridLengthInMillimetres']
+    section['Nx'] = section['numberOfPointsAlongXAxis']
+    section['Ny'] = section['numberOfPointsAlongYAxis']
+
     x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
                                                                           cs)
     # Determine the order of the dimensions.
