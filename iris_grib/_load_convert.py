@@ -928,10 +928,16 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
     mm_to_m = 1e-3
 
     if section['gridDefinitionTemplateNumber'] in _XYGRIDLENGTH_GDT_NUMBERS:
-        dx = section['Dx']
-        dy = section['Dy']
-        nx = section['Nx']
-        ny = section['Ny']
+        if section['gridDefinitionTemplateNumber'] == 140:
+            dx = section['xDirectionGridLengthInMillimetres']
+            dy = section['yDirectionGridLengthInMillimetres']
+            nx = section['numberOfPointsAlongXAxis']
+            ny = section['numberOfPointsAlongYAxis']
+        else:
+            dx = section['Dx']
+            dy = section['Dy']
+            nx = section['Nx']
+            ny = section['Ny']
     elif section['gridDefinitionTemplateNumber'] in _IJGRIDLENGTH_GDT_NUMBERS:
         dx = section['Di']
         dy = section['Dj']
@@ -1277,15 +1283,6 @@ def grid_definition_template_140(section, metadata):
     major, minor, radius = ellipsoid_geometry(section)
     cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
 
-    # Set expected headers for coord calculations
-    print(type(section))
-    print(f'before setting :\n{section}')
-    section['Dx'] = section['xDirectionGridLengthInMillimetres']
-    section['Dy'] = section['yDirectionGridLengthInMillimetres']
-    section['Nx'] = section['numberOfPointsAlongXAxis']
-    section['Ny'] = section['numberOfPointsAlongYAxis']
-    print(f'after setting :\n{section}')
-
     x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
                                                                           cs)
     # Determine the order of the dimensions.
@@ -1354,6 +1351,7 @@ def grid_definition_section(section, metadata):
         grid_definition_template_90(section, metadata)
     elif template == 140:
         # Process Lambert Azimuthal Equal Area.
+        print('processing as LAEA')
         grid_definition_template_140(section, metadata)
     else:
         msg = 'Grid definition template [{}] is not supported'.format(template)
