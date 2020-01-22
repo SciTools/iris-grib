@@ -1278,10 +1278,13 @@ def grid_definition_template_140(section, metadata):
     cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
 
     # Set expected headers for coord calculations
+    print(type(section))
+    print(f'before setting :\n{section}')
     section['Dx'] = section['xDirectionGridLengthInMillimetres']
     section['Dy'] = section['yDirectionGridLengthInMillimetres']
     section['Nx'] = section['numberOfPointsAlongXAxis']
     section['Ny'] = section['numberOfPointsAlongYAxis']
+    print(f'after setting :\n{section}')
 
     x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
                                                                           cs)
