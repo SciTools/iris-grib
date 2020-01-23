@@ -2,5 +2,6 @@ channels:
     - conda-forge
 dependencies:
     - iris>=2
-    - python-eccodes 0.9.4
+    - python-eccodes 0.9.*
+    - eccodes 2.15.*
     - pep8
