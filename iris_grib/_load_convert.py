@@ -1283,8 +1283,9 @@ def grid_definition_template_140(section, metadata):
     major, minor, radius = ellipsoid_geometry(section)
     cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
 
-    x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section,
-                                                                          cs)
+    x_coord, y_coord, scan = \
+        _calculate_proj_coords_from_grid_lengths(section, cs)
+
     # Determine the order of the dimensions.
     y_dim, x_dim = 0, 1
     if scan.j_consecutive:
