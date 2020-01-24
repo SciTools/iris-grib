@@ -36,8 +36,8 @@ class Test(tests.IrisGribTest):
             'scaledValueOfEarthMajorAxis': MDI,
             'scaleFactorOfEarthMinorAxis': MDI,
             'scaledValueOfEarthMinorAxis': MDI,
-            'numberOfPointsAlongXAxis': 15,
-            'numberOfPointsAlongYAxis': 10,
+            'numberOfPointsAlongXAxis': 2,
+            'numberOfPointsAlongYAxis': 2,
             'latitudeOfFirstGridPoint': 53988880,
             'longitudeOfFirstGridPoint': -4027984,
             'standardParallelInMicrodegrees' : 54900000,
@@ -65,8 +65,8 @@ class Test(tests.IrisGribTest):
         x0m, y0m = cs.as_cartopy_crs().transform_point(
             lon0, lat0, ccrs.Geodetic())
         dxm = dym = 2000000.
-        x_points = x0m + dxm * np.arange(15)
-        y_points = y0m + dym * np.arange(10)
+        x_points = x0m + dxm * np.arange(2)
+        y_points = y0m + dym * np.arange(2)
         x = iris.coords.DimCoord(x_points,
                                  standard_name='projection_x_coordinate',
                                  units='m',
