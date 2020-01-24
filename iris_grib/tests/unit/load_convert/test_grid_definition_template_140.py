@@ -43,8 +43,8 @@ class Test(tests.IrisGribTest):
             'standardParallelInMicrodegrees' : 54900000,
             'centralLongitudeInMicrodegrees' : -2500000,
             'resolutionAndComponentFlags': 0b00110000,
-            'Dx': 2000000,
-            'Dy': 2000000,
+            'xDirectionGridLengthInMillimetres': 2000000,
+            'yDirectionGridLengthInMillimetres': 2000000,
             'scanningMode': 0b01000000,
         }
         return section
