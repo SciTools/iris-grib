@@ -1281,7 +1281,12 @@ def grid_definition_template_140(section, metadata):
     """
     # Determine the coordinate system
     major, minor, radius = ellipsoid_geometry(section)
-    cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
+    cs = icoord_systems.LambertAzimuthalEqualArea(
+        section['standardParallelInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        section['centralLongitudeInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        0,
+        0,
+        ellipsoid(section['shapeOfTheEarth'], major, minor, radius))
 
     x_coord, y_coord, scan = \
         _calculate_proj_coords_from_grid_lengths(section, cs)
