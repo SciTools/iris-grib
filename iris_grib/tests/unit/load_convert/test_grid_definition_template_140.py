@@ -54,7 +54,7 @@ class Test(tests.IrisGribTest):
         expected = empty_metadata()
         ellipsoid = iris.coord_systems.GeogCS(6378137,
                                           inverse_flattening=298.257222101)
-        cs = iris.coord_systems.LambertAzimutalEqualArea(
+        cs = iris.coord_systems.LambertAzimuthalEqualArea(
             latitude_of_projection_origin=54.9,
             longitude_of_projection_origin=-2.5,
             false_easting=0,
