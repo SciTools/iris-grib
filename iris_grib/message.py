@@ -145,7 +145,7 @@ class GribMessage:
                 shape = (grid_section['Ny'], grid_section['Nx'])
             elif template == 140:
                 shape = (grid_section['numberOfPointsAlongYAxis'],
-                            grid_section['numberOfPointsAlongXAxis'])
+                         grid_section['numberOfPointsAlongXAxis'])
             elif template == 40 and reduced:
                 shape = (grid_section['numberOfDataPoints'],)
             else:
