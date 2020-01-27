@@ -40,8 +40,8 @@ class Test(tests.IrisGribTest):
             'numberOfPointsAlongYAxis': 2,
             'latitudeOfFirstGridPoint': 53988880,
             'longitudeOfFirstGridPoint': -4027984,
-            'standardParallelInMicrodegrees' : 54900000,
-            'centralLongitudeInMicrodegrees' : -2500000,
+            'standardParallelInMicrodegrees': 54900000,
+            'centralLongitudeInMicrodegrees': -2500000,
             'resolutionAndComponentFlags': 0b00110000,
             'xDirectionGridLengthInMillimetres': 2000000,
             'yDirectionGridLengthInMillimetres': 2000000,
@@ -52,8 +52,9 @@ class Test(tests.IrisGribTest):
     def expected(self, y_dim, x_dim):
         # Prepare the expectation.
         expected = empty_metadata()
-        ellipsoid = iris.coord_systems.GeogCS(6378137,
-                                          inverse_flattening=298.257222101)
+        ellipsoid = iris.coord_systems.GeogCS(
+            6378137,
+            inverse_flattening=298.257222101)
         cs = iris.coord_systems.LambertAzimuthalEqualArea(
             latitude_of_projection_origin=54.9,
             longitude_of_projection_origin=-2.5,
