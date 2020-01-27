@@ -65,7 +65,7 @@ class Test(tests.IrisGribTest):
         lat0 = 53988880 * 1e-6
         x0m, y0m = cs.as_cartopy_crs().transform_point(
             lon0, lat0, ccrs.Geodetic())
-        dxm = dym = 2000000.
+        dxm = dym = 2000.
         x_points = x0m + dxm * np.arange(2)
         y_points = y0m + dym * np.arange(2)
         x = iris.coords.DimCoord(x_points,
