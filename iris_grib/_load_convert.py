@@ -1279,7 +1279,7 @@ def grid_definition_template_140(section, metadata):
     * metadata:
         :class:`collections.OrderedDict` of metadata.
     """
-    # Determine the coordinate system
+    # Define the coordinate system
     major, minor, radius = ellipsoid_geometry(section)
     cs = icoord_systems.LambertAzimuthalEqualArea(
         section['standardParallelInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
