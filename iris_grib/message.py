@@ -12,7 +12,7 @@ from collections import namedtuple
 import re
 
 import gribapi
-from iris_grib import _fake_empty_getitem as fake_empty_getitem
+from iris_grib import _array_slice_ifempty
 import numpy as np
 import numpy.ma as ma
 
@@ -232,7 +232,7 @@ class _DataProxy:
 
         # Avoid fetching file data just to return an 'empty' result.
         # Needed because of how dask.array.from_array behaves since Dask v2.0.
-        result = fake_empty_getitem(keys=keys, shape=self.shape, self.dtype)
+        result = _array_slice_ifempty(keys, self.shape, self.dtype)
         if result is None:
             message = self.recreate_raw()
             sections = message.sections

@@ -25,6 +25,74 @@ from iris._lazy_data import as_lazy_data
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 
+try:
+    from iris.util import _array_slice_ifempty
+except ImportError:
+    # A temporary cut-and-paste hack, until this is in an Iris release ...
+    # see : https://github.com/SciTools/iris/pull/3659
+    def _array_slice_ifempty(keys, shape, dtype):
+        """
+        Detect cases where an array slice will contain no data, as it contains
+        a zero-length dimension, and produce an equivalent result for those
+        cases.
+
+        The function indicates 'empty' slicing cases, by returning an array
+        equal to the slice result in those cases.
+
+        Args:
+
+        * keys (indexing key, or tuple of keys):
+            The argument from an array __getitem__ call.
+            Only tuples of integers and slices are supported, in particular no
+            newaxis, ellipsis or array keys.
+            These are the types of array access usage we expect from Dask.
+        * shape (tuple of int):
+            The shape of the array being indexed.
+        * dtype (numpy.dtype):
+            The dtype of the array being indexed.
+
+        Returns:
+            result (np.ndarray or None):
+                If 'keys' contains a slice(0, 0), this is an ndarray of the
+                correct resulting shape and provided dtype.
+                Otherwise it is None.
+
+        .. note::
+
+            This is used to prevent DataProxy arraylike objects from fetching
+            their file data when wrapped as Dask arrays.
+            This is because, for Dask >= 2.0, the "dask.array.from_array" call
+            performs a fetch like [0:0, 0:0, ...], to snapshot array metadata.
+            This function enables us to avoid triggering a file data fetch in
+            those cases :  This is consistent because the result will not
+            contain any actual data content.
+
+        """
+        # Convert single key into a 1-tuple, so we always have a tuple of keys.
+        if isinstance(keys, tuple):
+            keys_tuple = keys
+        else:
+            keys_tuple = (keys,)
+
+        if any(key == slice(0, 0) for key in keys_tuple):
+            # An 'empty' slice is present :  Return a 'fake' array instead.
+            target_shape = list(shape)
+            for i_dim, key in enumerate(keys_tuple):
+                if key == slice(0, 0):
+                    # Reduce dims with empty slicing to length 0.
+                    target_shape[i_dim] = 0
+            # Create a prototype result : no memory usage, as some dims are 0.
+            result = np.zeros(target_shape, dtype=dtype)
+            # Index with original keys to produce the desired result shape.
+            # Note : also ok in 0-length dims, as the slice is always '0:0'.
+            result = result[keys]
+        else:
+            result = None
+
+        return result
+
+
+
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
@@ -81,53 +149,6 @@ TIME_CODES_EDITION1 = {
 unknown_string = "???"
 
 
-def _fake_empty_getitem(keys, shape, dtype):
-    """
-    Detect certain cases where an array slicing will yield no data.
-
-    Args:
-
-    * keys (indexing key, or tuple of keys):
-        The argument(s) from an array __getitem__ call.
-    * shape (tuple of int):
-        The shape of the array being indexed.
-    * dtype (numpy.dtype):
-        The dtype of the array being indexed.
-
-    Returns:
-        result (np.ndarray or None):
-            If 'keys' contains a slice(0, 0), this is an ndarray of the correct
-            shape and provided dtype.
-            Otherwise it is None.
-
-    Note: this is used to avoid Proxy array objects wrapped as Dask arrays
-    from fetching their file data in these cases.
-    This is because, for Dask >= 2.0, "dask.array.from_array" does a
-    fetch like [0:0, 0:0, ...], to 'snapshot' the array metadata.
-    This lets us avoid fetching the file data in those cases, as none of it is
-    then used.
-
-    """
-    # Convert a single key to a 1-tuple, for empty-slice testing.
-    if isinstance(keys, tuple):
-        keys_tuple = keys
-    else:
-        keys_tuple = (keys,)
-
-    if any(key == slice(0, 0) for key in keys_tuple):
-        # When an 'empty' slice is present, return a 'fake' array instead.
-        target_shape = list(shape)
-        for i_dim, key in enumerate(keys_tuple):
-            if key == slice(0, 0):
-                target_shape[i_dim] = 0
-        result = np.zeros((1,), dtype=dtype)
-        result = np.broadcast_to(result, target_shape)
-    else:
-        result = None
-
-    return result
-
-
 class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
@@ -146,7 +167,7 @@ class GribDataProxy:
     def __getitem__(self, keys):
         # Avoid fetching file data just to return an 'empty' result.
         # Needed because of how dask.array.from_array behaves since Dask v2.0.
-        result = _fake_empty_getitem(keys, self.shape, self.dtype)
+        result = _array_slice_ifempty(keys, self.shape, self.dtype)
         if result is None:
             with open(self.path, 'rb') as grib_fh:
                 grib_fh.seek(self.offset)
