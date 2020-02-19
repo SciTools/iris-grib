@@ -1,6 +1,6 @@
-# Copyright Iris contributors
+# Copyright iris-grib contributors
 #
-# This file is part of Iris and is released under the LGPL license.
+# This file is part of iris-grib and is released under the LGPL license.
 # See COPYING and COPYING.LESSER in the root of the repository for full
 # licensing details.
 """
@@ -219,8 +219,8 @@ class TestGribTimecodes(tests.IrisTest):
 
                 # Check the data-starttime calculation.
                 interval_start_to_end = (
-                    wrapped_msg._phenomenonDateTime
-                    - wrapped_msg._referenceDateTime
+                    wrapped_msg._phenomenonDateTime -
+                    wrapped_msg._referenceDateTime
                 )
                 if grib_edition == 1:
                     interval_from_units = wrapped_msg.P1
