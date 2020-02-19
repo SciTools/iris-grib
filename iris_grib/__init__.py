@@ -81,6 +81,53 @@ TIME_CODES_EDITION1 = {
 unknown_string = "???"
 
 
+def _fake_empty_getitem(keys, shape, dtype):
+    """
+    Detect certain cases where an array slicing will yield no data.
+
+    Args:
+
+    * keys (indexing key, or tuple of keys):
+        The argument(s) from an array __getitem__ call.
+    * shape (tuple of int):
+        The shape of the array being indexed.
+    * dtype (numpy.dtype):
+        The dtype of the array being indexed.
+
+    Returns:
+        result (np.ndarray or None):
+            If 'keys' contains a slice(0, 0), this is an ndarray of the correct
+            shape and provided dtype.
+            Otherwise it is None.
+
+    Note: this is used to avoid Proxy array objects wrapped as Dask arrays
+    from fetching their file data in these cases.
+    This is because, for Dask >= 2.0, "dask.array.from_array" does a
+    fetch like [0:0, 0:0, ...], to 'snapshot' the array metadata.
+    This lets us avoid fetching the file data in those cases, as none of it is
+    then used.
+
+    """
+    # Convert a single key to a 1-tuple, for empty-slice testing.
+    if isinstance(keys, tuple):
+        keys_tuple = keys
+    else:
+        keys_tuple = (keys,)
+
+    if any(key == slice(0, 0) for key in keys_tuple):
+        # When an 'empty' slice is present, return a 'fake' array instead.
+        target_shape = list(shape)
+        for i_dim, key in enumerate(keys_tuple):
+            if key == slice(0, 0):
+                target_shape[i_dim] = 0
+        result = np.zeros((1,), dtype=dtype)
+        result = np.broadcast_to(result, target_shape)
+    else:
+        result = None
+
+    return result
+
+
 class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
@@ -97,13 +144,19 @@ class GribDataProxy:
         return len(self.shape)
 
     def __getitem__(self, keys):
-        with open(self.path, 'rb') as grib_fh:
-            grib_fh.seek(self.offset)
-            grib_message = gribapi.grib_new_from_file(grib_fh)
-            data = _message_values(grib_message, self.shape)
-            gribapi.grib_release(grib_message)
+        # Avoid fetching file data just to return an 'empty' result.
+        # Needed because of how dask.array.from_array behaves since Dask v2.0.
+        result = _fake_empty_getitem(keys, self.shape, self.dtype)
+        if result is None:
+            with open(self.path, 'rb') as grib_fh:
+                grib_fh.seek(self.offset)
+                grib_message = gribapi.grib_new_from_file(grib_fh)
+                data = _message_values(grib_message, self.shape)
+                gribapi.grib_release(grib_message)
 
-        return data.__getitem__(keys)
+            result = data.__getitem__(keys)
+
+        return result
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
