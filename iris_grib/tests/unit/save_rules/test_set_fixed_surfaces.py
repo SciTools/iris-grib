@@ -120,7 +120,6 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface", 255)
         mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface", -1)
 
-
     @mock.patch.object(gribapi, "grib_set")
     def test_no_vertical(self, mock_set):
         grib = None
