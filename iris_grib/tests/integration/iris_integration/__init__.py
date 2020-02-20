@@ -22,7 +22,8 @@ class TestCallbacks(tests.IrisGribTest):
     def test_grib_callback(self):
         def grib_thing_getter(cube, field, filename):
             if hasattr(field, "sections"):
-                # New-style loader callback : 'field' is a GribMessage, which has 'sections'.
+                # New-style loader callback : 'field' is a GribMessage, which
+                # has 'sections'.
                 cube.add_aux_coord(
                     iris.coords.AuxCoord(
                         field.sections[1]["year"],
