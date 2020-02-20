@@ -44,7 +44,7 @@ class Test__bitmap(tests.IrisGribTest):
 
 
 class Test_emptyfetch(tests.IrisGribTest):
-    # See : 
+    # See :
     #   iris.tests.unit.fileformats.pp.test_PPDataProxy.Test__getitem__slicing
     # In this case, test *only* the no-data-read effect, not the method which
     # is part of Iris.
