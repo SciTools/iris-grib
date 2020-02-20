@@ -12,6 +12,8 @@ Unit tests for :func:`iris_grib._save_rules.set_fixed_surfaces`.
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
+
 import gribapi
 import numpy as np
 
@@ -82,6 +84,54 @@ class Test(tests.IrisGribTest):
         self.assertEqual(
             gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"),
             106)
+
+    @mock.patch.object(gribapi, "grib_set")
+    def test_altitude_point(self, mock_set):
+        grib = None
+        cube = iris.cube.Cube([1, 2, 3, 4, 5])
+        cube.add_aux_coord(
+            iris.coords.AuxCoord([12345], "altitude", units="m")
+        )
+
+        set_fixed_surfaces(cube, grib)
+
+        mock_set.assert_any_call(grib, "typeOfFirstFixedSurface", 102)
+        mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
+        mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface",
+                                 12345)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface",
+                                 255)
+        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface",
+                                 -1)
+
+    @mock.patch.object(gribapi, "grib_set")
+    def test_height_point(self, mock_set):
+        grib = None
+        cube = iris.cube.Cube([1, 2, 3, 4, 5])
+        cube.add_aux_coord(iris.coords.AuxCoord([12345], "height", units="m"))
+
+        set_fixed_surfaces(cube, grib)
+
+        mock_set.assert_any_call(grib, "typeOfFirstFixedSurface", 103)
+        mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
+        mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface", 12345)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface", 255)
+        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface", -1)
+
+
+    @mock.patch.object(gribapi, "grib_set")
+    def test_no_vertical(self, mock_set):
+        grib = None
+        cube = iris.cube.Cube([1, 2, 3, 4, 5])
+        set_fixed_surfaces(cube, grib)
+        mock_set.assert_any_call(grib, "typeOfFirstFixedSurface", 1)
+        mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
+        mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface", 0)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface", 255)
+        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface", -1)
 
 
 if __name__ == "__main__":
