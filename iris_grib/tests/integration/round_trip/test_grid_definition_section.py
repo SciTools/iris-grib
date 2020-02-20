@@ -33,13 +33,6 @@ class TestGDT5(TestGribMessage):
         self.assertEqual(cube.coord_dims("time"), (0,))
         cube = cube[0]
 
-        # FOR NOW: **also** fix the data so that it is square, i.e. nx=ny.
-        # This is needed because of a bug in the gribapi.
-        # See : https://software.ecmwf.int/issues/browse/SUP-1096
-        ny, nx = cube.shape
-        nn = min(nx, ny)
-        cube = cube[:nn, :nn]
-
         # Check that it has a rotated-pole variable-spaced grid, as expected.
         x_coord = cube.coord(axis="x")
         self.assertIsInstance(x_coord.coord_system, RotatedGeogCS)
@@ -86,7 +79,7 @@ class TestGDT5(TestGribMessage):
                 test_cube.standard_name, "air_pressure_at_sea_level"
             )
             self.assertEqual(test_cube.units, "Pa")
-            self.assertEqual(test_cube.shape, (744, 744))
+            self.assertEqual(test_cube.shape, (928, 744))
             self.assertEqual(test_cube.cell_methods, ())
 
         # Check only the GRIB_PARAM attribute exists on the re-loaded cube.
