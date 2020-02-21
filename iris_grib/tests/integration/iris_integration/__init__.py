@@ -20,29 +20,23 @@ import iris.coords
 
 class TestCallbacks(tests.IrisGribTest):
     def test_grib_callback(self):
-        def grib_thing_getter(cube, field, filename):
-            if hasattr(field, "sections"):
-                # New-style loader callback : 'field' is a GribMessage, which
-                # has 'sections'.
-                cube.add_aux_coord(
-                    iris.coords.AuxCoord(
-                        field.sections[1]["year"],
-                        long_name="extra_year_number_coord",
-                        units="no_unit",
-                    )
+        # What this actually tests:
+        #    1. iris.load works with grib (though the GRIB picker is in Iris)
+        #    2. callbacks work with the grib loader
+        #    3. grib loaded result matches a cube snapshot
+        def load_callback(cube, field, filename):
+            # GRIB2 loader callback : 'field' is a GribMessage, which
+            # has 'sections'.
+            cube.add_aux_coord(
+                iris.coords.AuxCoord(
+                    field.sections[1]["year"],
+                    long_name="extra_year_number_coord",
+                    units="no_unit",
                 )
-            else:
-                # Old-style loader provides 'GribWrapper' type field.
-                cube.add_aux_coord(
-                    iris.coords.AuxCoord(
-                        field.extra_keys["_periodStartDateTime"],
-                        long_name="random element",
-                        units="no_unit",
-                    )
-                )
+            )
 
         fname = tests.get_data_path(("GRIB", "global_t", "global.grib2"))
-        cube = iris.load_cube(fname, callback=grib_thing_getter)
+        cube = iris.load_cube(fname, callback=load_callback)
         self.assertCML(cube)
 
 
