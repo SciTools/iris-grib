@@ -6,14 +6,8 @@
 """
 Integration tests for grib2 file loading.
 
-This code used to be part of 'tests/test_grib_load.py', but these integration-
-style tests have been split out of there.
-
-The remainder of the old 'tests/test_grib_load.py' is now renamed as
-'tests/test_grib_load_translations.py'.  Those tests are implementation-
-specific, and target the module 'iris_grib'.
-
-NOTE: imported from iris.tests.integration.test_grib_load.py
+These load various files from iris-test-data, and compare the cube with a
+reference CML file, to catch any unexpected changes over time.
 
 """
 
@@ -25,14 +19,16 @@ from unittest import skipIf
 
 import iris
 
-# Skip out some tests that fail now that grib edition 2 files no longer use
-# the GribWrapper.
-# TODO: either fix these problems, or remove the tests.
+# Skip out tests that fail because the file coding is not yet supported.
+# NOTE: now *only* used for the file 'GRIB/y_fastest/y_fast.grib2', as the
+# loader does not support X,Y dimensioned data (as opposed to Y,X).
+# TODO: fix this, or remove the test.
 skip_irisgrib_fails = skipIf(
-    True, "Test(s) are not currently usable with the new " "grib 2 loader."
+    True, "Current grib2 loader does not support this test(s)."
 )
 
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
+
 
 @tests.skip_data
 class TestBasicLoad(tests.IrisGribTest):
@@ -147,10 +143,9 @@ class TestBasicLoad(tests.IrisGribTest):
 class TestIjDirections(tests.IrisGribTest):
     @staticmethod
     def _old_compat_load(name):
-        cube = iris.load(tests.get_data_path(("GRIB", "ij_directions", name)))[
-            0
-        ]
-        return [cube]
+        filepath = tests.get_data_path(("GRIB", "ij_directions", name))
+        cube = iris.load_cube(filepath)
+        return cube
 
     def test_ij_directions_ipos_jpos(self):
         cubes = self._old_compat_load("ipos_jpos.grib2")
@@ -173,9 +168,8 @@ class TestIjDirections(tests.IrisGribTest):
 class TestShapeOfEarth(tests.IrisGribTest):
     @staticmethod
     def _old_compat_load(name):
-        cube = iris.load(
-            tests.get_data_path(("GRIB", "shape_of_earth", name))
-        )[0]
+        filepath = tests.get_data_path(("GRIB", "shape_of_earth", name))
+        cube = iris.load_cube(filepath)
         return cube
 
     def test_shape_of_earth_basic(self):
