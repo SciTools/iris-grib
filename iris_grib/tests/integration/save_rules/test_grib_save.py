@@ -4,7 +4,7 @@
 # See COPYING and COPYING.LESSER in the root of the repository for full
 # licensing details.
 """
-Tests for specific implementation aspects of the grib savers.
+Tests for specific implementation aspects of the grib saver.
 Ported here from 'iris.tests.integration.test_grib_save'.
 
 """
@@ -132,7 +132,7 @@ class TestCubeSave(tests.IrisGribTest):
 
     def _load_basic(self):
         path = tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2"))
-        return iris.load(path)[0]
+        return iris.load_cube(path)
 
     def test_params(self):
         # TODO
@@ -210,17 +210,6 @@ class TestCubeSave(tests.IrisGribTest):
         cube = iris.load_cube(
             tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2"))
         )
-        # Changing pressure to altitude due to grib api bug:
-        # https://github.com/SciTools/iris/pull/715#discussion_r5901538
-        cube.remove_coord("pressure")
-        cube.add_aux_coord(
-            iris.coords.AuxCoord(
-                1030.0,
-                long_name="altitude",
-                units="m",
-                bounds=np.array([111.0, 1949.0]),
-            )
-        )
         with self.temp_filename(".grib2") as testfile:
             iris.save(cube, testfile)
             with open(testfile, "rb") as saved_file:
@@ -229,13 +218,13 @@ class TestCubeSave(tests.IrisGribTest):
                     gribapi.grib_get_double(
                         g, "scaledValueOfFirstFixedSurface"
                     ),
-                    111.0,
+                    0.0,
                 )
                 self.assertEqual(
                     gribapi.grib_get_double(
                         g, "scaledValueOfSecondFixedSurface"
                     ),
-                    1949.0,
+                    2147483647.0,
                 )
 
 
@@ -243,7 +232,7 @@ class TestHandmade(tests.IrisGribTest):
     def _lat_lon_cube_no_time(self):
         """
         Returns a cube with a latitude and longitude suitable for testing
-        saving to PP/NetCDF etc.
+        saving to GRIB.
 
         """
         cube = iris.cube.Cube(np.arange(12, dtype=np.int32).reshape((3, 4)))
