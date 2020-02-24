@@ -1,6 +1,7 @@
 Release Notes
 =============
 
+
 What's new in iris-grib v0.15
 -----------------------------
 
@@ -29,7 +30,7 @@ Features
   iris_grib.grib_phenom_translation.GRIBCode and represents the parameter code.
   When saving, if a cube has a GRIBCode attribute, this determines the parameter code
   in the created message(s): This will _override_ any translation from the CF names.
-  
+
 Bug Fixes
 ^^^^^^^^^
 
@@ -40,6 +41,24 @@ Dependencies
 ^^^^^^^^^^^^
 
 * Python 2 is no longer supported
+
+
+:Release: 0.15.1
+:Date: 24 Feb 2020
+
+Bug Fixes
+^^^^^^^^^
+
+* Fixed a bug that was causing all field data to be read from file during the
+  initial cube loading.  This occurred since Dask version 2.0, and caused
+  slow loading and excessive memory use.  This problem was shared with UM file
+  access in Iris : see
+  https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed .
+
+Dependencies
+^^^^^^^^^^^^
+
+* Now requires Iris version >= 2.4
 
 
 What's new in iris-grib v0.14
