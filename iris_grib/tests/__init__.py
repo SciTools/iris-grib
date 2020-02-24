@@ -24,6 +24,8 @@ except ImportError:
 
 from iris.tests import main, skip_data, get_data_path
 
+from iris_grib.message import GribMessage
+
 
 #: Basepath for iris-grib test results.
 _RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
