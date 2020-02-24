@@ -17,6 +17,8 @@ import inspect
 import os
 import os.path
 
+import numpy as np
+
 try:
     from iris.tests import IrisTest_nometa as IrisTest
 except ImportError:
