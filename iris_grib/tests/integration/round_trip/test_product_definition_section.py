@@ -18,13 +18,12 @@ from iris import load_cube, save
 import iris.coords
 import iris.coord_systems
 
-from iris.tests import TestGribMessage
 import iris.tests.stock as stock
 
 from iris_grib.grib_phenom_translation import GRIBCode
 
 
-class TestPDT11(TestGribMessage):
+class TestPDT11(tests.TestGribMessage):
     def test_perturbation(self):
         path = tests.get_data_path(
             ("NetCDF", "global", "xyt", "SMALL_hires_wind_u_for_ipcc4.nc")

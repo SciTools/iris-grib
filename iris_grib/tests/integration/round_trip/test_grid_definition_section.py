@@ -17,12 +17,10 @@ from iris.coord_systems import RotatedGeogCS
 from iris.fileformats.pp import EARTH_RADIUS as UM_DEFAULT_EARTH_RADIUS
 from iris.util import is_regular
 
-from iris.tests import TestGribMessage
-
 from iris_grib.grib_phenom_translation import GRIBCode
 
 
-class TestGDT5(TestGribMessage):
+class TestGDT5(tests.TestGribMessage):
     def test_save_load(self):
         # Load sample UKV data (variable-resolution rotated grid).
         path = tests.get_data_path(("PP", "ukV1", "ukVpmslont.pp"))
