@@ -80,7 +80,7 @@ setup_args = dict(
     # NOTE: The Python 3 bindings to eccodes (eccodes-python) is available on
     # PyPI, but the user is required to install eccodes itself manually. See 
     # ECMWF ecCodes installation documentation for more information.
-    install_requires=['scitools-iris>=2.0.*'] + ['eccodes-python'],
+    install_requires=['scitools-iris>=2.4.*'] + ['eccodes-python'],
     test_suite = 'iris_grib.tests',
 )
 

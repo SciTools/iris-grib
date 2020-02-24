@@ -20,12 +20,13 @@ import gribapi
 import numpy as np
 import numpy.ma as ma
 
+# NOTE: careful here, to avoid circular imports (as iris imports grib)
 import iris
 from iris._lazy_data import as_lazy_data
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
+from iris.util import _array_slice_ifempty
 
-# NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
 from ._load_convert import convert as load_convert
@@ -97,13 +98,19 @@ class GribDataProxy:
         return len(self.shape)
 
     def __getitem__(self, keys):
-        with open(self.path, 'rb') as grib_fh:
-            grib_fh.seek(self.offset)
-            grib_message = gribapi.grib_new_from_file(grib_fh)
-            data = _message_values(grib_message, self.shape)
-            gribapi.grib_release(grib_message)
+        # Avoid fetching file data just to return an 'empty' result.
+        # Needed because of how dask.array.from_array behaves since Dask v2.0.
+        result = _array_slice_ifempty(keys, self.shape, self.dtype)
+        if result is None:
+            with open(self.path, 'rb') as grib_fh:
+                grib_fh.seek(self.offset)
+                grib_message = gribapi.grib_new_from_file(grib_fh)
+                data = _message_values(grib_message, self.shape)
+                gribapi.grib_release(grib_message)
 
-        return data.__getitem__(keys)
+            result = data.__getitem__(keys)
+
+        return result
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \

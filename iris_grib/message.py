@@ -12,6 +12,7 @@ from collections import namedtuple
 import re
 
 import gribapi
+from iris_grib import _array_slice_ifempty
 import numpy as np
 import numpy.ma as ma
 
@@ -228,29 +229,35 @@ class _DataProxy:
     def __getitem__(self, keys):
         # NB. Currently assumes that the validity of this interpretation
         # is checked before this proxy is created.
-        message = self.recreate_raw()
-        sections = message.sections
-        bitmap_section = sections[6]
-        bitmap = self._bitmap(bitmap_section)
-        data = sections[7]['codedValues']
 
-        if bitmap is not None:
-            # Note that bitmap and data are both 1D arrays at this point.
-            if np.count_nonzero(bitmap) == data.shape[0]:
-                # Only the non-masked values are included in codedValues.
-                _data = np.empty(shape=bitmap.shape)
-                _data[bitmap.astype(bool)] = data
-                # `ma.masked_array` masks where input = 1, the opposite of
-                # the behaviour specified by the GRIB spec.
-                data = ma.masked_array(_data, mask=np.logical_not(bitmap),
-                                       fill_value=np.nan)
-            else:
-                msg = 'Shapes of data and bitmap do not match.'
-                raise TranslationError(msg)
+        # Avoid fetching file data just to return an 'empty' result.
+        # Needed because of how dask.array.from_array behaves since Dask v2.0.
+        result = _array_slice_ifempty(keys, self.shape, self.dtype)
+        if result is None:
+            message = self.recreate_raw()
+            sections = message.sections
+            bitmap_section = sections[6]
+            bitmap = self._bitmap(bitmap_section)
+            data = sections[7]['codedValues']
 
-        data = data.reshape(self.shape)
+            if bitmap is not None:
+                # Note that bitmap and data are both 1D arrays at this point.
+                if np.count_nonzero(bitmap) == data.shape[0]:
+                    # Only the non-masked values are included in codedValues.
+                    _data = np.empty(shape=bitmap.shape)
+                    _data[bitmap.astype(bool)] = data
+                    # `ma.masked_array` masks where input = 1, the opposite of
+                    # the behaviour specified by the GRIB spec.
+                    data = ma.masked_array(_data, mask=np.logical_not(bitmap),
+                                           fill_value=np.nan)
+                else:
+                    msg = 'Shapes of data and bitmap do not match.'
+                    raise TranslationError(msg)
 
-        return data.__getitem__(keys)
+            data = data.reshape(self.shape)
+            result = data.__getitem__(keys)
+
+        return result
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
