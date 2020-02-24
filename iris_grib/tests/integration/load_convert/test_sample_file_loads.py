@@ -15,17 +15,7 @@ reference CML file, to catch any unexpected changes over time.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from unittest import skipIf
-
 import iris
-
-# Skip out tests that fail because the file coding is not yet supported.
-# NOTE: now *only* used for the file 'GRIB/y_fastest/y_fast.grib2', as the
-# loader does not support X,Y dimensioned data (as opposed to Y,X).
-# TODO: fix this, or remove the test.
-skip_irisgrib_fails = skipIf(
-    True, "Current grib2 loader does not support this test(s)."
-)
 
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
 
