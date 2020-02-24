@@ -6,7 +6,7 @@
 """
 Integration tests for grib2 file loading.
 
-These load various files from iris-test-data, and compare the cube with a
+These tests load various files from iris-test-data, and compare the cube with a
 reference CML file, to catch any unexpected changes over time.
 
 """
