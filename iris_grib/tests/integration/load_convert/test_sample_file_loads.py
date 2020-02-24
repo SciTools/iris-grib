@@ -65,13 +65,6 @@ class TestBasicLoad(tests.IrisGribTest):
         self.assertCML(cubes,
                        _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
 
-    @skip_irisgrib_fails
-    def test_y_fastest(self):
-        cubes = iris.load(
-            tests.get_data_path(("GRIB", "y_fastest", "y_fast.grib2"))
-        )
-        self.assertCML(cubes, _RESULTDIR_PREFIX + ("y_fastest.cml",))
-
     def test_polar_stereo_grib1(self):
         cube = iris.load_cube(
             tests.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
