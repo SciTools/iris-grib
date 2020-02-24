@@ -26,13 +26,11 @@ import iris.coords
 import iris.exceptions
 import iris.util
 
-from iris.tests import TestGribMessage
-
 import gribapi
 from iris_grib._load_convert import _MDI as MDI
 
 
-class TestLoadSave(TestGribMessage):
+class TestLoadSave(tests.TestGribMessage):
     def setUp(self):
         self.skip_keys = []
 
