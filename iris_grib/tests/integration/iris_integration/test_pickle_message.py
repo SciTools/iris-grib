@@ -28,7 +28,7 @@ class TestPickleGribMessage(PickleCommon, tests.IrisGribTest):
     # (a) the tests which use pickle_cube are "test_protocol_XXX", and none
     #     of those currently work (see overrides below).
     # (b) the tests which use *this* function are the extra ones below.
-    #     These check only that a GribMessage, and its lazy ".data" can be
+    #     These check only that a GribMessage, and its lazy ".data", can be
     #     pickled.  However, still, neither reads back successfully.
     # TODO: resolve this or remove the test.
     def pickle_obj(self, obj):
@@ -39,7 +39,7 @@ class TestPickleGribMessage(PickleCommon, tests.IrisGribTest):
             # TODO: fix
 
     # These probably "ought" to work, but currently fail.
-    # see https://github.com/SciTools/iris/pull/2608
+    # see https://github.com/SciTools/iris-grib/issues/202
     @unittest.expectedFailure
     def test_protocol_0(self):
         super().test_protocol_0()
