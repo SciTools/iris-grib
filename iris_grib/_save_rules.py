@@ -941,18 +941,29 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
     else:
-        # bounded : set lower+upper surfaces
-        output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
-        if output_v[0] - abs(output_v[0]) or output_v[1] - abs(output_v[1]):
-            warnings.warn("Vertical level encoding problem: scaling required.")
-        gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
-        gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 0)
-        gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface",
-                         int(output_v[0]))
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
-                         int(output_v[1]))
+        if grib_v_code == 106:
+            # scale depth coordinate to write cm
+            gribapi.grib_set(grib,
+                             "scaledValueOfFirstFixedSurface", v_coord.bounds[0] * 100)
+            gribapi.grib_set(grib,
+                             "scaledValueOfSecondFixedSurface", v_coord.bounds[1] * 100)
+            gribapi.grib_set(grib,
+                             "scaleFactorOfFirstFixedSurface", 2)
+            gribapi.grib_set(grib_message,
+                            "scaleFactorOfSecondFixedSurface", 2)
+        else:
+            # bounded : set lower+upper surfaces
+            output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
+            if output_v[0] - abs(output_v[0]) or output_v[1] - abs(output_v[1]):
+                warnings.warn("Vertical level encoding problem: scaling required.")
+            gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
+            gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
+            gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
+            gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 0)
+            gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface",
+                             int(output_v[0]))
+            gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
+                             int(output_v[1]))
 
     if hybrid_factory is not None:
         # Need to record ALL the level coefficents in a 'PV' vector.
