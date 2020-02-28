@@ -10,7 +10,6 @@
 import iris_grib.tests as tests
 
 import gribapi
-import numpy as np
 from unittest import mock
 
 import iris_grib

@@ -16,8 +16,10 @@ from unittest import mock
 
 from cf_units import Unit
 import gribapi
+import numpy as np
 
 from iris.coords import CellMethod, DimCoord
+import iris.cube
 import iris.tests.stock as stock
 
 from iris_grib._save_rules import product_definition_template_8
@@ -41,6 +43,34 @@ class TestProductDefinitionIdentifier(tests.IrisGribTest):
         product_definition_template_8(cube, mock.sentinel.grib)
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "productDefinitionTemplateNumber", 8)
+
+
+class Test_type_of_statistical_processing(tests.IrisTest):
+    @mock.patch.object(gribapi, "grib_set")
+    def test_stats_type_min(self, mock_set):
+        grib = None
+        cube = iris.cube.Cube(np.array([1.0]))
+        time_unit = Unit("hours since 1970-01-01 00:00:00")
+        time_coord = iris.coords.DimCoord(
+            [0.0], bounds=[0.0, 1], standard_name="time", units=time_unit
+        )
+        cube.add_aux_coord(time_coord, ())
+        cube.add_cell_method(iris.coords.CellMethod("maximum", time_coord))
+        product_definition_template_8(cube, grib)
+        mock_set.assert_any_call(grib, "typeOfStatisticalProcessing", 2)
+
+    @mock.patch.object(gribapi, "grib_set")
+    def test_stats_type_max(self, mock_set):
+        grib = None
+        cube = iris.cube.Cube(np.array([1.0]))
+        time_unit = Unit("hours since 1970-01-01 00:00:00")
+        time_coord = iris.coords.DimCoord(
+            [0.0], bounds=[0.0, 1], standard_name="time", units=time_unit
+        )
+        cube.add_aux_coord(time_coord, ())
+        cube.add_cell_method(iris.coords.CellMethod("minimum", time_coord))
+        product_definition_template_8(cube, grib)
+        mock_set.assert_any_call(grib, "typeOfStatisticalProcessing", 3)
 
 
 if __name__ == "__main__":

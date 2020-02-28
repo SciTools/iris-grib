@@ -49,6 +49,11 @@ class TestPhenomenonCoding(tests.IrisGribTest):
         cube.standard_name = 'sea_water_y_velocity'
         self._check_coding(cube, 10, 1, 3)  # as seen in _grib_cf_map.py
 
+    def test_known_long_name(self):
+        cube = self.mock_cube
+        cube.long_name = 'cloud_mixing_ratio'
+        self._check_coding(cube, 0, 1, 22)
+
     def test_gribcode_attribute_object(self):
         cube = self.mock_cube
         cube.attributes = {'GRIB_PARAM': GRIBCode(2, 7, 12, 99)}
