@@ -843,6 +843,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
     # Look for something we can export
     v_coord = grib_v_code = output_unit = None
 
+    # Default scale factor 
+    #scalefactor = 0
+    
     # Detect factories for hybrid vertical coordinates.
     hybrid_factories = [
         factory for factory in cube.aux_factories
@@ -896,6 +899,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         grib_v_code = 106
         output_unit = cf_units.Unit('m')
         v_coord = cube.coord("depth")
+        scalefactor = 2
 
     elif cube.coords("air_potential_temperature"):
         grib_v_code = 107
@@ -943,14 +947,19 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
     else:
         if grib_v_code == 106:
             # scale depth coordinate to write cm
-            gribapi.grib_set(grib,
-                             "scaledValueOfFirstFixedSurface", v_coord.bounds[0] * 100)
-            gribapi.grib_set(grib,
-                             "scaledValueOfSecondFixedSurface", v_coord.bounds[1] * 100)
-            gribapi.grib_set(grib,
-                             "scaleFactorOfFirstFixedSurface", 2)
-            gribapi.grib_set(grib_message,
-                            "scaleFactorOfSecondFixedSurface", 2)
+            gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
+            gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
+            
+            gribapi.grib_set_long(grib,
+                                  "scaledValueOfFirstFixedSurface", int(v_coord.bounds[0, 0] * 100))
+                             
+            #  "scaledValueOfFirstFixedSurface", v_coord.bounds[0] * 10 ** scaleFactorOfFixedSurface )
+            gribapi.grib_set_long(grib,
+                                  "scaledValueOfSecondFixedSurface", int(v_coord.bounds[0, 1] * 100))
+            gribapi.grib_set_long(grib,
+                                  "scaleFactorOfFirstFixedSurface", 2)
+            gribapi.grib_set_long(grib,
+                                  "scaleFactorOfSecondFixedSurface", 2)
         else:
             # bounded : set lower+upper surfaces
             output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
