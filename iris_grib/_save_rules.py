@@ -932,6 +932,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
     elif not v_coord.has_bounds():
+
+
+        
         # No second surface
         output_v = v_coord.units.convert(v_coord.points[0], output_unit)
         if output_v - abs(output_v):
@@ -945,14 +948,12 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
     else:
+        gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
+        gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
         if grib_v_code == 106:
             # scale depth coordinate to write cm
-            gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-            gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
-            
             gribapi.grib_set_long(grib,
-                                  "scaledValueOfFirstFixedSurface", int(v_coord.bounds[0, 0] * 100))
-                             
+                                  "scaledValueOfFirstFixedSurface", int(v_coord.bounds[0, 0] * 100))                             
             #  "scaledValueOfFirstFixedSurface", v_coord.bounds[0] * 10 ** scaleFactorOfFixedSurface )
             gribapi.grib_set_long(grib,
                                   "scaledValueOfSecondFixedSurface", int(v_coord.bounds[0, 1] * 100))
@@ -965,8 +966,6 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
             if output_v[0] - abs(output_v[0]) or output_v[1] - abs(output_v[1]):
                 warnings.warn("Vertical level encoding problem: scaling required.")
-            gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-            gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
             gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
             gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 0)
             gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface",
