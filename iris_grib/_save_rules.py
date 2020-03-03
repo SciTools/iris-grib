@@ -935,11 +935,15 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         # No second surface
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         if grib_v_code == 106:
-            # scale depth coordinate from m to cm, mm, etc as required
+            # scale depth coordinate from m to cm or mm as required
             output_v = v_coord.units.convert(v_coord.points[0], output_unit)
             scaledValueOfFixedSurface = len(str(output_v - int(output_v)))-2
-            if scaledValueOfFixedSurface > 0:
+            if scaledValueOfFixedSurface == 1:
+                # scale at least to cm
                 scaledValueOfFixedSurface = max(scaledValueOfFixedSurface,2)
+            if scaledValueOfFixedSurface > 3:
+                # scale not finer then mm
+                scaledValueOfFixedSurface = min(scaledValueOfFixedSurface,3)
             output_v = output_v * 10 ** scaledValueOfFixedSurface
             gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface", output_v)
             gribapi.grib_set_long(grib, "scaleFactorOfFirstFixedSurface", scaledValueOfFixedSurface)
@@ -956,15 +960,19 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
         if grib_v_code == 106:
-            # scale depth coordinate from m to cm, mm, etc as required
+            # scale depth coordinate from m to cm or mm as required
             output_b = v_coord.units.convert(v_coord.bounds, output_unit)
             # output_v = v_coord.units.convert(v_coord.points, output_unit)
             scaledValueOfFirstFixedSurface = len(str(output_b[0, 0] - int(output_b[0, 0]))) - 2
             scaledValueOfSecondFixedSurface = len(str(output_b[0, 1] - int(output_b[0, 1]))) - 2
             scaledValueOfFixedSurface = max(scaledValueOfFirstFixedSurface,
                                             scaledValueOfSecondFixedSurface)
-            if scaledValueOfFixedSurface > 0:
+            if scaledValueOfFixedSurface == 1:
+                # scale at least to cm
                 scaledValueOfFixedSurface = max(scaledValueOfFixedSurface,2)
+            if scaledValueOfFixedSurface > 3:
+                # scale not finer then mm
+                scaledValueOfFixedSurface = min(scaledValueOfFixedSurface,3)
             gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface",
                                   int(output_b[0, 0] * 10 ** scaledValueOfFixedSurface))
             gribapi.grib_set_long(grib, "scaledValueOfSecondFixedSurface",
