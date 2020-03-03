@@ -971,7 +971,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             if scaledValue > 3:
                 # scale not finer then mm
                 scaledValue = min(scaledValue, 3)
-            gribapi.grib_set_long(grib, "scaledValue",
+            gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface",
                                   int(output_b[0, 0] * 10 ** scaledValue))
             gribapi.grib_set_long(grib, "scaledValueOfSecondFixedSurface",
                                   int(output_b[0, 1] * 10 ** scaledValue))
