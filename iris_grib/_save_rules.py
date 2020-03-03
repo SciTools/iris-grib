@@ -932,18 +932,23 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
     elif not v_coord.has_bounds():
-
-
-        
         # No second surface
-        output_v = v_coord.units.convert(v_coord.points[0], output_unit)
-        if output_v - abs(output_v):
-            warnings.warn("Vertical level encoding problem: scaling required.")
-        output_v = int(output_v)
-
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
-        gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", output_v)
+        if grib_v_code == 106:
+            # scale depth coordinate from m to cm, mm, etc as required
+            output_v = v_coord.units.convert(v_coord.points[0], output_unit)
+            scaledValueOfFixedSurface = len(str(output_v - int(output_v)))-2
+            if scaledValueOfFixedSurface > 0:
+                scaledValueOfFixedSurface = max(scaledValueOfFixedSurface,2)
+            output_v = output_v * 10 ** scaledValueOfFixedSurface
+            gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface", output_v)
+            gribapi.grib_set_long(grib, "scaleFactorOfFirstFixedSurface", scaledValueOfFixedSurface)
+        else:
+            if output_v - abs(output_v):
+                warnings.warn("Vertical level encoding problem: scaling required.")
+            output_v = int(output_v)
+            gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
+            gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", output_v)
         gribapi.grib_set(grib, "typeOfSecondFixedSurface", -1)
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
@@ -951,16 +956,21 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
         if grib_v_code == 106:
-            # scale depth coordinate to write cm
-            gribapi.grib_set_long(grib,
-                                  "scaledValueOfFirstFixedSurface", int(v_coord.bounds[0, 0] * 100))                             
-            #  "scaledValueOfFirstFixedSurface", v_coord.bounds[0] * 10 ** scaleFactorOfFixedSurface )
-            gribapi.grib_set_long(grib,
-                                  "scaledValueOfSecondFixedSurface", int(v_coord.bounds[0, 1] * 100))
-            gribapi.grib_set_long(grib,
-                                  "scaleFactorOfFirstFixedSurface", 2)
-            gribapi.grib_set_long(grib,
-                                  "scaleFactorOfSecondFixedSurface", 2)
+            # scale depth coordinate from m to cm, mm, etc as required
+            output_b = v_coord.units.convert(v_coord.bounds, output_unit)
+            # output_v = v_coord.units.convert(v_coord.points, output_unit)
+            scaledValueOfFirstFixedSurface = len(str(output_b[0, 0] - int(output_b[0, 0]))) - 2
+            scaledValueOfSecondFixedSurface = len(str(output_b[0, 1] - int(output_b[0, 1]))) - 2
+            scaledValueOfFixedSurface = max(scaledValueOfFirstFixedSurface,
+                                            scaledValueOfSecondFixedSurface)
+            if scaledValueOfFixedSurface > 0:
+                scaledValueOfFixedSurface = max(scaledValueOfFixedSurface,2)
+            gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface",
+                                  int(output_b[0, 0] * 10 ** scaledValueOfFixedSurface))
+            gribapi.grib_set_long(grib, "scaledValueOfSecondFixedSurface",
+                                  int(output_b[0, 1]  * 10 ** scaledValueOfFixedSurface))
+            gribapi.grib_set_long(grib, "scaleFactorOfFirstFixedSurface", scaledValueOfFixedSurface)
+            gribapi.grib_set_long(grib, "scaleFactorOfSecondFixedSurface", scaledValueOfFixedSurface)
         else:
             # bounded : set lower+upper surfaces
             output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
