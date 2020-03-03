@@ -948,6 +948,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             gribapi.grib_set_long(grib, "scaledValueOfFirstFixedSurface", output_v)
             gribapi.grib_set_long(grib, "scaleFactorOfFirstFixedSurface", scaledValueOfFixedSurface)
         else:
+            output_v = v_coord.units.convert(v_coord.points[0], output_unit)
             if output_v - abs(output_v):
                 warnings.warn("Vertical level encoding problem: scaling required.")
             output_v = int(output_v)
