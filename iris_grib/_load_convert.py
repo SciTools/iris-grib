@@ -91,6 +91,8 @@ _TIME_RANGE_UNITS = {
     12: '12 hours',
     13: 'seconds'
 }
+# Regulation 92.1.4
+_TIME_RANGE_MISSING = 2 ** 32 - 1
 
 # Reference Code Table 4.5.
 _FIXED_SURFACE = {
@@ -1924,7 +1926,7 @@ def statistical_cell_method(section):
         raise TranslationError(msg)
 
     interval_number = section['timeIncrement']
-    if interval_number == 0:
+    if interval_number in (0, _TIME_RANGE_MISSING):
         intervals_string = None
     else:
         units_string = _TIME_RANGE_UNITS[
