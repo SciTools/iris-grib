@@ -14,6 +14,7 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
+import gribapi
 import iris.cube
 import numpy as np
 
@@ -149,6 +150,28 @@ class TestMDI(tests.IrisGribTest):
         FILL = self.assertBitmapRange(grib_api, -1000, 2000)
         # Check the correct data values have been set.
         self.assertValues(grib_api, [-1000, 2000, FILL, FILL])
+
+
+class TestNonDoubleData(tests.IrisGribTest):
+    # When saving to GRIB, data that is not float64 is cast to float64. This
+    # test checks that non-float64 data is saved without raising a segmentation
+    # fault.
+    def check(self, dtype):
+        data = np.random.random(1920 * 2560).astype(dtype)
+        cube = iris.cube.Cube(data,
+                              standard_name='geopotential_height', units='km')
+        grib_message = gribapi.grib_new_from_samples("GRIB2")
+        data_section(cube, grib_message)
+        gribapi.grib_release(grib_message)
+
+    def test_float32(self):
+        self.check(dtype=np.float32)
+
+    def test_int32(self):
+        self.check(dtype=np.int32)
+
+    def test_int64(self):
+        self.check(dtype=np.int64)
 
 
 if __name__ == "__main__":
