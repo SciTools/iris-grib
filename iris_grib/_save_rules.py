@@ -932,7 +932,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         output_v = v_coord.units.convert(v_coord.points[0], output_unit)
         if output_v - abs(output_v):
             warnings.warn("Vertical level encoding problem: scaling required.")
-        output_v = int(output_v)
+        output_v = int(round(output_v))
 
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
@@ -950,9 +950,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 0)
         gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface",
-                         int(output_v[0]))
+                         int(round(output_v[0])))
         gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
-                         int(output_v[1]))
+                         int(round(output_v[1])))
 
     if hybrid_factory is not None:
         # Need to record ALL the level coefficents in a 'PV' vector.
