@@ -19,7 +19,7 @@ import numpy.ma as ma
 from iris._lazy_data import as_lazy_data
 from iris.exceptions import TranslationError
 
-_SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
+_SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90, 140)
 
 
 class _OpenFileRef:
@@ -144,6 +144,9 @@ class GribMessage:
                 raise TranslationError(msg)
             if template in (20, 30, 90):
                 shape = (grid_section['Ny'], grid_section['Nx'])
+            elif template == 140:
+                shape = (grid_section['numberOfPointsAlongYAxis'],
+                         grid_section['numberOfPointsAlongXAxis'])
             elif template == 40 and reduced:
                 shape = (grid_section['numberOfDataPoints'],)
             else:

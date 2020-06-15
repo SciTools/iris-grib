@@ -255,6 +255,17 @@ class Test_data__grid_template_90(tests.IrisGribTest,
         return section_3
 
 
+class Test_data__grid_template_140(tests.IrisGribTest,
+                                   Mixin_data__grid_template):
+    def section_3(self, scanning_mode):
+        section_3 = _example_section_3(140, scanning_mode)
+        section_3['numberOfPointsAlongXAxis'] = section_3['Ni']
+        section_3['numberOfPointsAlongYAxis'] = section_3['Nj']
+        del section_3['Ni']
+        del section_3['Nj']
+        return section_3
+
+
 class Test_data__unknown_grid_template(tests.IrisGribTest):
     def test(self):
         message = _make_test_message(

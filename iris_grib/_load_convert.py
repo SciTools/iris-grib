@@ -528,7 +528,7 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
     scan = scanning_mode(section['scanningMode'])
 
-    # Set resoultion flags
+    # Set resolution flags
     res_flags = resolution_flags(section['resolutionAndComponentFlags'])
 
     # Calculate longitude points.
@@ -928,10 +928,16 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
     mm_to_m = 1e-3
 
     if section['gridDefinitionTemplateNumber'] in _XYGRIDLENGTH_GDT_NUMBERS:
-        dx = section['Dx']
-        dy = section['Dy']
-        nx = section['Nx']
-        ny = section['Ny']
+        if section['gridDefinitionTemplateNumber'] == 140:
+            dx = section['xDirectionGridLengthInMillimetres']
+            dy = section['yDirectionGridLengthInMillimetres']
+            nx = section['numberOfPointsAlongXAxis']
+            ny = section['numberOfPointsAlongYAxis']
+        else:
+            dx = section['Dx']
+            dy = section['Dy']
+            nx = section['Nx']
+            ny = section['Ny']
     elif section['gridDefinitionTemplateNumber'] in _IJGRIDLENGTH_GDT_NUMBERS:
         dx = section['Di']
         dy = section['Dj']
@@ -1259,6 +1265,42 @@ def grid_definition_template_90(section, metadata):
     metadata['dim_coords_and_dims'].append((x_coord, x_dim))
 
 
+def grid_definition_template_140(section, metadata):
+    """
+    Translate template representing Lambert Azimuthal Equal Area.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 3 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+    """
+    # Define the coordinate system
+    major, minor, radius = ellipsoid_geometry(section)
+    cs = icoord_systems.LambertAzimuthalEqualArea(
+        section['standardParallelInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        section['centralLongitudeInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        0,
+        0,
+        ellipsoid(section['shapeOfTheEarth'], major, minor, radius))
+
+    x_coord, y_coord, scan = \
+        _calculate_proj_coords_from_grid_lengths(section, cs)
+
+    # Determine the order of the dimensions.
+    y_dim, x_dim = 0, 1
+    if scan.j_consecutive:
+        y_dim, x_dim = 1, 0
+
+    # Add the projection coordinates to the metadata dim coords.
+    metadata['dim_coords_and_dims'].append((y_coord, y_dim))
+    metadata['dim_coords_and_dims'].append((x_coord, x_dim))
+
+
 def grid_definition_section(section, metadata):
     """
     Translate section 3 from the GRIB2 message.
@@ -1313,6 +1355,9 @@ def grid_definition_section(section, metadata):
     elif template == 90:
         # Process space view.
         grid_definition_template_90(section, metadata)
+    elif template == 140:
+        # Process Lambert Azimuthal Equal Area.
+        grid_definition_template_140(section, metadata)
     else:
         msg = 'Grid definition template [{}] is not supported'.format(template)
         raise TranslationError(msg)
