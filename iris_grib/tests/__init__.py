@@ -35,6 +35,34 @@ _RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
 #: Basepath for iris-grib loadable test files.
 _TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'testdata')
 
+override = os.environ.get("GRIB_TEST_DATA_PATH")
+if override:
+    if os.path.isdir(os.path.expanduser(override)):
+        _TESTDATA_PATH = os.path.abspath(override)
+
+
+def skip_data(fn):
+    """
+    Decorator to choose whether to run tests, based on the availability of
+    external data.
+
+    Example usage:
+        @skip_data
+        class MyDataTests(tests.IrisGribTest):
+            ...
+
+    """
+    no_data = (
+        not os.path.isdir(_TESTDATA_PATH)
+        or os.environ.get("GRIB_TEST_NO_DATA")
+    )
+
+    skip = unittest.skipIf(
+        condition=no_data, reason="Test(s) require external data."
+    )
+
+    return skip(fn)
+
 
 class IrisGribTest(IrisTest):
     # A specialised version of an IrisTest that implements the correct

@@ -17,6 +17,7 @@ from iris import load_cube, load, save
 from iris.cube import Cube
 
 
+@tests.skip_data
 class TestWAFCCodes(tests.IrisGribTest):
     def setUp(self):
         self.cat = self.get_testdata_path('CAT_T+24_0600.grib2')
