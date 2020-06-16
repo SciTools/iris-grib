@@ -16,6 +16,7 @@ import iris.tests
 import inspect
 import os
 import os.path
+import unittest
 
 import numpy as np
 
