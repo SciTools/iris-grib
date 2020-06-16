@@ -17,7 +17,7 @@ from iris import load_cube, load
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestHybridHeight(tests.IrisGribTest):
     def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
@@ -46,7 +46,7 @@ class TestHybridHeight(tests.IrisGribTest):
                                  atol=0.5)
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestHybridPressure(tests.IrisGribTest):
     def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')

@@ -42,7 +42,7 @@ if override:
         _TESTDATA_PATH = os.path.abspath(override)
 
 
-def skip_data(fn):
+def skip_grib_data(fn):
     """
     Decorator to choose whether to run tests, based on the availability of
     external data.

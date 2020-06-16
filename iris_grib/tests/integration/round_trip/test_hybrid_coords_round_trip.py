@@ -23,7 +23,7 @@ except ImportError:
     from iris.experimental.equalise_cubes import equalise_attributes
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestHybridHeightRoundTrip(tests.IrisGribTest):
     def test_hh_round_trip(self):
         filepath = self.get_testdata_path(
@@ -42,7 +42,7 @@ class TestHybridHeightRoundTrip(tests.IrisGribTest):
             self.assertTrue(saved_cube == cube)
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestHybridPressureRoundTrip(tests.IrisGribTest):
     def test_hybrid_pressure(self):
         filepath = self.get_testdata_path(

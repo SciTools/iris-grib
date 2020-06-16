@@ -20,7 +20,7 @@ from iris.cube import Cube
 from iris_grib import save_pairs_from_cube, save_messages, GribMessage
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestSaveHybridHeight(tests.IrisGribTest):
     def setUp(self):
         reference_data_filepath = self.get_testdata_path('hybrid_height.nc')
@@ -81,7 +81,7 @@ class TestSaveHybridHeight(tests.IrisGribTest):
                 255)
 
 
-@tests.skip_data
+@tests.skip_grib_data
 class TestSaveHybridPressure(tests.IrisGribTest):
     def setUp(self):
         reference_data_filepath = self.get_testdata_path(
