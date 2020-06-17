@@ -56,9 +56,10 @@ def skip_grib_data(fn):
     dpath = _TESTDATA_PATH
     evar = "GRIB_TEST_NO_DATA"
     no_data = not os.path.isdir(dpath) or os.environ.get(evar)
+    reason = "Test(s) require missing external GRIB test data."
 
     skip = unittest.skipIf(
-        condition=no_data, reason="Test(s) require external data."
+        condition=no_data, reason=reason
     )
 
     return skip(fn)
