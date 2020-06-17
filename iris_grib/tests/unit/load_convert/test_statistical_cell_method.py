@@ -45,6 +45,12 @@ class Test(tests.IrisGribTest):
         self.assertEqual(cell_method,
                          self.expected_cell_method(intervals=('3 hours',)))
 
+    def test_increment_missing(self):
+        self.section['timeIncrement'] = 2 ** 32 - 1
+        self.section['indicatorOfUnitForTimeIncrement'] = 255
+        cell_method = statistical_cell_method(self.section)
+        self.assertEqual(cell_method, self.expected_cell_method())
+
     def test_different_statistic(self):
         self.section['typeOfStatisticalProcessing'] = 6
         cell_method = statistical_cell_method(self.section)
