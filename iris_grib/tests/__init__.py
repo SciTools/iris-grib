@@ -16,6 +16,7 @@ import iris.tests
 import inspect
 import os
 import os.path
+import unittest
 
 import numpy as np
 
@@ -34,6 +35,34 @@ _RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
 
 #: Basepath for iris-grib loadable test files.
 _TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'testdata')
+
+override = os.environ.get("GRIB_TEST_DATA_PATH")
+if override:
+    if os.path.isdir(os.path.expanduser(override)):
+        _TESTDATA_PATH = os.path.abspath(override)
+
+
+def skip_grib_data(fn):
+    """
+    Decorator to choose whether to run tests, based on the availability of
+    external data.
+
+    Example usage:
+        @skip_data
+        class MyDataTests(tests.IrisGribTest):
+            ...
+
+    """
+    dpath = _TESTDATA_PATH
+    evar = "GRIB_TEST_NO_DATA"
+    no_data = not os.path.isdir(dpath) or os.environ.get(evar)
+    reason = "Test(s) require missing external GRIB test data."
+
+    skip = unittest.skipIf(
+        condition=no_data, reason=reason
+    )
+
+    return skip(fn)
 
 
 class IrisGribTest(IrisTest):
