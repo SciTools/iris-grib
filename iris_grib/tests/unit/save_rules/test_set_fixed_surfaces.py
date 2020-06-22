@@ -33,10 +33,10 @@ class Test(tests.IrisGribTest):
         set_fixed_surfaces(cube, grib)
         self.assertEqual(
             gribapi.grib_get_double(grib, "scaledValueOfFirstFixedSurface"),
-            304.0)
+            305.0)  # precise ~304.8
         self.assertEqual(
             gribapi.grib_get_double(grib, "scaledValueOfSecondFixedSurface"),
-            609.0)
+            610.0)  # precise ~609.6
         self.assertEqual(
             gribapi.grib_get_long(grib, "typeOfFirstFixedSurface"),
             102)
