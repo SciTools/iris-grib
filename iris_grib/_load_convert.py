@@ -1198,10 +1198,20 @@ def grid_definition_template_90(section, metadata):
     geog_cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
     height_above_centre = geog_cs.semi_major_axis * section['Nr'] / 1e6
     height_above_ellipsoid = height_above_centre - geog_cs.semi_major_axis
-    cs = icoord_systems.VerticalPerspective(sub_satellite_lat,
-                                            sub_satellite_lon,
-                                            height_above_ellipsoid,
-                                            ellipsoid=geog_cs)
+#     cs = icoord_systems.VerticalPerspective(sub_satellite_lat,
+#                                             sub_satellite_lon,
+#                                             height_above_ellipsoid,
+#                                             ellipsoid=geog_cs)
+    cs = icoord_systems.Geostationary(
+        latitude_of_projection_origin=sub_satellite_lat,
+        longitude_of_projection_origin=sub_satellite_lon,
+        perspective_point_height=height_above_ellipsoid,
+        sweep_angle_axis='y',
+        false_easting=section['Xo'],
+        false_northing=section['Yo'],
+        ellipsoid=geog_cs)
+    # TODO: Xo and Yo are zero in test data.  Should false_easting/northing
+    # be these values, or maybe the negatives ?
 
     # Figure out how large the Earth would appear in projection coodinates.
     # For both the apparent equatorial and polar diameters this is a
@@ -1225,17 +1235,14 @@ def grid_definition_template_90(section, metadata):
     # This can be simplified using: cos(psi) = a / height_above_centre
     half_apparent_equatorial_angle = math.asin(geog_cs.semi_major_axis /
                                                height_above_centre)
-    x_apparent_diameter = (2 * half_apparent_equatorial_angle *
-                           height_above_ellipsoid)
     parametric_angle = math.acos(geog_cs.semi_major_axis / height_above_centre)
     half_apparent_polar_angle = math.atan(geog_cs.semi_minor_axis /
                                           (height_above_centre *
                                            math.sin(parametric_angle)))
-    y_apparent_diameter = (2 * half_apparent_polar_angle *
-                           height_above_ellipsoid)
-
-    y_step = y_apparent_diameter / section['dy']
-    x_step = x_apparent_diameter / section['dx']
+    y_apparent_angular_diameter = 2 * half_apparent_polar_angle
+    x_apparent_angular_diameter = 2 * half_apparent_equatorial_angle
+    y_step = y_apparent_angular_diameter / section['dy']
+    x_step = x_apparent_angular_diameter / section['dx']
     y_start = y_step * (section['Yo'] - section['Yp'] / 1000)
     x_start = x_step * (section['Xo'] - section['Xp'] / 1000)
     y_points = y_start + np.arange(section['Ny']) * y_step
@@ -1252,9 +1259,9 @@ def grid_definition_template_90(section, metadata):
         raise TranslationError('Unsupported -y scanning')
 
     # Create the X and Y coordinates.
-    y_coord = DimCoord(y_points, 'projection_y_coordinate', units='m',
+    y_coord = DimCoord(y_points, 'projection_y_coordinate', units='radians',
                        coord_system=cs)
-    x_coord = DimCoord(x_points, 'projection_x_coordinate', units='m',
+    x_coord = DimCoord(x_points, 'projection_x_coordinate', units='radians',
                        coord_system=cs)
 
     # Determine the lat/lon dimensions.
