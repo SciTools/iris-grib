@@ -1198,20 +1198,6 @@ def grid_definition_template_90(section, metadata):
     geog_cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
     height_above_centre = geog_cs.semi_major_axis * section['Nr'] / 1e6
     height_above_ellipsoid = height_above_centre - geog_cs.semi_major_axis
-#     cs = icoord_systems.VerticalPerspective(sub_satellite_lat,
-#                                             sub_satellite_lon,
-#                                             height_above_ellipsoid,
-#                                             ellipsoid=geog_cs)
-    cs = icoord_systems.Geostationary(
-        latitude_of_projection_origin=sub_satellite_lat,
-        longitude_of_projection_origin=sub_satellite_lon,
-        perspective_point_height=height_above_ellipsoid,
-        sweep_angle_axis='y',
-        false_easting=section['Xo'],
-        false_northing=section['Yo'],
-        ellipsoid=geog_cs)
-    # TODO: Xo and Yo are zero in test data.  Should false_easting/northing
-    # be these values, or maybe the negatives ?
 
     # Figure out how large the Earth would appear in projection coodinates.
     # For both the apparent equatorial and polar diameters this is a
@@ -1257,6 +1243,16 @@ def grid_definition_template_90(section, metadata):
         raise TranslationError('Unsupported +x scanning')
     if not scan.j_positive:
         raise TranslationError('Unsupported -y scanning')
+
+    # Make a coordinate system for the X and Y coordinates.
+    # Note: false_easting/northing are always just zero, as the calculation of
+    # x_points/y_points takes both Xp/Yp and Xo/Yo into account.
+    cs = icoord_systems.Geostationary(
+        latitude_of_projection_origin=sub_satellite_lat,
+        longitude_of_projection_origin=sub_satellite_lon,
+        perspective_point_height=height_above_ellipsoid,
+        sweep_angle_axis='y',
+        ellipsoid=geog_cs)
 
     # Create the X and Y coordinates.
     y_coord = DimCoord(y_points, 'projection_y_coordinate', units='radians',
