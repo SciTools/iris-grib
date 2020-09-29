@@ -1,6 +1,117 @@
 Release Notes
 =============
 
+=======
+What's new in iris-grib v0.16
+-----------------------------
+
+:Release: 0.16.0
+:Date: ?? Sep 2020
+
+Features
+^^^^^^^^
+
+* `@tpowellmeto <https://github.com/tpowellmeto>`_ added support for loading
+  data on a "Lambert Azimuthal Equal Area Projection",
+  i.e. grid definition template 3.140.
+  See `PR#187 <https://github.com/SciTools/iris-grib/pull/187>`_ .
+
+* `@bjlittle <https://github.com/bjlittle>`_ made all the tests runnable for a
+  packaged install of iris-grib, where the grib testdata files will be missing.
+  See `PR#212 <https://github.com/SciTools/iris-grib/pull/212>`_ .
+
+* `@m1dr <https://github.com/m1dr>`_ added support for loading statistical
+  fields, as encoded in production definition template 3.8, even when the
+  "interval time increment" value is not specified (i.e. set to "missing").
+  See `PR#206 <https://github.com/SciTools/iris-grib/pull/206>`_ .
+
+* `@pp-mo <https://github.com/pp-mo>`_ ported some tests from Iris, which test
+  grib saving of data loaded from other formats.
+  See `PR#213 <https://github.com/SciTools/iris-grib/pull/213>`_ .
+  All grib-dependent testing is now contained in iris-grib : **There are no
+  remaining tests in Iris which use grib.**
+
+
+Bugs Fixed
+^^^^^^^^^^
+
+* `@lbdreyer <https://github.com/lbdreyer>`_ unpinned the python-eccodes
+  version for Travis testing, and added a workaround for a known bug in recent
+  versions of python-eccodes.
+  Previously, we could only test against python-eccodes versions ">=0.9.1,<2".
+  See `PR#208 <https://github.com/SciTools/iris-grib/pull/208>`_ .
+
+* `@pp-mo <https://github.com/pp-mo>`_ fixed save operations to round off the
+  the integer values of vertical surfaces, instead of truncating them.
+  See `PR#210 <https://github.com/SciTools/iris-grib/pull/210>`_ .
+
+* `@pp-mo <https://github.com/pp-mo>`_ fixed loading of grid definition
+  template 3.90, "Space view perspective or orthographic grid", which was
+  **broken since Iris 2.3**.  This now produces data with an iris
+  `Geostationary <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary>`_ 
+  coordinate system.  Prior to Iris 2.3, what is now the Iris 'Geostationary'
+  class was (incorrectly) named "VerticalPerspective" :  When that was
+  `corrected in Iris 2.3 <https://github.com/SciTools/iris/pull/3406>`_ , it
+  broke the iris-grib loading, since the data was now incorrectly
+  assigned the "new-style" Iris
+  `VerticalPerspective <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.VerticalPerspective>`_
+  coordinate system, equivalent to the Cartopy
+  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective>`_ 
+  and Proj
+  `"nsper" <https://proj.org/operations/projections/nsper.html>`_ .
+  The plotting behaviour of this is now **the same again as before Iris 2.3** :
+  only the Iris coordinate system has changed.
+  See `PR#223 <https://github.com/SciTools/iris-grib/pull/223>`_ .
+
+
+What's new in iris-grib v0.15.1
+-------------------------------
+
+:Release: 0.15.1
+:Date: 24 Feb 2020
+
+Bugs Fixed
+^^^^^^^^^^
+
+* `@pp-mo <https://github.com/pp-mo>`_ fixed a problem that caused very slow
+  loading, and possible memory overflows, with Dask versions >= 2.0.
+  **This requires Iris >= 2.4**, as a new minimum dependency.
+  See `PR#190 <https://github.com/SciTools/iris-grib/pull/190>`_ .
+
+* `@trexfeathers <https://github.com/trexfeathers>`_ fixed all the tests to
+  work with the latest Iris version, previously broken since Iris >= 2.3.
+  See `PR#184 <https://github.com/SciTools/iris-grib/pull/184>`_
+  and `PR#185 <https://github.com/SciTools/iris-grib/pull/185>`_ .
+
+* `@lbdreyer <https://github.com/lbdreyer>`_ fixed a problem with the metadata
+  in setup.py.
+  See `PR#183 <https://github.com/SciTools/iris-grib/pull/183>`_ .
+
+
+Internal
+^^^^^^^^
+
+* `@lbdreyer <https://github.com/lbdreyer>`_ and
+  `@pp-mo <https://github.com/pp-mo>`_ ported various grib-specific tests from
+  Iris.
+  See `PR#191 <https://github.com/SciTools/iris-grib/pull/191>`_ ,
+  `PR#192 <https://github.com/SciTools/iris-grib/pull/192>`_ ,
+  `PR#193 <https://github.com/SciTools/iris-grib/pull/193>`_ ,
+  `PR#194 <https://github.com/SciTools/iris-grib/pull/194>`_ ,
+  `PR#195 <https://github.com/SciTools/iris-grib/pull/195>`_ ,
+  `PR#198 <https://github.com/SciTools/iris-grib/pull/198>`_ ,
+  `PR#199 <https://github.com/SciTools/iris-grib/pull/199>`_ ,
+  `PR#200 <https://github.com/SciTools/iris-grib/pull/200>`_ ,
+  `PR#201 <https://github.com/SciTools/iris-grib/pull/201>`_  and
+  `PR#203 <https://github.com/SciTools/iris-grib/pull/200>`_ .
+
+Dependencies
+^^^^^^^^^^^^
+
+* now requires Iris version >= 2.4
+  Needed for the bugfix in
+  `PR#190 <https://github.com/SciTools/iris-grib/pull/190>`_ .
+
 
 What's new in iris-grib v0.15
 -----------------------------
