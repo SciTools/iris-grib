@@ -1,0 +1,19 @@
+name: iris-grib-dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.7
+
+# Core dependencies.
+  - iris>=2.4
+  - python-eccodes
+
+# Optional dependencies.
+  - mo_pack
+
+# Test dependencies.
+  - mock
+  - filelock
+  - pep8

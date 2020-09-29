@@ -1,2 +1,2 @@
 conda:
-    file: requirements/environment.yml
+    file: requirements/ci/readthedocs.yml
