@@ -1,0 +1,11 @@
+name: iris-grib-docs
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.7
+
+# Core dependencies.
+  - iris>=2.4
+  - python-eccodes
