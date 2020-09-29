@@ -7,7 +7,7 @@ dependencies:
   - python=3.7
 
 # Core dependencies.
-  - iris>=2.4
+  # Iris should be installed manually in dev mode - enables working with latest code.
   - python-eccodes
 
 # Optional dependencies.
