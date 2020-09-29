@@ -35,7 +35,7 @@ install:
   # Customise the test environment
   # ------------------------------
   - >
-    conda env update -n ${ENV_NAME} --quiet --file environment.yml;
+    conda env update -n ${ENV_NAME} --quiet --file requirements/environment.yml;
     # Check installation of eccodes.
     python -m eccodes selfcheck;
 
