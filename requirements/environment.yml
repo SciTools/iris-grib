@@ -1,7 +1,0 @@
-channels:
-    - conda-forge
-dependencies:
-    - iris>=2.4
-    - mo_pack
-    - python-eccodes
-    - pep8
