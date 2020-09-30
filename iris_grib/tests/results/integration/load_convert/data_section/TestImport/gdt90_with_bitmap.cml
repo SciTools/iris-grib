@@ -9,16 +9,17 @@
         <dimCoord id="87abc70d" long_name="instrument_type" points="[207]" shape="(1,)" units="Unit('1')" value_type="int64"/>
       </coord>
       <coord datadims="[1]">
-        <dimCoord id="31b8c928" points="[369081.561454, 366080.898353, 363080.235252,
-		..., -792175.058731, -795175.721833,
-		-798176.384934]" shape="(390,)" standard_name="projection_x_coordinate" units="Unit('m')" value_type="float64">
-          <verticalPerspective ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121"/>
+        <dimCoord id="dd8ec21c" points="[0.0103136242534, 0.0102297736497,
+		0.0101459230461, ..., -0.0221365593732,
+		-0.0222204099769, -0.0223042605806]" shape="(390,)" standard_name="projection_x_coordinate" units="Unit('radians')" value_type="float64">
+          <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
         </dimCoord>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="1f763ccc" points="[4392884.59202, 4395885.19625, 4398885.80048,
-		..., 5065019.93943, 5068020.54366, 5071021.14789]" shape="(227,)" standard_name="projection_y_coordinate" units="Unit('m')" value_type="float64">
-          <verticalPerspective ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121"/>
+        <dimCoord id="698f23ac" points="[0.122754875351, 0.12283872431, 0.122922573268,
+		..., 0.141537042072, 0.14162089103,
+		0.141704739989]" shape="(227,)" standard_name="projection_y_coordinate" units="Unit('radians')" value_type="float64">
+          <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
         </dimCoord>
       </coord>
       <coord>
