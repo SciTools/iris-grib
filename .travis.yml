@@ -51,7 +51,7 @@ install:
       wget -O ${IRIS_LOCATION}/iris.zip ${IRIS_REF};
       unzip -q ${IRIS_LOCATION}/iris.zip -d ${IRIS_LOCATION};
 
-      IRIS_ENV_FILE="${IRIS_LOCATION}/requirements/ci/py${PYTHON_VERSION}.yml";
+      IRIS_ENV_FILE="${IRIS_LOCATION}/iris-master/requirements/ci/py${PYTHON_VERSION}.yml";
       sed -i "/- iris/d" ${ENV_FILE};
       echo "# IRIS DEPENDENCIES." >> ${ENV_FILE};
       sed -ne "/dependencies:/,$ p" ${IRIS_ENV_FILE} | sed "1d" >> ${ENV_FILE};
@@ -81,7 +81,7 @@ install:
   # Optionally install latest Iris from downloaded source.
   - >
     if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
-      cd ${IRIS_LOCATION};
+      cd ${IRIS_LOCATION}/iris-master;
       python setup.py --quiet install;
     fi;
 
