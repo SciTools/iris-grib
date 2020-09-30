@@ -12,7 +12,7 @@ install:
   - >
     echo "==== STARTING TRAVIS.TML ====";
     echo "   path \$HOME=$HOME";
-    echo "   path cwd=${pwd}";
+    echo "   path cwd=$(pwd)";
     echo "";
 
   - set -x;
