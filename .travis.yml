@@ -9,6 +9,14 @@ env:
     - PYTHON_VERSION=37 LIMIT_TO_RELEASED_IRIS=true
 
 install:
+  - >
+    echo "==== STARTING TRAVIS.TML ====";
+    echo "   path \$HOME=$HOME";
+    echo "   path cwd=${pwd}";
+    echo "";
+
+  - set -x;
+
   # Download iris-test-data
   # -----------------------------------
   - >
