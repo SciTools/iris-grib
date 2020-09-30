@@ -10,7 +10,7 @@ dependencies:
   - setuptools
 
 # Core dependencies.
-  # Iris should be installed manually in dev mode - enables working with latest code.
+  - iris>=2.4
   - python-eccodes
 
 # Optional dependencies.
