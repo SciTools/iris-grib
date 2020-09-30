@@ -25,10 +25,11 @@ install:
   # -----------------------------------
   - >
     export IRIS_TEST_DATA_REF="https://github.com/SciTools/iris-test-data/archive/master.zip";
-    export IRIS_TEST_DATA_LOCATION="${HOME}/iris-test-data";
-    mkdir ${IRIS_TEST_DATA_LOCATION};
-    wget -O ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
-    unzip -q ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip -d ${IRIS_TEST_DATA_LOCATION};
+    export IRIS_TEST_DATA_DOWNLOAD="${HOME}/iris-test-data";
+    mkdir ${IRIS_TEST_DATA_DOWNLOAD};
+    wget -O ${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
+    unzip -q ${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data.zip -d ${IRIS_TEST_DATA_DOWNLOAD};
+    export IRIS_TEST_DATA_PATH=${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data-master/test_data
 
   # Install miniconda
   # -----------------
@@ -105,19 +106,16 @@ install:
     export PREFIX="${HOME}/miniconda/envs/${ENV_NAME}";
     SITE_CFG="${IRIS_DIR}/etc/site.cfg";
     echo "[Resources]" > ${SITE_CFG};
-    echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/test_data" >> ${SITE_CFG};
+    echo "test_data_dir = ${IRIS_TEST_DATA_PATH}" >> ${SITE_CFG};
     echo "[System]" >> ${SITE_CFG};
     echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG};
     echo "";
     echo "SITE.CFG CONTENT:";
     cat ${SITE_CFG};
     echo "";
-    echo "TEST DATA DIR : $\IRIS_TEST_DATA_LOCATION=${IRIS_TEST_DATA_LOCATION}";
-    echo "Content : ls -1ld \$IRIS_TEST_DATA_LOCATION/* : ";
-    ls -1ld ${IRIS_TEST_DATA_LOCATION}/*;
-    echo "";
-    echo "Content : ls -1ld \$IRIS_TEST_DATA_LOCATION/test_data/* : ";
-    ls -1ld ${IRIS_TEST_DATA_LOCATION}/test_data/*;
+    echo "TEST DATA DIR : $\IRIS_TEST_DATA_PATH=${IRIS_TEST_DATA_PATH}";
+    echo "Content : ls -1ld \$IRIS_TEST_DATA_PATH/* : ";
+    ls -1ld ${IRIS_TEST_DATA_PATH}/*;
     echo "";
 
   # Install iris-grib itself
