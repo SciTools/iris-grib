@@ -16,7 +16,7 @@ install:
     echo "   path \$TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR";
     echo "";
     echo "ls \$TRAVIS_BUILD_DIR :";
-    ls -1ld $TRAVIS_BUILD_DIR;
+    ls -1ld $TRAVIS_BUILD_DIR/*;
     echo "";
 
   # - set -x;
@@ -115,6 +115,7 @@ install:
   - >
     echo "Installing Iris-grib.";
     cd ${TRAVIS_BILD_DIR};
+    ls -1ld *;
     pip install . --no-deps;
 
   # Summarise the environment
