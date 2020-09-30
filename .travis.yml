@@ -15,6 +15,9 @@ install:
     echo "   path cwd=$(pwd)";
     echo "   path \$TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR";
     echo "";
+    echo "ls \$TRAVIS_BUILD_DIR :";
+    ls -1ld $TRAVIS_BUILD_DIR;
+    echo "";
 
   # - set -x;
 
@@ -48,7 +51,7 @@ install:
   # Get environment spec.
   - >
     export ENV_NAME="iris-grib-dev";
-    export ENV_FILE="requirements/ci/py${PYTHON_VERSION}.yml";
+    export ENV_FILE="${TRAVIS_BUILD_DIR}/requirements/ci/py${PYTHON_VERSION}.yml";
 
   # Optionally download latest Iris from repo,
   # and replace the Iris dependency with Iris' underlying dependencies.
