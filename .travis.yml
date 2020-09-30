@@ -3,8 +3,10 @@ dist: xenial
 
 env:
   matrix:
-    - PYTHON_VERSION=36
-    - PYTHON_VERSION=37
+    - PYTHON_VERSION=36 LIMIT_TO_RELEASED_IRIS=false
+    - PYTHON_VERSION=36 LIMIT_TO_RELEASED_IRIS=true
+    - PYTHON_VERSION=37 LIMIT_TO_RELEASED_IRIS=false
+    - PYTHON_VERSION=37 LIMIT_TO_RELEASED_IRIS=true
 
 install:
   # Download iris-test-data
@@ -16,15 +18,6 @@ install:
     wget -O ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
     unzip -q ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip -d ${IRIS_TEST_DATA_LOCATION};
 
-  # Download Iris latest
-  # --------------------
-  - >
-    export IRIS_REF="https://github.com/SciTools/iris/archive/master.zip";
-    export IRIS_LOCATION="${HOME}/iris";
-    mkdir ${IRIS_LOCATION};
-    wget -O ${IRIS_LOCATION}/iris.zip ${IRIS_REF};
-    unzip -q ${IRIS_LOCATION}/iris.zip -d ${IRIS_LOCATION};
-
   # Install miniconda
   # -----------------
   - >
@@ -34,22 +27,35 @@ install:
     bash miniconda.sh -b -p ${HOME}/miniconda;
     export PATH="${HOME}/miniconda/bin:${PATH}";
 
-  # Configure the test environment
-  # ------------------------------
+  # Create the test environment
+  # ---------------------------
   - >
-    echo "Configuring testing environment";
+    echo "Creating testing environment";
     conda config --set always_yes yes --set changeps1 no;
     conda config --set show_channel_urls True;
     conda config --add channels conda-forge;
     conda update --quiet conda;
 
-  # Get environment spec and also include Iris dependencies.
+  # Get environment spec.
   - >
     export ENV_NAME='iris-grib-dev';
     export ENV_FILE='requirements/ci/py${PYTHON_VERSION}.yml';
-    IRIS_ENV_FILE='${IRIS_LOCATION}/requirements/ci/py${PYTHON_VERSION}.yml';
-    echo '# IRIS DEPENDENCIES.' >> ${ENV_FILE};
-    sed -ne '/dependencies:/,$ p' ${IRIS_ENV_FILE} | sed '1d' >> ${ENV_FILE};
+
+  # Optionally download latest Iris from repo,
+  # and replace the Iris dependency with Iris' underlying dependencies.
+  - >
+    if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
+      IRIS_REF='https://github.com/SciTools/iris/archive/master.zip';
+      export IRIS_LOCATION='${HOME}/iris';
+      mkdir ${IRIS_LOCATION};
+      wget -O ${IRIS_LOCATION}/iris.zip ${IRIS_REF};
+      unzip -q ${IRIS_LOCATION}/iris.zip -d ${IRIS_LOCATION};
+
+      IRIS_ENV_FILE='${IRIS_LOCATION}/requirements/ci/py${PYTHON_VERSION}.yml';
+      sed -i '/- iris/d' ${ENV_FILE};
+      echo '# IRIS DEPENDENCIES.' >> ${ENV_FILE};
+      sed -ne '/dependencies:/,$ p' ${IRIS_ENV_FILE} | sed '1d' >> ${ENV_FILE};
+    fi;
 
   # Create environment.
   - >
@@ -63,14 +69,24 @@ install:
   - conda install --quiet pip;
   - pip install coveralls;
 
-  # Output environment debug info
+  # Output environment debug info.
   - >
     conda list -n ${ENV_NAME};
     conda info -a;
 
-  # Configure and install Iris
-  # ------------------------
-  - echo "Configuring and installing Iris.";
+  # Configure Iris
+  # --------------
+  - echo "Configuring Iris";
+
+  # Optionally install latest Iris from downloaded source.
+  - >
+    if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
+      cd {IRIS_LOCATION};
+      python setup.py --quiet install;
+    fi;
+
+  # Locate Iris installation.
+  - export IRIS_LOCATION=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
 
   # Set iris config paths.
   - >
@@ -81,11 +97,6 @@ install:
     echo "doc_dir = $(pwd)/docs/iris" >> ${SITE_CFG};
     echo "[System]" >> ${SITE_CFG};
     echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG};
-
-  # Install iris.
-  - >
-    cd {IRIS_LOCATION};
-    python setup.py --quiet install;
 
   # Install iris-grib itself
   # ------------------------
