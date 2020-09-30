@@ -86,12 +86,12 @@ install:
     fi;
 
   # Locate Iris installation.
-  - export IRIS_LOCATION=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
+  - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
 
   # Set iris config paths.
   - >
     export PREFIX="${HOME}/miniconda/envs/${ENV_NAME}";
-    SITE_CFG="{IRIS_LOCATION}/lib/iris/etc/site.cfg";
+    SITE_CFG="{IRIS_DIR}/lib/iris/etc/site.cfg";
     echo "[Resources]" > ${SITE_CFG};
     echo "test_data_dir = $(pwd)/iris-test-data/test_data" >> ${SITE_CFG};
     echo "doc_dir = $(pwd)/docs/iris" >> ${SITE_CFG};
