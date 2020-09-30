@@ -111,7 +111,7 @@ install:
   # ------------------------
   - >
     echo "Installing Iris-grib.";
-    cd ${HOME}/SciTools/iris-grib;
+    cd ${TRAVIS_BILD_DIR};
     pip install . --no-deps;
 
   # Summarise the environment
