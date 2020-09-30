@@ -105,8 +105,7 @@ install:
     export PREFIX="${HOME}/miniconda/envs/${ENV_NAME}";
     SITE_CFG="${IRIS_DIR}/etc/site.cfg";
     echo "[Resources]" > ${SITE_CFG};
-    echo "test_data_dir = $(pwd)/iris-test-data/test_data" >> ${SITE_CFG};
-    echo "doc_dir = $(pwd)/docs/iris" >> ${SITE_CFG};
+    echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/test_data" >> ${SITE_CFG};
     echo "[System]" >> ${SITE_CFG};
     echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG};
 
