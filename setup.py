@@ -49,7 +49,7 @@ def extract_version():
 
 
 def long_description():
-    fname = os.path.join(PACKAGE_DIR, "README.md")
+    fname = os.path.join(PACKAGE_DIR, "README.rst")
     with open(fname, "rb") as fi:
         result = fi.read().decode("utf-8")
     return result
@@ -76,7 +76,7 @@ setup_args = dict(
                                           remove='iris_grib/'))},
     description      = "GRIB loading for Iris",
     long_description = long_description(),
-    long_description_content_type = "text/markdown",
+    long_description_content_type = "text/x-rst",
     url              = 'https://github.com/SciTools/iris-grib',
     author           = 'UK Met Office',
     author_email     = 'scitools-iris@googlegroups.com',
