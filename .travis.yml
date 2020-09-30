@@ -13,9 +13,10 @@ install:
     echo "==== STARTING TRAVIS.TML ====";
     echo "   path \$HOME=$HOME";
     echo "   path cwd=$(pwd)";
+    echo "   path \$TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR";
     echo "";
 
-  - set -x;
+  # - set -x;
 
   # Download iris-test-data
   # -----------------------------------
