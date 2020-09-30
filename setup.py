@@ -93,7 +93,7 @@ setup_args = dict(
     # PyPI, but the user is required to install eccodes itself manually. See
     # ECMWF ecCodes installation documentation for more information.
     install_requires=pip_requirements("setup", "core"),
-    test_suite = f'{PYPI_NAME}.tests',
+    test_suite = f'{NAME}.tests',
     extras_require={
         "all": pip_requirements("all"),
         "test": pip_requirements("test"),
