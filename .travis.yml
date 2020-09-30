@@ -81,7 +81,7 @@ install:
   # Optionally install latest Iris from downloaded source.
   - >
     if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
-      cd {IRIS_LOCATION};
+      cd ${IRIS_LOCATION};
       python setup.py --quiet install;
     fi;
 
