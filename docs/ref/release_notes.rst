@@ -77,6 +77,8 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed a problem that caused very slow
   loading, and possible memory overflows, with Dask versions >= 2.0.
   **This requires Iris >= 2.4**, as a new minimum dependency.
+  ( This problem was shared with UM file access in Iris : see
+  https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed ).
   `(PR#190) <https://github.com/SciTools/iris-grib/pull/190>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ fixed all the tests to
@@ -110,7 +112,7 @@ Dependencies
 
 * now requires Iris version >= 2.4
   Needed for the bugfix in
-  `(PR#190 <https://github.com/SciTools/iris-grib/pull/190>`_ .
+  `PR#190 <https://github.com/SciTools/iris-grib/pull/190>`_ .
 
 
 What's new in iris-grib v0.15
@@ -152,24 +154,6 @@ Dependencies
 ^^^^^^^^^^^^
 
 * Python 2 is no longer supported
-
-
-:Release: 0.15.1
-:Date: 24 Feb 2020
-
-Bug Fixes
-^^^^^^^^^
-
-* Fixed a bug that was causing all field data to be read from file during the
-  initial cube loading.  This occurred since Dask version 2.0, and caused
-  slow loading and excessive memory use.  This problem was shared with UM file
-  access in Iris : see
-  https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed .
-
-Dependencies
-^^^^^^^^^^^^
-
-* Now requires Iris version >= 2.4
 
 
 What's new in iris-grib v0.14
