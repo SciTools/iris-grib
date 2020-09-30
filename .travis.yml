@@ -114,7 +114,7 @@ install:
   # ------------------------
   - >
     echo "Installing Iris-grib.";
-    cd ${TRAVIS_BILD_DIR};
+    cd ${TRAVIS_BUILD_DIR};
     ls -1ld *;
     pip install . --no-deps;
 
