@@ -38,23 +38,23 @@ install:
 
   # Get environment spec.
   - >
-    export ENV_NAME='iris-grib-dev';
-    export ENV_FILE='requirements/ci/py${PYTHON_VERSION}.yml';
+    export ENV_NAME="iris-grib-dev";
+    export ENV_FILE="requirements/ci/py${PYTHON_VERSION}.yml";
 
   # Optionally download latest Iris from repo,
   # and replace the Iris dependency with Iris' underlying dependencies.
   - >
     if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
-      IRIS_REF='https://github.com/SciTools/iris/archive/master.zip';
-      export IRIS_LOCATION='${HOME}/iris';
+      IRIS_REF="https://github.com/SciTools/iris/archive/master.zip";
+      export IRIS_LOCATION="${HOME}/iris";
       mkdir ${IRIS_LOCATION};
       wget -O ${IRIS_LOCATION}/iris.zip ${IRIS_REF};
       unzip -q ${IRIS_LOCATION}/iris.zip -d ${IRIS_LOCATION};
 
-      IRIS_ENV_FILE='${IRIS_LOCATION}/requirements/ci/py${PYTHON_VERSION}.yml';
-      sed -i '/- iris/d' ${ENV_FILE};
-      echo '# IRIS DEPENDENCIES.' >> ${ENV_FILE};
-      sed -ne '/dependencies:/,$ p' ${IRIS_ENV_FILE} | sed '1d' >> ${ENV_FILE};
+      IRIS_ENV_FILE="${IRIS_LOCATION}/requirements/ci/py${PYTHON_VERSION}.yml";
+      sed -i "/- iris/d" ${ENV_FILE};
+      echo "# IRIS DEPENDENCIES." >> ${ENV_FILE};
+      sed -ne "/dependencies:/,$ p" ${IRIS_ENV_FILE} | sed "1d" >> ${ENV_FILE};
     fi;
 
   # Create environment.
