@@ -102,7 +102,7 @@ install:
   # ------------------------
   - >
     echo "Installing Iris-grib.";
-    cd ${HOME};
+    cd ${HOME}/SciTools/iris-grib;
     pip install . --no-deps;
 
   # Summarise the environment
