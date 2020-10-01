@@ -47,6 +47,34 @@ class TestGDT30(tests.IrisGribTest):
         cube = load_cube(path)
         self.assertCMLApproxData(cube)
 
+    def test_context(self):
+        import os
+        import sys
+        import iris.coord_systems as ics
+        iris_lc = ics.LambertConformal(false_easting=0)
+        iris_lc_param = iris_lc.false_easting
+        iris_lc_fe="{paramtype}({value})".format(
+            value=iris_lc_param,
+            paramtype=type(iris_lc_param))
+        msg = (
+            "\n\n"
+            "PYTHON INSTALL CONTEXT for coord-systems:\n"
+            "python os path:  {os_path!s}\n"
+            "python sys version:\n{sys_version!s}\n"
+            "iris coord-systems path:  {iris_cs_path!s}\n"
+            "iris coord-systems '_arg_default':  {iris_cs_argdef!r}\n"
+            "iris LambertConformal default false_easting:  {iris_lc_fe!r}\n"
+            )
+        kwargs = dict(
+            os_path=os.__file__,
+            sys_version=sys.version,
+            iris_cs_path=ics.__file__,
+            iris_cs_argdef=getattr(ics, "_arg_default", None),
+            iris_lc_fe=iris_lc_fe
+            )
+        msg = msg.format(**kwargs)
+        self.assertEqual(1, 0, msg)
+
 
 class TestGDT40(tests.IrisGribTest):
     def test_regular(self):
