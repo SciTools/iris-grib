@@ -6,6 +6,7 @@ In this module:
  * :py:obj:`grib1_phenom_to_cf_info`
  * :py:obj:`grib2_phenom_to_cf_info`
  * :py:obj:`cf_phenom_to_grib2_info`
+ * :py:obj:`GRIBCode`
 
 
 .. currentmodule:: iris_grib.grib_phenom_translation
@@ -18,3 +19,5 @@ In this module:
 
 .. autofunction:: iris_grib.grib_phenom_translation.cf_phenom_to_grib2_info
 
+.. autoclass:: iris_grib.grib_phenom_translation.GRIBCode
+    :members:
