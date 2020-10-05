@@ -3,68 +3,82 @@ dist: xenial
 
 env:
   matrix:
-    - PYTHON_VERSION=3.6
-    - PYTHON_VERSION=3.7
+    - PYTHON_VERSION=36
+    - PYTHON_VERSION=37
 
 install:
+  # Download iris-test-data
+  # -----------------------------------
+  - >
+    export IRIS_TEST_DATA_REF="https://github.com/SciTools/iris-test-data/archive/master.zip";
+    export IRIS_TEST_DATA_DOWNLOAD="${HOME}/iris-test-data";
+    mkdir ${IRIS_TEST_DATA_DOWNLOAD};
+    wget -O ${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
+    unzip -q ${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data.zip -d ${IRIS_TEST_DATA_DOWNLOAD};
+    export IRIS_TEST_DATA_PATH=${IRIS_TEST_DATA_DOWNLOAD}/iris-test-data-master/test_data
+
   # Install miniconda
   # -----------------
   - >
     echo "Installing miniconda";
     export CONDA_BASE="https://repo.continuum.io/miniconda/Miniconda";
-    if [[ "${PYTHON_VERSION}" == 2* ]]; then
-      wget --quiet ${CONDA_BASE}2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget --quiet ${CONDA_BASE}3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi;
+    wget --quiet ${CONDA_BASE}3-latest-Linux-x86_64.sh -O miniconda.sh;
     bash miniconda.sh -b -p ${HOME}/miniconda;
     export PATH="${HOME}/miniconda/bin:${PATH}";
 
-  # Configure the test environment
-  # ------------------------------
+  # Create the test environment
+  # ---------------------------
   - >
-    echo "Configuring testing environment";
+    echo "Creating testing environment";
     conda config --set always_yes yes --set changeps1 no;
     conda config --set show_channel_urls True;
     conda config --add channels conda-forge;
     conda update --quiet conda;
-    ENV_NAME='test-environment';
-    conda create --quiet -n ${ENV_NAME} python=${PYTHON_VERSION} mock filelock pep8;
+
+  # Get environment spec.
+  - >
+    export ENV_NAME="iris-grib-dev";
+    export ENV_FILE="${TRAVIS_BUILD_DIR}/requirements/ci/py${PYTHON_VERSION}.yml";
+
+  # Create environment.
+  - >
+    conda env create --quiet --file=${ENV_FILE};
     source activate ${ENV_NAME};
 
-  # Customise the test environment
-  # ------------------------------
-  - >
-    conda env update -n ${ENV_NAME} --quiet --file environment.yml;
-    # Check installation of eccodes.
-    python -m eccodes selfcheck;
+  # Check installation of eccodes.
+  - python -m eccodes selfcheck;
 
-  # Download and install iris-test-data
-  # -----------------------------------
-  - >
-    export IRIS_TEST_DATA_REF="https://github.com/SciTools/iris-test-data/archive/master.zip";
-    export IRIS_TEST_DATA_LOCATION="${HOME}/iris-test-data";
-    mkdir ${IRIS_TEST_DATA_LOCATION};
-    wget -O ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip ${IRIS_TEST_DATA_REF};
-    unzip -q ${IRIS_TEST_DATA_LOCATION}/iris-test-data.zip -d ${IRIS_TEST_DATA_LOCATION};
+  # Install pip, then coveralls.
+  - conda install --quiet pip;
+  - pip install coveralls;
 
-  # Locate iris installation
-  # ------------------------
+  # Output environment debug info.
+  - >
+    conda list -n ${ENV_NAME};
+    conda info -a;
+
+  # Configure Iris
+  # --------------
+  - echo "Configuring Iris";
+
+  # Locate Iris installation.
   - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
 
-  # Poke site.cfg to reference iris-test-data
+  # Set iris config paths.
   - >
+    export PREFIX="${HOME}/miniconda/envs/${ENV_NAME}";
     SITE_CFG="${IRIS_DIR}/etc/site.cfg";
     echo "[Resources]" > ${SITE_CFG};
-    echo "test_data_dir = ${IRIS_TEST_DATA_LOCATION}/iris-test-data-master/test_data" >> ${SITE_CFG};
+    echo "test_data_dir = ${IRIS_TEST_DATA_PATH}" >> ${SITE_CFG};
+    echo "[System]" >> ${SITE_CFG};
+    echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG};
 
   # Install iris-grib itself
   # ------------------------
-  - pip install . --no-deps
-
-  # Install coveralls for test coverage
-  # -----------------------------------
-  - pip install coveralls
+  - >
+    echo "Installing Iris-grib.";
+    cd ${TRAVIS_BUILD_DIR};
+    pip install . --no-deps;
 
   # Summarise the environment
   # -------------------------
