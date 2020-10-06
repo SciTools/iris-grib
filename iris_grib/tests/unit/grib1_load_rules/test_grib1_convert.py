@@ -9,11 +9,10 @@
 # importing anything else
 import iris_grib.tests as tests
 
-import cf_units
 import gribapi
 from unittest import mock
 
-import iris
+from iris.aux_factory import HybridPressureFactory
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
@@ -109,8 +108,7 @@ class Test_GribLevels(tests.IrisTest):
         results = grib1_convert(gw)
 
         factory, = results[0]
-        self.assertEqual(factory.factory_class,
-                         iris.aux_factory.HybridPressureFactory)
+        self.assertEqual(factory.factory_class, HybridPressureFactory)
         delta, sigma, ref = factory.args
         self.assertEqual(delta, {'long_name': 'level_pressure'})
         self.assertEqual(sigma, {'long_name': 'sigma'})
