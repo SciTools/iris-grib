@@ -1545,7 +1545,7 @@ def hybrid_factories(section, metadata):
             # Create the model level number scalar coordinate.
             scaledValue = section['scaledValueOfFirstFixedSurface']
             coord = DimCoord(scaledValue, standard_name='model_level_number',
-                             attributes=dict(positive='up'))
+                             units=1, attributes=dict(positive='up'))
             metadata['aux_coords_and_dims'].append((coord, None))
 
             if typeOfFirstFixedSurface == 118:
@@ -1576,7 +1576,7 @@ def hybrid_factories(section, metadata):
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
             offset = NV // 2 + scaledValue
-            coord = AuxCoord(pv[offset], long_name='sigma')
+            coord = AuxCoord(pv[offset], long_name='sigma', units=1)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
             factory = Factory(factory_class, factory_args)
@@ -2286,19 +2286,22 @@ def satellite_common(section, metadata):
     if NB > 0:
         # Create the satellite series coordinate.
         satelliteSeries = section['satelliteSeries']
-        coord = AuxCoord(satelliteSeries, long_name='satellite_series')
+        coord = AuxCoord(satelliteSeries, long_name='satellite_series',
+                         units=1)
         # Add the satellite series coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
         # Create the satellite number coordinate.
         satelliteNumber = section['satelliteNumber']
-        coord = AuxCoord(satelliteNumber, long_name='satellite_number')
+        coord = AuxCoord(satelliteNumber, long_name='satellite_number',
+                         units=1)
         # Add the satellite number coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
         # Create the satellite instrument type coordinate.
         instrumentType = section['instrumentType']
-        coord = AuxCoord(instrumentType, long_name='instrument_type')
+        coord = AuxCoord(instrumentType, long_name='instrument_type',
+                         units=1)
         # Add the instrument type coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
