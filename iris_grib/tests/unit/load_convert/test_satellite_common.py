@@ -43,11 +43,11 @@ class Test(tests.IrisGribTest):
 
         # Check the result.
         expected = empty_metadata()
-        coord = AuxCoord(series, long_name='satellite_series')
+        coord = AuxCoord(series, long_name='satellite_series', units=1)
         expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(number, long_name='satellite_number')
+        coord = AuxCoord(number, long_name='satellite_number', units=1)
         expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(instrument, long_name='instrument_type')
+        coord = AuxCoord(instrument, long_name='instrument_type', units=1)
         expected['aux_coords_and_dims'].append((coord, None))
         standard_name = 'sensor_band_central_radiation_wavenumber'
         coord = AuxCoord(values / (10.0 ** factors),
