@@ -1,4 +1,4 @@
 # Core dependencies.
 
-scitools-iris>=3.0
+scitools-iris>=3.0.0rc0
 eccodes-python
