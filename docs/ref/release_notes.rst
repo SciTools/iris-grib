@@ -64,6 +64,14 @@ Bugs Fixed
   only the Iris coordinate system has changed.
   `(PR#223) <https://github.com/SciTools/iris-grib/pull/223>`_
 
+Dependencies
+^^^^^^^^^^^^
+
+* now requires Iris version >= 3.0
+  Needed for the bugfix in
+  `PR#223 <https://github.com/SciTools/iris-grib/pull/223>`_ .
+
+
 
 What's new in iris-grib v0.15.1
 -------------------------------
