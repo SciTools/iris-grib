@@ -3,10 +3,10 @@ dist: xenial
 
 env:
   matrix:
-    - PYTHON_VERSION=36 LIMIT_TO_RELEASED_IRIS=false
-    - PYTHON_VERSION=37 LIMIT_TO_RELEASED_IRIS=false
-  #  - PYTHON_VERSION=36 LIMIT_TO_RELEASED_IRIS=true
-  #  - PYTHON_VERSION=37 LIMIT_TO_RELEASED_IRIS=true
+    - PYTHON_VERSION=36 IRIS_VERSION=master
+    - PYTHON_VERSION=37 IRIS_VERSION=master
+    - PYTHON_VERSION=36 IRIS_VERSION=release
+    - PYTHON_VERSION=37 IRIS_VERSION=release
 
 install:
   # Download iris-test-data
@@ -42,10 +42,10 @@ install:
     export ENV_NAME="iris-grib-dev";
     export ENV_FILE="${TRAVIS_BUILD_DIR}/requirements/ci/py${PYTHON_VERSION}.yml";
 
-  # Optionally download latest Iris from repo,
+  # Optionally download latest Iris master, from the github repo,
   # and replace the Iris dependency with Iris' underlying dependencies.
   - >
-    if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
+    if [[ "${IRIS_VERSION}" == "master" ]]; then
       IRIS_REF="https://github.com/SciTools/iris/archive/master.zip";
       export IRIS_LOCATION="${HOME}/iris";
       mkdir ${IRIS_LOCATION};
@@ -79,9 +79,9 @@ install:
   # --------------
   - echo "Configuring Iris";
 
-  # Optionally install latest Iris from downloaded source.
+  # Optionally install latest Iris master, from downloaded source.
   - >
-    if [[ "${LIMIT_TO_RELEASED_IRIS}" == false ]]; then
+    if [[ "${IRIS_VERSION}" == "master" ]]; then
       cd ${IRIS_LOCATION}/iris-master;
       python setup.py --quiet install;
     fi;
