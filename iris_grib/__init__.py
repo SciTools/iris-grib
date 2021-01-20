@@ -343,17 +343,24 @@ class GribWrapper:
 
         # shape of the earth
         soe_code = self.shapeOfTheEarth
-        # As this class is now *only* for GRIB1, 'shapeOfTheEarth' is not a value read from the actual file :  It is
-        # really a GRIB2 param, and the value is merely what eccodes (griabpi) considers the correct default.
-        # This was always =6 until eccodes 0.19, when it changed to 0.  See https://jira.ecmwf.int/browse/ECC-811
+        # As this class is now *only* for GRIB1, 'shapeOfTheEarth' is not a
+        # value read from the actual file :  It is really a GRIB2 param, and
+        # the value is merely what eccodes (gribapi) gives as the default.
+        # This was always = 6, until eccodes 0.19, when it changed to 0.
+        # See https://jira.ecmwf.int/browse/ECC-811
         # The two represent different sized spherical earths.
         if soe_code not in (6, 0):
             raise ValueError('Unexpected shapeOfTheEarth value =', soe_code)
-        # *FOR NOW* maintain the old behaviour (radius=6371229) in all cases for backwards compatibility.
-        # However, this does not match 'radiusOfTheEarth' and may be incorrect :  We may change it in future.
+
         soe_code = 6
+        # *FOR NOW* maintain the old behaviour (radius=6371229) in all cases,
+        # for backwards compatibility.
+        # However, this does not match the 'radiusOfTheEarth' default from the
+        # gribapi so is probably incorrect (see above issue ECC-811).
+        # So we may change this in future.
+
         if soe_code == 0:
-            # New supposedly-correct correct value, matches the 'radiusOfTheEarth' parameter.
+            # New supposedly-correct default value, matches 'radiusOfTheEarth'.
             geoid = coord_systems.GeogCS(semi_major_axis=6367470)
         elif soe_code == 6:
             # Old value, does *not* match the 'radiusOfTheEarth' parameter.
