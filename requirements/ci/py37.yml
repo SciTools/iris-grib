@@ -1,7 +1,6 @@
 name: iris-grib-dev
 
 channels:
-  - conda-forge/label/rc_iris
   - conda-forge
 
 dependencies:
@@ -11,7 +10,7 @@ dependencies:
   - setuptools
 
 # Core dependencies.
-  - iris=3.0.0rc0
+  - iris>=3
   - python-eccodes
 
 # Optional dependencies.
