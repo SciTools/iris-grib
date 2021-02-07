@@ -3,3 +3,4 @@
 mock
 filelock
 pep8
+requests
