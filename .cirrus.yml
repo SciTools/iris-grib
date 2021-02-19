@@ -30,6 +30,7 @@ env:
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
   # Git commit hash for iris test data.
   IRIS_TEST_DATA_REF: "fffb9b14b9cb472c5eb2ebb7fd19acb7f6414a30"
+  NOSE_WITH_COVERAGE: 1
 
 #
 # Linting
@@ -93,4 +94,10 @@ linux_task:
       - unzip -q iris-test-data.zip
       - mv iris-test-data-${IRIS_TEST_DATA_REF} ${IRIS_TEST_DATA_DIR}
   tests_script:
+    - echo "[Resources]" > ${SITE_CFG}
+    - echo "test_data_dir = ${IRIS_TEST_DATA_DIR}/test_data" >> ${SITE_CFG}
+    - echo "doc_dir = ${CIRRUS_WORKING_DIR}/docs" >> ${SITE_CFG}
+    - echo "[System]" >> ${SITE_CFG}
+    - echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG}
     - nox --session tests
+    - coverage report -m
