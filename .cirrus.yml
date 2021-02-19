@@ -58,9 +58,6 @@ lint_task:
 linux_task_template: &LINUX_TASK_TEMPLATE
   auto_cancellation: true
   allow_failures: true
-  matrix:
-    env:
-      PY_VER: 3.7
   env:
     PATH: ${HOME}/miniconda/bin:${PATH}
 
@@ -97,6 +94,9 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
       
 tests_task:
+  matrix:
+    env:
+      PY_VER: 3.7
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   <<: &LINUX_TESTING_TEMPLATE
   tests_script:
@@ -110,6 +110,9 @@ tests_task:
     - "coverage report -m || :"
 
 eccodes_task:
+  matrix:
+    env:
+      PY_VER: 3.7
   name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
   <<: &LINUX_TESTING_TEMPLATE
   tests_script:
