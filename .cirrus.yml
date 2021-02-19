@@ -56,7 +56,7 @@ lint_task:
 #
 linux_task:
   auto_cancellation: true
-  allow_failues:
+  allow_failures:
   matrix:
     env:
       PY_VER: 3.7
