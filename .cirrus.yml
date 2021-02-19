@@ -1,9 +1,9 @@
 container:
-  image: node:latest
+  image: jamespenn/miniconda:latest
 
 check_task:
-  node_modules_cache:
-    folder: node_modules
-    fingerprint_script: cat yarn.lock
-    populate_script: yarn install
-  test_script: yarn test
+#   node_modules_cache:
+#     folder: node_modules
+#     fingerprint_script: cat requirements/ci/py37.yml
+#     populate_script: yarn install
+  test_script: conda info
