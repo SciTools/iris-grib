@@ -56,6 +56,10 @@ lint_task:
 #
 linux_task:
   auto_cancellation: true
+   env:
+    PATH: ${HOME}/miniconda/bin:${PATH}
+    # There must be a more elegant way of doing this...
+    SITE_CFG: ${CIRRUS_WORKING_DIR}/.nox/lib/python${PY_VER}/site-packages/iris/etc/site.cfg
   matrix:
     env:
       PY_VER: 3.7
@@ -92,11 +96,10 @@ linux_task:
     populate_script:
       - wget --quiet https://github.com/SciTools/iris-test-data/archive/${IRIS_TEST_DATA_REF}.zip -O iris-test-data.zip
       - unzip -q iris-test-data.zip
-      - mv iris-test-data-${IRIS_TEST_DATA_REF} ${IRIS_TEST_DATA_DIR}
+      - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
   tests_script:
     - echo "[Resources]" > ${SITE_CFG}
     - echo "test_data_dir = ${IRIS_TEST_DATA_DIR}/test_data" >> ${SITE_CFG}
-    - echo "doc_dir = ${CIRRUS_WORKING_DIR}/docs" >> ${SITE_CFG}
     - echo "[System]" >> ${SITE_CFG}
     - echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG}
     - nox --session tests
