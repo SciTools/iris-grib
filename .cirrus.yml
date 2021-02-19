@@ -56,20 +56,18 @@ lint_task:
 #
 linux_task:
   auto_cancellation: true
-   env:
-    PATH: ${HOME}/miniconda/bin:${PATH}
-    # There must be a more elegant way of doing this...
-    SITE_CFG: ${CIRRUS_WORKING_DIR}/.nox/lib/python${PY_VER}/site-packages/iris/etc/site.cfg
   matrix:
     env:
       PY_VER: 3.7
+  env:
+    PATH: ${HOME}/miniconda/bin:${PATH}
+    # There must be a more elegant way of doing this...
+    SITE_CFG: ${CIRRUS_WORKING_DIR}/.nox/lib/python${PY_VER}/site-packages/iris/etc/site.cfg
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   container:
     image: gcc:latest
     cpu: 6
-    memory: 8G
-  env:
-    PATH: ${HOME}/miniconda/bin:${PATH}
+    memory: 8G    
   conda_cache:
     folder: ${HOME}/miniconda
     fingerprint_script:
