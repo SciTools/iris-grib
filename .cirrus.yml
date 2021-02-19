@@ -37,6 +37,7 @@ env:
 #
 lint_task:
   auto_cancellation: true
+  allow_failures: true
   name: "${CIRRUS_OS}: flake8 and black"
   pip_cache:
     folder: ~/.cache/pip
