@@ -206,9 +206,22 @@ def tests(session):
 
 
 @nox.session(python=PY_VER, venv_backend="conda")
+def eccodes(session):
+    """Perform 'selfcheck' test of eccodes.
+    
+        Parameters
+        ----------
+        session: object
+            A `nox.sessions.Session` object.
+    """
+    prepare_venv(session)
+    session.run("python", "-m", "eccodes", "selfcheck")
+
+
+@nox.session(python=PY_VER, venv_backend="conda")
 def doctest(session):
     """
-    Perform iris doc-tests.
+    Perform iris-grib doc-tests.
 
     Parameters
     ----------
@@ -234,7 +247,7 @@ def doctest(session):
 @nox.session(python=PY_VER, venv_backend="conda")
 def linkcheck(session):
     """
-    Perform iris doc link check.
+    Perform iris-grib doc link check.
 
     Parameters
     ----------
