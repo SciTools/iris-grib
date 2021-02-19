@@ -98,7 +98,7 @@ tests_task:
     env:
       PY_VER: 3.7
   name: "${CIRRUS_OS}: py${PY_VER} tests"
-  <<: &LINUX_TESTING_TEMPLATE
+  << : *LINUX_TESTING_TEMPLATE
   tests_script:
     - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
     - export SITE_CFG=${IRIS_DIR}/etc/site.cfg
@@ -114,6 +114,6 @@ eccodes_task:
     env:
       PY_VER: 3.7
   name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
-  <<: &LINUX_TESTING_TEMPLATE
+  << : *LINUX_TESTING_TEMPLATE
   tests_script:
     - "nox --session eccodes || :"  # force return error 0
