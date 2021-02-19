@@ -13,6 +13,9 @@ sdist
 develop-eggs
 .installed.cfg
 
+# test
+.nox/
+
 # Installer logs
 pip-log.txt
 
@@ -24,3 +27,4 @@ pip-log.txt
 \#*
 \.\#*
 *.swp
+.vscode/

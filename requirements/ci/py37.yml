@@ -20,3 +20,6 @@ dependencies:
   - mock
   - filelock
   - pep8
+  - nox
+  - requests
+  - nose
