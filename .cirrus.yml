@@ -55,7 +55,7 @@ lint_task:
 #
 # Testing (Linux)
 #
-linux_task:
+linux_task_template: &LINUX_TASK_TEMPLATE
   auto_cancellation: true
   allow_failures: true
   matrix:
@@ -64,7 +64,6 @@ linux_task:
   env:
     PATH: ${HOME}/miniconda/bin:${PATH}
 
-  name: "${CIRRUS_OS}: py${PY_VER} tests"
   container:
     image: gcc:latest
     cpu: 6
@@ -96,6 +95,10 @@ linux_task:
       - wget --quiet https://github.com/SciTools/iris-test-data/archive/${IRIS_TEST_DATA_REF}.zip -O iris-test-data.zip
       - unzip -q iris-test-data.zip
       - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
+      
+tests_task:
+  name: "${CIRRUS_OS}: py${PY_VER} tests"
+  <<: &LINUX_TESTING_TEMPLATE
   tests_script:
     - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
     - export SITE_CFG=${IRIS_DIR}/etc/site.cfg
@@ -105,3 +108,9 @@ linux_task:
     - echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG}
     - "nox --session tests || :"  # force return error 0
     - "coverage report -m || :"
+
+eccodes_task:
+  name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
+  <<: &LINUX_TESTING_TEMPLATE
+  tests_script:
+    - "nox --session eccodes || :"  # force return error 0
