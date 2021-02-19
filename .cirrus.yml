@@ -56,6 +56,7 @@ lint_task:
 #
 linux_task:
   auto_cancellation: true
+  allow_failues:
   matrix:
     env:
       PY_VER: 3.7
@@ -79,7 +80,7 @@ linux_task:
       - conda config --set show_channel_urls True
       - conda config --add channels conda-forge
       - conda update --quiet --name base conda
-      - conda install --quiet --name base nox pip
+      - conda install --quiet --name base nox pip coverage
   nox_cache:
     folder: ${CIRRUS_WORKING_DIR}/.nox
     fingerprint_script:
