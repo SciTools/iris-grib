@@ -28,7 +28,8 @@ env:
   PIP_CACHE_PACKAGES: "pip setuptools wheel nox"
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
-
+  # Git commit hash for iris test data.
+  IRIS_TEST_DATA_REF: "fffb9b14b9cb472c5eb2ebb7fd19acb7f6414a30"
 
 #
 # Linting
@@ -82,14 +83,12 @@ linux_task:
     fingerprint_script:
       - echo "${CIRRUS_TASK_NAME}"
       - echo "$(date +%Y).$(($(date +%U) / ${CACHE_PERIOD})):${NOX_CACHE_BUILD}"
-      - cat ${CIRRUS_WORKING_DIR}/requirements/manual/iris_commit.txt
       - sha256sum ${CIRRUS_WORKING_DIR}/requirements/ci/py$(echo ${PY_VER} | tr -d ".").yml
   data_cache:
     folder: ${IRIS_TEST_DATA_DIR}
     fingerprint_script:
-      - cat ${CIRRUS_WORKING_DIR}/requirements/manual/iris_test_data_ref.txt
+      - echo "${IRIS_TEST_DATA_REF}"
     populate_script:
-      - export IRIS_TEST_DATA_REF=$(cat ${CIRRUS_WORKING_DIR}/requirements/manual/iris_test_data_ref.txt)
       - wget --quiet https://github.com/SciTools/iris-test-data/archive/${IRIS_TEST_DATA_REF}.zip -O iris-test-data.zip
       - unzip -q iris-test-data.zip
       - mv iris-test-data-${IRIS_TEST_DATA_REF} ${IRIS_TEST_DATA_DIR}
