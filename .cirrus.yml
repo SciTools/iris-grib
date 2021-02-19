@@ -61,8 +61,7 @@ linux_task:
       PY_VER: 3.7
   env:
     PATH: ${HOME}/miniconda/bin:${PATH}
-    # There must be a more elegant way of doing this...
-    SITE_CFG: ${CIRRUS_WORKING_DIR}/.nox/lib/python${PY_VER}/site-packages/iris/etc/site.cfg
+
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   container:
     image: gcc:latest
@@ -96,6 +95,8 @@ linux_task:
       - unzip -q iris-test-data.zip
       - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
   tests_script:
+    - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
+    - export SITE_CFG=${IRIS_DIR}/etc/site.cfg
     - echo "[Resources]" > ${SITE_CFG}
     - echo "test_data_dir = ${IRIS_TEST_DATA_DIR}/test_data" >> ${SITE_CFG}
     - echo "[System]" >> ${SITE_CFG}
