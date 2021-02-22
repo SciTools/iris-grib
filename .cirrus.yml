@@ -100,14 +100,7 @@ tests_task:
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
-    - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")
-    - export SITE_CFG=${IRIS_DIR}/etc/site.cfg
-    - echo "[Resources]" > ${SITE_CFG}
-    - echo "test_data_dir = ${IRIS_TEST_DATA_DIR}/test_data" >> ${SITE_CFG}
-    - echo "[System]" >> ${SITE_CFG}
-    - echo "udunits2_path = ${PREFIX}/lib/libudunits2.so" >> ${SITE_CFG}
-    - "nox --session tests || :"  # force return error 0
-    - "coverage report -m || :"
+    - nox --session tests -- --iris-test-data ${IRIS_TEST_DATA_DIR}/test_data
 
 eccodes_task:
   matrix:
@@ -116,4 +109,4 @@ eccodes_task:
   name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
-    - "nox --session eccodes || :"  # force return error 0
+    - nox --session eccodes
