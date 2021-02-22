@@ -141,12 +141,12 @@ def prepare_venv(session):
     except:
         test_data_dir = ""
     
-    iris_config_file = os.path.join(session.virtualenv.location, 'site-pacakges', 'iris', 'etc', 'site.cfg')
-
-    try:
-        os.mkdir(os.path.join(session.virtualenv.location, 'site-pacakges', 'iris', 'etc'))
-    except FileExistsError as  e:
-        pass
+    iris_config_file = os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-packages', 'iris', 'etc', 'site.cfg')
+    
+    # try:
+    #     os.mkdir(os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-pacakges', 'iris', 'etc'))
+    # except FileExistsError as  e:
+    #     pass
 
     iris_config = f"""
 [Resources]
