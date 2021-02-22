@@ -5,6 +5,7 @@ For further details, see https://nox.thea.codes/en/stable/#
 
 """
 
+from csv import excel
 import hashlib
 import os
 from pathlib import Path
@@ -133,6 +134,32 @@ def prepare_venv(session):
     # Determine whether verbose diagnostics have been requested
     # from the command line.
     verbose = "-v" in session.posargs or "--verbose" in session.posargs
+
+    # add configuration to iris
+    try:
+        test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
+    except:
+        test_data_dir = ""
+    
+    iris_config_file = os.path.join(session.virtualenv.location, 'site-pacakges', 'iris', 'etc', 'site.cfg')
+
+    try:
+        os.mkdir(os.path.join(session.virtualenv.location, 'site-pacakges', 'iris', 'etc'))
+    except FileExistsError as  e:
+        pass
+
+    iris_config = f"""
+[Resources]
+test_data_dir = {test_data_dir}
+[System]
+udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.so')}
+"""
+
+    print("Iris config\n-----------")
+    print(iris_config)
+
+    with open(iris_config_file, 'w') as f:
+        f.write(iris_config)
 
     if verbose:
         session.run("conda", "info")
