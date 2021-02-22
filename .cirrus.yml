@@ -43,7 +43,7 @@ lint_task:
     folder: ~/.cache/pip
     fingerprint_script:
       - echo "${CIRRUS_TASK_NAME}"
-      - echo "$(date +%Y).$(($(date +%U) / ${CACHE_PERIOD})):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
   lint_script:
     - pip list
     - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
@@ -70,7 +70,7 @@ linux_task_template: &LINUX_TASK_TEMPLATE
     fingerprint_script:
       - wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
       - echo "${CIRRUS_OS} $(sha256sum miniconda.sh)"
-      - echo "$(date +%Y).$(($(date +%U) / ${CACHE_PERIOD})):${CONDA_CACHE_BUILD}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${CONDA_CACHE_BUILD}"
     populate_script:
       - bash miniconda.sh -b -p ${HOME}/miniconda
       - conda config --set always_yes yes --set changeps1 no
@@ -82,7 +82,7 @@ linux_task_template: &LINUX_TASK_TEMPLATE
     folder: ${CIRRUS_WORKING_DIR}/.nox
     fingerprint_script:
       - echo "${CIRRUS_TASK_NAME}"
-      - echo "$(date +%Y).$(($(date +%U) / ${CACHE_PERIOD})):${NOX_CACHE_BUILD}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${NOX_CACHE_BUILD}"
       - sha256sum ${CIRRUS_WORKING_DIR}/requirements/ci/py$(echo ${PY_VER} | tr -d ".").yml
   data_cache:
     folder: ${IRIS_TEST_DATA_DIR}
