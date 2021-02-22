@@ -4,13 +4,13 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.7
+  - python=3.8
 
 # Setup dependencies.
   - setuptools
 
 # Core dependencies.
-  - iris>=2.4
+  - iris>=3
   - python-eccodes
 
 # Optional dependencies.
