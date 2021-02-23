@@ -48,7 +48,7 @@ lint_task:
     - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
     - pip list
     - "nox --session flake8 || :"
-#     - nox --session black
+    - nox --session black
 
 
 #
@@ -56,7 +56,6 @@ lint_task:
 #
 linux_task_template: &LINUX_TASK_TEMPLATE
   auto_cancellation: true
-  allow_failures: true
   env:
     PATH: ${HOME}/miniconda/bin:${PATH}
 

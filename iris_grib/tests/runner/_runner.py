@@ -63,7 +63,7 @@ class TestRunner:
         self.unit_tests = False
         self.default_tests = False
         self.integration_tests = False
-        self.num_processors: int = None
+        self.num_processors = None
         self.create_missing = False
 
     def finalize_options(self):
