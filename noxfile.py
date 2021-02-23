@@ -5,6 +5,7 @@ For further details, see https://nox.thea.codes/en/stable/#
 
 """
 
+from asyncore import write
 from csv import excel
 import hashlib
 import os
@@ -93,6 +94,25 @@ def cache_cartopy(session):
             "import cartopy; cartopy.io.shapereader.natural_earth()",
         )
 
+def write_iris_config(session):
+    """Add test data dir and libudunits2.so to iris config"""
+    try:
+        test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
+    except:
+        test_data_dir = ""
+    iris_config_file = os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-packages', 'iris', 'etc', 'site.cfg')
+    iris_config = f"""
+[Resources]
+test_data_dir = {test_data_dir}
+[System]
+udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.so')}
+"""
+
+    print("Iris config\n-----------")
+    print(iris_config)
+
+    with open(iris_config_file, 'w') as f:
+        f.write(iris_config)
 
 def prepare_venv(session):
     """
@@ -126,6 +146,7 @@ def prepare_venv(session):
             "--prune",
         )
         session._run(*command, silent=True, external="error")
+        write_iris_config(session)
         cache_venv(session)
 
     cache_cartopy(session)
@@ -134,32 +155,6 @@ def prepare_venv(session):
     # Determine whether verbose diagnostics have been requested
     # from the command line.
     verbose = "-v" in session.posargs or "--verbose" in session.posargs
-
-    # add configuration to iris
-    try:
-        test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
-    except:
-        test_data_dir = ""
-    
-    iris_config_file = os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-packages', 'iris', 'etc', 'site.cfg')
-    
-    # try:
-    #     os.mkdir(os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-pacakges', 'iris', 'etc'))
-    # except FileExistsError as  e:
-    #     pass
-
-    iris_config = f"""
-[Resources]
-test_data_dir = {test_data_dir}
-[System]
-udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.so')}
-"""
-
-    print("Iris config\n-----------")
-    print(iris_config)
-
-    with open(iris_config_file, 'w') as f:
-        f.write(iris_config)
 
     if verbose:
         session.run("conda", "info")
