@@ -33,7 +33,7 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = '0.15.1'
+__version__ = '0.16.0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages']
@@ -342,55 +342,29 @@ class GribWrapper:
         self.extra_keys['_forecastTimeUnit'] = self._timeunit_string()
 
         # shape of the earth
+        soe_code = self.shapeOfTheEarth
+        # As this class is now *only* for GRIB1, 'shapeOfTheEarth' is not a
+        # value read from the actual file :  It is really a GRIB2 param, and
+        # the value is merely what eccodes (gribapi) gives as the default.
+        # This was always = 6, until eccodes 0.19, when it changed to 0.
+        # See https://jira.ecmwf.int/browse/ECC-811
+        # The two represent different sized spherical earths.
+        if soe_code not in (6, 0):
+            raise ValueError('Unexpected shapeOfTheEarth value =', soe_code)
 
-        # pre-defined sphere
-        if self.shapeOfTheEarth == 0:
+        soe_code = 6
+        # *FOR NOW* maintain the old behaviour (radius=6371229) in all cases,
+        # for backwards compatibility.
+        # However, this does not match the 'radiusOfTheEarth' default from the
+        # gribapi so is probably incorrect (see above issue ECC-811).
+        # So we may change this in future.
+
+        if soe_code == 0:
+            # New supposedly-correct default value, matches 'radiusOfTheEarth'.
             geoid = coord_systems.GeogCS(semi_major_axis=6367470)
-
-        # custom sphere
-        elif self.shapeOfTheEarth == 1:
-            geoid = coord_systems.GeogCS(
-                self.scaledValueOfRadiusOfSphericalEarth *
-                10 ** -self.scaleFactorOfRadiusOfSphericalEarth)
-
-        # IAU65 oblate sphere
-        elif self.shapeOfTheEarth == 2:
-            geoid = coord_systems.GeogCS(6378160, inverse_flattening=297.0)
-
-        # custom oblate spheroid (km)
-        elif self.shapeOfTheEarth == 3:
-            geoid = coord_systems.GeogCS(
-                semi_major_axis=self.scaledValueOfEarthMajorAxis *
-                10 ** -self.scaleFactorOfEarthMajorAxis * 1000.,
-                semi_minor_axis=self.scaledValueOfEarthMinorAxis *
-                10 ** -self.scaleFactorOfEarthMinorAxis * 1000.)
-
-        # IAG-GRS80 oblate spheroid
-        elif self.shapeOfTheEarth == 4:
-            geoid = coord_systems.GeogCS(6378137, None, 298.257222101)
-
-        # WGS84
-        elif self.shapeOfTheEarth == 5:
-            geoid = \
-                coord_systems.GeogCS(6378137, inverse_flattening=298.257223563)
-
-        # pre-defined sphere
-        elif self.shapeOfTheEarth == 6:
+        elif soe_code == 6:
+            # Old value, does *not* match the 'radiusOfTheEarth' parameter.
             geoid = coord_systems.GeogCS(6371229)
-
-        # custom oblate spheroid (m)
-        elif self.shapeOfTheEarth == 7:
-            geoid = coord_systems.GeogCS(
-                semi_major_axis=self.scaledValueOfEarthMajorAxis *
-                10 ** -self.scaleFactorOfEarthMajorAxis,
-                semi_minor_axis=self.scaledValueOfEarthMinorAxis *
-                10 ** -self.scaleFactorOfEarthMinorAxis)
-
-        elif self.shapeOfTheEarth == 8:
-            raise ValueError("unhandled shape of earth : grib earth shape = 8")
-
-        else:
-            raise ValueError("undefined shape of earth")
 
         gridType = gribapi.grib_get_string(self.grib_message, "gridType")
 

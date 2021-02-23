@@ -9,11 +9,10 @@
 # importing anything else
 import iris_grib.tests as tests
 
-import cf_units
 import gribapi
 from unittest import mock
 
-import iris
+from iris.aux_factory import HybridPressureFactory
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
@@ -109,27 +108,23 @@ class Test_GribLevels(tests.IrisTest):
         results = grib1_convert(gw)
 
         factory, = results[0]
-        self.assertEqual(factory.factory_class,
-                         iris.aux_factory.HybridPressureFactory)
+        self.assertEqual(factory.factory_class, HybridPressureFactory)
         delta, sigma, ref = factory.args
         self.assertEqual(delta, {'long_name': 'level_pressure'})
         self.assertEqual(sigma, {'long_name': 'sigma'})
         self.assertEqual(ref, Reference(name='surface_pressure'))
 
-        ml_ref = iris.coords.CoordDefn('model_level_number', None, None,
-                                       cf_units.Unit('1'),
-                                       {'positive': 'up'}, None, False)
-        lp_ref = iris.coords.CoordDefn(None, 'level_pressure', None,
-                                       cf_units.Unit('Pa'),
-                                       {}, None, False)
-        s_ref = iris.coords.CoordDefn(None, 'sigma', None,
-                                      cf_units.Unit('1'),
-                                      {}, None, False)
-
-        aux_coord_defns = [coord._as_defn() for coord, dim in results[8]]
-        self.assertIn(ml_ref, aux_coord_defns)
-        self.assertIn(lp_ref, aux_coord_defns)
-        self.assertIn(s_ref, aux_coord_defns)
+        coords_and_dims = results[8]
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'model_level_number']
+        self.assertEqual(coord.units, '1')
+        self.assertEqual(coord.attributes['positive'], 'up')
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'level_pressure']
+        self.assertEqual(coord.units, 'Pa')
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'sigma']
+        self.assertEqual(coord.units, '1')
 
 
 if __name__ == "__main__":

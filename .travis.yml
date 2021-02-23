@@ -3,8 +3,10 @@ dist: xenial
 
 env:
   matrix:
-    - PYTHON_VERSION=36
-    - PYTHON_VERSION=37
+    - PYTHON_VERSION=36 IRIS_SOURCE=master
+    - PYTHON_VERSION=37 IRIS_SOURCE=master
+    - PYTHON_VERSION=36 IRIS_SOURCE=release
+    - PYTHON_VERSION=37 IRIS_SOURCE=release
 
 install:
   # Download iris-test-data
@@ -40,6 +42,22 @@ install:
     export ENV_NAME="iris-grib-dev";
     export ENV_FILE="${TRAVIS_BUILD_DIR}/requirements/ci/py${PYTHON_VERSION}.yml";
 
+  # Optionally download latest Iris master, from the github repo,
+  # and replace the Iris dependency with Iris' underlying dependencies.
+  - >
+    if [[ "${IRIS_SOURCE}" == "master" ]]; then
+      IRIS_REF="https://github.com/SciTools/iris/archive/master.zip";
+      export IRIS_LOCATION="${HOME}/iris";
+      mkdir ${IRIS_LOCATION};
+      wget -O ${IRIS_LOCATION}/iris.zip ${IRIS_REF};
+      unzip -q ${IRIS_LOCATION}/iris.zip -d ${IRIS_LOCATION};
+
+      IRIS_ENV_FILE="${IRIS_LOCATION}/iris-master/requirements/ci/py${PYTHON_VERSION}.yml";
+      sed -i "/- iris/d" ${ENV_FILE};
+      echo "# IRIS DEPENDENCIES." >> ${ENV_FILE};
+      sed -ne "/dependencies:/,$ p" ${IRIS_ENV_FILE} | sed "1d" >> ${ENV_FILE};
+    fi;
+
   # Create environment.
   - >
     conda env create --quiet --file=${ENV_FILE};
@@ -60,6 +78,13 @@ install:
   # Configure Iris
   # --------------
   - echo "Configuring Iris";
+
+  # Optionally install latest Iris master, from downloaded source.
+  - >
+    if [[ "${IRIS_SOURCE}" == "master" ]]; then
+      cd ${IRIS_LOCATION}/iris-master;
+      python setup.py --quiet install;
+    fi;
 
   # Locate Iris installation.
   - export IRIS_DIR=$(python -c "import iris; import os.path; print(os.path.dirname(iris.__file__))")

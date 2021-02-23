@@ -1,12 +1,12 @@
 Release Notes
 =============
 
-=======
+
 What's new in iris-grib v0.16
 -----------------------------
 
 :Release: 0.16.0
-:Date: ?? Sep 2020
+:Date: 27 Jan 2021
 
 Features
 ^^^^^^^^
@@ -63,6 +63,24 @@ Bugs Fixed
   The plotting behaviour of this is now **the same again as before Iris 2.3** :
   only the Iris coordinate system has changed.
   `(PR#223) <https://github.com/SciTools/iris-grib/pull/223>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ fixed a problem where cubes were loading from GRIB 1 with a changed coordinate
+  system, since eccodes versions >= 1.19.  This resulted from a change to eccodes, which now returns a different
+  'shapeOfTheEarth' parameter : see `eccodes issue ECC-811 <https://jira.ecmwf.int/browse/ECC-811>`_ .  This resulted
+  in a coordinate system with a different earth radius.
+  For backwards compatibilty, the earth radius has now been fixed to the same value as previously.
+  However, pending further investigation, this value may be technically incorrect and we may
+  yet decide to change it in a future release.
+  `(PR#240) <https://github.com/SciTools/iris-grib/pull/240>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+
+* now requires Iris version >= 3.0
+  Needed for the bugfix in
+  `PR#223 <https://github.com/SciTools/iris-grib/pull/223>`_ .
+
 
 
 What's new in iris-grib v0.15.1

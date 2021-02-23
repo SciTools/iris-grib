@@ -238,9 +238,9 @@ def grib1_convert(grib):
     if \
             (grib.levelType == 'ml') and \
             (hasattr(grib, 'pv')):
-        aux_coords_and_dims.append((AuxCoord(grib.level, standard_name='model_level_number', attributes={'positive': 'up'}), None))
+        aux_coords_and_dims.append((AuxCoord(grib.level, standard_name='model_level_number', units=1, attributes={'positive': 'up'}), None))
         aux_coords_and_dims.append((DimCoord(grib.pv[grib.level], long_name='level_pressure', units='Pa'), None))
-        aux_coords_and_dims.append((AuxCoord(grib.pv[grib.numberOfCoordinatesValues//2 + grib.level], long_name='sigma'), None))
+        aux_coords_and_dims.append((AuxCoord(grib.pv[grib.numberOfCoordinatesValues//2 + grib.level], long_name='sigma', units=1), None))
         factories.append(Factory(HybridPressureFactory, [{'long_name': 'level_pressure'}, {'long_name': 'sigma'}, Reference('surface_pressure')]))
 
     if grib._originatingCentre != 'unknown':
