@@ -29,8 +29,7 @@ env:
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
   # Git commit hash for iris test data.
-  IRIS_TEST_DATA_REF: "fffb9b14b9cb472c5eb2ebb7fd19acb7f6414a30"
-  NOSE_WITH_COVERAGE: 1
+  IRIS_TEST_DATA_REF: "2.0.0"
 
 #
 # Linting
@@ -100,7 +99,7 @@ tests_task:
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
-    - nox --session tests -- --iris-test-data ${IRIS_TEST_DATA_DIR}/test_data
+    - nox --session tests -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
 
 eccodes_task:
   matrix:
