@@ -104,16 +104,3 @@ tests_task:
   << : *LINUX_TASK_TEMPLATE
   tests_script:
     - nox --session tests -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
-
-eccodes_task:
-  matrix:
-    env:
-      PY_VER: 3.6
-    env:
-      PY_VER: 3.7
-    env:
-      PY_VER: 3.8
-  name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
-  << : *LINUX_TASK_TEMPLATE
-  tests_script:
-    - nox --session eccodes

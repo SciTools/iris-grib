@@ -324,6 +324,8 @@ def tests(session, iris):
         session.install("--no-deps", "--editable", ".")
         write_iris_config(session)
 
+    session.run("python", "-m", "eccodes", "selfcheck")
+
     session.run(
         "python",
         "-m",
@@ -333,17 +335,6 @@ def tests(session, iris):
         "--integration-tests",
     )
 
-@nox.session(python=PY_VER, venv_backend="conda")
-def eccodes(session):
-    """Perform 'selfcheck' test of eccodes.
-    
-        Parameters
-        ----------
-        session: object
-            A `nox.sessions.Session` object.
-    """
-    prepare_venv(session)
-    session.run("python", "-m", "eccodes", "selfcheck")
 
 
 @nox.session(python=PY_VER, venv_backend="conda")
