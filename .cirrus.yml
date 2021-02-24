@@ -19,13 +19,13 @@ env:
   # Maximum cache period (in weeks) before forcing a new cache upload.
   CACHE_PERIOD: "2"
   # Increment the build number to force new conda cache upload.
-  CONDA_CACHE_BUILD: "99"
+  CONDA_CACHE_BUILD: "98"
   # Increment the build number to force new nox cache upload.
-  NOX_CACHE_BUILD: "99"
+  NOX_CACHE_BUILD: "98"
   # Increment the build number to force new pip cache upload.
-  PIP_CACHE_BUILD: "99"
+  PIP_CACHE_BUILD: "98"
   # Pip package to be upgraded/installed.
-  PIP_CACHE_PACKAGES: "pip setuptools wheel nox"
+  PIP_CACHE_PACKAGES: "pip setuptools wheel nox pyyaml"
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
   # Git commit hash for iris test data.
@@ -75,7 +75,7 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - conda config --set show_channel_urls True
       - conda config --add channels conda-forge
       - conda update --quiet --name base conda
-      - conda install --quiet --name base nox pip coverage yaml
+      - conda install --quiet --name base nox pip coverage pyyaml
   nox_cache:
     folder: ${CIRRUS_WORKING_DIR}/.nox
     fingerprint_script:
