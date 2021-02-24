@@ -14,6 +14,7 @@ from contextlib import contextmanager
 import hashlib
 import os
 from pathlib import Path
+from readline import write_history_file
 
 import nox
 import yaml
@@ -184,7 +185,7 @@ def prepare_venv(session, requirements_file=None):
     # Allow the user to do setup things
     # like installing iris-grib in development mode
     yield session
-
+    
     # Determine whether verbose diagnostics have been requested
     # from the command line.
     verbose = "-v" in session.posargs or "--verbose" in session.posargs
@@ -284,6 +285,8 @@ def tests(session, iris):
         if iris == 'source':
             session.install(iris_dir, '--no-deps')
         session.install("--no-deps", "--editable", ".")
+        write_iris_config(session)
+
 
     session.run(
         "python",
