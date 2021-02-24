@@ -270,7 +270,7 @@ def tests(session, iris):
         # combine iris and iris-grib requirements into one requirement list
         requirements = concat_requirements(
             f"requirements/ci/py{session.python.replace('.', '')}.yml",
-            f"../iris_dev/requirements/ci/py{session.python.replace('.', '')}.yml"
+            f"{iris_dir}/requirements/ci/py{session.python.replace('.', '')}.yml"
         )
         # remove iris dependencies, we'll install these from source
         requirements['dependencies'] = [x for x in requirements['dependencies'] if not x.startswith('iris')]
