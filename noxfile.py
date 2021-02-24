@@ -65,6 +65,23 @@ def venv_cached(session, requirements_file=None):
 
 
 def concat_requirements(primary, *others):
+    """Join together the dependencies of one or more requirements.yaml.
+
+    Parameters
+    ----------
+    primary: str
+        filename of the primary requirements.yaml
+
+    others: list[str]
+        list of additional requirements.yamls
+    
+    Returns
+    -------
+    yaml
+        Dictionary of yaml data: primary with the addition
+        of others[]['dependencies']
+
+    """
     with open(primary, 'r') as f:
         requirements = yaml.load(f, yaml.FullLoader)
 
@@ -119,7 +136,18 @@ def cache_cartopy(session):
         )
 
 def write_iris_config(session):
-    """Add test data dir and libudunits2.so to iris config"""
+    """Add test data dir and libudunits2.so to iris config.
+
+    test data dir is set from session pos args. i.e. can be 
+    configured by passing in on the command line:
+        nox --session tests -- --test-data-dir $TEST_DATA_DIR/test_data
+    
+    Parameters
+    ----------
+    session: object
+        A `nox.sessions.Session` object.
+
+    """
     try:
         test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
     except:
@@ -243,7 +271,7 @@ def black(session):
 @nox.parametrize('iris', IRIS_SOURCE)
 def tests(session, iris):
     """
-    Perform iris-grib tests against current development version of iris.
+    Perform iris-grib tests against release and development versions of iris.
 
     Parameters
     ----------
@@ -257,10 +285,17 @@ def tests(session, iris):
         iris_dir = f"{session.create_tmp()}/iris"
 
         if os.path.exists(iris_dir):
-            # shutil.rmtree(iris_dir) # TODO: replace this with git pull / checkout
-            pass
+            # cached.  update by pulling from origin/master
+            session.run(
+                "git",
+                "-C",
+                iris_dir,
+                "pull",
+                "origin/master",
+                external=True  # use git from host environment
+            )
         else:
-            session._run(
+            session.run(
                 "git",
                 "clone",
                 "https://github.com/scitools/iris.git",
@@ -274,8 +309,9 @@ def tests(session, iris):
             f"{iris_dir}/requirements/ci/py{session.python.replace('.', '')}.yml"
         )
         # remove iris dependencies, we'll install these from source
-        requirements['dependencies'] = [x for x in requirements['dependencies'] if not x.startswith('iris')]
-        req_file = session.create_tmp() + '/requirements.yaml'
+        requirements['dependencies'] = [x for x in requirements['dependencies'] 
+                                            if not x.startswith('iris')]
+        req_file = f"{session.create_tmp()}/requirements.yaml"
         with open(req_file, 'w') as f:
             yaml.dump(requirements, f)
     else:
@@ -286,7 +322,6 @@ def tests(session, iris):
             session.install(iris_dir, '--no-deps')
         session.install("--no-deps", "--editable", ".")
         write_iris_config(session)
-
 
     session.run(
         "python",

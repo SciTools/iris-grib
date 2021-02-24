@@ -95,8 +95,11 @@ linux_task_template: &LINUX_TASK_TEMPLATE
 tests_task:
   matrix:
     env:
+      PY_VER: 3.6
+    env:
       PY_VER: 3.7
-      # IRIS_SOURCE: 'develop'
+    env:
+      PY_VER: 3.8
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
@@ -105,7 +108,11 @@ tests_task:
 eccodes_task:
   matrix:
     env:
+      PY_VER: 3.6
+    env:
       PY_VER: 3.7
+    env:
+      PY_VER: 3.8
   name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
