@@ -1,0 +1,119 @@
+# Reference:
+#   - https://cirrus-ci.org/guide/writing-tasks/
+#   - https://cirrus-ci.org/guide/tips-and-tricks/#sharing-configuration-between-tasks
+#   - https://cirrus-ci.org/guide/linux/
+#   - https://cirrus-ci.org/guide/macOS/
+#   - https://cirrus-ci.org/guide/windows/
+#   - https://hub.docker.com/_/gcc/
+#   - https://hub.docker.com/_/python/
+
+#
+# Global defaults.
+#
+container:
+  image: python:3.8
+  cpu: 2
+  memory: 4G
+
+env:
+  # Maximum cache period (in weeks) before forcing a new cache upload.
+  CACHE_PERIOD: "2"
+  # Increment the build number to force new conda cache upload.
+  CONDA_CACHE_BUILD: "98"
+  # Increment the build number to force new nox cache upload.
+  NOX_CACHE_BUILD: "98"
+  # Increment the build number to force new pip cache upload.
+  PIP_CACHE_BUILD: "98"
+  # Pip package to be upgraded/installed.
+  PIP_CACHE_PACKAGES: "pip setuptools wheel nox pyyaml"
+  # Base directory for the iris-test-data.
+  IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
+  # Git commit hash for iris test data.
+  IRIS_TEST_DATA_REF: "2.0.0"
+
+#
+# Linting
+#
+lint_task:
+  auto_cancellation: true
+  allow_failures: true
+  name: "${CIRRUS_OS}: flake8 and black"
+  pip_cache:
+    folder: ~/.cache/pip
+    fingerprint_script:
+      - echo "${CIRRUS_TASK_NAME}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
+  lint_script:
+    - pip list
+    - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
+    - pip list
+    - "nox --session flake8 || :"
+    - "nox --session black || :"
+
+
+#
+# Testing (Linux)
+#
+linux_task_template: &LINUX_TASK_TEMPLATE
+  auto_cancellation: true
+  env:
+    PATH: ${HOME}/miniconda/bin:${PATH}
+
+  container:
+    image: gcc:latest
+    cpu: 6
+    memory: 8G    
+  conda_cache:
+    folder: ${HOME}/miniconda
+    fingerprint_script:
+      - wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+      - echo "${CIRRUS_OS} $(sha256sum miniconda.sh)"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${CONDA_CACHE_BUILD}"
+    populate_script:
+      - bash miniconda.sh -b -p ${HOME}/miniconda
+      - conda config --set always_yes yes --set changeps1 no
+      - conda config --set show_channel_urls True
+      - conda config --add channels conda-forge
+      - conda update --quiet --name base conda
+      - conda install --quiet --name base nox pip coverage pyyaml
+  nox_cache:
+    folder: ${CIRRUS_WORKING_DIR}/.nox
+    fingerprint_script:
+      - echo "${CIRRUS_TASK_NAME}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${NOX_CACHE_BUILD}"
+      - sha256sum ${CIRRUS_WORKING_DIR}/requirements/ci/py$(echo ${PY_VER} | tr -d ".").yml
+      - echo "IRIS ${IRIS_SOURCE}"
+  data_cache:
+    folder: ${IRIS_TEST_DATA_DIR}
+    fingerprint_script:
+      - echo "${IRIS_TEST_DATA_REF}"
+    populate_script:
+      - wget --quiet https://github.com/SciTools/iris-test-data/archive/v${IRIS_TEST_DATA_REF}.zip -O iris-test-data.zip
+      - unzip -q iris-test-data.zip
+      - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
+      
+tests_task:
+  matrix:
+    env:
+      PY_VER: 3.6
+    env:
+      PY_VER: 3.7
+    env:
+      PY_VER: 3.8
+  name: "${CIRRUS_OS}: py${PY_VER} tests"
+  << : *LINUX_TASK_TEMPLATE
+  tests_script:
+    - nox --session tests -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
+
+eccodes_task:
+  matrix:
+    env:
+      PY_VER: 3.6
+    env:
+      PY_VER: 3.7
+    env:
+      PY_VER: 3.8
+  name: "${CIRRUS_OS}: py${PY_VER} eccodes test"
+  << : *LINUX_TASK_TEMPLATE
+  tests_script:
+    - nox --session eccodes
