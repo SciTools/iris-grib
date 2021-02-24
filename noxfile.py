@@ -10,11 +10,11 @@ For further details, see https://nox.thea.codes/en/stable/#
 
 """
 
-from asyncore import write
-from csv import excel
+from contextlib import contextmanager
 import hashlib
 import os
 from pathlib import Path
+import yaml
 
 import nox
 
@@ -22,17 +22,18 @@ import nox
 #: Default to reusing any pre-existing nox environments.
 nox.options.reuse_existing_virtualenvs = True
 
-#: Name of the package to test.
+#: Name of the package to test. 
 PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
 PY_VER = os.environ.get("PY_VER", ["3.6", "3.7", "3.8"])
+IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ['source', 'conda-forge'])
 
 #: Default cartopy cache directory.
 CARTOPY_CACHE_DIR = os.environ.get("HOME") / Path(".local/share/cartopy")
 
 
-def venv_cached(session):
+def venv_cached(session, requirements_file=None):
     """
     Determine whether the nox session environment has been cached.
 
@@ -48,7 +49,10 @@ def venv_cached(session):
 
     """
     result = False
-    yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
+    if not requirements_file is None:
+        yml = Path(requirements_file)
+    else:
+        yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
     tmp_dir = Path(session.create_tmp())
     cache = tmp_dir / yml.name
     if cache.is_file():
@@ -60,7 +64,19 @@ def venv_cached(session):
     return result
 
 
-def cache_venv(session):
+def concat_requirements(primary, *others):
+    with open(primary, 'r') as f:
+        requirements = yaml.load(f, yaml.FullLoader)
+
+    for o in others:
+        with open(o, 'r') as f:
+            oreq = yaml.load(f, yaml.FullLoader)
+            requirements['dependencies'].extend(oreq['dependencies'])
+    
+    return requirements
+
+
+def cache_venv(session, requirements_file=None):
     """
     Cache the nox session environment.
 
@@ -73,7 +89,10 @@ def cache_venv(session):
         A `nox.sessions.Session` object.
 
     """
-    yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
+    if requirements_file is None:
+        yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
+    else:
+        yml = Path(requirements_file)
     with open(yml, "rb") as fi:
         hexdigest = hashlib.sha256(fi.read()).hexdigest()
     tmp_dir = Path(session.create_tmp())
@@ -105,6 +124,7 @@ def write_iris_config(session):
         test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
     except:
         test_data_dir = ""
+    
     iris_config_file = os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-packages', 'iris', 'etc', 'site.cfg')
     iris_config = f"""
 [Resources]
@@ -119,7 +139,8 @@ udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.s
     with open(iris_config_file, 'w') as f:
         f.write(iris_config)
 
-def prepare_venv(session):
+@contextmanager
+def prepare_venv(session, requirements_file=None):
     """
     Create and cache the nox session conda environment, and additionally
     provide conda environment package details and info.
@@ -130,6 +151,10 @@ def prepare_venv(session):
     ----------
     session: object
         A `nox.sessions.Session` object.
+    
+    requirements_file: str
+        Path to the environment requirements file.
+        Default: requirements/ci/py{PY_VER}.yml
 
     Notes
     -----
@@ -138,24 +163,28 @@ def prepare_venv(session):
       - https://github.com/theacodes/nox/issues/260
 
     """
-    if not venv_cached(session):
+    if requirements_file is None:
         # Determine the conda requirements yaml file.
-        fname = f"requirements/ci/py{session.python.replace('.', '')}.yml"
+        requirements_file = f"requirements/ci/py{session.python.replace('.', '')}.yml"
+
+    if not venv_cached(session, requirements_file):
         # Back-door approach to force nox to use "conda env update".
         command = (
             "conda",
             "env",
             "update",
             f"--prefix={session.virtualenv.location}",
-            f"--file={fname}",
+            f"--file={requirements_file}",
             "--prune",
         )
-        session._run(*command, silent=True, external="error")
-        write_iris_config(session)
+        session._run(*command, silent=True, external="error")    
         cache_venv(session)
 
     cache_cartopy(session)
-    session.install("--no-deps", "--editable", ".")
+
+    # Allow the user to do setup things
+    # like installing iris-grib in development mode
+    yield session
 
     # Determine whether verbose diagnostics have been requested
     # from the command line.
@@ -211,9 +240,10 @@ def black(session):
 
 
 @nox.session(python=PY_VER, venv_backend="conda")
-def tests(session):
+@nox.parametrize('iris', IRIS_SOURCE)
+def tests(session, iris):
     """
-    Perform iris-grib system, integration and unit tests.
+    Perform iris-grib tests against current development version of iris.
 
     Parameters
     ----------
@@ -221,7 +251,41 @@ def tests(session):
         A `nox.sessions.Session` object.
 
     """
-    prepare_venv(session)
+    
+    if iris == 'source':
+        # get latest iris
+        iris_dir = f"{session.create_tmp()}/iris"
+
+        if os.path.exists(iris_dir):
+            # shutil.rmtree(iris_dir) # TODO: replace this with git pull / checkout
+            pass
+        else:
+            session._run(
+                "git",
+                "clone",
+                "https://github.com/scitools/iris.git",
+                iris_dir,
+                external=True
+            )
+        
+        # combine iris and iris-grib requirements into one requirement list
+        requirements = concat_requirements(
+            f"requirements/ci/py{session.python.replace('.', '')}.yml",
+            f"../iris_dev/requirements/ci/py{session.python.replace('.', '')}.yml"
+        )
+        # remove iris dependencies, we'll install these from source
+        requirements['dependencies'] = [x for x in requirements['dependencies'] if not x.startswith('iris')]
+        req_file = session.create_tmp() + '/requirements.yaml'
+        with open(req_file, 'w') as f:
+            yaml.dump(requirements, f)
+    else:
+        req_file = f"requirements/ci/py{session.python.replace('.', '')}.yml"
+    
+    with prepare_venv(session, req_file):
+        if iris == 'source':
+            session.install(iris_dir, '--no-deps')
+        session.install("--no-deps", "--editable", ".")
+
     session.run(
         "python",
         "-m",
@@ -230,7 +294,6 @@ def tests(session):
         "--unit-tests",
         "--integration-tests",
     )
-
 
 @nox.session(python=PY_VER, venv_backend="conda")
 def eccodes(session):
