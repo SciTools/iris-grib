@@ -14,10 +14,9 @@ from contextlib import contextmanager
 import hashlib
 import os
 from pathlib import Path
-import yaml
 
 import nox
-
+import yaml
 
 #: Default to reusing any pre-existing nox environments.
 nox.options.reuse_existing_virtualenvs = True

@@ -48,7 +48,7 @@ lint_task:
     - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
     - pip list
     - "nox --session flake8 || :"
-    - nox --session black
+    - "nox --session black || :"
 
 
 #
@@ -75,7 +75,7 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - conda config --set show_channel_urls True
       - conda config --add channels conda-forge
       - conda update --quiet --name base conda
-      - conda install --quiet --name base nox pip coverage
+      - conda install --quiet --name base nox pip coverage yaml
   nox_cache:
     folder: ${CIRRUS_WORKING_DIR}/.nox
     fingerprint_script:
@@ -96,7 +96,7 @@ tests_task:
   matrix:
     env:
       PY_VER: 3.7
-      IRIS_SOURCE: 'develop'
+      # IRIS_SOURCE: 'develop'
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
