@@ -291,7 +291,8 @@ def tests(session, iris):
                 "-C",
                 iris_dir,
                 "pull",
-                "origin/master",
+                "origin",
+                "master",
                 external=True  # use git from host environment
             )
         else:
