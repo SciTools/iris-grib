@@ -98,8 +98,8 @@ tests_task:
       PY_VER: 3.6
     env:
       PY_VER: 3.7
-    env:
-      PY_VER: 3.8
+    # env:
+    #   PY_VER: 3.8
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
