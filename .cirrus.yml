@@ -33,22 +33,22 @@ env:
 
 #
 # Linting
-#
-lint_task:
-  auto_cancellation: true
-  allow_failures: true
-  name: "${CIRRUS_OS}: flake8 and black"
-  pip_cache:
-    folder: ~/.cache/pip
-    fingerprint_script:
-      - echo "${CIRRUS_TASK_NAME}"
-      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
-  lint_script:
-    - pip list
-    - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
-    - pip list
-    - "nox --session flake8 || :"
-    - "nox --session black || :"
+# [2021-03-01] jamesp: Currently not black or flake compliant.  
+#                      GitHub issues open #251 and #252
+# lint_task:
+#   auto_cancellation: true
+#   name: "${CIRRUS_OS}: flake8 and black"
+#   pip_cache:
+#     folder: ~/.cache/pip
+#     fingerprint_script:
+#       - echo "${CIRRUS_TASK_NAME}"
+#       - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
+#   lint_script:
+#     - pip list
+#     - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
+#     - pip list
+#     - nox --session flake8
+#     - nox --session black
 
 
 #
