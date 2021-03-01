@@ -12,7 +12,6 @@ Provides testing capabilities for installed copies of iris-grib.
 # imports later in the file.
 import multiprocessing
 import os
-import sys
 
 
 # NOTE: Do not inherit from object as distutils does not like it.

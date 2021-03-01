@@ -14,7 +14,6 @@ from contextlib import contextmanager
 import hashlib
 import os
 from pathlib import Path
-from readline import write_history_file
 
 import nox
 import yaml
