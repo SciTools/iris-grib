@@ -1,7 +1,7 @@
 iris-grib
 =========
 
-|CirrusCI|_
+|CirrusCI|_ |Coveralls|_
 
 GRIB interface for `Iris <https://github.com/SciTools/iris>`_.
 
@@ -21,3 +21,6 @@ terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
 
 .. |CirrusCI| image:: https://api.cirrus-ci.com/github/SciTools/iris-grib.svg?branch=master
 .. _CirrusCI: https://cirrus-ci.com/github/SciTools/iris-grib
+
+.. |Coveralls| image:: https://coveralls.io/repos/github/SciTools/iris-grib/badge.svg?branch=master
+.. _Coveralls: https://coveralls.io/github/SciTools/iris-grib?branch=master
