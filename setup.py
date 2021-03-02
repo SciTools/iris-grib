@@ -4,7 +4,6 @@ import os
 import os.path
 from setuptools import setup
 
-
 NAME = 'iris_grib'
 PYPI_NAME = 'iris-grib'
 PACKAGE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -93,7 +92,7 @@ setup_args = dict(
     # PyPI, but the user is required to install eccodes itself manually. See
     # ECMWF ecCodes installation documentation for more information.
     install_requires=pip_requirements("setup", "core"),
-    test_suite = f'{NAME}.tests',
+    test_loader="unittest:TestLoader",
     extras_require={
         "all": pip_requirements("all"),
         "test": pip_requirements("test"),
