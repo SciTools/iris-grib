@@ -487,12 +487,13 @@ def ellipsoid_geometry(section):
     return major, minor, radius
 
 
-def _calculate_increment(first_grid_point, last_grid_point, num_intervals):
-    # Calculates the directional increment from the difference between
-    # the grid point values divided by the total number of intervals.
-    # Required by template 0 & 40 when no increment values are provided.
-
-    return math.fabs(last_grid_point - first_grid_point) / num_intervals
+def _calculate_increment(first_point, last_point, n_increments, mod=math.inf):
+    """
+    Calculates the directional increment from the difference between the grid
+    point values divided by the total number of increments. Required by
+    template 0 & 40 when no increment values are provided.
+    """
+    return (last_point - first_point) % mod / n_increments
 
 
 def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
@@ -538,7 +539,8 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
              if res_flags.i_increments_given
              else _calculate_increment(section['longitudeOfFirstGridPoint'],
                                        section['longitudeOfLastGridPoint'],
-                                       section['Ni'] - 1))
+                                       section['Ni'] - 1,
+                                       360.0 / _GRID_ACCURACY_IN_DEGREES))
     x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
@@ -1071,7 +1073,8 @@ def grid_definition_template_40_regular(section, metadata, cs):
              if res_flags.i_increments_given
              else _calculate_increment(section['longitudeOfFirstGridPoint'],
                                        section['longitudeOfLastGridPoint'],
-                                       section['Ni'] - 1))
+                                       section['Ni'] - 1,
+                                       360.0 / _GRID_ACCURACY_IN_DEGREES))
     x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
