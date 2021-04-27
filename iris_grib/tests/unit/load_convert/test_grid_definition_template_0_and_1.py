@@ -49,18 +49,17 @@ class Test_resolution_flags(tests.IrisGribTest):
         })
         return section
 
-    def expected(self, x_dim, y_dim, x_neg=True, y_neg=True):
+    def expected(self, x_dim, y_dim, x_points, y_points, x_neg=True,
+                 y_neg=True):
         # Prepare the expectation.
         expected = empty_metadata()
         cs = iris.coord_systems.GeogCS(6367470)
-        x_points = np.array([0., 1., 2., 3., 4., 5.])
         if x_neg:
             x_points = x_points[::-1]
         x = iris.coords.DimCoord(x_points,
                                  standard_name='longitude',
                                  units='degrees',
                                  coord_system=cs)
-        y_points = np.array([0., 1., 2., 3., 4., 5.])
         if y_neg:
             y_points = y_points[::-1]
         y = iris.coords.DimCoord(y_points,
@@ -77,7 +76,10 @@ class Test_resolution_flags(tests.IrisGribTest):
         cs = iris.coord_systems.GeogCS(6367470)
         grid_definition_template_0_and_1(section, metadata, 'latitude',
                                          'longitude', cs)
-        expected = self.expected(1, 0, x_neg=False, y_neg=False)
+        x_points = np.array([0., 1., 2., 3., 4., 5.])
+        y_points = np.array([0., 1., 2., 3., 4., 5.])
+        expected = self.expected(1, 0, x_points, y_points, x_neg=False,
+                                 y_neg=False)
         self.assertEqual(metadata, expected)
 
     def test_with_increments(self):
@@ -89,7 +91,10 @@ class Test_resolution_flags(tests.IrisGribTest):
         cs = iris.coord_systems.GeogCS(6367470)
         grid_definition_template_0_and_1(section, metadata, 'latitude',
                                          'longitude', cs)
-        expected = self.expected(1, 0, x_neg=False, y_neg=False)
+        x_points = np.array([0., 1., 2., 3., 4., 5.])
+        y_points = np.array([0., 1., 2., 3., 4., 5.])
+        expected = self.expected(1, 0, x_points, y_points, x_neg=False,
+                                 y_neg=False)
         self.assertEqual(metadata, expected)
 
     def test_with_i_not_j_increment(self):
@@ -100,7 +105,10 @@ class Test_resolution_flags(tests.IrisGribTest):
         cs = iris.coord_systems.GeogCS(6367470)
         grid_definition_template_0_and_1(section, metadata, 'latitude',
                                          'longitude', cs)
-        expected = self.expected(1, 0, x_neg=False, y_neg=False)
+        x_points = np.array([0., 1., 2., 3., 4., 5.])
+        y_points = np.array([0., 1., 2., 3., 4., 5.])
+        expected = self.expected(1, 0, x_points, y_points, x_neg=False,
+                                 y_neg=False)
         self.assertEqual(metadata, expected)
 
     def test_with_j_not_i_increment(self):
@@ -111,7 +119,26 @@ class Test_resolution_flags(tests.IrisGribTest):
         cs = iris.coord_systems.GeogCS(6367470)
         grid_definition_template_0_and_1(section, metadata, 'latitude',
                                          'longitude', cs)
-        expected = self.expected(1, 0, x_neg=False, y_neg=False)
+        x_points = np.array([0., 1., 2., 3., 4., 5.])
+        y_points = np.array([0., 1., 2., 3., 4., 5.])
+        expected = self.expected(1, 0, x_points, y_points, x_neg=False,
+                                 y_neg=False)
+        self.assertEqual(metadata, expected)
+
+    def test_without_increments_crossing_0_lon(self):
+        section = self.section_3()
+        section['longitudeOfFirstGridPoint'] = 355000000
+        section['Ni'] = 11
+        metadata = empty_metadata()
+        cs = iris.coord_systems.GeogCS(6367470)
+        grid_definition_template_0_and_1(section, metadata, 'latitude',
+                                         'longitude', cs)
+        x_points = np.array(
+            [355., 356., 357., 358., 359., 360., 361., 362., 363., 364., 365.]
+        )
+        y_points = np.array([0., 1., 2., 3., 4., 5.])
+        expected = self.expected(1, 0, x_points, y_points, x_neg=False,
+                                 y_neg=False)
         self.assertEqual(metadata, expected)
 
 

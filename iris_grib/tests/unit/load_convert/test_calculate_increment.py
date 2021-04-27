@@ -24,6 +24,10 @@ class Test(tests.IrisGribTest):
         result = _calculate_increment(-5, 5, 10)
         self.assertEqual(result, 1)
 
+    def test_with_mod(self):
+        result = _calculate_increment(355, 5, 10, 360)
+        self.assertEqual(result, 1)
+
 
 if __name__ == '__main__':
     tests.main()
