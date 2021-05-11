@@ -29,7 +29,7 @@ class Test(tests.IrisGribTest):
     def test_unsupported_template(self):
         message = _make_test_message(
             {5: {'dataRepresentationTemplateNumber': 5}})
-        err_msg = 'Data Representation Section Template [5] is not supported'
+        err_msg = 'Template [5] is not supported'
         with self.assertRaisesRegex(TranslationError, err_msg):
             data_representation_section(message.sections[5])
 
