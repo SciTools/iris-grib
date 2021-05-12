@@ -2515,7 +2515,7 @@ def data_representation_section(section):
     template = section['dataRepresentationTemplateNumber']
 
     # Supported templates for both grid point and spectral data:
-    grid_point_templates = (0, 1, 2, 3, 4, 40, 41, 61)
+    grid_point_templates = (0, 1, 2, 3, 4, 40, 41, 42, 61)
     spectral_templates = (50, 51)
     supported_templates = grid_point_templates + spectral_templates
 
