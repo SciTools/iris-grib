@@ -2,6 +2,33 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.17
+-----------------------------
+
+:Release: 0.17.0
+:Date: 18 May 2021
+
+Features
+^^^^^^^^
+
+* `@m1dr <https://github.com/m1dr>`_ added support for GRIB regulation 92.1.8 
+  for loading GRIB files where the longitude increment is not given.
+  `(PR#261) <https://github.com/SciTools/iris-grib/pull/261>`_
+
+* `@lbdreyer <https://github.com/lbdreyer>`_ added support for loading grid 
+  point and spectral data with CCSDS recommended lossless compression, i.e. 
+  data representation template 42.
+  `(PR#264) <https://github.com/SciTools/iris-grib/pull/264>`_
+
+
+Internal
+^^^^^^^^
+
+* `@jamesp <https://github.com/jamesp>`_ moved CI testing to Cirrus CI.
+  `(PR#250) <https://github.com/SciTools/iris-grib/pull/250>`_
+
+
+
 What's new in iris-grib v0.16
 -----------------------------
 
