@@ -15,16 +15,16 @@ Features
   for loading GRIB files where the longitude increment is not given.
   `(PR#261) <https://github.com/SciTools/iris-grib/pull/261>`_
 
-* `@lbdreyer <https://github.com/lbdreyer>`_ added support for loading Grid 
+* `@lbdreyer <https://github.com/lbdreyer>`_ added support for loading grid 
   point and spectral data with CCSDS recommended lossless compression, i.e. 
-  data representation template 42
+  data representation template 42.
   `(PR#264) <https://github.com/SciTools/iris-grib/pull/264>`_
 
 
 Internal
 ^^^^^^^^
 
-* `@jamesp <https://github.com/jamesp>`_ moved CI testing to Cirrus CI
+* `@jamesp <https://github.com/jamesp>`_ moved CI testing to Cirrus CI.
   `(PR#250) <https://github.com/SciTools/iris-grib/pull/250>`_
 
 
