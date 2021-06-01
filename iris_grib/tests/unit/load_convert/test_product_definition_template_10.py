@@ -12,7 +12,6 @@ Test function :func:`iris_grib._load_convert.product_definition_template_10`.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from copy import deepcopy
 from unittest import mock
 
 from iris.coords import DimCoord

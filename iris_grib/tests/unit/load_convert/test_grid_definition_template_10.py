@@ -20,7 +20,6 @@ import iris.coords
 import iris.exceptions
 
 from iris_grib.tests.unit.load_convert import empty_metadata
-from iris_grib._load_convert import _MDI as MDI
 
 from iris_grib._load_convert import grid_definition_template_10
 

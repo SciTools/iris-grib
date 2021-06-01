@@ -14,7 +14,6 @@ import iris_grib.tests as tests
 
 import numpy as np
 
-import iris.coords
 from iris.coord_systems import GeogCS, Mercator
 
 from iris_grib._save_rules import grid_definition_template_10

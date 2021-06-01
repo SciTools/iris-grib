@@ -17,7 +17,6 @@ import cf_units
 import gribapi
 import numpy as np
 import numpy.ma as ma
-import cartopy.crs as ccrs
 
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory

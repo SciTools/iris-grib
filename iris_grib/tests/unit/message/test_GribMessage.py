@@ -41,7 +41,7 @@ class Test_messages_from_filename(tests.IrisGribTest):
                                         '3_layer.grib2'))
         my_file = open(filename)
 
-        import builtins
+        import builtins # noqa: F401
         self.patch('builtins.open', mock.Mock(return_value=my_file))
 
         messages = list(GribMessage.messages_from_filename(filename))

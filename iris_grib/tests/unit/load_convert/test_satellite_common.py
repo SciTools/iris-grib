@@ -12,9 +12,7 @@ Tests for `iris_grib._load_convert.satellite_common`.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from copy import deepcopy
 from unittest import mock
-import warnings
 
 from iris.coords import AuxCoord
 import numpy as np

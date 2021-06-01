@@ -9,11 +9,8 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
-import iris
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import Loader
 
-import iris_grib
 from iris_grib import GribWrapper
 from iris_grib import _load_generate
 from iris_grib.message import GribMessage

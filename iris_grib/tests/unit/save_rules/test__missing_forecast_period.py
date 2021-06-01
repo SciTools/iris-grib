@@ -12,9 +12,6 @@ Unit tests for :func:`iris_grib._save_rules._missing_forecast_period.`
 # importing anything else.
 import iris_grib.tests as tests
 
-import datetime
-import numpy as np
-
 from iris.cube import Cube
 from iris.coords import DimCoord
 

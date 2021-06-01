@@ -16,13 +16,10 @@ testing for the statistical method and spatial-processing type.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from unittest import mock
-
 import iris.coords
 from iris.exceptions import TranslationError
 from iris.coords import CellMethod, DimCoord
 
-import iris_grib
 from iris_grib.tests.unit.load_convert import empty_metadata
 from iris_grib.tests.unit.load_convert import LoadConvertTest
 from iris_grib._load_convert import _MDI as MDI

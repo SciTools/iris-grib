@@ -7,16 +7,13 @@
 # Historically this was auto-generated from
 # SciTools/iris-code-generators:tools/gen_rules.py
 
-import warnings
 
 from cf_units import CALENDAR_GREGORIAN, Unit
-import numpy as np
 
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import (ConversionMetadata, Factory, Reference,
-                                    ReferenceTarget)
+from iris.fileformats.rules import (ConversionMetadata, Factory, Reference)
 
 
 def grib1_convert(grib):

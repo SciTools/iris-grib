@@ -15,10 +15,10 @@ import iris_grib.tests as tests
 import numpy as np
 from unittest import mock
 
-from iris._lazy_data import as_concrete_data, is_lazy_data
+from iris._lazy_data import is_lazy_data
 from iris.exceptions import TranslationError
 
-from iris_grib import GribWrapper, GribDataProxy, _load_generate
+from iris_grib import GribWrapper, _load_generate
 
 
 _message_length = 1000

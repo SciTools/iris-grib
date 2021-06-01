@@ -11,7 +11,7 @@ plot control reasons : see documentation there.
 
 """
 
-import iris.tests
+import iris.tests # noqa: F401
 
 import inspect
 import os
@@ -24,8 +24,6 @@ try:
     from iris.tests import IrisTest_nometa as IrisTest
 except ImportError:
     from iris.tests import IrisTest
-
-from iris.tests import main, skip_data, get_data_path
 
 from iris_grib.message import GribMessage
 

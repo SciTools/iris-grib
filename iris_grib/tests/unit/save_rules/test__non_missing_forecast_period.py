@@ -9,8 +9,6 @@
 # importing anything else.
 import iris_grib.tests as tests
 
-import cf_units
-
 import iris
 
 from iris_grib._save_rules import _non_missing_forecast_period

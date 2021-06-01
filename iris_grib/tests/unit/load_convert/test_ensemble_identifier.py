@@ -13,7 +13,6 @@ Test function
 # before importing anything else.
 import iris_grib.tests as tests
 
-from copy import deepcopy
 from unittest import mock
 import warnings
 
