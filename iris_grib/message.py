@@ -246,7 +246,7 @@ class _DataProxy:
                 # `ma.masked_array` masks where input = 1, the opposite of
                 # the behaviour specified by the GRIB spec.
                 data = ma.masked_array(_data, mask=np.logical_not(bitmap),
-                                        fill_value=np.nan)
+                                       fill_value=np.nan)
             else:
                 msg = 'Shapes of data and bitmap do not match.'
                 raise TranslationError(msg)
