@@ -29,7 +29,10 @@ PY_VER = os.environ.get("PY_VER", ["3.6", "3.7"])
 IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ['source', 'conda-forge'])
 
 #: Default cartopy cache directory.
-CARTOPY_CACHE_DIR = os.environ.get("HOME") / Path(".local/share/cartopy")
+if os.getenv("HOME"):
+    CARTOPY_CACHE_DIR = Path(os.getenv("HOME")) / ".local/share/cartopy"
+else:
+    CARTOPY_CACHE_DIR = None
 
 
 def venv_cached(session, requirements_file=None):
