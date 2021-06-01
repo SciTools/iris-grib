@@ -25,7 +25,6 @@ import iris
 from iris._lazy_data import as_lazy_data
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
-from iris.util import _array_slice_ifempty
 
 from . import grib_phenom_translation as gptx
 from . import _save_rules
