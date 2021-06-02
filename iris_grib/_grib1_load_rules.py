@@ -45,42 +45,42 @@ def grib1_convert(grib):
     aux_coords_and_dims = []
 
     if \
-            (grib.gridType=="reduced_gg"):
+            (grib.gridType == "reduced_gg"):
         aux_coords_and_dims.append((AuxCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
         aux_coords_and_dims.append((AuxCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system), 0))
 
     if \
-            (grib.gridType=="regular_ll") and \
+            (grib.gridType == "regular_ll") and \
             (grib.jPointsAreConsecutive == 0):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
 
     if \
-            (grib.gridType=="regular_ll") and \
+            (grib.gridType == "regular_ll") and \
             (grib.jPointsAreConsecutive == 1):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
 
     if \
-            (grib.gridType=="regular_gg") and \
+            (grib.gridType == "regular_gg") and \
             (grib.jPointsAreConsecutive == 0):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
 
     if \
-            (grib.gridType=="regular_gg") and \
+            (grib.gridType == "regular_gg") and \
             (grib.jPointsAreConsecutive == 1):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
 
     if \
-            (grib.gridType=="rotated_ll") and \
+            (grib.gridType == "rotated_ll") and \
             (grib.jPointsAreConsecutive == 0):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
 
     if \
-            (grib.gridType=="rotated_ll") and \
+            (grib.gridType == "rotated_ll") and \
             (grib.jPointsAreConsecutive == 1):
         dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
         dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
@@ -225,12 +225,11 @@ def grib1_convert(grib):
 
     if \
             (grib.levelType == 'sfc'):
-
-            if (grib._cf_data is not None) and \
-            (grib._cf_data.set_height is not None):
-                aux_coords_and_dims.append((DimCoord(points=grib._cf_data.set_height,  long_name="height", units="m", attributes={'positive':'up'}), None))
-            elif grib.typeOfLevel == 'heightAboveGround': # required for NCAR
-                aux_coords_and_dims.append((DimCoord(points=grib.level,  long_name="height", units="m", attributes={'positive':'up'}), None))
+        if (grib._cf_data is not None) and \
+                (grib._cf_data.set_height is not None):
+            aux_coords_and_dims.append((DimCoord(points=grib._cf_data.set_height,  long_name="height", units="m", attributes={'positive': 'up'}), None))
+        elif grib.typeOfLevel == 'heightAboveGround':  # required for NCAR
+            aux_coords_and_dims.append((DimCoord(points=grib.level,  long_name="height", units="m", attributes={'positive': 'up'}), None))
 
     if \
             (grib.levelType == 'ml') and \

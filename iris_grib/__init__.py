@@ -20,7 +20,7 @@ import numpy as np
 import numpy.ma as ma
 
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
-import iris # noqa: F401
+import iris  # noqa: F401
 from iris._lazy_data import as_lazy_data
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError

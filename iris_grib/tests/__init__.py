@@ -11,7 +11,7 @@ plot control reasons : see documentation there.
 
 """
 
-import iris.tests # noqa: F401
+import iris.tests  # noqa: F401
 
 import inspect
 import os

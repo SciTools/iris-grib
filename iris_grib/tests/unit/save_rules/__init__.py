@@ -7,7 +7,7 @@
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
-import iris_grib.tests # noqa: F401
+import iris_grib.tests  # noqa: F401
 from unittest import mock
 
 import numpy as np
