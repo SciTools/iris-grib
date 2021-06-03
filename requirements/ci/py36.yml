@@ -10,7 +10,7 @@ dependencies:
   - setuptools
 
 # Core dependencies.
-  - iris>=3
+  - iris>=3.0.2
   - python-eccodes
 
 # Optional dependencies.
