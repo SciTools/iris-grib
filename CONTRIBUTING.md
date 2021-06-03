@@ -14,7 +14,7 @@ Getting started
 2. Fork the iris-grib repository, create your new fix/feature branch, and
    start commiting code.
  - The main
-   [Iris development guide](http://scitools.org.uk/iris/docs/latest/developers_guide/gitwash/git_development.html)
+   [Iris development guide](https://scitools-iris.readthedocs.io/en/latest/developers_guide/gitwash/index.html)
    has more detail.
 3. Remember to add appropriate documentation and tests to supplement any new or changed functionality.
 
