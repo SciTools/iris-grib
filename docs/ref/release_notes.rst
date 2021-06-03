@@ -22,6 +22,7 @@ Dependencies
 ^^^^^^^^^^^^
 
 * now requires Iris version >= 3.0.2
+* now requires Python version >= 3.7
 
 
 
