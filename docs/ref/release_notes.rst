@@ -11,19 +11,19 @@ What's new in iris-grib v0.17.1
 Bugs Fixed
 ^^^^^^^^^^
 
-*  `@TomDufall <https://github.com/TomDufall>`_ removed the empty slice
-   handling (originally added in v0.15.1) as this used  
-   iris.util._array_slice_ifempty which was removed in Iris v3.0.2 and is no
-   longer necessary.
-   `(PR#270) <https://github.com/SciTools/iris-grib/pull/270>`_
+* `@TomDufall <https://github.com/TomDufall>`_ removed the empty slice
+  handling (originally added in v0.15.1) as this used  
+  iris.util._array_slice_ifempty which was removed in Iris v3.0.2 and is no
+  longer necessary.
+  `(PR#270) <https://github.com/SciTools/iris-grib/pull/270>`_
 
 
 Dependencies
 ^^^^^^^^^^^^
 
-* now requires Iris version >= 3.0.2
+* now requires Iris version >= 3.0.2.
 
-* now requires Python version >= 3.7
+* now requires Python version >= 3.7.
 
 
 
