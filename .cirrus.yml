@@ -24,7 +24,7 @@ env:
   NOX_CACHE_BUILD: "98"
   # Increment the build number to force new pip cache upload.
   PIP_CACHE_BUILD: "98"
-  # Pip package to be upgraded/installed.
+  # Pip packages to be upgraded/installed.
   PIP_CACHE_PACKAGES: "pip setuptools wheel nox pyyaml"
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
@@ -80,10 +80,10 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - conda install --quiet --name base nox pip coverage pyyaml
   nox_cache:
     folder: ${CIRRUS_WORKING_DIR}/.nox
+    reupload_on_changes: true
     fingerprint_script:
       - echo "${CIRRUS_TASK_NAME}"
-      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${NOX_CACHE_BUILD}"
-      - sha256sum ${CIRRUS_WORKING_DIR}/requirements/ci/py$(echo ${PY_VER} | tr -d ".").yml
+      - echo "${NOX_CACHE_BUILD}"
       - echo "IRIS ${IRIS_SOURCE}"
   data_cache:
     folder: ${IRIS_TEST_DATA_DIR}
@@ -105,3 +105,14 @@ tests_task:
   tests_script:
     - export CONDA_OVERRIDE_LINUX="$(uname -r | cut -d'+' -f1)"
     - nox --session tests -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
+
+# [2021-06-07] lbdreyer: Doctests are failing, see Github Issue #274
+#doctest_task:
+#  matrix:
+#    env:
+#      PY_VER: 3.7
+#  name: "${CIRRUS_OS}: py${PY_VER} tests"
+#  << : *LINUX_TASK_TEMPLATE
+#  tests_script:
+#    - export CONDA_OVERRIDE_LINUX="$(uname -r | cut -d'+' -f1)"
+#    - nox --session doctest -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
