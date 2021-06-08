@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 
 import nox
+from nox.logger import logger
 import yaml
 
 #: Default to reusing any pre-existing nox environments.
@@ -25,99 +26,14 @@ nox.options.reuse_existing_virtualenvs = True
 PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
-PY_VER = os.environ.get("PY_VER", ["3.6", "3.7"])
+PY_VER = os.environ.get("PY_VER", ["3.7", "3.8"])
 IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ['source', 'conda-forge'])
 
 #: Default cartopy cache directory.
 CARTOPY_CACHE_DIR = os.environ.get("HOME") / Path(".local/share/cartopy")
 
 
-def venv_cached(session, requirements_file=None):
-    """
-    Determine whether the nox session environment has been cached.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    Returns
-    -------
-    bool
-        Whether the session has been cached.
-
-    """
-    result = False
-    if not requirements_file is None:
-        yml = Path(requirements_file)
-    else:
-        yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
-    tmp_dir = Path(session.create_tmp())
-    cache = tmp_dir / yml.name
-    if cache.is_file():
-        with open(yml, "rb") as fi:
-            expected = hashlib.sha256(fi.read()).hexdigest()
-        with open(cache, "r") as fi:
-            actual = fi.read()
-        result = actual == expected
-    return result
-
-
-def concat_requirements(primary, *others):
-    """Join together the dependencies of one or more requirements.yaml.
-
-    Parameters
-    ----------
-    primary: str
-        filename of the primary requirements.yaml
-
-    others: list[str]
-        list of additional requirements.yamls
-    
-    Returns
-    -------
-    yaml
-        Dictionary of yaml data: primary with the addition
-        of others[]['dependencies']
-
-    """
-    with open(primary, 'r') as f:
-        requirements = yaml.load(f, yaml.FullLoader)
-
-    for o in others:
-        with open(o, 'r') as f:
-            oreq = yaml.load(f, yaml.FullLoader)
-            requirements['dependencies'].extend(oreq['dependencies'])
-    
-    return requirements
-
-
-def cache_venv(session, requirements_file=None):
-    """
-    Cache the nox session environment.
-
-    This consists of saving a hexdigest (sha256) of the associated
-    conda requirements YAML file.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    if requirements_file is None:
-        yml = Path(f"requirements/ci/py{session.python.replace('.', '')}.yml")
-    else:
-        yml = Path(requirements_file)
-    with open(yml, "rb") as fi:
-        hexdigest = hashlib.sha256(fi.read()).hexdigest()
-    tmp_dir = Path(session.create_tmp())
-    cache = tmp_dir / yml.name
-    with open(cache, "w") as fo:
-        fo.write(hexdigest)
-
-
-def cache_cartopy(session):
+def _cache_cartopy(session: nox.sessions.Session) -> None:
     """
     Determine whether to cache the cartopy natural earth shapefiles.
 
@@ -134,8 +50,10 @@ def cache_cartopy(session):
             "import cartopy; cartopy.io.shapereader.natural_earth()",
         )
 
-def write_iris_config(session):
-    """Add test data dir and libudunits2.so to iris config.
+
+def _write_iris_config(session: nox.sessions.Session) -> None:
+    """
+    Add test data dir and libudunits2.so to iris config.
 
     test data dir is set from session pos args. i.e. can be 
     configured by passing in on the command line:
@@ -166,8 +84,75 @@ udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.s
     with open(iris_config_file, 'w') as f:
         f.write(iris_config)
 
+
+def _session_lockfile(session: nox.sessions.Session) -> Path:
+    """
+    Return the path of the session lockfile for the relevant python string
+    e.g ``py38``.
+
+    """
+    lockfile_name = f"py{session.python.replace('.', '')}-linux-64.lock"
+    return Path("requirements/nox.lock") / lockfile_name
+
+
+def _file_content(file_path: Path) -> str:
+    with file_path.open("r") as file:
+        return file.read()
+
+
+def _session_cachefile(session: nox.sessions.Session) -> Path:
+    """Return the path of the session lockfile cache."""
+    tmp_dir = Path(session.create_tmp())
+    cache = tmp_dir / _session_lockfile(session).name
+    return cache
+
+
+def _venv_populated(session: nox.sessions.Session) -> bool:
+    """
+    Return True if the Conda venv has been created and the list of packages in
+    the lockfile installed.
+
+    """
+    return _session_cachefile(session).is_file()
+
+
+def _venv_changed(session: nox.sessions.Session) -> bool:
+    """
+    Return True if the installed session is different to that specified in the
+    lockfile.
+
+    """
+    result = False
+    if _venv_populated(session):
+        expected = _file_content(_session_lockfile(session))
+        actual = _file_content(_session_cachefile(session))
+        result = actual != expected
+    return result
+
+
+def _install_and_cache_venv(session: nox.sessions.Session) -> None:
+    """
+    Install and cache the nox session environment.
+    This consists of saving a hexdigest (sha256) of the associated
+    Conda lock file.
+
+    Parameters
+    ----------
+    session: object
+        A `nox.sessions.Session` object.
+
+    """
+    lockfile = _session_lockfile(session)
+    session.conda_install(f"--file={lockfile}")
+
+    with open(lockfile, "rb") as fi:
+        hexdigest = hashlib.sha256(fi.read()).hexdigest()
+    with _session_cachefile(session).open("w") as cachefile:
+        cachefile.write(hexdigest)
+
+
 @contextmanager
-def prepare_venv(session, requirements_file=None):
+def prepare_venv(session: nox.sessions.Session, iris_source: str ='conda_forge') -> None:
     """
     Create and cache the nox session conda environment, and additionally
     provide conda environment package details and info.
@@ -178,10 +163,10 @@ def prepare_venv(session, requirements_file=None):
     ----------
     session: object
         A `nox.sessions.Session` object.
-    
-    requirements_file: str
-        Path to the environment requirements file.
-        Default: requirements/ci/py{PY_VER}.yml
+
+    iris_source: str
+        Determines where Iris was sourced from. Either 'conda_forge' (the
+        default), or 'master' which refers to the Iris master branch.
 
     Notes
     -----
@@ -190,96 +175,26 @@ def prepare_venv(session, requirements_file=None):
       - https://github.com/theacodes/nox/issues/260
 
     """
-    if requirements_file is None:
-        # Determine the conda requirements yaml file.
-        requirements_file = f"requirements/ci/py{session.python.replace('.', '')}.yml"
+    venv_dir = session.virtualenv.location_name
 
-    if not venv_cached(session, requirements_file):
-        # Back-door approach to force nox to use "conda env update".
-        command = (
-            "conda",
-            "env",
-            "update",
-            f"--prefix={session.virtualenv.location}",
-            f"--file={requirements_file}",
-            "--prune",
-        )
-        session._run(*command, silent=True, external="error")    
-        cache_venv(session)
+    if not _venv_populated(session):
+        # Environment has been created but packages not yet installed.
+        # Populate the environment from the lockfile.
+        logger.debug(f"Populating conda env: {venv_dir}")
+        _install_and_cache_venv(session)
 
-    cache_cartopy(session)
+    elif _venv_changed(session):
+        # Destroy the environment and rebuild it.
+        logger.debug(f"Lockfile changed. Recreating conda env: {venv_dir}")
+        _reuse_original = session.virtualenv.reuse_existing
+        session.virtualenv.reuse_existing = False
+        session.virtualenv.create()
+        _install_and_cache_venv(session)
+        session.virtualenv.reuse_existing = _reuse_original
 
-    # Allow the user to do setup things
-    # like installing iris-grib in development mode
-    yield session
-    
-    # Determine whether verbose diagnostics have been requested
-    # from the command line.
-    verbose = "-v" in session.posargs or "--verbose" in session.posargs
+    logger.debug(f"Environment up to date: {venv_dir}")
 
-    if verbose:
-        session.run("conda", "info")
-        session.run("conda", "list", f"--prefix={session.virtualenv.location}")
-        session.run(
-            "conda",
-            "list",
-            f"--prefix={session.virtualenv.location}",
-            "--explicit",
-        )
-
-
-@nox.session
-def flake8(session):
-    """
-    Perform flake8 linting of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("flake8")
-    # Execute the flake8 linter on the package.
-    session.run("flake8", PACKAGE)
-    # Execute the flake8 linter on this file.
-    session.run("flake8", __file__)
-
-
-@nox.session
-def black(session):
-    """
-    Perform black format checking of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("black==20.8b1")
-    # Execute the black format checker on the package.
-    session.run("black", "--check", PACKAGE)
-    # Execute the black format checker on this file.
-    session.run("black", "--check", __file__)
-
-
-@nox.session(python=PY_VER, venv_backend="conda")
-@nox.parametrize('iris', IRIS_SOURCE)
-def tests(session, iris):
-    """
-    Perform iris-grib tests against release and development versions of iris.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    
-    if iris == 'source':
+    if iris_source == 'master':
         # get latest iris
         iris_dir = f"{session.create_tmp()}/iris"
 
@@ -302,26 +217,84 @@ def tests(session, iris):
                 iris_dir,
                 external=True
             )
-        
-        # combine iris and iris-grib requirements into one requirement list
-        requirements = concat_requirements(
-            f"requirements/ci/py{session.python.replace('.', '')}.yml",
-            f"{iris_dir}/requirements/ci/py{session.python.replace('.', '')}.yml"
+        session.install(iris_dir, '--no-deps')
+
+    _cache_cartopy(session)
+    _write_iris_config(session)
+
+    # Install the iris-grib source in develop mode.
+    session.install("--no-deps", "--editable", ".")
+
+    # Determine whether verbose diagnostics have been requested
+    # from the command line.
+    verbose = "-v" in session.posargs or "--verbose" in session.posargs
+
+    if verbose:
+        session.run("conda", "info")
+        session.run("conda", "list", f"--prefix={venv_dir}")
+        session.run(
+            "conda",
+            "list",
+            f"--prefix={venv_dir}",
+            "--explicit",
         )
-        # remove iris dependencies, we'll install these from source
-        requirements['dependencies'] = [x for x in requirements['dependencies'] 
-                                            if not x.startswith('iris')]
-        req_file = f"{session.create_tmp()}/requirements.yaml"
-        with open(req_file, 'w') as f:
-            yaml.dump(requirements, f)
-    else:
-        req_file = f"requirements/ci/py{session.python.replace('.', '')}.yml"
-    
-    with prepare_venv(session, req_file):
-        if iris == 'source':
-            session.install(iris_dir, '--no-deps')
-        session.install("--no-deps", "--editable", ".")
-        write_iris_config(session)
+
+
+@nox.session
+def flake8(session: nox.sessions.Session):
+    """
+    Perform flake8 linting of iris-grib.
+
+    Parameters
+    ----------
+    session: object
+        A `nox.sessions.Session` object.
+
+    """
+    # Pip install the session requirements.
+    session.install("flake8")
+    # Execute the flake8 linter on the package.
+    session.run("flake8", PACKAGE)
+    # Execute the flake8 linter on this file.
+    session.run("flake8", __file__)
+
+
+@nox.session
+def black(session: nox.sessions.Session):
+    """
+    Perform black format checking of iris-grib.
+
+    Parameters
+    ----------
+    session: object
+        A `nox.sessions.Session` object.
+
+    """
+    # Pip install the session requirements.
+    session.install("black==20.8b1")
+    # Execute the black format checker on the package.
+    session.run("black", "--check", PACKAGE)
+    # Execute the black format checker on this file.
+    session.run("black", "--check", __file__)
+
+
+@nox.session(python=PY_VER, venv_backend="conda")
+@nox.parametrize('iris_source', IRIS_SOURCE)
+def tests(session: nox.sessions.Session, iris_source: str):
+    """
+    Perform iris-grib tests against release and development versions of iris.
+
+    Parameters
+    ----------
+    session: object
+        A `nox.sessions.Session` object.
+
+    iris_source: str
+        Either 'conda_forge' if using Iris from conda-forge, or 'master' if
+        installing Iris from the Iris' master branch.
+
+    """
+    prepare_venv(session, iris_source)
 
     session.run("python", "-m", "eccodes", "selfcheck")
 
@@ -335,9 +308,8 @@ def tests(session, iris):
     )
 
 
-
 @nox.session(python=PY_VER, venv_backend="conda")
-def doctest(session):
+def doctest(session: nox.sessions.Session):
     """
     Perform iris-grib doc-tests.
 
@@ -363,7 +335,7 @@ def doctest(session):
 
 
 @nox.session(python=PY_VER, venv_backend="conda")
-def linkcheck(session):
+def linkcheck(session: nox.sessions.Session):
     """
     Perform iris-grib doc link check.
 
