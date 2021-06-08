@@ -6,7 +6,7 @@ What's new in iris-grib v0.17.1
 -------------------------------
 
 :Release: 0.17.1
-:Date: 3 June 2021
+:Date: 8 June 2021
 
 Bugs Fixed
 ^^^^^^^^^^
