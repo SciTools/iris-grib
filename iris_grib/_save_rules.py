@@ -705,7 +705,7 @@ def set_discipline_and_parameter(cube, grib):
                 category = gc.category
                 number = gc.number
                 identity_found = True
-        except:
+        except Exception:
             pass
 
     if not identity_found:
