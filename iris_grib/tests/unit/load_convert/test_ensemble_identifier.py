@@ -23,9 +23,7 @@ from iris_grib._load_convert import ensemble_identifier
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        module = 'iris_grib._load_convert'
         self.patch('warnings.warn')
-        this = '{}.product_definition_template_0'.format(module)
 
     def _check(self, request_warning):
         section = {'perturbationNumber': 17}
@@ -35,6 +33,7 @@ class Test(tests.IrisGribTest):
             expected = DimCoord(section['perturbationNumber'],
                                 standard_name='realization',
                                 units='no_unit')
+            self.assertEqual(realization, expected)
 
             if request_warning:
                 warn_msgs = [mcall[1][0] for mcall in warnings.warn.mock_calls]

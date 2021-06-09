@@ -22,7 +22,6 @@ from iris_grib.tests.unit.load_convert import empty_metadata
 class Test(tests.IrisGribTest):
     def setUp(self):
         module = 'iris_grib._load_convert'
-        this_module = '{}.product_definition_template_10'.format(module)
         self.patch_statistical_fp_coord = self.patch(
             module + '.statistical_forecast_period_coord',
             return_value=mock.sentinel.dummy_fp_coord)

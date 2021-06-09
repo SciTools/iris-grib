@@ -274,7 +274,7 @@ class Test_data__unknown_grid_template(tests.IrisGribTest):
              7: {'codedValues': np.arange(12)}})
         with self.assertRaisesRegex(TranslationError,
                                     'template 999 is not supported'):
-            data = message.data
+            _ = message.data
 
 
 if __name__ == '__main__':

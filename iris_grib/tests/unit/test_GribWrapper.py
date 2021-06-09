@@ -110,7 +110,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
                  self.lookup(grib_message, 'Ni'))
         for offset in self.expected:
             with mock.patch('iris_grib.GribDataProxy') as mock_gdp:
-                gw = GribWrapper(grib_message, self.grib_fh)
+                _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with(shape, self.dtype,
                                              self.path, offset)
 
@@ -119,7 +119,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
         shape = (self.lookup(grib_message, 'numberOfValues'))
         for offset in self.expected:
             with mock.patch('iris_grib.GribDataProxy') as mock_gdp:
-                gw = GribWrapper(grib_message, self.grib_fh)
+                _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with((shape,), self.dtype,
                                              self.path, offset)
 
