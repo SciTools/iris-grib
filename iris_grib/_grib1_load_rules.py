@@ -44,50 +44,82 @@ def grib1_convert(grib):
     dim_coords_and_dims = []
     aux_coords_and_dims = []
 
-    if \
-            (grib.gridType == "reduced_gg"):
-        aux_coords_and_dims.append((AuxCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
-        aux_coords_and_dims.append((AuxCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system), 0))
+    if grib.gridType == "reduced_gg":
+        aux_coords_and_dims.append(
+            (
+                AuxCoord(
+                    grib._y_points,
+                    grib._y_coord_name,
+                    units='degrees',
+                    coord_system=grib._coord_system,
+                ),
+                0
+            )
+        )
+        aux_coords_and_dims.append(
+            (
+                AuxCoord(
+                    grib._x_points,
+                    grib._x_coord_name,
+                    units='degrees',
+                    coord_system=grib._coord_system,
+                ),
+                0
+            )
+        )
+    elif grib.gridType in ("regular_ll", "rotated_ll", "regular_gg"):
+        j_points_are_consecutive = grib.jPointsAreConsecutive
 
-    if \
-            (grib.gridType == "regular_ll") and \
-            (grib.jPointsAreConsecutive == 0):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
+        if j_points_are_consecutive not in (0, 1):
+            raise ValueError
 
-    if \
-            (grib.gridType == "regular_ll") and \
-            (grib.jPointsAreConsecutive == 1):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
+        dim_coords_and_dims.append(
+            (
+                DimCoord(
+                    grib._y_points,
+                    grib._y_coord_name,
+                    units='degrees',
+                    coord_system=grib._coord_system,
+                ),
+                j_points_are_consecutive
+            )
+        )
+        dim_coords_and_dims.append(
+            (
+                DimCoord(
+                    grib._x_points,
+                    grib._x_coord_name,
+                    units='degrees',
+                    coord_system=grib._coord_system,
+                    circular=grib._x_circular,
+                ),
+                int(not(j_points_are_consecutive))
+            )
+        )
 
-    if \
-            (grib.gridType == "regular_gg") and \
-            (grib.jPointsAreConsecutive == 0):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
-
-    if \
-            (grib.gridType == "regular_gg") and \
-            (grib.jPointsAreConsecutive == 1):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
-
-    if \
-            (grib.gridType == "rotated_ll") and \
-            (grib.jPointsAreConsecutive == 0):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 0))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 1))
-
-    if \
-            (grib.gridType == "rotated_ll") and \
-            (grib.jPointsAreConsecutive == 1):
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units='degrees', coord_system=grib._coord_system), 1))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units='degrees', coord_system=grib._coord_system, circular=grib._x_circular), 0))
-
-    if grib.gridType in ["polar_stereographic", "lambert"]:
-        dim_coords_and_dims.append((DimCoord(grib._y_points, grib._y_coord_name, units="m", coord_system=grib._coord_system), 0))
-        dim_coords_and_dims.append((DimCoord(grib._x_points, grib._x_coord_name, units="m", coord_system=grib._coord_system), 1))
+    elif grib.gridType in ["polar_stereographic", "lambert"]:
+        dim_coords_and_dims.append(
+            (
+                DimCoord(
+                    grib._y_points,
+                    grib._y_coord_name,
+                    units="m",
+                    coord_system=grib._coord_system,
+                ),
+                0
+            )
+        )
+        dim_coords_and_dims.append(
+            (
+                DimCoord(
+                    grib._x_points,
+                    grib._x_coord_name,
+                    units="m",
+                    coord_system=grib._coord_system,
+                ),
+                1
+            )
+        )
 
     if \
             (grib.table2Version < 128) and \
@@ -119,19 +151,38 @@ def grib1_convert(grib):
     if \
             (grib.table2Version >= 128) and \
             (grib._cf_data is None):
-        long_name = "UNKNOWN LOCAL PARAM " + str(grib.indicatorOfParameter) + "." + str(grib.table2Version)
+        long_name = f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}"\
+                    f".{grib.table2Version}"
         units = "???"
 
     if \
             (grib.table2Version == 1) and \
             (grib.indicatorOfParameter >= 128):
-        long_name = "UNKNOWN LOCAL PARAM " + str(grib.indicatorOfParameter) + "." + str(grib.table2Version)
+        long_name = f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}"\
+                    f".{grib.table2Version}"
         units = "???"
 
-    if \
-            (grib._phenomenonDateTime != -1.0):
-        aux_coords_and_dims.append((DimCoord(points=grib.startStep, standard_name='forecast_period', units=grib._forecastTimeUnit), None))
-        aux_coords_and_dims.append((DimCoord(points=grib.phenomenon_points('hours'), standard_name='time', units=Unit('hours since epoch', CALENDAR_GREGORIAN)), None))
+    if grib._phenomenonDateTime != -1.0:
+        aux_coords_and_dims.append(
+            (
+                DimCoord(
+                    points=grib.startStep,
+                    standard_name='forecast_period',
+                    units=grib._forecastTimeUnit,
+                ),
+                None
+            )
+        )
+        aux_coords_and_dims.append(
+            (
+                DimCoord(
+                    points=grib.phenomenon_points('hours'),
+                    standard_name='time',
+                    units=Unit('hours since epoch', CALENDAR_GREGORIAN),
+                ),
+                None
+            )
+        )
 
     def add_bounded_time_coords(aux_coords_and_dims, grib):
         t_bounds = grib.phenomenon_bounds('hours')
@@ -219,28 +270,94 @@ def grib1_convert(grib):
         add_bounded_time_coords(aux_coords_and_dims, grib)
         cell_methods.append(CellMethod("standard_deviation", coords="time"))
 
-    if \
-            (grib.levelType == 'pl'):
-        aux_coords_and_dims.append((DimCoord(points=grib.level,  long_name="pressure", units="hPa"), None))
+    if grib.levelType == 'pl':
+        aux_coords_and_dims.append(
+            (
+                DimCoord(
+                    points=grib.level, long_name="pressure", units="hPa"
+                ),
+                None
+            )
+        )
 
-    if \
-            (grib.levelType == 'sfc'):
-        if (grib._cf_data is not None) and \
-                (grib._cf_data.set_height is not None):
-            aux_coords_and_dims.append((DimCoord(points=grib._cf_data.set_height,  long_name="height", units="m", attributes={'positive': 'up'}), None))
+    if grib.levelType == 'sfc':
+        if grib._cf_data is not None and grib._cf_data.set_height is not None:
+            aux_coords_and_dims.append(
+                (
+                    DimCoord(
+                        points=grib._cf_data.set_height,
+                        long_name="height",
+                        units="m",
+                        attributes={'positive': 'up'},
+                    ),
+                    None
+                )
+            )
         elif grib.typeOfLevel == 'heightAboveGround':  # required for NCAR
-            aux_coords_and_dims.append((DimCoord(points=grib.level,  long_name="height", units="m", attributes={'positive': 'up'}), None))
+            aux_coords_and_dims.append(
+                (
+                    DimCoord(
+                        points=grib.level,
+                        long_name="height",
+                        units="m",
+                        attributes={'positive': 'up'},
+                    ),
+                    None
+                )
+            )
 
-    if \
-            (grib.levelType == 'ml') and \
-            (hasattr(grib, 'pv')):
-        aux_coords_and_dims.append((AuxCoord(grib.level, standard_name='model_level_number', units=1, attributes={'positive': 'up'}), None))
-        aux_coords_and_dims.append((DimCoord(grib.pv[grib.level], long_name='level_pressure', units='Pa'), None))
-        aux_coords_and_dims.append((AuxCoord(grib.pv[grib.numberOfCoordinatesValues//2 + grib.level], long_name='sigma', units=1), None))
-        factories.append(Factory(HybridPressureFactory, [{'long_name': 'level_pressure'}, {'long_name': 'sigma'}, Reference('surface_pressure')]))
+    if grib.levelType == 'ml' and hasattr(grib, 'pv'):
+        aux_coords_and_dims.append(
+            (
+                AuxCoord(
+                    grib.level,
+                    standard_name='model_level_number',
+                    units=1,
+                    attributes={'positive': 'up'},
+                ),
+                None
+            )
+        )
+        aux_coords_and_dims.append(
+            (
+                DimCoord(
+                    grib.pv[grib.level], long_name='level_pressure', units='Pa'
+                ),
+                None
+            )
+        )
+        aux_coords_and_dims.append(
+            (
+                AuxCoord(
+                    grib.pv[grib.numberOfCoordinatesValues//2 + grib.level],
+                    long_name='sigma',
+                    units=1,
+                ),
+                None
+            )
+        )
+        factories.append(
+            Factory(
+                HybridPressureFactory,
+                [
+                    {'long_name': 'level_pressure'},
+                    {'long_name': 'sigma'},
+                    Reference('surface_pressure'),
+                ]
+            )
+        )
 
     if grib._originatingCentre != 'unknown':
-        aux_coords_and_dims.append((AuxCoord(points=grib._originatingCentre, long_name='originating_centre', units='no_unit'), None))
+        aux_coords_and_dims.append(
+            (
+                AuxCoord(
+                    points=grib._originatingCentre,
+                    long_name='originating_centre',
+                    units='no_unit',
+                ),
+                None
+            )
+        )
 
     return ConversionMetadata(factories, references, standard_name, long_name,
                               units, attributes, cell_methods,
