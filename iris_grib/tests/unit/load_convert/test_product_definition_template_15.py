@@ -87,14 +87,14 @@ class Test(LoadConvertTest):
     def test_bad_statistic_method(self):
         section = section_4_sample()
         section['statisticalProcess'] = 999
-        msg = 'unsupported statistical process type \[999\]'
+        msg = r'unsupported statistical process type \[999\]'
         with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 
     def test_bad_spatial_processing_code(self):
         section = section_4_sample()
         section['spatialProcessing'] = 999
-        msg = 'unsupported spatial processing type \[999\]'
+        msg = r'unsupported spatial processing type \[999\]'
         with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 

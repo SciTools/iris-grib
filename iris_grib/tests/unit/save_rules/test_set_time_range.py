@@ -80,7 +80,7 @@ class Test(tests.IrisGribTest):
             warnings.simplefilter("always")
             set_time_range(self.coord, mock.sentinel.grib)
         self.assertEqual(len(warn), 1)
-        msg = 'Truncating floating point lengthOfTimeRange 10\.8?9+ ' \
+        msg = r'Truncating floating point lengthOfTimeRange 10\.8?9+ ' \
               'to integer value 10'
         self.assertRegex(str(warn[0].message), msg)
         mock_set_long.assert_any_call(mock.sentinel.grib,
