@@ -31,7 +31,7 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = '0.17.dev0'
+__version__ = '0.17.1'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages']
@@ -96,19 +96,13 @@ class GribDataProxy:
         return len(self.shape)
 
     def __getitem__(self, keys):
-        # Avoid fetching file data just to return an 'empty' result.
-        # Needed because of how dask.array.from_array behaves since Dask v2.0.
-        result = _array_slice_ifempty(keys, self.shape, self.dtype)
-        if result is None:
-            with open(self.path, 'rb') as grib_fh:
-                grib_fh.seek(self.offset)
-                grib_message = gribapi.grib_new_from_file(grib_fh)
-                data = _message_values(grib_message, self.shape)
-                gribapi.grib_release(grib_message)
+        with open(self.path, 'rb') as grib_fh:
+            grib_fh.seek(self.offset)
+            grib_message = gribapi.grib_new_from_file(grib_fh)
+            data = _message_values(grib_message, self.shape)
+            gribapi.grib_release(grib_message)
 
-            result = data.__getitem__(keys)
-
-        return result
+        return data.__getitem__(keys)
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
