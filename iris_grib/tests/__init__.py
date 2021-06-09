@@ -25,6 +25,8 @@ try:
 except ImportError:
     from iris.tests import IrisTest
 
+from iris.tests import main, skip_data, get_data_path  # noqa: F401
+
 from iris_grib.message import GribMessage
 
 

@@ -11,6 +11,7 @@ from unittest import mock
 
 from iris.fileformats.rules import Loader
 
+import iris_grib
 from iris_grib import load_cubes
 
 
