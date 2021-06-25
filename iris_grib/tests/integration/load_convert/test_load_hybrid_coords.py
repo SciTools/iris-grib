@@ -13,7 +13,7 @@ Integration test for loading hybrid height data.
 import iris_grib.tests as tests
 
 
-from iris import load_cube, load
+from iris import load_cube
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
 

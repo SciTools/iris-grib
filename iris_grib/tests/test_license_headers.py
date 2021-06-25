@@ -11,7 +11,6 @@ Unit tests for iris-grib license header conformance.
 from datetime import datetime
 from fnmatch import fnmatch
 import os
-import re
 import subprocess
 import unittest
 

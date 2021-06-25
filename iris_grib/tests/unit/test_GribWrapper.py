@@ -15,10 +15,10 @@ import iris_grib.tests as tests
 import numpy as np
 from unittest import mock
 
-from iris._lazy_data import as_concrete_data, is_lazy_data
+from iris._lazy_data import is_lazy_data
 from iris.exceptions import TranslationError
 
-from iris_grib import GribWrapper, GribDataProxy, _load_generate
+from iris_grib import GribWrapper, _load_generate
 
 
 _message_length = 1000
@@ -110,7 +110,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
                  self.lookup(grib_message, 'Ni'))
         for offset in self.expected:
             with mock.patch('iris_grib.GribDataProxy') as mock_gdp:
-                gw = GribWrapper(grib_message, self.grib_fh)
+                _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with(shape, self.dtype,
                                              self.path, offset)
 
@@ -119,7 +119,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
         shape = (self.lookup(grib_message, 'numberOfValues'))
         for offset in self.expected:
             with mock.patch('iris_grib.GribDataProxy') as mock_gdp:
-                gw = GribWrapper(grib_message, self.grib_fh)
+                _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with((shape,), self.dtype,
                                              self.path, offset)
 

@@ -213,8 +213,8 @@ class TestGribSimple(tests.IrisGribTest):
         # Parameter translation now uses the GribWrapper, so we must convert
         # the Mock-based fake message to a FakeGribMessage.
         with mock.patch('iris_grib.gribapi', _mock_gribapi):
-                grib_message = FakeGribMessage(**grib.__dict__)
-                wrapped_msg = iris_grib.GribWrapper(grib_message)
-                cube, _, _ = iris.fileformats.rules._make_cube(
-                    wrapped_msg, iris_grib._grib1_load_rules.grib1_convert)
+            grib_message = FakeGribMessage(**grib.__dict__)
+            wrapped_msg = iris_grib.GribWrapper(grib_message)
+            cube, _, _ = iris.fileformats.rules._make_cube(
+                wrapped_msg, iris_grib._grib1_load_rules.grib1_convert)
         return cube

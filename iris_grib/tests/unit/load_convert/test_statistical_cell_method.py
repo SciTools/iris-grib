@@ -67,21 +67,21 @@ class Test(tests.IrisGribTest):
     def test_fail_multiple_ranges(self):
         self.section['numberOfTimeRange'] = 2
         with self.assertRaisesRegex(TranslationError,
-                                    'multiple time ranges \[2\]'):
+                                    r'multiple time ranges \[2\]'):
             statistical_cell_method(self.section)
 
     def test_fail_unknown_statistic(self):
         self.section['typeOfStatisticalProcessing'] = 17
         with self.assertRaisesRegex(
                 TranslationError,
-                'contains an unsupported statistical process type \[17\]'):
+                r'contains an unsupported statistical process type \[17\]'):
             statistical_cell_method(self.section)
 
     def test_fail_bad_increment_type(self):
         self.section['typeOfTimeIncrement'] = 7
         with self.assertRaisesRegex(
                 TranslationError,
-                'time-increment type \[7\] is not supported'):
+                r'time-increment type \[7\] is not supported'):
             statistical_cell_method(self.section)
 
     def test_pdt_9(self):

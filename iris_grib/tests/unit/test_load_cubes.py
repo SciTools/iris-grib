@@ -9,7 +9,6 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
-import iris
 from iris.fileformats.rules import Loader
 
 import iris_grib

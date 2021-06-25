@@ -17,12 +17,11 @@ from pathlib import Path
 
 import nox
 from nox.logger import logger
-import yaml
 
 #: Default to reusing any pre-existing nox environments.
 nox.options.reuse_existing_virtualenvs = True
 
-#: Name of the package to test. 
+#: Name of the package to test.
 PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
@@ -55,10 +54,10 @@ def _write_iris_config(session: nox.sessions.Session) -> None:
     """
     Add test data dir and libudunits2.so to iris config.
 
-    test data dir is set from session pos args. i.e. can be 
+    test data dir is set from session pos args. i.e. can be
     configured by passing in on the command line:
         nox --session tests -- --test-data-dir $TEST_DATA_DIR/test_data
-    
+
     Parameters
     ----------
     session: object
@@ -66,16 +65,28 @@ def _write_iris_config(session: nox.sessions.Session) -> None:
 
     """
     try:
-        test_data_dir = session.posargs[session.posargs.index('--test-data-dir')+1]
-    except:
+        test_data_dir = session.posargs[
+            session.posargs.index('--test-data-dir')+1
+            ]
+    except Exception:
         test_data_dir = ""
-    
-    iris_config_file = os.path.join(session.virtualenv.location, 'lib', f'python{session.python}', 'site-packages', 'iris', 'etc', 'site.cfg')
+
+    iris_config_file = os.path.join(
+        session.virtualenv.location,
+        'lib',
+        f'python{session.python}',
+        'site-packages',
+        'iris',
+        'etc',
+        'site.cfg',
+    )
     iris_config = f"""
 [Resources]
 test_data_dir = {test_data_dir}
 [System]
-udunits2_path = {os.path.join(session.virtualenv.location, 'lib', 'libudunits2.so')}
+udunits2_path = {
+    os.path.join(session.virtualenv.location,'lib', 'libudunits2.so')
+}
 """
 
     print("Iris config\n-----------")
@@ -152,7 +163,9 @@ def _install_and_cache_venv(session: nox.sessions.Session) -> None:
 
 
 @contextmanager
-def prepare_venv(session: nox.sessions.Session, iris_source: str ='conda_forge') -> None:
+def prepare_venv(
+    session: nox.sessions.Session, iris_source: str = 'conda_forge'
+) -> None:
     """
     Create and cache the nox session conda environment, and additionally
     provide conda environment package details and info.
