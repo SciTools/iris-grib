@@ -96,10 +96,22 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       
 tests_task:
   matrix:
-    - env:
+    - name: repo_py37
+      env:
         PY_VER: 3.7
-    - env:
+        IRIS_SOURCE: "source"
+    - name: repo_py38
+      env:
         PY_VER: 3.8
+        IRIS_SOURCE: "source"
+    - name: release_py37
+      env:
+        PY_VER: 3.7
+        IRIS_SOURCE: "conda-forge"
+    - name: release_py38
+      env:
+        PY_VER: 3.8
+        IRIS_SOURCE: "conda-forge"
 
   name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
