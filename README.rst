@@ -19,11 +19,11 @@ terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
 
 \(C) British Crown Copyright 2010 - 2021, Met Office
 
-.. |CirrusCI| image:: https://api.cirrus-ci.com/github/SciTools/iris-grib.svg?branch=master
+.. |CirrusCI| image:: https://api.cirrus-ci.com/github/SciTools/iris-grib.svg?branch=main
 .. _CirrusCI: https://cirrus-ci.com/github/SciTools/iris-grib
 
-.. |Coveralls| image:: https://coveralls.io/repos/github/SciTools/iris-grib/badge.svg?branch=master
-.. _Coveralls: https://coveralls.io/github/SciTools/iris-grib?branch=master
+.. |Coveralls| image:: https://coveralls.io/repos/github/SciTools/iris-grib/badge.svg?branch=main
+.. _Coveralls: https://coveralls.io/github/SciTools/iris-grib?branch=main
 
 .. |conda-forge| image:: https://img.shields.io/conda/vn/conda-forge/iris-grib?color=orange&label=conda-forge&logo=conda-forge&logoColor=white
 .. _conda-forge: https://anaconda.org/conda-forge/iris-grib
@@ -32,10 +32,10 @@ terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
 .. _pypi: https://pypi.org/project/iris-grib
 
 .. |License| image:: https://img.shields.io/github/license/SciTools/iris-grib?style=plastic
-.. _License: https://github.com/SciTools/iris-grib/blob/master/COPYING
+.. _License: https://github.com/SciTools/iris-grib/blob/main/COPYING
 
 .. |Contributors| image:: https://img.shields.io/github/contributors/SciTools/iris-grib?style=plastic
 .. _Contributors: https://github.com/SciTools/iris-grib/graphs/contributors
 
 .. |Commits| image:: https://img.shields.io/github/commits-since/SciTools/iris-grib/latest.svg?style=plastic
-.. _Commits: https://github.com/SciTools/iris-grib/commits/master
+.. _Commits: https://github.com/SciTools/iris-grib/commits/main
