@@ -284,14 +284,14 @@ def tests(session, iris):
         iris_dir = f"{session.create_tmp()}/iris"
 
         if os.path.exists(iris_dir):
-            # cached.  update by pulling from origin/master
+            # cached.  update by pulling from origin/main
             session.run(
                 "git",
                 "-C",
                 iris_dir,
                 "pull",
                 "origin",
-                "master",
+                "main",
                 external=True  # use git from host environment
             )
         else:
