@@ -96,24 +96,23 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       
 tests_task:
   matrix:
-    - name: repo_py37
+    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.7"
       env:
         PY_VER: 3.7
         IRIS_SOURCE: "source"
-    - name: repo_py38
+    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.8"
       env:
         PY_VER: 3.8
         IRIS_SOURCE: "source"
-    - name: release_py37
+    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.7"
       env:
         PY_VER: 3.7
         IRIS_SOURCE: "conda-forge"
-    - name: release_py38
+    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.8"
       env:
         PY_VER: 3.8
         IRIS_SOURCE: "conda-forge"
 
-  name: "${CIRRUS_OS}: py${PY_VER} tests"
   << : *LINUX_TASK_TEMPLATE
   tests_script:
     - export CONDA_OVERRIDE_LINUX="$(uname -r | cut -d'+' -f1)"
