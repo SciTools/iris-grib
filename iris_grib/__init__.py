@@ -150,6 +150,7 @@ class GribWrapper:
             offset = grib_fh.tell()
             message_length = eccodes.codes_get_long(
                 grib_message, 'totalLength')
+            offset = gribapi.grib_get_message_offset(grib_message)
 
         # Initialise the key-extension dictionary.
         # NOTE: this attribute *must* exist, or the the __getattr__ overload
@@ -170,11 +171,8 @@ class GribWrapper:
         if deferred:
             # Wrap the reference to the data payload within the data proxy
             # in order to support deferred data loading.
-            # The byte offset requires to be reset back to the first byte
-            # of this message. The file pointer offset is always at the end
-            # of the current message due to the grib-api reading the message.
             proxy = GribDataProxy(shape, np.array([0.]).dtype, grib_fh.name,
-                                  offset - message_length)
+                                  offset)
             self._data = as_lazy_data(proxy)
         else:
             self.data = _message_values(grib_message, shape)
