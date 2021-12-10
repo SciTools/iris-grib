@@ -145,11 +145,6 @@ class GribWrapper:
         # Store the file pointer and message length from the current
         # grib message before it's changed by calls to the grib-api.
         if deferred:
-            # Note that, the grib-api has already read this message and
-            # advanced the file pointer to the end of the message.
-            offset = grib_fh.tell()
-            message_length = eccodes.codes_get_long(
-                grib_message, 'totalLength')
             offset = gribapi.grib_get_message_offset(grib_message)
 
         # Initialise the key-extension dictionary.
