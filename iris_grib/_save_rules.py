@@ -15,6 +15,7 @@ import warnings
 
 import cf_units
 import gribapi
+from gribapi import GRIB_MISSING_LONG
 import numpy as np
 import numpy.ma as ma
 
@@ -180,13 +181,16 @@ def shape_of_the_earth(cube, grib):
     # assume latlon
     cs = cube.coord(dimensions=[0]).coord_system
 
-    # Initially set shape_of_earth keys to missing (255 for byte, -1 for long).
+    # Initially set shape_of_earth keys to missing (255 for byte).
     gribapi.grib_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfRadiusOfSphericalEarth", -1)
+    gribapi.grib_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
+                          GRIB_MISSING_LONG)
     gribapi.grib_set_long(grib, "scaleFactorOfEarthMajorAxis", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis", -1)
+    gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis",
+                          GRIB_MISSING_LONG)
     gribapi.grib_set_long(grib, "scaleFactorOfEarthMinorAxis", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis", -1)
+    gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis",
+                          GRIB_MISSING_LONG)
 
     if isinstance(cs, GeogCS):
         ellipsoid = cs
@@ -923,9 +927,10 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", 0)
         # Set secondary surface = 'missing'.
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", -1)
+        gribapi.grib_set(grib, "typeOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
+        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
+                         GRIB_MISSING_LONG)
     elif not v_coord.has_bounds():
         # No second surface
         output_v = v_coord.units.convert(v_coord.points[0], output_unit)
@@ -936,9 +941,10 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", output_v)
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", -1)
+        gribapi.grib_set(grib, "typeOfSecondFixedSurface", 255)
         gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
+        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
+                         GRIB_MISSING_LONG)
     else:
         # bounded : set lower+upper surfaces
         output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
