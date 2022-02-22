@@ -15,6 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 import gribapi
+from gribapi import GRIB_MISSING_LONG
 import numpy as np
 
 import iris.cube
@@ -99,11 +100,11 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
         mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface",
                                  12345)
-        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", 255)
         mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface",
                                  255)
         mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface",
-                                 -1)
+                                 GRIB_MISSING_LONG)
 
     @mock.patch.object(gribapi, "grib_set")
     def test_height_point(self, mock_set):
@@ -116,9 +117,10 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(grib, "typeOfFirstFixedSurface", 103)
         mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
         mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface", 12345)
-        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", 255)
         mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface", 255)
-        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface",
+                                 GRIB_MISSING_LONG)
 
     @mock.patch.object(gribapi, "grib_set")
     def test_no_vertical(self, mock_set):
@@ -128,9 +130,10 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(grib, "typeOfFirstFixedSurface", 1)
         mock_set.assert_any_call(grib, "scaleFactorOfFirstFixedSurface", 0)
         mock_set.assert_any_call(grib, "scaledValueOfFirstFixedSurface", 0)
-        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "typeOfSecondFixedSurface", 255)
         mock_set.assert_any_call(grib, "scaleFactorOfSecondFixedSurface", 255)
-        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface", -1)
+        mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface",
+                                 GRIB_MISSING_LONG)
 
 
 if __name__ == "__main__":
