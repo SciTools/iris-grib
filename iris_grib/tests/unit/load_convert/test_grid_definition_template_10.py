@@ -63,7 +63,8 @@ class Test(tests.IrisGribTest):
                                  units='m',
                                  coord_system=cs)
         ny = 213
-        y_origin = 253793.10903714446
+        y_origin = 253793.10903714459
+
         dy = 12000
         y = iris.coords.DimCoord(np.arange(ny) * dy + y_origin,
                                  'projection_y_coordinate',
