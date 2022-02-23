@@ -17,7 +17,6 @@ import cf_units
 import gribapi
 import numpy as np
 import numpy.ma as ma
-import cartopy.crs as ccrs
 
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
@@ -706,7 +705,7 @@ def set_discipline_and_parameter(cube, grib):
                 category = gc.category
                 number = gc.number
                 identity_found = True
-        except:
+        except Exception:
             pass
 
     if not identity_found:

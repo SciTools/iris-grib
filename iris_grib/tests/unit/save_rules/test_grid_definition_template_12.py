@@ -16,7 +16,6 @@ import numpy as np
 
 import iris.coords
 from iris.coord_systems import GeogCS, TransverseMercator
-from iris.exceptions import TranslationError
 
 from iris_grib._save_rules import grid_definition_template_12
 from iris_grib.tests.unit.save_rules import GdtTestMixin

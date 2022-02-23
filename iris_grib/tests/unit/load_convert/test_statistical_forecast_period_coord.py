@@ -51,14 +51,12 @@ class Test(tests.IrisGribTest):
         self.assertArrayAlmostEqual(coord.bounds, [[0.0, 8.0]])
 
     def test_with_hindcast(self):
-        coord = statistical_forecast_period_coord(self.section,
-                                                  self.frt_coord)
+        _ = statistical_forecast_period_coord(self.section, self.frt_coord)
         self.assertEqual(self.patch_hindcast.call_count, 1)
 
     def test_no_hindcast(self):
         self.patch(self.module + '.options.support_hindcast_values', False)
-        coord = statistical_forecast_period_coord(self.section,
-                                                  self.frt_coord)
+        _ = statistical_forecast_period_coord(self.section, self.frt_coord)
         self.assertEqual(self.patch_hindcast.call_count, 0)
 
 

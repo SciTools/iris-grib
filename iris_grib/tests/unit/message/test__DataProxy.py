@@ -12,9 +12,6 @@ Unit tests for the `iris.message._DataProxy` class.
 # importing anything else.
 import iris_grib.tests as tests
 
-from unittest import mock
-
-import numpy as np
 from numpy.random import randint
 
 from iris.exceptions import TranslationError

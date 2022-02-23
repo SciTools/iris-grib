@@ -1,0 +1,4 @@
+[flake8]
+exclude = 
+    # Auto-generated file
+    iris_grib/_grib_cf_map.py
