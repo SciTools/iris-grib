@@ -96,7 +96,8 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       
 tests_task:
   matrix:
-    # TODO: iris-grib does not currently work with iris-main
+    # TODO: iris-grib does not currently work with iris-main, see Github issue
+    # #288 and #277.
     #- name: "${CIRRUS_OS} tests: iris=repo-main python=3.8"
     #  env:
     #    PY_VER: 3.8
