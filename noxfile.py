@@ -103,7 +103,7 @@ def _session_lockfile(session: nox.sessions.Session) -> Path:
 
     """
     lockfile_name = f"py{session.python.replace('.', '')}-linux-64.lock"
-    return Path("requirements/nox.lock") / lockfile_name
+    return Path("requirements/ci/nox.lock") / lockfile_name
 
 
 def _file_content(file_path: Path) -> str:

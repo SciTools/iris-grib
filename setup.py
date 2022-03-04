@@ -84,7 +84,6 @@ setup_args = dict(
     keywords         = ['iris', 'GRIB'],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3 :: Only',
     ],
