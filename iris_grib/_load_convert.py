@@ -292,7 +292,7 @@ def reference_time_coord(section):
     # Current GRIBAPI does not cover GRIB Section 1 - Octets 22-nn (optional)
     # which are part of GRIB spec v12.
     unit = Unit('hours since epoch', calendar=CALENDAR_GREGORIAN)
-    point = unit.date2num(dt)
+    point = float(unit.date2num(dt))
 
     # Reference Code Table 1.2.
     significanceOfReferenceTime = section['significanceOfReferenceTime']
@@ -1839,7 +1839,7 @@ def validity_time_coord(frt_coord, fp_coord):
     # Calculate validity (phenomenon) time in forecast-reference-time units.
     frt_point = frt_coord.units.num2date(frt_coord.points[0])
     point_delta = coord_timedelta(fp_coord, fp_coord.points[0])
-    point = frt_coord.units.date2num(frt_point + point_delta)
+    point = float(frt_coord.units.date2num(frt_point + point_delta))
 
     # Calculate bounds (if any) in the same way.
     if fp_coord.bounds is None:
@@ -1847,7 +1847,7 @@ def validity_time_coord(frt_coord, fp_coord):
     else:
         bounds_deltas = [coord_timedelta(fp_coord, bound_point)
                          for bound_point in fp_coord.bounds[0]]
-        bounds = [frt_coord.units.date2num(frt_point + delta)
+        bounds = [float(frt_coord.units.date2num(frt_point + delta))
                   for delta in bounds_deltas]
 
     # Create the time scalar coordinate.
