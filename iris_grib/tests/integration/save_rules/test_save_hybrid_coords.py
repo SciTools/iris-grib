@@ -15,7 +15,6 @@ import iris_grib.tests as tests
 import numpy as np
 
 import iris
-from iris.cube import Cube
 
 from iris_grib import save_pairs_from_cube, save_messages, GribMessage
 

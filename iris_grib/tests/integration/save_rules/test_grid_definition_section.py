@@ -13,14 +13,12 @@ to confirm that the correct grid_definition_template is being selected.
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris.coords import DimCoord
 from iris.coord_systems import (GeogCS,
                                 RotatedGeogCS,
                                 Mercator,
                                 TransverseMercator,
                                 LambertConformal,
                                 AlbersEqualArea)
-from iris.cube import Cube
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_section

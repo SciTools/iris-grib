@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'iris-grib'
-copyright = u'2016, Met Office'
+copyright = u'2021, Met Office'
 author = u'Met Office'
 
 # The version info for the project you're documenting, acts as replacement for

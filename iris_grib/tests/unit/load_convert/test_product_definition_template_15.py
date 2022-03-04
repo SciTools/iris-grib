@@ -16,13 +16,10 @@ testing for the statistical method and spatial-processing type.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from unittest import mock
-
 import iris.coords
 from iris.exceptions import TranslationError
 from iris.coords import CellMethod, DimCoord
 
-import iris_grib
 from iris_grib.tests.unit.load_convert import empty_metadata
 from iris_grib.tests.unit.load_convert import LoadConvertTest
 from iris_grib._load_convert import _MDI as MDI
@@ -90,14 +87,14 @@ class Test(LoadConvertTest):
     def test_bad_statistic_method(self):
         section = section_4_sample()
         section['statisticalProcess'] = 999
-        msg = 'unsupported statistical process type \[999\]'
+        msg = r'unsupported statistical process type \[999\]'
         with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 
     def test_bad_spatial_processing_code(self):
         section = section_4_sample()
         section['spatialProcessing'] = 999
-        msg = 'unsupported spatial processing type \[999\]'
+        msg = r'unsupported spatial processing type \[999\]'
         with self.assertRaisesRegex(TranslationError, msg):
             self._translate(section)
 

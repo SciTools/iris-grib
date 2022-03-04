@@ -12,8 +12,6 @@ Tests for function :func:`iris_grib._load_convert.translate_phenomenon`.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from copy import deepcopy
-
 from cf_units import Unit
 from iris.coords import DimCoord
 

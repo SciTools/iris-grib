@@ -12,12 +12,7 @@ Tests for `iris_grib._load_convert.product_definition_template_31`.
 # before importing anything else.
 import iris_grib.tests as tests
 
-from copy import deepcopy
 from unittest import mock
-import warnings
-
-from iris.coords import AuxCoord
-import numpy as np
 
 from iris_grib.tests.unit.load_convert import empty_metadata
 

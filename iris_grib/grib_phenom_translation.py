@@ -260,6 +260,7 @@ def _make_cf_to_grib2_table():
 
     return table
 
+
 _CF_GRIB2_TABLE = _make_cf_to_grib2_table()
 
 

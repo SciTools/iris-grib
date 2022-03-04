@@ -24,7 +24,7 @@ env:
   NOX_CACHE_BUILD: "98"
   # Increment the build number to force new pip cache upload.
   PIP_CACHE_BUILD: "98"
-  # Pip package to be upgraded/installed.
+  # Pip packages to be upgraded/installed.
   PIP_CACHE_PACKAGES: "pip setuptools wheel nox pyyaml"
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
@@ -33,22 +33,22 @@ env:
 
 #
 # Linting
-# [2021-03-01] jamesp: Currently not black or flake compliant.  
-#                      GitHub issues open #251 and #252
-# lint_task:
-#   auto_cancellation: true
-#   name: "${CIRRUS_OS}: flake8 and black"
-#   pip_cache:
-#     folder: ~/.cache/pip
-#     fingerprint_script:
-#       - echo "${CIRRUS_TASK_NAME}"
-#       - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
-#   lint_script:
-#     - pip list
-#     - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
-#     - pip list
-#     - nox --session flake8
-#     - nox --session black
+# [2021-03-01] jamesp: Currently not black compliant.  
+#                      GitHub issue open #251
+lint_task:
+  auto_cancellation: true
+  name: "${CIRRUS_OS}: flake8" # and black
+  pip_cache:
+    folder: ~/.cache/pip
+    fingerprint_script:
+      - echo "${CIRRUS_TASK_NAME}"
+      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${PIP_CACHE_BUILD} ${PIP_CACHE_PACKAGES}"
+  lint_script:
+    - pip list
+    - python -m pip install --retries 3 --upgrade ${PIP_CACHE_PACKAGES}
+    - pip list
+    - nox --session flake8
+#    - nox --session black
 
 
 #
@@ -80,10 +80,10 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - conda install --quiet --name base nox pip coverage pyyaml
   nox_cache:
     folder: ${CIRRUS_WORKING_DIR}/.nox
+    reupload_on_changes: true
     fingerprint_script:
       - echo "${CIRRUS_TASK_NAME}"
-      - echo "$(date +%Y).$(expr $(date +%U) / ${CACHE_PERIOD}):${NOX_CACHE_BUILD}"
-      - sha256sum ${CIRRUS_WORKING_DIR}/requirements/ci/py$(echo ${PY_VER} | tr -d ".").yml
+      - echo "${NOX_CACHE_BUILD}"
       - echo "IRIS ${IRIS_SOURCE}"
   data_cache:
     folder: ${IRIS_TEST_DATA_DIR}
@@ -96,14 +96,12 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       
 tests_task:
   matrix:
-    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.7"
-      env:
-        PY_VER: 3.7
-        IRIS_SOURCE: "source"
-    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.8"
-      env:
-        PY_VER: 3.8
-        IRIS_SOURCE: "source"
+    # TODO: iris-grib does not currently work with iris-main, see Github issue
+    # #288 and #277.
+    #- name: "${CIRRUS_OS} tests: iris=repo-main python=3.8"
+    #  env:
+    #    PY_VER: 3.8
+    #    IRIS_SOURCE: "source"
     - name: "${CIRRUS_OS} tests: iris=conda-release python=3.7"
       env:
         PY_VER: 3.7
@@ -117,3 +115,14 @@ tests_task:
   tests_script:
     - export CONDA_OVERRIDE_LINUX="$(uname -r | cut -d'+' -f1)"
     - nox --session tests -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
+
+# [2021-06-07] lbdreyer: Doctests are failing, see Github Issue #274
+#doctest_task:
+#  matrix:
+#    env:
+#      PY_VER: 3.7
+#  name: "${CIRRUS_OS}: py${PY_VER} tests"
+#  << : *LINUX_TASK_TEMPLATE
+#  tests_script:
+#    - export CONDA_OVERRIDE_LINUX="$(uname -r | cut -d'+' -f1)"
+#    - nox --session doctest -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data

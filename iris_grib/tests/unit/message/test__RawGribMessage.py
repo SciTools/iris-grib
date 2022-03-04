@@ -27,7 +27,7 @@ class Test(tests.IrisGribTest):
 
     def test_sections__set(self):
         # Test that sections writes into the _sections attribute.
-        res = self.message.sections
+        _ = self.message.sections
         self.assertNotEqual(self.message._sections, None)
 
     def test_sections__indexing(self):

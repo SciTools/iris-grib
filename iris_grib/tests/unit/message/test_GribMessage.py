@@ -41,7 +41,7 @@ class Test_messages_from_filename(tests.IrisGribTest):
                                         '3_layer.grib2'))
         my_file = open(filename)
 
-        import builtins
+        import builtins  # noqa: F401
         self.patch('builtins.open', mock.Mock(return_value=my_file))
 
         messages = list(GribMessage.messages_from_filename(filename))
@@ -274,7 +274,7 @@ class Test_data__unknown_grid_template(tests.IrisGribTest):
              7: {'codedValues': np.arange(12)}})
         with self.assertRaisesRegex(TranslationError,
                                     'template 999 is not supported'):
-            data = message.data
+            _ = message.data
 
 
 if __name__ == '__main__':

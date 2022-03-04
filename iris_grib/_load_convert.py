@@ -17,7 +17,7 @@ import math
 import warnings
 
 import cartopy.crs as ccrs
-from cf_units import CALENDAR_GREGORIAN, date2num, Unit
+from cf_units import CALENDAR_GREGORIAN, Unit
 import numpy as np
 import numpy.ma as ma
 
