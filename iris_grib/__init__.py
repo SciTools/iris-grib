@@ -618,8 +618,12 @@ class GribWrapper:
 
         """
         time_reference = '%s since epoch' % time_unit
-        return cf_units.date2num(self._phenomenonDateTime, time_reference,
-                                 cf_units.CALENDAR_GREGORIAN)
+        return float(
+            cf_units.date2num(
+                self._phenomenonDateTime, time_reference,
+                cf_units.CALENDAR_GREGORIAN
+            )
+        )
 
     def phenomenon_bounds(self, time_unit):
         """
@@ -630,8 +634,8 @@ class GribWrapper:
         # TODO #576 Investigate when it's valid to get phenomenon_bounds
         time_reference = '%s since epoch' % time_unit
         unit = cf_units.Unit(time_reference, cf_units.CALENDAR_GREGORIAN)
-        return [unit.date2num(self._periodStartDateTime),
-                unit.date2num(self._periodEndDateTime)]
+        return [float(unit.date2num(self._periodStartDateTime)),
+                float(unit.date2num(self._periodEndDateTime))]
 
 
 def _longitude_is_cyclic(points):

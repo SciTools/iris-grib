@@ -9,7 +9,11 @@
         <dimCoord bounds="[[0.0, 3.0]]" id="1d45e087" points="[3.0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="float64"/>
       </coord>
       <coord>
-        <dimCoord bounds="[[0.0, 100.0]]" id="c87e380b" long_name="height above ground level" points="[50.0]" shape="(1,)" standard_name="height" units="Unit('m')" value_type="float64"/>
+        <dimCoord bounds="[[0.0, 100.0]]" id="1a539915" long_name="height above ground level" points="[50.0]" shape="(1,)" standard_name="height" units="Unit('m')" value_type="float64">
+          <attributes>
+            <attribute name="positive" value="up"/>
+          </attributes>
+        </dimCoord>
       </coord>
       <coord datadims="[0]">
         <dimCoord id="77a50eb5" points="[52.367102, 52.368208, 52.369314, ..., 52.584984,

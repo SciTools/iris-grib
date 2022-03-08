@@ -15,6 +15,7 @@ dependencies:
 
 # Optional dependencies.
   - mo_pack
+  - pip
 
 # Test dependencies.
   - mock
