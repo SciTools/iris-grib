@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'iris-grib'
-copyright = u'2021, Met Office'
+copyright = u'2022, Met Office'
 author = u'Met Office'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -297,5 +297,5 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
-    'iris': ('http://scitools.org.uk/iris/docs/latest/', None),
+    'iris': ('https://scitools-iris.readthedocs.io/en/latest/', None),
 }
