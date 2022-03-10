@@ -18,7 +18,7 @@ Bugs Fixed
   `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
   the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
   values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
-  `(PR#271) <https://github.com/SciTools/iris-grib/pull/288>`_
+  `(PR#288) <https://github.com/SciTools/iris-grib/pull/288>`_
 
 
 Dependencies
@@ -228,6 +228,7 @@ Features
 
 * Updated translations between GRIB parameter code and CF standard_name or
   long_name :
+
       * additional WAFC codes, both to and from CF
       * 'mass_fraction_of_cloud_liquid_water_in_air' and 'mass_fraction_of_cloud_ice_in_air', both to and from CF
       * 'surface_downwelling_longwave_flux_in_air', now translates to GRIBcode(2, 0, 5, 3)  (but not the reverse).
