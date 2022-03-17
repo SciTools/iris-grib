@@ -1232,8 +1232,8 @@ def grid_definition_template_90(section, metadata):
     x_apparent_angular_diameter = 2 * half_apparent_equatorial_angle
     y_step = y_apparent_angular_diameter / section['dy']
     x_step = x_apparent_angular_diameter / section['dx']
-    y_start = y_step * (section['Yo'] - section['Yp'] / 1000)
-    x_start = x_step * (section['Xo'] - section['Xp'] / 1000)
+    y_start = y_step * (section['Yo'] - (section['Yp'] / 1000) + 1)
+    x_start = x_step * (section['Xo'] - (section['Xp'] / 1000) + 1)
     y_points = y_start + np.arange(section['Ny']) * y_step
     x_points = x_start + np.arange(section['Nx']) * x_step
 
