@@ -2,6 +2,38 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.18.0
+-------------------------------
+
+:Release: 0.18.0
+:Date: 14 March 2022
+
+Bugs Fixed
+^^^^^^^^^^
+* `@lbdreyer <https://github.com/lbdreyer>`_ made various updates to allow 
+  iris-grib to work with the latest versions of 
+  `iris <https://scitools-iris.readthedocs.io/en/stable/>`_,
+  `cf-units <https://cf-units.readthedocs.io/en/latest/>`_,
+  `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ and 
+  `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
+  the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
+  values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
+  `(PR#288) <https://github.com/SciTools/iris-grib/pull/288>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+* now requires Python version >= 3.8
+
+
+Internal
+^^^^^^^^
+* `@TomDufall <https://github.com/TomDufall>`_ updated the code so that it was
+  `flake8 <https://flake8.pycqa.org/en/stable/>`_ compliant and enabled flake8 
+  checks to the CI.
+  `(PR#271) <https://github.com/SciTools/iris-grib/pull/271>`_
+
+
 What's new in iris-grib v0.17.1
 -------------------------------
 
@@ -196,6 +228,7 @@ Features
 
 * Updated translations between GRIB parameter code and CF standard_name or
   long_name :
+
       * additional WAFC codes, both to and from CF
       * 'mass_fraction_of_cloud_liquid_water_in_air' and 'mass_fraction_of_cloud_ice_in_air', both to and from CF
       * 'surface_downwelling_longwave_flux_in_air', now translates to GRIBcode(2, 0, 5, 3)  (but not the reverse).
