@@ -22,7 +22,8 @@ import numpy.ma as ma
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
-                                TransverseMercator, LambertConformal)
+                                TransverseMercator, LambertConformal,
+                                LambertAzimuthalEqualArea)
 from iris.exceptions import TranslationError
 
 
@@ -645,6 +646,72 @@ def grid_definition_template_30(cube, grib):
     gribapi.grib_set(grib, "longitudeOfSouthernPole", 0)
 
 
+def grid_definition_template_140(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.140.
+
+    Template 3.140 is used to represent a Lambert azimuthal equal area
+    projection grid.
+
+    """
+
+    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 140)
+
+    # Retrieve some information from the cube.
+    y_coord = cube.coord(dimensions=[0])
+    x_coord = cube.coord(dimensions=[1])
+    cs = y_coord.coord_system
+
+    # Normalise the coordinate values to millimetres - the resolution
+    # used in the GRIB message.
+    y_mm = points_in_unit(y_coord, 'mm')
+    x_mm = points_in_unit(x_coord, 'mm')
+
+    # Encode the horizontal points.
+
+    # NB. Since we're already in millimetres, our tolerance for
+    # discrepancy in the differences is 1.
+    try:
+        x_step = step(x_mm, atol=1)
+        y_step = step(y_mm, atol=1)
+    except ValueError:
+        msg = ('Irregular coordinates not supported for Lambert '
+               'Conformal.')
+        raise TranslationError(msg)
+    gribapi.grib_set(grib, 'Dx', abs(x_step))
+    gribapi.grib_set(grib, 'Dy', abs(y_step))
+
+    horizontal_grid_common(cube, grib, xy=True)
+
+    # Transform first point into geographic CS
+    geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
+    first_x, first_y = geog.as_cartopy_crs().transform_point(
+        x_coord.points[0],
+        y_coord.points[0],
+        cs.as_cartopy_crs())
+    first_x = first_x % 360
+    proj_origin_lon = cs.longitude_of_projection_origin % 360
+
+    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
+                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
+                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
+                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+    gribapi.grib_set(grib, "standardParallel",
+                     int(np.round(proj_origin_lon
+                                  / _DEFAULT_DEGREES_UNITS)))
+    gribapi.grib_set(grib, "centralLongitude",
+                     int(np.round(cs.longitude_of_projection_origin
+                                  / _DEFAULT_DEGREES_UNITS)))
+    if cs.false_easting != 0.0 or cs.false_northing != 0.0:
+        msg = ('false easting non zero ({}) or false northing non zero ({}) '
+               '\n; unsupported by GRIB Template 3.140'
+               '.').format(cs.false_easting, cs.false_northing)
+        raise TranslationError(msg)
+
+
 def grid_definition_section(cube, grib):
     """
     Set keys within the grid definition section of the provided grib message,
@@ -681,6 +748,8 @@ def grid_definition_section(cube, grib):
     elif isinstance(cs, LambertConformal):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
+    elif isinstance(cs, LambertAzimuthalEqualArea):
+        grid_definition_template_140(cube, grib)
     else:
         name = cs.grid_mapping_name.replace('_', ' ').title()
         emsg = 'Grib saving is not supported for coordinate system {!r}'
@@ -1231,6 +1300,24 @@ def product_definition_template_1(cube, grib, full3d_cube=None):
     set_ensemble(cube, grib)
 
 
+def product_definition_template_6(cube, grib, full3d_cube=None):
+    """
+    Set keys within the provided grib message based on Product Definition
+    Template 4.6.
+
+    Template 4.6 is used to represent a percentile forecast at a point in time
+    interval.
+
+    """
+    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 6)
+    if not (cube.coords('percentile') and
+            len(cube.coord('percentile').points) == 1):
+        raise ValueError("A cube 'percentile' coordinate with one "
+                         "point is required, but not present.")
+    gribapi.grib_set(grib, "percentileValue",
+                     int(cube.coord('percentile').points[0]))
+
+
 def product_definition_template_8(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
@@ -1425,6 +1512,8 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'spatial_processing_type' in cube.attributes:
             # spatial process (template 4.15)
             product_definition_template_15(cube, grib, full3d_cube)
+        elif cube.coords('percentile'):
+            product_definition_template_6(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
             product_definition_template_0(cube, grib, full3d_cube)
