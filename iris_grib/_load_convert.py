@@ -829,6 +829,14 @@ def grid_definition_template_12(section, metadata):
     cs = icoord_systems.TransverseMercator(lat, lon, easting, northing,
                                            scale, geog_cs)
 
+    # This has only been tested with +x/+y scanning, so raise an error
+    # for other permutations.
+    scan = scanning_mode(section['scanningMode'])
+    if scan.i_negative:
+        raise TranslationError('Unsupported -x scanning')
+    if not scan.j_positive:
+        raise TranslationError('Unsupported -y scanning')
+
     # Deal with bug in ECMWF GRIB API (present at 1.12.1) where these
     # values are treated as unsigned, 4-byte integers.
     x1 = fixup_int32_from_uint32(section['X1'])
@@ -852,14 +860,6 @@ def grid_definition_template_12(section, metadata):
 
     x_points = np.linspace(x1 * CM_TO_M, x2 * CM_TO_M, section['Ni'])
     y_points = np.linspace(y1 * CM_TO_M, y2 * CM_TO_M, section['Nj'])
-
-    # This has only been tested with +x/+y scanning, so raise an error
-    # for other permutations.
-    scan = scanning_mode(section['scanningMode'])
-    if scan.i_negative:
-        raise TranslationError('Unsupported -x scanning')
-    if not scan.j_positive:
-        raise TranslationError('Unsupported -y scanning')
 
     # Create the X and Y coordinates.
     y_coord = DimCoord(y_points, 'projection_y_coordinate', units='m',
