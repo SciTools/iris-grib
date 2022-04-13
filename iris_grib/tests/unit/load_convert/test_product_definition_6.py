@@ -15,7 +15,6 @@ import iris_grib.tests as tests
 
 from copy import deepcopy
 from unittest import mock
-import warnings
 
 from iris.coords import DimCoord
 
