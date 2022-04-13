@@ -17,7 +17,7 @@ from unittest import mock
 from cf_units import Unit
 import gribapi
 
-from iris.coords import CellMethod, DimCoord
+from iris.coords import DimCoord
 import iris.tests.stock as stock
 
 from iris_grib._save_rules import product_definition_template_6
