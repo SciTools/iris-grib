@@ -699,12 +699,12 @@ def grid_definition_template_140(cube, grib):
                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     gribapi.grib_set(grib, 'resolutionAndComponentFlags',
                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
-    gribapi.grib_set(grib, "standardParallel",
-                     int(np.round(proj_origin_lon
-                                  / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "centralLongitude",
-                     int(np.round(cs.longitude_of_projection_origin
-                                  / _DEFAULT_DEGREES_UNITS)))
+    s_parallel = proj_origin_lon / _DEFAULT_DEGREES_UNITS
+    s_parallel = int(np.round(s_parallel))
+    gribapi.grib_set(grib, "standardParallel", s_parallel)
+    c_longitude = cs.longitude_of_projection_origin / _DEFAULT_DEGREES_UNITS
+    c_longitude = int(np.round(c_longitude))
+    gribapi.grib_set(grib, "centralLongitude", c_longitude)
     if cs.false_easting != 0.0 or cs.false_northing != 0.0:
         msg = ('false easting non zero ({}) or false northing non zero ({}) '
                '\n; unsupported by GRIB Template 3.140'
