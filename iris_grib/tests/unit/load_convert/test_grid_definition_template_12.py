@@ -53,7 +53,7 @@ class Test(tests.IrisGribTest):
         }
         return section
 
-    def expected(self, y_dim, x_dim, y_negative=False):
+    def expected(self, y_dim, x_dim, x_negative=False, y_negative=False):
         # Prepare the expectation.
         expected = empty_metadata()
         ellipsoid = iris.coord_systems.GeogCS(6377563.396, 6356256.909)
@@ -62,7 +62,10 @@ class Test(tests.IrisGribTest):
         nx = 4
         x_origin = 293000
         dx = 2000
-        x = iris.coords.DimCoord(np.arange(nx) * dx + x_origin,
+        x_array = np.arange(nx) * dx + x_origin
+        if x_negative:
+            x_array = np.flip(x_array)
+        x = iris.coords.DimCoord(x_array,
                                  'projection_x_coordinate', units='m',
                                  coord_system=cs)
         ny = 3
@@ -98,10 +101,11 @@ class Test(tests.IrisGribTest):
     def test_negative_x(self):
         section = self.section_3()
         section['scanningMode'] = 0b11000000
+        section['X1'], section['X2'] = section['X2'], section['X1']
         metadata = empty_metadata()
-        with self.assertRaisesRegex(iris.exceptions.TranslationError,
-                                    '-x scanning'):
-            grid_definition_template_12(section, metadata)
+        grid_definition_template_12(section, metadata)
+        expected = self.expected(0, 1, x_negative=True)
+        self.assertEqual(metadata, expected)
 
     def test_negative_y(self):
         section = self.section_3()

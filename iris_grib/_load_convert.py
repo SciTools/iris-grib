@@ -829,12 +829,6 @@ def grid_definition_template_12(section, metadata):
     cs = icoord_systems.TransverseMercator(lat, lon, easting, northing,
                                            scale, geog_cs)
 
-    # This has not been tested with -x scanning, so raise an error in that
-    #  case.
-    scan = scanning_mode(section['scanningMode'])
-    if scan.i_negative:
-        raise TranslationError('Unsupported -x scanning')
-
     # Deal with bug in ECMWF GRIB API (present at 1.12.1) where these
     # values are treated as unsigned, 4-byte integers.
     x1 = fixup_int32_from_uint32(section['X1'])
@@ -872,6 +866,7 @@ def grid_definition_template_12(section, metadata):
 
     # Determine the lat/lon dimensions.
     y_dim, x_dim = 0, 1
+    scan = scanning_mode(section['scanningMode'])
     if scan.j_consecutive:
         y_dim, x_dim = 1, 0
 
