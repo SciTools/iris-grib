@@ -829,13 +829,11 @@ def grid_definition_template_12(section, metadata):
     cs = icoord_systems.TransverseMercator(lat, lon, easting, northing,
                                            scale, geog_cs)
 
-    # This has only been tested with +x/+y scanning, so raise an error
-    # for other permutations.
+    # This has not been tested with -x scanning, so raise an error in that
+    #  case.
     scan = scanning_mode(section['scanningMode'])
     if scan.i_negative:
         raise TranslationError('Unsupported -x scanning')
-    if not scan.j_positive:
-        raise TranslationError('Unsupported -y scanning')
 
     # Deal with bug in ECMWF GRIB API (present at 1.12.1) where these
     # values are treated as unsigned, 4-byte integers.
@@ -851,9 +849,14 @@ def grid_definition_template_12(section, metadata):
     # Check whether Di and Dj are as consistent as possible with that
     # interpretation - i.e. they are within 1cm.
     def check_range(v1, v2, n, d):
-        min_last = v1 + (n - 1) * (d - 1)
-        max_last = v1 + (n - 1) * (d + 1)
-        if not (min_last < v2 < max_last):
+        # This is agnostic to negative/positive scanning directions - if only
+        #  some scanning directions are supported then separate checks should
+        #  be used.
+        small = min(v1, v2)
+        large = max(v1, v2)
+        min_last = small + (n - 1) * (d - 1)
+        max_last = small + (n - 1) * (d + 1)
+        if not (min_last < large < max_last):
             raise TranslationError('Inconsistent grid definition')
     check_range(x1, x2, section['Ni'], section['Di'])
     check_range(y1, y2, section['Nj'], section['Dj'])
