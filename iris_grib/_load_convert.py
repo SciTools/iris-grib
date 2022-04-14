@@ -843,9 +843,6 @@ def grid_definition_template_12(section, metadata):
     # Check whether Di and Dj are as consistent as possible with that
     # interpretation - i.e. they are within 1cm.
     def check_range(v1, v2, n, d):
-        # This is agnostic to negative/positive scanning directions - if only
-        #  some scanning directions are supported then separate checks should
-        #  be used.
         small = min(v1, v2)
         large = max(v1, v2)
         min_last = small + (n - 1) * (d - 1)
