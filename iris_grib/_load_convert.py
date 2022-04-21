@@ -852,6 +852,22 @@ def grid_definition_template_12(section, metadata):
     check_range(x1, x2, section['Ni'], section['Di'])
     check_range(y1, y2, section['Nj'], section['Dj'])
 
+    # Further over-specification - the sequence of X1 & X2 is enough to
+    #  generate the sequence in the correct direction (also Y1 & Y2). All
+    #  scanningMode can do is add confusion; warn if there is inconsistency.
+    def validate_scanning(axis: str, stated: bool, encoded: bool):
+        def scan_str(scanning_bool):
+            return "positive" if scanning_bool else "negative"
+        if stated != encoded:
+            message = (
+                f"File states {scan_str(stated)} {axis} scanning, but encodes "
+                f"{scan_str(encoded)} {axis} scanning."
+            )
+            warnings.warn(message)
+    scan = scanning_mode(section['scanningMode'])
+    validate_scanning("X", not scan.i_negative, x1 < x2)
+    validate_scanning("Y", scan.j_positive, y1 < y2)
+
     x_points = np.linspace(x1 * CM_TO_M, x2 * CM_TO_M, section['Ni'])
     y_points = np.linspace(y1 * CM_TO_M, y2 * CM_TO_M, section['Nj'])
 
@@ -863,7 +879,6 @@ def grid_definition_template_12(section, metadata):
 
     # Determine the lat/lon dimensions.
     y_dim, x_dim = 0, 1
-    scan = scanning_mode(section['scanningMode'])
     if scan.j_consecutive:
         y_dim, x_dim = 1, 0
 

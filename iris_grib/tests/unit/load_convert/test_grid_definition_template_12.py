@@ -14,6 +14,7 @@ Unit tests for
 import iris_grib.tests as tests
 
 import numpy as np
+import warnings
 
 import iris.coord_systems
 import iris.coords
@@ -107,6 +108,18 @@ class Test(tests.IrisGribTest):
         expected = self.expected(0, 1, x_negative=True)
         self.assertEqual(metadata, expected)
 
+    def test_x_inconsistent(self):
+        section = self.section_3()
+        section['scanningMode'] = 0b11000000
+        metadata = empty_metadata()
+        with warnings.catch_warnings(record=True) as warn:
+            grid_definition_template_12(section, metadata)
+        self.assertEqual(len(warn), 1)
+        message = "File states negative X scanning"
+        self.assertRegex(str(warn[0].message), message)
+        expected = self.expected(0, 1)
+        self.assertEqual(metadata, expected)
+
     def test_negative_y(self):
         section = self.section_3()
         section['scanningMode'] = 0b00000000
@@ -114,6 +127,18 @@ class Test(tests.IrisGribTest):
         metadata = empty_metadata()
         grid_definition_template_12(section, metadata)
         expected = self.expected(0, 1, y_negative=True)
+        self.assertEqual(metadata, expected)
+
+    def test_y_inconsistent(self):
+        section = self.section_3()
+        section['scanningMode'] = 0b00000000
+        metadata = empty_metadata()
+        with warnings.catch_warnings(record=True) as warn:
+            grid_definition_template_12(section, metadata)
+        self.assertEqual(len(warn), 1)
+        message = "File states negative Y scanning"
+        self.assertRegex(str(warn[0].message), message)
+        expected = self.expected(0, 1)
         self.assertEqual(metadata, expected)
 
     def test_transposed(self):
