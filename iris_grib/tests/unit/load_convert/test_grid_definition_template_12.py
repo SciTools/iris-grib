@@ -108,17 +108,27 @@ class Test(tests.IrisGribTest):
         expected = self.expected(0, 1, x_negative=True)
         self.assertEqual(metadata, expected)
 
-    def test_x_inconsistent(self):
+    def test_x_inconsistent_direction(self):
         section = self.section_3()
         section['scanningMode'] = 0b11000000
         metadata = empty_metadata()
         with warnings.catch_warnings(record=True) as warn:
             grid_definition_template_12(section, metadata)
         self.assertEqual(len(warn), 1)
-        message = "File states negative X scanning"
+        message = "X definition inconsistent: scanningMode"
         self.assertRegex(str(warn[0].message), message)
         expected = self.expected(0, 1)
         self.assertEqual(metadata, expected)
+
+    def test_x_inconsistent_steps(self):
+        section = self.section_3()
+        section['Ni'] += 1
+        metadata = empty_metadata()
+        expected_regex = (
+            "X definition inconsistent: .* incompatible with step-size")
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    expected_regex):
+            grid_definition_template_12(section, metadata)
 
     def test_negative_y(self):
         section = self.section_3()
@@ -129,17 +139,27 @@ class Test(tests.IrisGribTest):
         expected = self.expected(0, 1, y_negative=True)
         self.assertEqual(metadata, expected)
 
-    def test_y_inconsistent(self):
+    def test_y_inconsistent_direction(self):
         section = self.section_3()
         section['scanningMode'] = 0b00000000
         metadata = empty_metadata()
         with warnings.catch_warnings(record=True) as warn:
             grid_definition_template_12(section, metadata)
         self.assertEqual(len(warn), 1)
-        message = "File states negative Y scanning"
+        message = "Y definition inconsistent: scanningMode"
         self.assertRegex(str(warn[0].message), message)
         expected = self.expected(0, 1)
         self.assertEqual(metadata, expected)
+
+    def test_y_inconsistent_steps(self):
+        section = self.section_3()
+        section['Nj'] += 1
+        metadata = empty_metadata()
+        expected_regex = (
+            "Y definition inconsistent: .* incompatible with step-size")
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    expected_regex):
+            grid_definition_template_12(section, metadata)
 
     def test_transposed(self):
         section = self.section_3()

@@ -842,15 +842,20 @@ def grid_definition_template_12(section, metadata):
     # precision, as opposed to using Di and Dj.
     # Check whether Di and Dj are as consistent as possible with that
     # interpretation - i.e. they are within 1cm.
-    def check_range(v1, v2, n, d):
+    def check_range(v1, v2, n, d, axis_name):
         small = min(v1, v2)
         large = max(v1, v2)
         min_last = small + (n - 1) * (d - 1)
         max_last = small + (n - 1) * (d + 1)
         if not (min_last < large < max_last):
-            raise TranslationError('Inconsistent grid definition')
-    check_range(x1, x2, section['Ni'], section['Di'])
-    check_range(y1, y2, section['Nj'], section['Dj'])
+            message = (
+                f'File grid {axis_name} definition inconsistent: '
+                f'{v1} to {v2} in {n} steps is incompatible with step-size '
+                f'{d} .'
+            )
+            raise TranslationError(message)
+    check_range(x1, x2, section['Ni'], section['Di'], 'X')
+    check_range(y1, y2, section['Nj'], section['Dj'], 'Y')
 
     # Further over-specification - the sequence of X1 & X2 is enough to
     #  generate the sequence in the correct direction (also Y1 & Y2). All
@@ -860,8 +865,9 @@ def grid_definition_template_12(section, metadata):
             return "positive" if scanning_bool else "negative"
         if stated != encoded:
             message = (
-                f"File states {scan_str(stated)} {axis} scanning, but encodes "
-                f"{scan_str(encoded)} {axis} scanning."
+                f"File grid {axis} definition inconsistent: "
+                f"scanningMode = {scan_str(stated)}, actual grid point "
+                f"direction is {scan_str(encoded)}."
             )
             warnings.warn(message)
     scan = scanning_mode(section['scanningMode'])
