@@ -1,6 +1,0 @@
-# Test dependencies.
-
-mock
-filelock
-pep8
-requests
