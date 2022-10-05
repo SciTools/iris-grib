@@ -93,7 +93,7 @@ def grib1_convert(grib):
                     coord_system=grib._coord_system,
                     circular=grib._x_circular,
                 ),
-                int(not(j_points_are_consecutive))
+                int(not j_points_are_consecutive)
             )
         )
 
