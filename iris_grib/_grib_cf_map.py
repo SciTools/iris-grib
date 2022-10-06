@@ -3,13 +3,6 @@
 # This file is part of iris-grib and is released under the LGPL license.
 # See COPYING and COPYING.LESSER in the root of the repository for full
 # licensing details.
-#
-# DO NOT EDIT: AUTO-GENERATED
-# Created on 29 November 2019 10:11 from
-# http://www.metarelate.net/metOcean
-# at commit 36da82fe65a1a37e6cf1fa49899107fc6dc908ed
-
-# https://github.com/metarelate/metOcean/commit/36da82fe65a1a37e6cf1fa49899107fc6dc908ed
 
 """
 Provides GRIB/CF phenomenon translations.
