@@ -16,16 +16,16 @@
         <auxCoord id="61bde96d" long_name="originating_centre" points="[	US National Weather Service, National Centres for Environmental Prediction]" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
       </coord>
       <coord datadims="[1]">
-        <dimCoord id="62845c7c" points="[-2396487.0124, -2392487.0124, -2388487.0124,
-		..., 2387512.9876, 2391512.9876, 2395512.9876]" shape="(1199,)" standard_name="projection_x_coordinate" units="Unit('m')" value_type="float64">
-          <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6371229.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
+        <dimCoord id="4d043920" points="[-2395073.09451, -2391073.09451, -2387073.09451,
+		..., 2388926.90549, 2392926.90549, 2396926.90549]" shape="(1199,)" standard_name="projection_x_coordinate" units="Unit('m')" value_type="float64">
+          <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6367470.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
         </dimCoord>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="c75f3634" points="[-3870311.24926, -3866311.24926, -3862311.24926,
-		..., -686311.249256, -682311.249256,
-		-678311.249256]" shape="(799,)" standard_name="projection_y_coordinate" units="Unit('m')" value_type="float64">
-          <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6371229.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
+        <dimCoord id="e8df5368" points="[-3868027.78087, -3864027.78087, -3860027.78087,
+		..., -684027.780872, -680027.780872,
+		-676027.780872]" shape="(799,)" standard_name="projection_y_coordinate" units="Unit('m')" value_type="float64">
+          <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6367470.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
         </dimCoord>
       </coord>
       <coord>
