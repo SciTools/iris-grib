@@ -2,6 +2,22 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.19.0
+-------------------------------
+
+:Release: 0.19.0
+:Date: [unreleased]
+
+Bugs Fixed
+^^^^^^^^^^
+* `@lbdreyer <https://github.com/lbdreyer>`_ and 
+  `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the GRIB1 loading 
+  code so that it no longer assumes a spherical Earth with radius of 6371229 m 
+  and instead uses the resolutionAndComponentFlag to determine the shape of the
+  Earth. `(PR#288) <https://github.com/SciTools/iris-grib/pull/288>`_
+
+
+
 What's new in iris-grib v0.18.0
 -------------------------------
 
