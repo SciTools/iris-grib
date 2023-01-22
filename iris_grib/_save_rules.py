@@ -911,15 +911,29 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
     # unknown / absent
     else:
-        # check for *ANY* height coords at all...
-        v_coords = cube.coords(axis='z')
-        if v_coords:
-            # There are vertical coordinate(s), but we don't understand them...
-            v_coords_str = ' ,'.join(["'{}'".format(c.name())
-                                      for c in v_coords])
-            raise TranslationError(
-                'The vertical-axis coordinate(s) ({}) '
-                'are not recognised or handled.'.format(v_coords_str))
+        v_coords = [coord for coord in cube.coords() if
+                    'GRIB_fixed_surface_code' in coord.attributes]
+        if len(v_coords) > 1:
+            fs_types = [c.attributes['GRIB_fixed_surface_code']
+                        for c in v_coords]
+            raise ValueError("Multiple vertical-axis coordinates were found "
+                             f"of fixed surface type: {fs_types}")
+        elif len(v_coords) == 1:
+            v_coord = v_coords[0]
+            warnings.warn("The vertical-axis coordinate unit may not be "
+                          "encoded correctly.")
+            grib_v_code = v_coord.attributes['GRIB_fixed_surface_code']
+        else:
+            # check for *ANY* height coords at all...
+            v_coords = cube.coords(axis='z')
+            if v_coords:
+                # There are vertical coordinate(s), but we don't understand
+                # them...
+                v_coords_str = ' ,'.join(["'{}'".format(c.name())
+                                          for c in v_coords])
+                raise TranslationError(
+                    'The vertical-axis coordinate(s) ({}) '
+                    'are not recognised or handled.'.format(v_coords_str))
 
     # What did we find?
     if v_coord is None:
@@ -932,12 +946,15 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface", 0)
         # Set secondary surface = 'missing'.
         eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
-        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 255)
+        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
         eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
                           GRIB_MISSING_LONG)
     elif not v_coord.has_bounds():
         # No second surface
-        output_v = v_coord.units.convert(v_coord.points[0], output_unit)
+        output_v = v_coord.points[0]
+        if output_unit:
+            output_v = v_coord.units.convert(output_v, output_unit)
         if output_v - abs(output_v):
             warnings.warn("Vertical level encoding problem: scaling required.")
         output_v = int(round(output_v))
@@ -946,12 +963,15 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface", output_v)
         eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
-        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 255)
+        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
         eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
                           GRIB_MISSING_LONG)
     else:
         # bounded : set lower+upper surfaces
-        output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
+        output_v = v_coord.bounds[0]
+        if output_unit:
+            output_v = v_coord.units.convert(output_v, output_unit)
         if output_v[0] - abs(output_v[0]) or output_v[1] - abs(output_v[1]):
             warnings.warn("Vertical level encoding problem: scaling required.")
         eccodes.codes_set(grib, "typeOfFirstFixedSurface", grib_v_code)
