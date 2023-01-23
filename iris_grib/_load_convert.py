@@ -1631,7 +1631,9 @@ def vertical_coords(section, metadata):
         # Generate vertical coordinate.
         typeOfFirstFixedSurface = section['typeOfFirstFixedSurface']
 
-        if typeOfFirstFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
+        # We treat fixed surface level type=1 as having no vertical coordinate.
+        # See https://github.com/SciTools/iris/issues/519
+        if typeOfFirstFixedSurface not in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
             key = 'scaledValueOfFirstFixedSurface'
             scaledValueOfFirstFixedSurface = section[key]
             if scaledValueOfFirstFixedSurface == _MDI:
@@ -1680,7 +1682,7 @@ def vertical_coords(section, metadata):
                                      long_name=fixed_surface.long_name,
                                      units=fixed_surface.units)
                 if coord.name() == 'unknown':
-                    coord.attributes['GRIB_fixed_surface_code'] = \
+                    coord.attributes['GRIB_fixed_surface_type'] = \
                         typeOfFirstFixedSurface
 
                 # Add the vertical coordinate to metadata aux coords.

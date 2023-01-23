@@ -911,18 +911,18 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
     # unknown / absent
     else:
-        v_coords = [coord for coord in cube.coords() if
-                    'GRIB_fixed_surface_code' in coord.attributes]
-        if len(v_coords) > 1:
-            fs_types = [c.attributes['GRIB_fixed_surface_code']
-                        for c in v_coords]
+        fs_v_coords = [coord for coord in cube.coords() if
+                       'GRIB_fixed_surface_type' in coord.attributes]
+        if len(fs_v_coords) > 1:
+            fs_types = [c.attributes['GRIB_fixed_surface_type']
+                        for c in fs_v_coords]
             raise ValueError("Multiple vertical-axis coordinates were found "
                              f"of fixed surface type: {fs_types}")
-        elif len(v_coords) == 1:
-            v_coord = v_coords[0]
+        elif len(fs_v_coords) == 1:
+            v_coord = fs_v_coords[0]
             warnings.warn("The vertical-axis coordinate unit may not be "
                           "encoded correctly.")
-            grib_v_code = v_coord.attributes['GRIB_fixed_surface_code']
+            grib_v_code = v_coord.attributes['GRIB_fixed_surface_type']
         else:
             # check for *ANY* height coords at all...
             v_coords = cube.coords(axis='z')

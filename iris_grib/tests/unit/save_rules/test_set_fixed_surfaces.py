@@ -130,7 +130,7 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([1],
-                                 attributes={'GRIB_fixed_surface_code': 151}))
+                                 attributes={'GRIB_fixed_surface_type': 151}))
         grib = gribapi.grib_new_from_samples("GRIB2")
         with warnings.catch_warnings(record=True) as warn:
             set_fixed_surfaces(cube, grib)
@@ -156,7 +156,7 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([450], bounds=np.array([900.0, 0.0]),
-                                 attributes={'GRIB_fixed_surface_code': 108}))
+                                 attributes={'GRIB_fixed_surface_type': 108}))
         grib = gribapi.grib_new_from_samples("GRIB2")
         with warnings.catch_warnings(record=True) as warn:
             set_fixed_surfaces(cube, grib)
@@ -187,11 +187,11 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([1],
-                                 attributes={'GRIB_fixed_surface_code': 151}))
+                                 attributes={'GRIB_fixed_surface_type': 151}))
         cube.add_aux_coord(
             iris.coords.AuxCoord([450], bounds=np.array([900.0, 0.0]),
-                                 attributes={'GRIB_fixed_surface_code': 108}))
-        msg = "coordinates were found of fixed surface type: \[151, 108\]"
+                                 attributes={'GRIB_fixed_surface_type': 108}))
+        msg = r"coordinates were found of fixed surface type: \[151, 108\]"
         with self.assertRaisesRegex(ValueError, msg):
             set_fixed_surfaces(cube, grib)
 
@@ -200,7 +200,7 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([450], attributes={'positive': 'up'}))
-        msg = "coordinate\(s\) \('unknown'\) are not recognised or handled."
+        msg = r"coordinate\(s\) \('unknown'\) are not recognised or handled."
         with self.assertRaisesRegex(TranslationError, msg):
             set_fixed_surfaces(cube, grib)
 

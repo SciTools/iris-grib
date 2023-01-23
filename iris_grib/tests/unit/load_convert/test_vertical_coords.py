@@ -53,6 +53,16 @@ class Test(tests.IrisGribTest):
         vertical_coords(section, metadata)
         self.assertEqual(metadata, self.metadata)
 
+    def test_fixed_surface_type_1(self):
+        metadata = deepcopy(self.metadata)
+        section = {'NV': 0,
+                   'typeOfFirstFixedSurface': 1,
+                   'scaledValueOfFirstFixedSurface': 0,
+                   'scaleFactorOfFirstFixedSurface': 0,
+                   'typeOfSecondFixedSurface': 255}
+        vertical_coords(section, metadata)
+        self.assertEqual(metadata, self.metadata)
+
     def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
         this = 'iris_grib._load_convert.options'
         with mock.patch('warnings.warn') as warn:
@@ -82,7 +92,7 @@ class Test(tests.IrisGribTest):
                    'scaleFactorOfFirstFixedSurface': 0,
                    'typeOfSecondFixedSurface': MISSING_SURFACE}
         vertical_coords(section, metadata)
-        coord = DimCoord(600.0, attributes={'GRIB_fixed_surface_code': 106})
+        coord = DimCoord(600.0, attributes={'GRIB_fixed_surface_type': 106})
 
         expected = deepcopy(self.metadata)
         expected['aux_coords_and_dims'].append((coord, None))
@@ -100,7 +110,7 @@ class Test(tests.IrisGribTest):
                    'scaleFactorOfSecondFixedSurface': 0}
         vertical_coords(section, metadata)
         coord = DimCoord(9000.0, bounds=[18000, 0],
-                         attributes={'GRIB_fixed_surface_code': 108})
+                         attributes={'GRIB_fixed_surface_type': 108})
         expected = deepcopy(self.metadata)
         expected['aux_coords_and_dims'].append((coord, None))
         self.assertEqual(metadata, expected)

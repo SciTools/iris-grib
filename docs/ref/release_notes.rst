@@ -8,6 +8,18 @@ What's new in iris-grib v0.19.0
 :Release: 0.19.0
 :Date: [unreleased]
 
+
+=======
+Features
+^^^^^^^^
+* `@lbdreyer <https://github.com/lbdreyer>`_ and 
+  `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the loading of GRIB
+  messages with an unrecognised fixed surface type. These are now loaded in as
+  an unnamed coordinate with an attribute called GRIB_fixed_surface_type.
+  iris-grib will also save out cubes with this attribute as the given fixed
+  surface type.`(PR#318) <https://github.com/SciTools/iris-grib/pull/288>`_
+
+
 Bugs Fixed
 ^^^^^^^^^^
 * `@lbdreyer <https://github.com/lbdreyer>`_ and
