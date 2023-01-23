@@ -14,7 +14,11 @@ Bugs Fixed
   `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the GRIB1 loading 
   code so that it no longer assumes a spherical Earth with radius of 6371229 m 
   and instead uses the resolutionAndComponentFlag to determine the shape of the
-  Earth. `(PR#288) <https://github.com/SciTools/iris-grib/pull/288>`_
+  Earth. This can either be a spherical Earth with radius of 6367470 m or an 
+  oblate spheroid, the latter of which is not supported. Note that this change
+  in Earth's radius will result in a different coordinate system and may also 
+  affect the coordinate values.
+  `(PR#316) <https://github.com/SciTools/iris-grib/pull/316>`_
 
 
 
