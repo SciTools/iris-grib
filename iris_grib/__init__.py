@@ -335,30 +335,15 @@ class GribWrapper:
         # TODO #575 Do we want PP or GRIB style forecast delta?
         self.extra_keys['_forecastTimeUnit'] = self._timeunit_string()
 
-        # shape of the earth
-        soe_code = self.shapeOfTheEarth
-        # As this class is now *only* for GRIB1, 'shapeOfTheEarth' is not a
-        # value read from the actual file :  It is really a GRIB2 param, and
-        # the value is merely what eccodes (gribapi) gives as the default.
-        # This was always = 6, until eccodes 0.19, when it changed to 0.
-        # See https://jira.ecmwf.int/browse/ECC-811
-        # The two represent different sized spherical earths.
-        if soe_code not in (6, 0):
-            raise ValueError('Unexpected shapeOfTheEarth value =', soe_code)
-
-        soe_code = 6
-        # *FOR NOW* maintain the old behaviour (radius=6371229) in all cases,
-        # for backwards compatibility.
-        # However, this does not match the 'radiusOfTheEarth' default from the
-        # gribapi so is probably incorrect (see above issue ECC-811).
-        # So we may change this in future.
-
-        if soe_code == 0:
-            # New supposedly-correct default value, matches 'radiusOfTheEarth'.
+        # shape of the Earth
+        oblate_Earth = self.resolutionAndComponentFlags & 0b0100000
+        if oblate_Earth:
+            # Earth assumed oblate spheroidal with size as determined by IAU in
+            # 1965 (6378.160 km, 6356.775 km, f = 1/297.0)
+            raise ValueError("Oblate Spheroidal Earth is not supported.")
+        else:
+            # Earth assumed spherical with radius 6367.47 km
             geoid = coord_systems.GeogCS(semi_major_axis=6367470)
-        elif soe_code == 6:
-            # Old value, does *not* match the 'radiusOfTheEarth' parameter.
-            geoid = coord_systems.GeogCS(6371229)
 
         gridType = gribapi.grib_get_string(self.grib_message, "gridType")
 
