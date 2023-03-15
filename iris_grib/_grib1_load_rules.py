@@ -186,11 +186,10 @@ def grib1_convert(grib):
 
     def add_bounded_time_coords(aux_coords_and_dims, grib):
         t_bounds = grib.phenomenon_bounds('hours')
-        period = Unit('hours').convert(t_bounds[1] - t_bounds[0],
-                                       grib._forecastTimeUnit)
+        period = t_bounds[1] - t_bounds[0]
         aux_coords_and_dims.append((
             DimCoord(standard_name='forecast_period',
-                     units=grib._forecastTimeUnit,
+                     units="hours",
                      points=grib._forecastTime + 0.5 * period,
                      bounds=[grib._forecastTime, grib._forecastTime + period]),
             None))

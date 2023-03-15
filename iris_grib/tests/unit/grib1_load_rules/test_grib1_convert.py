@@ -58,47 +58,79 @@ class TestBoundedTime(TestField):
                              expected_points=[100],
                              expected_bounds=[[80, 120]])
 
+    def assert_bounded_message_3hours(self, **kwargs):
+        attributes = {'productDefinitionTemplateNumber': 0,
+                      'edition': 1, '_forecastTime': 252,
+                      '_forecastTimeUnit': '3 hours',
+                      'phenomenon_bounds': lambda u: (252, 258),
+                      '_phenomenonDateTime': -1,
+                      'table2Version': 9999,
+                      '_originatingCentre': 'xxx',
+                      }
+        attributes.update(kwargs)
+        message = mock.Mock(**attributes)
+        self._test_for_coord(message, grib1_convert, self.is_forecast_period,
+                             expected_points=[255],
+                             expected_bounds=[[252, 258]])
+        self._test_for_coord(message, grib1_convert, self.is_time,
+                             expected_points=[255],
+                             expected_bounds=[[252, 258]])
+
     def test_time_range_indicator_2(self):
         self.assert_bounded_message(timeRangeIndicator=2)
+        self.assert_bounded_message_3hours(timeRangeIndicator=2)
 
     def test_time_range_indicator_3(self):
         self.assert_bounded_message(timeRangeIndicator=3)
+        self.assert_bounded_message_3hours(timeRangeIndicator=3)
 
     def test_time_range_indicator_4(self):
         self.assert_bounded_message(timeRangeIndicator=4)
+        self.assert_bounded_message_3hours(timeRangeIndicator=4)
 
     def test_time_range_indicator_5(self):
         self.assert_bounded_message(timeRangeIndicator=5)
+        self.assert_bounded_message_3hours(timeRangeIndicator=5)
 
     def test_time_range_indicator_51(self):
         self.assert_bounded_message(timeRangeIndicator=51)
+        self.assert_bounded_message_3hours(timeRangeIndicator=51)
 
     def test_time_range_indicator_113(self):
         self.assert_bounded_message(timeRangeIndicator=113)
+        self.assert_bounded_message_3hours(timeRangeIndicator=113)
 
     def test_time_range_indicator_114(self):
         self.assert_bounded_message(timeRangeIndicator=114)
+        self.assert_bounded_message_3hours(timeRangeIndicator=114)
 
     def test_time_range_indicator_115(self):
         self.assert_bounded_message(timeRangeIndicator=115)
+        self.assert_bounded_message_3hours(timeRangeIndicator=115)
 
     def test_time_range_indicator_116(self):
         self.assert_bounded_message(timeRangeIndicator=116)
+        self.assert_bounded_message_3hours(timeRangeIndicator=116)
 
     def test_time_range_indicator_117(self):
         self.assert_bounded_message(timeRangeIndicator=117)
+        self.assert_bounded_message_3hours(timeRangeIndicator=117)
 
     def test_time_range_indicator_118(self):
         self.assert_bounded_message(timeRangeIndicator=118)
+        self.assert_bounded_message_3hours(timeRangeIndicator=118)
 
     def test_time_range_indicator_123(self):
         self.assert_bounded_message(timeRangeIndicator=123)
+        self.assert_bounded_message_3hours(timeRangeIndicator=123)
 
     def test_time_range_indicator_124(self):
         self.assert_bounded_message(timeRangeIndicator=124)
+        self.assert_bounded_message_3hours(timeRangeIndicator=124)
 
     def test_time_range_indicator_125(self):
         self.assert_bounded_message(timeRangeIndicator=125)
+        self.assert_bounded_message_3hours(timeRangeIndicator=125)
 
 
 class Test_GribLevels(tests.IrisTest):
