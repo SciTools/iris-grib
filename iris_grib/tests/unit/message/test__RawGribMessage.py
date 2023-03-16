@@ -43,7 +43,7 @@ class Test(tests.IrisGribTest):
 
     def test_sections__numberOfSection_value(self):
         # The key `numberOfSection` is repeated in every section meaning that
-        # if requested using gribapi it always defaults to its last value (7).
+        # if requested using ecCodes it always defaults to its last value (7).
         # This tests that the `_RawGribMessage._get_message_sections`
         # override is functioning.
         section_number = 4

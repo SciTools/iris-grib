@@ -204,7 +204,7 @@ def unscale(value, factor):
     return result
 
 
-# Use ECCodes gribapi to recognise missing value
+# Use ECCodes to recognise missing value
 _MDI = None
 
 
@@ -1875,7 +1875,7 @@ def validity_time_coord(frt_coord, fp_coord):
 def time_coords(section, metadata, rt_coord):
     if 'forecastTime' in section.keys():
         forecast_time = section['forecastTime']
-    # The gribapi encodes the forecast time as 'startStep' for pdt 4.4x;
+    # ecCodes encodes the forecast time as 'startStep' for pdt 4.4x;
     # product_definition_template_40 makes use of this function. The
     # following will be removed once the suspected bug is fixed.
     elif 'startStep' in section.keys():

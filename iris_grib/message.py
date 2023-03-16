@@ -76,7 +76,7 @@ class GribMessage:
         them directly.
 
         """
-        # A RawGribMessage giving gribapi access to the original grib message.
+        # A RawGribMessage giving ecCodes access to the original grib message.
         self._raw_message = raw_message
         # A _MessageLocation which dask uses to read the message data array,
         # by which time this message may be dead and the original grib file
@@ -309,7 +309,7 @@ class _RawGribMessage:
 
     def __del__(self):
         """
-        Release the gribapi reference to the message at end of object's life.
+        Release the ecCodes reference to the message at end of object's life.
 
         """
         eccodes.codes_release(self._message_id)
@@ -443,7 +443,7 @@ class Section:
             res = eccodes.codes_get_array(self._message_id, key)
         elif key == 'bitmap':
             # The bitmap is stored as contiguous boolean bits, one bit for each
-            # data point. GRIBAPI returns these as strings, so it must be
+            # data point. ecCodes returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
             res = eccodes.codes_get_array(self._message_id, key, int)
         elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
