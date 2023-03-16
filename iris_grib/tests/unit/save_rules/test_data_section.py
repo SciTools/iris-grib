@@ -30,17 +30,17 @@ class TestMDI(tests.IrisGribTest):
         # Check the use of a mask has been turned off via:
         #   eccodes.codes_set(grib_message, 'bitmapPresent', 0)
         grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                  'bitmapPresent', 0)
+                                                   'bitmapPresent', 0)
 
     def assertBitmapOn(self, grib_api, fill_value):
         # Check the use of a mask has been turned on via:
         #   eccodes.codes_set(grib_message, 'bitmapPresent', 1)
         #   eccodes.codes_set_double(grib_message, 'missingValue', fill_value)
         grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                  'bitmapPresent', 1)
+                                                   'bitmapPresent', 1)
         grib_api.codes_set_double.assert_called_once_with(GRIB_MESSAGE,
-                                                         'missingValue',
-                                                         fill_value)
+                                                          'missingValue',
+                                                          fill_value)
 
     def assertBitmapRange(self, grib_api, min_data, max_data):
         # Check the use of a mask has been turned on via:
@@ -48,7 +48,7 @@ class TestMDI(tests.IrisGribTest):
         #   eccodes.codes_set_double(grib_message, 'missingValue', ...)
         # and that a suitable fill value has been chosen.
         grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                  'bitmapPresent', 1)
+                                                   'bitmapPresent', 1)
         args, = grib_api.codes_set_double.call_args_list
         (message, key, fill_value), kwargs = args
         self.assertIs(message, GRIB_MESSAGE)

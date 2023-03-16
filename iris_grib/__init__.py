@@ -130,6 +130,7 @@ class GribWrapper:
     provides alternative means of working with GRIB message instances.
 
     """
+
     def __init__(self, grib_message, grib_fh=None):
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
@@ -147,7 +148,8 @@ class GribWrapper:
             # Note that, the grib-api has already read this message and
             # advanced the file pointer to the end of the message.
             offset = grib_fh.tell()
-            message_length = eccodes.codes_get_long(grib_message, 'totalLength')
+            message_length = eccodes.codes_get_long(
+                grib_message, 'totalLength')
 
         # Initialise the key-extension dictionary.
         # NOTE: this attribute *must* exist, or the the __getattr__ overload
@@ -162,7 +164,7 @@ class GribWrapper:
         if not self.gridType.startswith('reduced'):
             ni, nj = self.Ni, self.Nj
             j_fast = eccodes.codes_get_long(grib_message,
-                                           'jPointsAreConsecutive')
+                                            'jPointsAreConsecutive')
             shape = (nj, ni) if j_fast == 0 else (ni, nj)
 
         if deferred:
@@ -198,16 +200,19 @@ class GribWrapper:
                          'typeOfSecondFixedSurface'):
                 res = np.int32(eccodes.codes_get_long(self.grib_message, key))
             else:
-                key_type = eccodes.codes_get_native_type(self.grib_message, key)
+                key_type = eccodes.codes_get_native_type(
+                    self.grib_message, key)
                 if key_type == int:
                     res = np.int32(eccodes.codes_get_long(self.grib_message,
-                                                         key))
+                                                          key))
                 elif key_type == float:
                     # Because some computer keys are floats, like
                     # longitudeOfFirstGridPointInDegrees, a float32
                     # is not always enough...
-                    res = np.float64(eccodes.codes_get_double(self.grib_message,
-                                                             key))
+                    res = np.float64(eccodes.codes_get_double(
+                        self.grib_message, key
+                        )
+                    )
                 elif key_type == str:
                     res = eccodes.codes_get_string(self.grib_message, key)
                 else:
@@ -419,7 +424,7 @@ class GribWrapper:
             # (south-to-north) and then put them in the right direction
             # depending on the scan direction
             latitude_points = eccodes.codes_get_double_array(
-                    self.grib_message, 'distinctLatitudes').astype(np.float64)
+                self.grib_message, 'distinctLatitudes').astype(np.float64)
             latitude_points.sort()
             if not self.jScansPositively:
                 # we require latitudes north-to-south

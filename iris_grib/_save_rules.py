@@ -184,13 +184,13 @@ def shape_of_the_earth(cube, grib):
     # Initially set shape_of_earth keys to missing (255 for byte).
     eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 255)
     eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
-                          GRIB_MISSING_LONG)
+                           GRIB_MISSING_LONG)
     eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 255)
     eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis",
-                          GRIB_MISSING_LONG)
+                           GRIB_MISSING_LONG)
     eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 255)
     eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis",
-                          GRIB_MISSING_LONG)
+                           GRIB_MISSING_LONG)
 
     if isinstance(cs, GeogCS):
         ellipsoid = cs
@@ -206,7 +206,7 @@ def shape_of_the_earth(cube, grib):
         eccodes.codes_set_long(grib, "shapeOfTheEarth", 1)
         eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
         eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
-                              ellipsoid.semi_major_axis)
+                               ellipsoid.semi_major_axis)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
         eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
@@ -216,10 +216,10 @@ def shape_of_the_earth(cube, grib):
         eccodes.codes_set_long(grib, "shapeOfTheEarth", 7)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
         eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis",
-                              ellipsoid.semi_major_axis)
+                               ellipsoid.semi_major_axis)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
         eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis",
-                              ellipsoid.semi_minor_axis)
+                               ellipsoid.semi_minor_axis)
 
 
 def grid_dims(x_coord, y_coord, grib, x_str, y_str):
@@ -242,13 +242,13 @@ def latlon_first_last(x_coord, y_coord, grib):
 #                            float(x_coord.points[-1]))
 # WORKAROUND
     eccodes.codes_set_long(grib, "latitudeOfFirstGridPoint",
-                          int(y_coord.points[0]*1000000))
+                           int(y_coord.points[0]*1000000))
     eccodes.codes_set_long(grib, "latitudeOfLastGridPoint",
-                          int(y_coord.points[-1]*1000000))
+                           int(y_coord.points[-1]*1000000))
     eccodes.codes_set_long(grib, "longitudeOfFirstGridPoint",
-                          int((x_coord.points[0] % 360)*1000000))
+                           int((x_coord.points[0] % 360)*1000000))
     eccodes.codes_set_long(grib, "longitudeOfLastGridPoint",
-                          int((x_coord.points[-1] % 360)*1000000))
+                           int((x_coord.points[-1] % 360)*1000000))
 
 
 def dx_dy(x_coord, y_coord, grib):
@@ -259,13 +259,13 @@ def dx_dy(x_coord, y_coord, grib):
     # WMO Manual on Codes regulation 92.1.6
     if x_coord.units == 'degrees':
         eccodes.codes_set(grib, "iDirectionIncrement",
-                         round(1e6 * float(abs(x_step))))
+                          round(1e6 * float(abs(x_step))))
     else:
         raise ValueError('X coordinate must be in degrees, not {}'
                          '.'.format(x_coord.units))
     if y_coord.units == 'degrees':
         eccodes.codes_set(grib, "jDirectionIncrement",
-                         round(1e6 * float(abs(y_step))))
+                          round(1e6 * float(abs(y_step))))
     else:
         raise ValueError('Y coordinate must be in degrees, not {}'
                          '.'.format(y_coord.units))
@@ -273,9 +273,9 @@ def dx_dy(x_coord, y_coord, grib):
 
 def scanning_mode_flags(x_coord, y_coord, grib):
     eccodes.codes_set_long(grib, "iScansPositively",
-                          int(x_coord.points[1] - x_coord.points[0] > 0))
+                           int(x_coord.points[1] - x_coord.points[0] > 0))
     eccodes.codes_set_long(grib, "jScansPositively",
-                          int(y_coord.points[1] - y_coord.points[0] > 0))
+                           int(y_coord.points[1] - y_coord.points[0] > 0))
 
 
 def horizontal_grid_common(cube, grib, xy=False):
@@ -316,9 +316,9 @@ def latlon_points_irregular(cube, grib):
     lon_values = x_coord.points / _DEFAULT_DEGREES_UNITS
     lat_values = y_coord.points / _DEFAULT_DEGREES_UNITS
     eccodes.codes_set_array(grib, 'longitudes',
-                           np.array(np.round(lon_values), dtype=np.int64))
+                            np.array(np.round(lon_values), dtype=np.int64))
     eccodes.codes_set_array(grib, 'latitudes',
-                           np.array(np.round(lat_values), dtype=np.int64))
+                            np.array(np.round(lat_values), dtype=np.int64))
 
 
 def rotated_pole(cube, grib):
@@ -488,24 +488,24 @@ def grid_definition_template_10(cube, grib):
     last_x = last_x % 360
 
     eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "latitudeOfLastGridPoint",
-                     int(np.round(last_y / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(last_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfLastGridPoint",
-                     int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
 
     # Check and raise a more intelligible error, if the Iris version is too old
     # to support the Mercator 'standard_parallel' property.
     confirm_extended_mercator_supported()
     # Encode the latitude at which the projection intersects the Earth.
     eccodes.codes_set(grib, 'LaD',
-                     cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
+                      cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
 
     # Encode resolution and component flags
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
 
 def grid_definition_template_12(cube, grib):
@@ -553,10 +553,14 @@ def grid_definition_template_12(cube, grib):
     ensure_set_int32_value(grib, 'X2', int(x_cm[-1]))
 
     # Lat and lon of reference point are measured in millionths of a degree.
-    eccodes.codes_set(grib, "latitudeOfReferencePoint",
-                     cs.latitude_of_projection_origin / _DEFAULT_DEGREES_UNITS)
-    eccodes.codes_set(grib, "longitudeOfReferencePoint",
-                     cs.longitude_of_central_meridian / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(
+        grib, "latitudeOfReferencePoint",
+        cs.latitude_of_projection_origin / _DEFAULT_DEGREES_UNITS
+    )
+    eccodes.codes_set(
+        grib, "longitudeOfReferencePoint",
+        cs.longitude_of_central_meridian / _DEFAULT_DEGREES_UNITS
+    )
 
     # Convert a value in metres into the closest integer number of
     # centimetres.
@@ -572,7 +576,7 @@ def grid_definition_template_12(cube, grib):
     # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
     key_type = eccodes.codes_get_native_type(grib,
-                                            "scaleFactorAtReferencePoint")
+                                             "scaleFactorAtReferencePoint")
     if key_type is not float:
         value = fixup_float32_as_int32(value)
     eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
@@ -625,16 +629,16 @@ def grid_definition_template_30(cube, grib):
     central_lon = cs.central_lon % 360
 
     eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
     latin1, latin2 = cs.secant_latitudes
     eccodes.codes_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
     # Which pole are the parallels closest to? That is the direction
     # that the cone converges.
@@ -930,7 +934,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
         eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
-                         GRIB_MISSING_LONG)
+                          GRIB_MISSING_LONG)
     elif not v_coord.has_bounds():
         # No second surface
         output_v = v_coord.units.convert(v_coord.points[0], output_unit)
@@ -944,7 +948,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
         eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 255)
         eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
-                         GRIB_MISSING_LONG)
+                          GRIB_MISSING_LONG)
     else:
         # bounded : set lower+upper surfaces
         output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
@@ -955,9 +959,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 0)
         eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface",
-                         int(round(output_v[0])))
+                          int(round(output_v[0])))
         eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
-                         int(round(output_v[1])))
+                          int(round(output_v[1])))
 
     if hybrid_factory is not None:
         # Need to record ALL the level coefficents in a 'PV' vector.
@@ -1017,7 +1021,7 @@ def set_time_range(time_coord, grib):
 
     # Set type to hours and convert period to this unit.
     eccodes.codes_set(grib, "indicatorOfUnitForTimeRange",
-                     _TIME_RANGE_UNITS['hours'])
+                      _TIME_RANGE_UNITS['hours'])
     hours_since_units = cf_units.Unit('hours since epoch',
                                       calendar=time_coord.units.calendar)
     start_hours, end_hours = time_coord.units.convert(time_coord.bounds[0],
@@ -1177,7 +1181,7 @@ def set_ensemble(cube, grib):
         raise ValueError("A cube 'realization' coordinate with one "
                          "point is required, but not present")
     eccodes.codes_set(grib, "perturbationNumber",
-                     int(cube.coord('realization').points[0]))
+                      int(cube.coord('realization').points[0]))
     # no encoding at present in iris-grib, set to missing
     eccodes.codes_set(grib, "numberOfForecastsInEnsemble", 255)
     eccodes.codes_set(grib, "typeOfEnsembleForecast", 255)
@@ -1259,7 +1263,7 @@ def product_definition_template_10(cube, grib, full3d_cube=None):
         raise ValueError("A cube 'percentile_over_time' coordinate with one "
                          "point is required, but not present.")
     eccodes.codes_set(grib, "percentileValue",
-                     int(cube.coord('percentile_over_time').points[0]))
+                      int(cube.coord('percentile_over_time').points[0]))
     _product_definition_template_8_10_and_11(cube, grib)
 
 

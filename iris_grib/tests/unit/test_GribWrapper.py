@@ -56,7 +56,8 @@ class Test_edition(tests.IrisGribTest):
         self.patch('iris_grib.GribWrapper._compute_extra_keys')
         self.patch('eccodes.codes_get_long', _mock_codes_get_long)
         self.patch('eccodes.codes_get_string', _mock_codes_get_string)
-        self.patch('eccodes.codes_get_native_type', _mock_codes_get_native_type)
+        self.patch('eccodes.codes_get_native_type',
+                   _mock_codes_get_native_type)
         self.tell = mock.Mock(side_effect=[_message_length])
 
     def test_not_edition_1(self):
@@ -96,7 +97,8 @@ class Test_deferred_proxy_args(tests.IrisTest):
         self.patch('iris_grib.GribWrapper._compute_extra_keys')
         self.patch('eccodes.codes_get_long', _mock_codes_get_long)
         self.patch('eccodes.codes_get_string', _mock_codes_get_string)
-        self.patch('eccodes.codes_get_native_type', _mock_codes_get_native_type)
+        self.patch('eccodes.codes_get_native_type',
+                   _mock_codes_get_native_type)
         tell_tale = np.arange(1, 5) * _message_length
         self.expected = tell_tale - _message_length
         self.grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
