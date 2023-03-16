@@ -14,42 +14,42 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
-import gribapi
+import eccodes
 import iris.cube
 import numpy as np
 
 from iris_grib._save_rules import data_section
 
 
-GRIB_API = 'iris_grib._save_rules.gribapi'
+GRIB_API = 'iris_grib._save_rules.eccodes'
 GRIB_MESSAGE = mock.sentinel.GRIB_MESSAGE
 
 
 class TestMDI(tests.IrisGribTest):
     def assertBitmapOff(self, grib_api):
         # Check the use of a mask has been turned off via:
-        #   gribapi.grib_set(grib_message, 'bitmapPresent', 0)
-        grib_api.grib_set.assert_called_once_with(GRIB_MESSAGE,
+        #   eccodes.codes_set(grib_message, 'bitmapPresent', 0)
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
                                                   'bitmapPresent', 0)
 
     def assertBitmapOn(self, grib_api, fill_value):
         # Check the use of a mask has been turned on via:
-        #   gribapi.grib_set(grib_message, 'bitmapPresent', 1)
-        #   gribapi.grib_set_double(grib_message, 'missingValue', fill_value)
-        grib_api.grib_set.assert_called_once_with(GRIB_MESSAGE,
+        #   eccodes.codes_set(grib_message, 'bitmapPresent', 1)
+        #   eccodes.codes_set_double(grib_message, 'missingValue', fill_value)
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
                                                   'bitmapPresent', 1)
-        grib_api.grib_set_double.assert_called_once_with(GRIB_MESSAGE,
+        grib_api.codes_set_double.assert_called_once_with(GRIB_MESSAGE,
                                                          'missingValue',
                                                          fill_value)
 
     def assertBitmapRange(self, grib_api, min_data, max_data):
         # Check the use of a mask has been turned on via:
-        #   gribapi.grib_set(grib_message, 'bitmapPresent', 1)
-        #   gribapi.grib_set_double(grib_message, 'missingValue', ...)
+        #   eccodes.codes_set(grib_message, 'bitmapPresent', 1)
+        #   eccodes.codes_set_double(grib_message, 'missingValue', ...)
         # and that a suitable fill value has been chosen.
-        grib_api.grib_set.assert_called_once_with(GRIB_MESSAGE,
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
                                                   'bitmapPresent', 1)
-        args, = grib_api.grib_set_double.call_args_list
+        args, = grib_api.codes_set_double.call_args_list
         (message, key, fill_value), kwargs = args
         self.assertIs(message, GRIB_MESSAGE)
         self.assertEqual(key, 'missingValue')
@@ -60,8 +60,8 @@ class TestMDI(tests.IrisGribTest):
 
     def assertValues(self, grib_api, values):
         # Check the correct data values have been set via:
-        #   gribapi.grib_set_double_array(grib_message, 'values', ...)
-        args, = grib_api.grib_set_double_array.call_args_list
+        #   eccodes.codes_set_double_array(grib_message, 'values', ...)
+        args, = grib_api.codes_set_double_array.call_args_list
         (message, key, values), kwargs = args
         self.assertIs(message, GRIB_MESSAGE)
         self.assertEqual(key, 'values')
@@ -160,9 +160,9 @@ class TestNonDoubleData(tests.IrisGribTest):
         data = np.random.random(1920 * 2560).astype(dtype)
         cube = iris.cube.Cube(data,
                               standard_name='geopotential_height', units='km')
-        grib_message = gribapi.grib_new_from_samples("GRIB2")
+        grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
         data_section(cube, grib_message)
-        gribapi.grib_release(grib_message)
+        eccodes.codes_release(grib_message)
 
     def test_float32(self):
         self.check(dtype=np.float32)

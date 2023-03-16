@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 import numpy as np
 
 from iris.coords import CellMethod, DimCoord
@@ -34,7 +34,7 @@ class TestProductDefinitionIdentifier(tests.IrisGribTest):
                          units=Unit('days since epoch', calendar='standard'))
         self.cube.add_aux_coord(coord)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_product_definition(self, mock_set):
         cube = self.cube
         cell_method = CellMethod(method='sum', coords=['time'])
@@ -46,7 +46,7 @@ class TestProductDefinitionIdentifier(tests.IrisGribTest):
 
 
 class Test_type_of_statistical_processing(tests.IrisTest):
-    @mock.patch.object(gribapi, "grib_set")
+    @mock.patch.object(eccodes, "codes_set")
     def test_stats_type_min(self, mock_set):
         grib = None
         cube = iris.cube.Cube(np.array([1.0]))
@@ -59,7 +59,7 @@ class Test_type_of_statistical_processing(tests.IrisTest):
         product_definition_template_8(cube, grib)
         mock_set.assert_any_call(grib, "typeOfStatisticalProcessing", 2)
 
-    @mock.patch.object(gribapi, "grib_set")
+    @mock.patch.object(eccodes, "codes_set")
     def test_stats_type_max(self, mock_set):
         grib = None
         cube = iris.cube.Cube(np.array([1.0]))

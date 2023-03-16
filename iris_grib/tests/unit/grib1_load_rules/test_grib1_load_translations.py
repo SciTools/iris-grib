@@ -23,12 +23,12 @@ import numpy as np
 import iris
 import iris.exceptions
 
-import gribapi
+import eccodes
 import iris.fileformats
 import iris_grib
 
 
-def _mock_gribapi_fetch(message, key):
+def _mock_eccodes_fetch(message, key):
     """
     Fake the gribapi key-fetch.
 
@@ -39,10 +39,10 @@ def _mock_gribapi_fetch(message, key):
     if key in message:
         return message[key]
     else:
-        raise _mock_gribapi.errors.GribInternalError
+        raise _mock_eccodes.CodesInternalError
 
 
-def _mock_gribapi__grib_is_missing(grib_message, keyname):
+def _mock_eccodes__codes_is_missing(grib_message, keyname):
     """
     Fake the gribapi key-existence enquiry.
 
@@ -52,7 +52,7 @@ def _mock_gribapi__grib_is_missing(grib_message, keyname):
     return keyname not in grib_message
 
 
-def _mock_gribapi__grib_get_native_type(grib_message, keyname):
+def _mock_eccodes__codes_get_native_type(grib_message, keyname):
     """
     Fake the gribapi type-discovery operation.
 
@@ -62,24 +62,24 @@ def _mock_gribapi__grib_get_native_type(grib_message, keyname):
     """
     if keyname in grib_message:
         return type(grib_message[keyname])
-    raise _mock_gribapi.errors.GribInternalError(keyname)
+    raise _mock_eccodes.CodesInternalError(keyname)
 
 
 # Construct a mock object to mimic the gribapi for GribWrapper testing.
-_mock_gribapi = mock.Mock(spec=gribapi)
-_mock_gribapi.errors.GribInternalError = Exception
+_mock_eccodes = mock.Mock(spec=eccodes)
+_mock_eccodes.CodesInternalError = Exception
 
-_mock_gribapi.grib_get_long = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_string = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_double = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_double_array = mock.Mock(
-    side_effect=_mock_gribapi_fetch
+_mock_eccodes.codes_get_long = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_string = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_double = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_double_array = mock.Mock(
+    side_effect=_mock_eccodes_fetch
 )
-_mock_gribapi.grib_is_missing = mock.Mock(
-    side_effect=_mock_gribapi__grib_is_missing
+_mock_eccodes.codes_is_missing = mock.Mock(
+    side_effect=_mock_eccodes__codes_is_missing
 )
-_mock_gribapi.grib_get_native_type = mock.Mock(
-    side_effect=_mock_gribapi__grib_get_native_type
+_mock_eccodes.codes_get_native_type = mock.Mock(
+    side_effect=_mock_eccodes__codes_get_native_type
 )
 
 # define seconds in an hour, for general test usage
@@ -173,7 +173,7 @@ class TestGribTimecodes(tests.IrisTest):
         # Operates on lists of cases for various time-units and grib-editions.
         # Format: (edition, code, expected-exception,
         #          equivalent-seconds, description-string)
-        with mock.patch("iris_grib.gribapi", _mock_gribapi):
+        with mock.patch("iris_grib.eccodes", _mock_eccodes):
             for test_controls in test_set:
                 (
                     grib_edition,
@@ -294,12 +294,12 @@ class TestGribTimecodes(tests.IrisTest):
         with self.temp_filename() as temp_gribfile_path:
             # Write a test grib message to the temporary file.
             with open(temp_gribfile_path, "wb") as temp_gribfile:
-                grib_message = gribapi.grib_new_from_samples("GRIB2")
+                grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
                 # Set the PDT to something unexpected.
-                gribapi.grib_set_long(
+                eccodes.codes_set_long(
                     grib_message, "productDefinitionTemplateNumber", 5
                 )
-                gribapi.grib_write(grib_message, temp_gribfile)
+                eccodes.codes_write(grib_message, temp_gribfile)
 
             # Load the message from the file as a cube.
             cube_generator = iris_grib.load_cubes(temp_gribfile_path)
@@ -329,7 +329,7 @@ class TestGrib1LoadPhenomenon(tests.IrisTest):
     def cube_from_message(self, grib):
         # Parameter translation now uses the GribWrapper, so we must convert
         # the Mock-based fake message to a FakeGribMessage.
-        with mock.patch("iris_grib.gribapi", _mock_gribapi):
+        with mock.patch("iris_grib.eccodes", _mock_eccodes):
             grib_message = FakeGribMessage(**grib.__dict__)
             wrapped_msg = iris_grib.GribWrapper(grib_message)
             cube, _, _ = iris.fileformats.rules._make_cube(

@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
@@ -34,7 +34,7 @@ class TestRealizationIdentifier(tests.IrisGribTest):
         coord = DimCoord(4, 'realization', units='1')
         self.cube.add_aux_coord(coord)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_realization(self, mock_set):
         cube = self.cube
         cell_method = CellMethod(method='sum', coords=['time'])

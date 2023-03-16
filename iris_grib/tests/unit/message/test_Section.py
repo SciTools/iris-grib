@@ -12,7 +12,7 @@ Unit tests for `iris_grib.message.Section`.
 # importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 import numpy as np
 
 from iris_grib.message import Section
@@ -23,7 +23,9 @@ class Test___getitem__(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
         with open(filename, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
 
     def test_scalar(self):
         section = Section(self.grib_id, None, ['Ni'])
@@ -56,7 +58,9 @@ class Test__getitem___pdt_31(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'umukv', 'ukv_chan9.grib2'))
         with open(filename, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
         self.keys = ['satelliteSeries', 'satelliteNumber', 'instrumentType',
                      'scaleFactorOfCentralWaveNumber',
                      'scaledValueOfCentralWaveNumber']
@@ -74,7 +78,9 @@ class Test_get_computed_key(tests.IrisGribTest):
     def test_gdt40_computed(self):
         fname = tests.get_data_path(('GRIB', 'gaussian', 'regular_gg.grib2'))
         with open(fname, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
             section = Section(self.grib_id, None, [])
         latitudes = section.get_computed_key('latitudes')
         self.assertTrue(88.55 < latitudes[0] < 88.59)

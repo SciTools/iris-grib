@@ -16,7 +16,7 @@ from unittest import mock
 import warnings
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import DimCoord
 
@@ -47,7 +47,7 @@ class Test(tests.IrisGribTest):
                                     'coordinate, got 2 points'):
             set_time_range(coord, mock.sentinel.grib)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_hours(self, mock_set):
         lower = 10
         upper = 20
@@ -58,7 +58,7 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  'lengthOfTimeRange', upper - lower)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_days(self, mock_set):
         lower = 4
         upper = 6
@@ -71,7 +71,7 @@ class Test(tests.IrisGribTest):
                                  'lengthOfTimeRange',
                                  (upper - lower) * 24)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_fractional_hours(self, mock_set_long):
         lower = 10.0
         upper = 20.9

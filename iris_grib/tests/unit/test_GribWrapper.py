@@ -24,7 +24,7 @@ from iris_grib import GribWrapper, _load_generate
 _message_length = 1000
 
 
-def _mock_grib_get_long(grib_message, key):
+def _mock_codes_get_long(grib_message, key):
     lookup = dict(totalLength=_message_length,
                   numberOfValues=200,
                   jPointsAreConsecutive=0,
@@ -34,16 +34,16 @@ def _mock_grib_get_long(grib_message, key):
     try:
         result = lookup[key]
     except KeyError:
-        msg = 'Mock grib_get_long unknown key: {!r}'.format(key)
+        msg = 'Mock codes_get_long unknown key: {!r}'.format(key)
         raise AttributeError(msg)
     return result
 
 
-def _mock_grib_get_string(grib_message, key):
+def _mock_codes_get_string(grib_message, key):
     return grib_message
 
 
-def _mock_grib_get_native_type(grib_message, key):
+def _mock_codes_get_native_type(grib_message, key):
     result = int
     if key == 'gridType':
         result = str
@@ -54,9 +54,9 @@ class Test_edition(tests.IrisGribTest):
     def setUp(self):
         self.patch('iris_grib.GribWrapper._confirm_in_scope')
         self.patch('iris_grib.GribWrapper._compute_extra_keys')
-        self.patch('gribapi.grib_get_long', _mock_grib_get_long)
-        self.patch('gribapi.grib_get_string', _mock_grib_get_string)
-        self.patch('gribapi.grib_get_native_type', _mock_grib_get_native_type)
+        self.patch('eccodes.codes_get_long', _mock_codes_get_long)
+        self.patch('eccodes.codes_get_string', _mock_codes_get_string)
+        self.patch('eccodes.codes_get_native_type', _mock_codes_get_native_type)
         self.tell = mock.Mock(side_effect=[_message_length])
 
     def test_not_edition_1(self):
@@ -64,7 +64,7 @@ class Test_edition(tests.IrisGribTest):
             return 2
 
         emsg = "GRIB edition 2 is not supported by 'GribWrapper'"
-        with mock.patch('gribapi.grib_get_long', func):
+        with mock.patch('eccodes.codes_get_long', func):
             with self.assertRaisesRegex(TranslationError, emsg):
                 GribWrapper(None)
 
@@ -94,15 +94,15 @@ class Test_deferred_proxy_args(tests.IrisTest):
     def setUp(self):
         self.patch('iris_grib.GribWrapper._confirm_in_scope')
         self.patch('iris_grib.GribWrapper._compute_extra_keys')
-        self.patch('gribapi.grib_get_long', _mock_grib_get_long)
-        self.patch('gribapi.grib_get_string', _mock_grib_get_string)
-        self.patch('gribapi.grib_get_native_type', _mock_grib_get_native_type)
+        self.patch('eccodes.codes_get_long', _mock_codes_get_long)
+        self.patch('eccodes.codes_get_string', _mock_codes_get_string)
+        self.patch('eccodes.codes_get_native_type', _mock_codes_get_native_type)
         tell_tale = np.arange(1, 5) * _message_length
         self.expected = tell_tale - _message_length
         self.grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
         self.dtype = np.float64
         self.path = self.grib_fh.name
-        self.lookup = _mock_grib_get_long
+        self.lookup = _mock_codes_get_long
 
     def test_regular_proxy_args(self):
         grib_message = 'regular_ll'

@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import DimCoord
 import iris.tests.stock as stock
@@ -33,7 +33,7 @@ class TestChemicalConstituentIdentifier(tests.IrisGribTest):
         self.cube.add_aux_coord(coord)
         self.cube.attributes['WMO_constituent_type'] = 0
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_constituent_type(self, mock_set):
         cube = self.cube
 

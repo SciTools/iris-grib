@@ -12,7 +12,7 @@ Unit tests for the `iris_grib.message._RawGribMessage` class.
 # importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 
 from iris_grib.message import _RawGribMessage
 
@@ -22,7 +22,9 @@ class Test(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
         with open(filename, 'rb') as grib_fh:
-            grib_id = gribapi.grib_new_from_file(grib_fh)
+            grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
             self.message = _RawGribMessage(grib_id)
 
     def test_sections__set(self):

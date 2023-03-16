@@ -102,15 +102,15 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("Di", 200)
         self._check_key("Dj", 500)
 
-    def test__negative_grid_points_gribapi_broken(self):
-        self.mock_gribapi.GribInternalError = FakeGribError
+    def test__negative_grid_points_eccodes_broken(self):
+        self.mock_eccodes.GribInternalError = FakeGribError
 
         # Force the test to run the signed int --> unsigned int workaround.
         def set(grib, key, value):
             if key in ["X1", "X2", "Y1", "Y2"] and value < 0:
-                raise self.mock_gribapi.GribInternalError()
+                raise self.mock_eccodes.GribInternalError()
             grib.keys[key] = value
-        self.mock_gribapi.grib_set = set
+        self.mock_eccodes.codes_set = set
 
         test_cube = self._make_test_cube(x_points=[-1, 1, 3, 5, 7],
                                          y_points=[-4, 9])
@@ -120,7 +120,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("Y1", 0x80000190)
         self._check_key("Y2", 900)
 
-    def test__negative_grid_points_gribapi_fixed(self):
+    def test__negative_grid_points_eccodes_fixed(self):
         test_cube = self._make_test_cube(x_points=[-1, 1, 3, 5, 7],
                                          y_points=[-4, 9])
         grid_definition_template_12(test_cube, self.mock_grib)
@@ -136,7 +136,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("XR", 40000000.0)
         self._check_key("YR", -10000000.0)
 
-    def test__scale_factor_gribapi_broken(self):
+    def test__scale_factor_eccodes_broken(self):
         # GRIBAPI expects a signed int for scaleFactorAtReferencePoint
         # but it should accept a float, so work around this.
         # See https://software.ecmwf.int/issues/browse/SUP-1100
@@ -144,16 +144,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         def get_native_type(grib, key):
             assert key == "scaleFactorAtReferencePoint"
             return int
-        self.mock_gribapi.grib_get_native_type = get_native_type
+        self.mock_eccodes.codes_get_native_type = get_native_type
         grid_definition_template_12(self.test_cube, self.mock_grib)
         self._check_key("scaleFactorAtReferencePoint", 1065346526)
 
-    def test__scale_factor_gribapi_fixed(self):
+    def test__scale_factor_eccodes_fixed(self):
 
         def get_native_type(grib, key):
             assert key == "scaleFactorAtReferencePoint"
             return float
-        self.mock_gribapi.grib_get_native_type = get_native_type
+        self.mock_eccodes.codes_get_native_type = get_native_type
         grid_definition_template_12(self.test_cube, self.mock_grib)
         self._check_key("scaleFactorAtReferencePoint", 0.9996012717)
 

@@ -11,7 +11,7 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
-import gribapi
+import eccodes
 
 import iris
 import iris.tests.stock as stock
@@ -20,7 +20,7 @@ from iris_grib._save_rules import identification
 from iris_grib.tests.unit import TestGribSimple
 
 
-GRIB_API = 'iris_grib._save_rules.gribapi'
+GRIB_API = 'iris_grib._save_rules.eccodes'
 
 
 class Test(TestGribSimple):
@@ -28,12 +28,12 @@ class Test(TestGribSimple):
     def test_no_realization(self):
         cube = stock.simple_pp()
         grib = mock.Mock()
-        mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch(GRIB_API, mock_gribapi):
+        mock_eccodes = mock.Mock(spec=eccodes)
+        with mock.patch(GRIB_API, mock_eccodes):
             identification(cube, grib)
 
-        mock_gribapi.assert_has_calls(
-            [mock.call.grib_set_long(grib, "typeOfProcessedData", 2)])
+        mock_eccodes.assert_has_calls(
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 2)])
 
     @tests.skip_data
     def test_realization_0(self):
@@ -43,12 +43,12 @@ class Test(TestGribSimple):
         cube.add_aux_coord(realisation)
 
         grib = mock.Mock()
-        mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch(GRIB_API, mock_gribapi):
+        mock_eccodes = mock.Mock(spec=eccodes)
+        with mock.patch(GRIB_API, mock_eccodes):
             identification(cube, grib)
 
-        mock_gribapi.assert_has_calls(
-            [mock.call.grib_set_long(grib, "typeOfProcessedData", 3)])
+        mock_eccodes.assert_has_calls(
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 3)])
 
     @tests.skip_data
     def test_realization_n(self):
@@ -58,12 +58,12 @@ class Test(TestGribSimple):
         cube.add_aux_coord(realisation)
 
         grib = mock.Mock()
-        mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch(GRIB_API, mock_gribapi):
+        mock_eccodes = mock.Mock(spec=eccodes)
+        with mock.patch(GRIB_API, mock_eccodes):
             identification(cube, grib)
 
-        mock_gribapi.assert_has_calls(
-            [mock.call.grib_set_long(grib, "typeOfProcessedData", 4)])
+        mock_eccodes.assert_has_calls(
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 4)])
 
 
 if __name__ == "__main__":

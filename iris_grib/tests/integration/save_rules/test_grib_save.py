@@ -26,7 +26,7 @@ import iris.coords
 import iris.exceptions
 import iris.util
 
-import gribapi
+import eccodes
 from iris_grib._load_convert import _MDI as MDI
 
 
@@ -211,15 +211,17 @@ class TestCubeSave(tests.IrisGribTest):
         with self.temp_filename(".grib2") as testfile:
             iris.save(cube, testfile)
             with open(testfile, "rb") as saved_file:
-                g = gribapi.grib_new_from_file(saved_file)
+                g = eccodes.codes_new_from_file(
+                    saved_file, eccodes.CODES_PRODUCT_GRIB
+                )
                 self.assertEqual(
-                    gribapi.grib_get_double(
+                    eccodes.codes_get_double(
                         g, "scaledValueOfFirstFixedSurface"
                     ),
                     0.0,
                 )
                 self.assertEqual(
-                    gribapi.grib_get_double(
+                    eccodes.codes_get_double(
                         g, "scaledValueOfSecondFixedSurface"
                     ),
                     2147483647.0,
