@@ -23,10 +23,10 @@ class GdtTestMixin:
     TARGET_MODULE = 'iris_grib._save_rules'
 
     def setUp(self):
-        # Patch the gribapi of the tested module.
+        # Patch the ecCodes of the tested module.
         self.mock_eccodes = self.patch(self.TARGET_MODULE + '.eccodes')
 
-        # Fix the mock gribapi to record key assignments.
+        # Fix the mock ecCodes to record key assignments.
         def codes_set_trap(grib, name, value):
             # Record a key setting on the mock passed as the 'grib message id'.
             grib.keys[name] = value

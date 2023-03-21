@@ -27,7 +27,7 @@ def _make_test_message(sections):
 
 def _mock_eccodes_fetch(message, key):
     """
-    Fake the gribapi key-fetch.
+    Fake the ecCodes key-fetch.
 
     Fetch key-value from the fake message (dictionary).
     If the key is not present, raise the diagnostic exception.
@@ -41,7 +41,7 @@ def _mock_eccodes_fetch(message, key):
 
 def _mock_eccodes__codes_is_missing(grib_message, keyname):
     """
-    Fake the gribapi key-existence enquiry.
+    Fake the ecCodes key-existence enquiry.
 
     Return whether the key exists in the fake message (dictionary).
 
@@ -51,7 +51,7 @@ def _mock_eccodes__codes_is_missing(grib_message, keyname):
 
 def _mock_eccodes__codes_get_native_type(grib_message, keyname):
     """
-    Fake the gribapi type-discovery operation.
+    Fake the ecCodes type-discovery operation.
 
     Return type of key-value in the fake message (dictionary).
     If the key is not present, raise the diagnostic exception.
