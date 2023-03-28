@@ -36,7 +36,7 @@ def _mock_eccodes_fetch(message, key):
     if key in message:
         return message[key]
     else:
-        raise _mock_eccodes.GribInternalError
+        raise _mock_eccodes.CodesInternalError
 
 
 def _mock_eccodes__codes_is_missing(grib_message, keyname):
@@ -59,12 +59,12 @@ def _mock_eccodes__codes_get_native_type(grib_message, keyname):
     """
     if keyname in grib_message:
         return type(grib_message[keyname])
-    raise _mock_eccodes.GribInternalError(keyname)
+    raise _mock_eccodes.CodesInternalError(keyname)
 
 
 # Construct a mock object to mimic the eccodes for GribWrapper testing.
 _mock_eccodes = mock.Mock(spec=eccodes)
-_mock_eccodes.GribInternalError = Exception
+_mock_eccodes.CodesInternalError = Exception
 
 _mock_eccodes.codes_get_long = mock.Mock(side_effect=_mock_eccodes_fetch)
 _mock_eccodes.codes_get_string = mock.Mock(side_effect=_mock_eccodes_fetch)

@@ -103,12 +103,12 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("Dj", 500)
 
     def test__negative_grid_points_eccodes_broken(self):
-        self.mock_eccodes.GribInternalError = FakeGribError
+        self.mock_eccodes.CodesInternalError = FakeGribError
 
         # Force the test to run the signed int --> unsigned int workaround.
         def set(grib, key, value):
             if key in ["X1", "X2", "Y1", "Y2"] and value < 0:
-                raise self.mock_eccodes.GribInternalError()
+                raise self.mock_eccodes.CodesInternalError()
             grib.keys[key] = value
         self.mock_eccodes.codes_set = set
 

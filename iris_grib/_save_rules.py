@@ -94,7 +94,7 @@ def ensure_set_int32_value(grib, key, value):
     """
     try:
         eccodes.codes_set(grib, key, value)
-    except eccodes.GribInternalError:
+    except eccodes.CodesInternalError:
         value = fixup_int32_as_uint32(value)
         eccodes.codes_set(grib, key, value)
 
