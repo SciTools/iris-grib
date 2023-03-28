@@ -1502,7 +1502,7 @@ def data_section(cube, grib):
     eccodes.codes_set_double_array(grib, "values", data.flatten())
 
     # todo: check packing accuracy?
-#    print("packingError", eccodes.getb_get_double(grib, "packingError"))
+#    print("packingError", eccodes.get_get_double(grib, "packingError"))
 
 
 ###############################################################################
