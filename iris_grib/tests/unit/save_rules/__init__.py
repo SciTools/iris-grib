@@ -23,20 +23,20 @@ class GdtTestMixin:
     TARGET_MODULE = 'iris_grib._save_rules'
 
     def setUp(self):
-        # Patch the gribapi of the tested module.
-        self.mock_gribapi = self.patch(self.TARGET_MODULE + '.gribapi')
+        # Patch the ecCodes of the tested module.
+        self.mock_eccodes = self.patch(self.TARGET_MODULE + '.eccodes')
 
-        # Fix the mock gribapi to record key assignments.
-        def grib_set_trap(grib, name, value):
+        # Fix the mock ecCodes to record key assignments.
+        def codes_set_trap(grib, name, value):
             # Record a key setting on the mock passed as the 'grib message id'.
             grib.keys[name] = value
 
-        self.mock_gribapi.grib_set = grib_set_trap
-        self.mock_gribapi.grib_set_long = grib_set_trap
-        self.mock_gribapi.grib_set_float = grib_set_trap
-        self.mock_gribapi.grib_set_double = grib_set_trap
-        self.mock_gribapi.grib_set_long_array = grib_set_trap
-        self.mock_gribapi.grib_set_array = grib_set_trap
+        self.mock_eccodes.codes_set = codes_set_trap
+        self.mock_eccodes.codes_set_long = codes_set_trap
+        self.mock_eccodes.codes_set_float = codes_set_trap
+        self.mock_eccodes.codes_set_double = codes_set_trap
+        self.mock_eccodes.codes_set_long_array = codes_set_trap
+        self.mock_eccodes.codes_set_array = codes_set_trap
 
         # Create a mock 'grib message id', with a 'keys' dict for settings.
         self.mock_grib = mock.Mock(keys={})

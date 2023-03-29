@@ -11,7 +11,7 @@ Defines a lightweight wrapper class to wrap a single GRIB message.
 from collections import namedtuple
 import re
 
-import gribapi
+import eccodes
 import numpy as np
 import numpy.ma as ma
 
@@ -60,7 +60,9 @@ class GribMessage:
 
         while True:
             offset = grib_fh.tell()
-            grib_id = gribapi.grib_new_from_file(grib_fh)
+            grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
             if grib_id is None:
                 break
             raw_message = _RawGribMessage(grib_id)
@@ -74,7 +76,7 @@ class GribMessage:
         them directly.
 
         """
-        # A RawGribMessage giving gribapi access to the original grib message.
+        # A RawGribMessage giving ecCodes access to the original grib message.
         self._raw_message = raw_message
         # A _MessageLocation which dask uses to read the message data array,
         # by which time this message may be dead and the original grib file
@@ -282,7 +284,9 @@ class _RawGribMessage:
     def from_file_offset(filename, offset):
         with open(filename, 'rb') as f:
             f.seek(offset)
-            message_id = gribapi.grib_new_from_file(f)
+            message_id = eccodes.codes_new_from_file(
+                f, eccodes.CODES_PRODUCT_GRIB
+            )
             if message_id is None:
                 fmt = 'Invalid GRIB message: {} @ {}'
                 raise RuntimeError(fmt.format(filename, offset))
@@ -305,10 +309,10 @@ class _RawGribMessage:
 
     def __del__(self):
         """
-        Release the gribapi reference to the message at end of object's life.
+        Release the ecCodes reference to the message at end of object's life.
 
         """
-        gribapi.grib_release(self._message_id)
+        eccodes.codes_release(self._message_id)
 
     @property
     def sections(self):
@@ -330,11 +334,11 @@ class _RawGribMessage:
     def _get_message_keys(self):
         """Creates a generator of all the keys in the message."""
 
-        keys_itr = gribapi.grib_keys_iterator_new(self._message_id)
-        gribapi.grib_skip_computed(keys_itr)
-        while gribapi.grib_keys_iterator_next(keys_itr):
-            yield gribapi.grib_keys_iterator_get_name(keys_itr)
-        gribapi.grib_keys_iterator_delete(keys_itr)
+        keys_itr = eccodes.codes_keys_iterator_new(self._message_id)
+        eccodes.codes_skip_computed(keys_itr)
+        while eccodes.codes_keys_iterator_next(keys_itr):
+            yield eccodes.codes_keys_iterator_get_name(keys_itr)
+        eccodes.codes_keys_iterator_delete(keys_itr)
 
     def _get_message_sections(self):
         """
@@ -436,12 +440,12 @@ class Section:
                        'scaledValueOfCentralWaveNumber',
                        'longitudes', 'latitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = eccodes.codes_get_array(self._message_id, key)
         elif key == 'bitmap':
             # The bitmap is stored as contiguous boolean bits, one bit for each
-            # data point. GRIBAPI returns these as strings, so it must be
+            # data point. ecCodes returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
-            res = gribapi.grib_get_array(self._message_id, key, int)
+            res = eccodes.codes_get_array(self._message_id, key, int)
         elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
             # By default these values are returned as unhelpful strings but
             # we can use int representation to compare against instead.
@@ -466,7 +470,7 @@ class Section:
         """
         vector_keys = ('longitudes', 'latitudes', 'distinctLatitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = eccodes.codes_get_array(self._message_id, key)
         else:
             res = self._get_value_or_missing(key)
         return res
@@ -481,11 +485,11 @@ class Section:
         Implementation of Regulations 92.1.4 and 92.1.5 via ECCodes.
 
         """
-        if gribapi.grib_is_missing(self._message_id, key):
+        if eccodes.codes_is_missing(self._message_id, key):
             result = None
         else:
             if use_int:
-                result = gribapi.grib_get(self._message_id, key, int)
+                result = eccodes.codes_get(self._message_id, key, int)
             else:
-                result = gribapi.grib_get(self._message_id, key)
+                result = eccodes.codes_get(self._message_id, key)
         return result

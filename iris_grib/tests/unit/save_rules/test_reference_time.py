@@ -11,7 +11,7 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
-import gribapi
+import eccodes
 
 from iris_grib import load_cubes
 from iris_grib._save_rules import reference_time
@@ -20,14 +20,14 @@ from iris_grib._save_rules import reference_time
 class Test(tests.IrisGribTest):
     def _test(self, cube):
         grib = mock.Mock()
-        mock_gribapi = mock.Mock(spec=gribapi)
-        with mock.patch('iris_grib._save_rules.gribapi', mock_gribapi):
+        mock_eccodes = mock.Mock(spec=eccodes)
+        with mock.patch('iris_grib._save_rules.eccodes', mock_eccodes):
             reference_time(cube, grib)
 
-        mock_gribapi.assert_has_calls(
-            [mock.call.grib_set_long(grib, "significanceOfReferenceTime", 1),
-             mock.call.grib_set_long(grib, "dataDate", '19980306'),
-             mock.call.grib_set_long(grib, "dataTime", '0300')])
+        mock_eccodes.assert_has_calls(
+            [mock.call.codes_set_long(grib, "significanceOfReferenceTime", 1),
+             mock.call.codes_set_long(grib, "dataDate", '19980306'),
+             mock.call.codes_set_long(grib, "dataTime", '0300')])
 
     @tests.skip_data
     def test_forecast_period(self):

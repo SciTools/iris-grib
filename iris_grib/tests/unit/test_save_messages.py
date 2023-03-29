@@ -9,7 +9,7 @@
 # importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 from unittest import mock
 
 import iris_grib
@@ -18,7 +18,7 @@ import iris_grib
 class TestSaveMessages(tests.IrisGribTest):
     def setUp(self):
         # Create a test object to stand in for a real PPField.
-        self.grib_message = gribapi.grib_new_from_samples("GRIB2")
+        self.grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
 
     def test_save(self):
         m = mock.mock_open()

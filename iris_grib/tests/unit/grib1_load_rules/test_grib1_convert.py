@@ -9,7 +9,7 @@
 # importing anything else
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 from unittest import mock
 
 from iris.aux_factory import HybridPressureFactory
@@ -135,7 +135,7 @@ class TestBoundedTime(TestField):
 
 class Test_GribLevels(tests.IrisTest):
     def test_grib1_hybrid_height(self):
-        gm = gribapi.grib_new_from_samples('regular_gg_ml_grib1')
+        gm = eccodes.codes_grib_new_from_samples('regular_gg_ml_grib1')
         gw = GribWrapper(gm)
         results = grib1_convert(gw)
 

@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import DimCoord
 import iris.tests.stock as stock
@@ -33,7 +33,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
             units=Unit('days since epoch', calendar='julian'))
         self.cube.add_aux_coord(time_coord)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_percentile_value(self, mock_set):
         cube = self.cube
         percentile_coord = DimCoord(95, long_name='percentile_over_time')
@@ -45,7 +45,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "percentileValue", 95)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_multiple_percentile_value(self, mock_set):
         cube = self.cube
         percentile_coord = DimCoord([5, 10, 15],

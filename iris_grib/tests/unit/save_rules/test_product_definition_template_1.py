@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import DimCoord
 import iris.tests.stock as stock
@@ -32,7 +32,7 @@ class TestRealizationIdentifier(tests.IrisGribTest):
                          units=Unit('days since epoch', calendar='standard'))
         self.cube.add_aux_coord(coord)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_realization(self, mock_set):
         cube = self.cube
         coord = DimCoord(10, 'realization', units='1')
@@ -48,7 +48,7 @@ class TestRealizationIdentifier(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "typeOfEnsembleForecast", 255)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_multiple_realization_values(self, mock_set):
         cube = self.cube
         coord = DimCoord([8, 9, 10], 'realization', units='1')

@@ -9,7 +9,7 @@
 # before importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 import numpy as np
 from unittest import mock
 
@@ -25,9 +25,9 @@ def _make_test_message(sections):
     return GribMessage(raw_message, recreate_raw)
 
 
-def _mock_gribapi_fetch(message, key):
+def _mock_eccodes_fetch(message, key):
     """
-    Fake the gribapi key-fetch.
+    Fake the ecCodes key-fetch.
 
     Fetch key-value from the fake message (dictionary).
     If the key is not present, raise the diagnostic exception.
@@ -36,12 +36,12 @@ def _mock_gribapi_fetch(message, key):
     if key in message:
         return message[key]
     else:
-        raise _mock_gribapi.GribInternalError
+        raise _mock_eccodes.CodesInternalError
 
 
-def _mock_gribapi__grib_is_missing(grib_message, keyname):
+def _mock_eccodes__codes_is_missing(grib_message, keyname):
     """
-    Fake the gribapi key-existence enquiry.
+    Fake the ecCodes key-existence enquiry.
 
     Return whether the key exists in the fake message (dictionary).
 
@@ -49,9 +49,9 @@ def _mock_gribapi__grib_is_missing(grib_message, keyname):
     return (keyname not in grib_message)
 
 
-def _mock_gribapi__grib_get_native_type(grib_message, keyname):
+def _mock_eccodes__codes_get_native_type(grib_message, keyname):
     """
-    Fake the gribapi type-discovery operation.
+    Fake the ecCodes type-discovery operation.
 
     Return type of key-value in the fake message (dictionary).
     If the key is not present, raise the diagnostic exception.
@@ -59,22 +59,22 @@ def _mock_gribapi__grib_get_native_type(grib_message, keyname):
     """
     if keyname in grib_message:
         return type(grib_message[keyname])
-    raise _mock_gribapi.GribInternalError(keyname)
+    raise _mock_eccodes.CodesInternalError(keyname)
 
 
-# Construct a mock object to mimic the gribapi for GribWrapper testing.
-_mock_gribapi = mock.Mock(spec=gribapi)
-_mock_gribapi.GribInternalError = Exception
+# Construct a mock object to mimic the eccodes for GribWrapper testing.
+_mock_eccodes = mock.Mock(spec=eccodes)
+_mock_eccodes.CodesInternalError = Exception
 
-_mock_gribapi.grib_get_long = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_string = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_double = mock.Mock(side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_get_double_array = mock.Mock(
-    side_effect=_mock_gribapi_fetch)
-_mock_gribapi.grib_is_missing = mock.Mock(
-    side_effect=_mock_gribapi__grib_is_missing)
-_mock_gribapi.grib_get_native_type = mock.Mock(
-    side_effect=_mock_gribapi__grib_get_native_type)
+_mock_eccodes.codes_get_long = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_string = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_double = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_get_double_array = mock.Mock(
+    side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_is_missing = mock.Mock(
+    side_effect=_mock_eccodes__codes_is_missing)
+_mock_eccodes.codes_get_native_type = mock.Mock(
+    side_effect=_mock_eccodes__codes_get_native_type)
 
 
 class FakeGribMessage(dict):
@@ -212,7 +212,7 @@ class TestGribSimple(tests.IrisGribTest):
     def cube_from_message(self, grib):
         # Parameter translation now uses the GribWrapper, so we must convert
         # the Mock-based fake message to a FakeGribMessage.
-        with mock.patch('iris_grib.gribapi', _mock_gribapi):
+        with mock.patch('iris_grib.eccodes', _mock_eccodes):
             grib_message = FakeGribMessage(**grib.__dict__)
             wrapped_msg = iris_grib.GribWrapper(grib_message)
             cube, _, _ = iris.fileformats.rules._make_cube(

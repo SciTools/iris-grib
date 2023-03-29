@@ -27,8 +27,8 @@ class TestPhenomenonCoding(tests.IrisGribTest):
 
     def _check_coding(self, cube, discipline, paramCategory, paramNumber):
         # Check that encoding 'cube' writes the expected phenomenon keys.
-        grib_set_patch = self.patch(
-            'iris_grib._save_rules.gribapi.grib_set')
+        codes_set_patch = self.patch(
+            'iris_grib._save_rules.eccodes.codes_set')
         mock_message = mock.sentinel.grib2_message
 
         set_discipline_and_parameter(cube, mock_message)
@@ -38,7 +38,7 @@ class TestPhenomenonCoding(tests.IrisGribTest):
             mock.call(mock_message, "parameterCategory", paramCategory),
             mock.call(mock_message, "parameterNumber", paramNumber)]
 
-        self.assertEqual(grib_set_patch.call_args_list, expected_calls)
+        self.assertEqual(codes_set_patch.call_args_list, expected_calls)
 
     def test_unknown_phenomenon(self):
         cube = self.mock_cube

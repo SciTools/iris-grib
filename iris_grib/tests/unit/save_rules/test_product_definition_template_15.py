@@ -15,7 +15,7 @@ import iris_grib.tests as tests
 from unittest import mock
 
 from cf_units import Unit
-import gribapi
+import eccodes
 
 from iris.coords import CellMethod, DimCoord
 import iris.tests.stock as stock
@@ -35,7 +35,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         # Rename cube to avoid warning about unknown discipline/parameter.
         self.cube.rename('air_temperature')
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_cell_method(self, mock_set):
         cube_0 = self.cube
         cube_0.attributes = dict(spatial_processing_type='No interpolation')
@@ -53,7 +53,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "statisticalProcess", 0)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_bilinear_interpolation(self, mock_set):
         cube_1 = self.cube
         cube_1.attributes = dict(spatial_processing_type='Bilinear '
@@ -69,7 +69,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 4)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_bicubic_interpolation(self, mock_set):
         cube_2 = self.cube
         cube_2.attributes = dict(spatial_processing_type='Bicubic '
@@ -85,7 +85,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 4)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_nearest_neighbour_interpolation(self, mock_set):
         cube_3 = self.cube
         cube_3.attributes = dict(spatial_processing_type='Nearest neighbour '
@@ -101,7 +101,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 1)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_budget_interpolation(self, mock_set):
         cube_4 = self.cube
         cube_4.attributes = dict(spatial_processing_type='Budget '
@@ -117,7 +117,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 4)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_spectral_interpolation(self, mock_set):
         cube_5 = self.cube
         cube_5.attributes = dict(spatial_processing_type='Spectral '
@@ -133,7 +133,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "numberOfPointsUsed", 4)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_neighbour_budget_interpolation(self, mock_set):
         cube_6 = self.cube
         cube_6.attributes = dict(spatial_processing_type='Neighbour-budget '
