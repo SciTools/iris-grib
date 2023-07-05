@@ -25,7 +25,7 @@ nox.options.reuse_existing_virtualenvs = True
 PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
-PY_VER = os.environ.get("PY_VER", ["3.7", "3.8"])
+PY_VER = os.environ.get("PY_VER", ["3.9", "3.10", "3.11"])
 IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ['source', 'conda-forge'])
 
 #: Default cartopy cache directory.

@@ -84,7 +84,9 @@ setup_args = dict(
     keywords         = ['iris', 'GRIB'],
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3 :: Only',
     ],
     # NOTE: The Python 3 bindings to eccodes (eccodes-python) is available on

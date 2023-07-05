@@ -11,7 +11,7 @@
 # Global defaults.
 #
 container:
-  image: python:3.8
+  image: python:3.11
   cpu: 2
   memory: 4G
 
@@ -33,7 +33,7 @@ env:
 
 #
 # Linting
-# [2021-03-01] jamesp: Currently not black compliant.  
+# [2021-03-01] jamesp: Currently not black compliant.
 #                      GitHub issue open #251
 lint_task:
   auto_cancellation: true
@@ -62,7 +62,7 @@ linux_task_template: &LINUX_TASK_TEMPLATE
   container:
     image: gcc:latest
     cpu: 6
-    memory: 8G    
+    memory: 8G
   conda_cache:
     folder: ${HOME}/miniconda
     fingerprint_script:
@@ -93,17 +93,25 @@ linux_task_template: &LINUX_TASK_TEMPLATE
       - wget --quiet https://github.com/SciTools/iris-test-data/archive/v${IRIS_TEST_DATA_REF}.zip -O iris-test-data.zip
       - unzip -q iris-test-data.zip
       - mv iris-test-data-$(echo "${IRIS_TEST_DATA_REF}" | sed "s/^v//") ${IRIS_TEST_DATA_DIR}
-      
+
 tests_task:
   matrix:
-    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.8"
+    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.9"
       env:
-        PY_VER: 3.8
-        IRIS_SOURCE: "source"
-    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.8"
-      env:
-        PY_VER: 3.8
+        PY_VER: 3.9
         IRIS_SOURCE: "conda-forge"
+    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.10"
+      env:
+        PY_VER: 3.10
+        IRIS_SOURCE: "conda-forge"
+    - name: "${CIRRUS_OS} tests: iris=conda-release python=3.11"
+      env:
+        PY_VER: 3.11
+        IRIS_SOURCE: "conda-forge"
+    - name: "${CIRRUS_OS} tests: iris=repo-main python=3.11"
+      env:
+        PY_VER: 3.11
+        IRIS_SOURCE: "source"
 
   << : *LINUX_TASK_TEMPLATE
   tests_script:
