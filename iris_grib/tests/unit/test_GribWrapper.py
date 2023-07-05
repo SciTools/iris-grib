@@ -51,7 +51,7 @@ def _mock_codes_get_native_type(grib_message, key):
     return result
 
 
-def _mock_codes_get_message_offset(grib_message, key):
+def _mock_codes_get_message_offset(grib_message):
     return _offset
 
 
