@@ -9,16 +9,14 @@
         <dimCoord id="87abc70d" long_name="instrument_type" points="[207]" shape="(1,)" units="Unit('1')" value_type="int64"/>
       </coord>
       <coord datadims="[1]">
-        <dimCoord id="dd8ec21c" points="[0.0103136242534, 0.0102297736497,
-		0.0101459230461, ..., -0.0221365593732,
-		-0.0222204099769, -0.0223042605806]" shape="(390,)" standard_name="projection_x_coordinate" units="Unit('radians')" value_type="float64">
+        <dimCoord id="dd8ec21c" points="[ 0.01031362,  0.01022977,  0.01014592, ...,
+ -0.02213656, -0.02222041, -0.02230426]" shape="(390,)" standard_name="projection_x_coordinate" units="Unit('radians')" value_type="float64">
           <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
         </dimCoord>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="698f23ac" points="[0.122754875351, 0.12283872431, 0.122922573268,
-		..., 0.141537042072, 0.14162089103,
-		0.141704739989]" shape="(227,)" standard_name="projection_y_coordinate" units="Unit('radians')" value_type="float64">
+        <dimCoord id="698f23ac" points="[0.12275488, 0.12283872, 0.12292257, ...,
+ 0.14153704, 0.14162089, 0.14170474]" shape="(227,)" standard_name="projection_y_coordinate" units="Unit('radians')" value_type="float64">
           <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
         </dimCoord>
       </coord>
@@ -29,10 +27,10 @@
         <dimCoord id="7de00380" long_name="satellite_series" points="[333]" shape="(1,)" units="Unit('1')" value_type="int64"/>
       </coord>
       <coord>
-        <dimCoord id="f7861546" points="[92.0]" shape="(1,)" standard_name="sensor_band_central_radiation_wavenumber" units="Unit('m-1')" value_type="float64"/>
+        <dimCoord id="f7861546" points="[92.]" shape="(1,)" standard_name="sensor_band_central_radiation_wavenumber" units="Unit('m-1')" value_type="float64"/>
       </coord>
       <coord>
-        <dimCoord id="cb784457" points="[356661.0]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+        <dimCoord id="cb784457" points="[356661.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
       </coord>
     </coords>
     <cellMethods/>
