@@ -1,0 +1,25 @@
+name: iris-grib-dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11
+
+# Setup dependencies.
+  - setuptools
+
+# Core dependencies.
+  - iris>=3.0.2
+  - python-eccodes
+
+# Optional dependencies.
+  - mo_pack
+  - pip
+
+# Test dependencies.
+  - mock
+  - filelock
+  - pep8
+  - requests
+  - nose

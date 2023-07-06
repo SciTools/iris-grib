@@ -10,16 +10,20 @@ What's new in iris-grib v0.19.0
 
 Bugs Fixed
 ^^^^^^^^^^
-* `@lbdreyer <https://github.com/lbdreyer>`_ and 
-  `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the GRIB1 loading 
-  code so that it no longer assumes a spherical Earth with radius of 6371229 m 
+* `@lbdreyer <https://github.com/lbdreyer>`_ and
+  `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the GRIB1 loading
+  code so that it no longer assumes a spherical Earth with radius of 6371229 m
   and instead uses the resolutionAndComponentFlag to determine the shape of the
-  Earth. This can either be a spherical Earth with radius of 6367470 m or an 
+  Earth. This can either be a spherical Earth with radius of 6367470 m or an
   oblate spheroid, the latter of which is not supported. Note that this change
-  in Earth's radius will result in a different coordinate system and may also 
+  in Earth's radius will result in a different coordinate system and may also
   affect the coordinate values.
   `(PR#316) <https://github.com/SciTools/iris-grib/pull/316>`_
 
+
+Dependencies
+^^^^^^^^^^^^
+* now requires Python version >= 3.9
 
 
 What's new in iris-grib v0.18.0
@@ -30,11 +34,11 @@ What's new in iris-grib v0.18.0
 
 Bugs Fixed
 ^^^^^^^^^^
-* `@lbdreyer <https://github.com/lbdreyer>`_ made various updates to allow 
-  iris-grib to work with the latest versions of 
+* `@lbdreyer <https://github.com/lbdreyer>`_ made various updates to allow
+  iris-grib to work with the latest versions of
   `iris <https://scitools-iris.readthedocs.io/en/stable/>`_,
   `cf-units <https://cf-units.readthedocs.io/en/latest/>`_,
-  `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ and 
+  `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ and
   `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
   the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
   values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
@@ -49,7 +53,7 @@ Dependencies
 Internal
 ^^^^^^^^
 * `@TomDufall <https://github.com/TomDufall>`_ updated the code so that it was
-  `flake8 <https://flake8.pycqa.org/en/stable/>`_ compliant and enabled flake8 
+  `flake8 <https://flake8.pycqa.org/en/stable/>`_ compliant and enabled flake8
   checks to the CI.
   `(PR#271) <https://github.com/SciTools/iris-grib/pull/271>`_
 
@@ -64,7 +68,7 @@ Bugs Fixed
 ^^^^^^^^^^
 
 * `@TomDufall <https://github.com/TomDufall>`_ removed the empty slice
-  handling (originally added in v0.15.1) as this used  
+  handling (originally added in v0.15.1) as this used
   iris.util._array_slice_ifempty which was removed in Iris v3.0.2 and is no
   longer necessary.
   `(PR#270) <https://github.com/SciTools/iris-grib/pull/270>`_
@@ -88,12 +92,12 @@ What's new in iris-grib v0.17
 Features
 ^^^^^^^^
 
-* `@m1dr <https://github.com/m1dr>`_ added support for GRIB regulation 92.1.8 
+* `@m1dr <https://github.com/m1dr>`_ added support for GRIB regulation 92.1.8
   for loading GRIB files where the longitude increment is not given.
   `(PR#261) <https://github.com/SciTools/iris-grib/pull/261>`_
 
-* `@lbdreyer <https://github.com/lbdreyer>`_ added support for loading grid 
-  point and spectral data with CCSDS recommended lossless compression, i.e. 
+* `@lbdreyer <https://github.com/lbdreyer>`_ added support for loading grid
+  point and spectral data with CCSDS recommended lossless compression, i.e.
   data representation template 42.
   `(PR#264) <https://github.com/SciTools/iris-grib/pull/264>`_
 
@@ -153,7 +157,7 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed loading of grid definition
   template 3.90, "Space view perspective or orthographic grid", which was
   **broken since Iris 2.3**.  This now produces data with an iris
-  `Geostationary <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary>`_ 
+  `Geostationary <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary>`_
   coordinate system.  Prior to Iris 2.3, what is now the Iris 'Geostationary'
   class was (incorrectly) named "VerticalPerspective" :  When that was
   `corrected in Iris 2.3 <https://github.com/SciTools/iris/pull/3406>`_ , it
@@ -161,7 +165,7 @@ Bugs Fixed
   assigned the "new-style" Iris
   `VerticalPerspective <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.VerticalPerspective>`_
   coordinate system, equivalent to the Cartopy
-  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective>`_ 
+  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective>`_
   and Proj
   `"nsper" <https://proj.org/operations/projections/nsper.html>`_ .
   The plotting behaviour of this is now **the same again as before Iris 2.3** :
@@ -270,8 +274,8 @@ Features
 Bug Fixes
 ^^^^^^^^^
 
-* Reverted a bug that was fixed in v0.13 related to loading hybrid pressure 
-  levels. It was agreed that the initial behaviour was correct 
+* Reverted a bug that was fixed in v0.13 related to loading hybrid pressure
+  levels. It was agreed that the initial behaviour was correct
 
 Dependencies
 ^^^^^^^^^^^^
@@ -338,7 +342,7 @@ Bug Fixes
 ^^^^^^^^^
 
 * Fixed a bug with loading data on Hybrid Pressure levels (surface types 105
-  and 119 in code table 4.5).  
+  and 119 in code table 4.5).
   Previously, *all* hybrid coordinate values, in both 'level_pressure' and
   'sigma' coordinates, were loaded from the next level up,
   i.e. (model_level_number + 1).

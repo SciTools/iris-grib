@@ -13,23 +13,24 @@
         </dimCoord>
       </coord>
       <coord>
-        <auxCoord id="61bde96d" long_name="originating_centre" points="[	US National Weather Service, National Centres for Environmental Prediction]" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+        <auxCoord id="61bde96d" long_name="originating_centre" points="['US National Weather Service, National Centres for Environmental Prediction']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
       </coord>
       <coord datadims="[1]">
-        <dimCoord id="4d043920" points="[-2395073.09451, -2391073.09451, -2387073.09451,
-		..., 2388926.90549, 2392926.90549, 2396926.90549]" shape="(1199,)" standard_name="projection_x_coordinate" units="Unit('m')" value_type="float64">
+        <dimCoord id="4d043920" points="[-2395073.09450535, -2391073.09450535,
+ -2387073.09450535, ...,  2388926.90549465,
+  2392926.90549465,  2396926.90549465]" shape="(1199,)" standard_name="projection_x_coordinate" units="Unit('m')" value_type="float64">
           <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6367470.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
         </dimCoord>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="e8df5368" points="[-3868027.78087, -3864027.78087, -3860027.78087,
-		..., -684027.780872, -680027.780872,
-		-676027.780872]" shape="(799,)" standard_name="projection_y_coordinate" units="Unit('m')" value_type="float64">
+        <dimCoord id="e8df5368" points="[-3868027.7808721, -3864027.7808721,
+ -3860027.7808721, ...,  -684027.7808721,
+  -680027.7808721,  -676027.7808721]" shape="(799,)" standard_name="projection_y_coordinate" units="Unit('m')" value_type="float64">
           <lambertConformal central_lat="60.0" central_lon="-98.0" ellipsoid="GeogCS(6367470.0)" false_easting="0.0" false_northing="0.0" secant_latitudes="(60.0, 30.0)"/>
         </dimCoord>
       </coord>
       <coord>
-        <dimCoord id="cb784457" points="[380916.0]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+        <dimCoord id="cb784457" points="[380916.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
       </coord>
     </coords>
     <cellMethods/>
