@@ -59,12 +59,11 @@ class GribMessage:
         file_ref = _OpenFileRef(grib_fh)
 
         while True:
-            offset = grib_fh.tell()
-            grib_id = eccodes.codes_new_from_file(
-                grib_fh, eccodes.CODES_PRODUCT_GRIB
-            )
+            grib_id = eccodes.codes_new_from_file(grib_fh,
+                                                  eccodes.CODES_PRODUCT_GRIB)
             if grib_id is None:
                 break
+            offset = eccodes.codes_get_message_offset(grib_id)
             raw_message = _RawGribMessage(grib_id)
             recreate_raw = _MessageLocation(filename, offset)
             yield GribMessage(raw_message, recreate_raw, file_ref=file_ref)

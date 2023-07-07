@@ -21,6 +21,7 @@ from iris.exceptions import TranslationError
 from iris_grib import GribWrapper, _load_generate
 
 
+_offset = 0
 _message_length = 1000
 
 
@@ -50,6 +51,10 @@ def _mock_codes_get_native_type(grib_message, key):
     return result
 
 
+def _mock_codes_get_message_offset(grib_message):
+    return _offset
+
+
 class Test_edition(tests.IrisGribTest):
     def setUp(self):
         self.patch('iris_grib.GribWrapper._confirm_in_scope')
@@ -58,7 +63,8 @@ class Test_edition(tests.IrisGribTest):
         self.patch('eccodes.codes_get_string', _mock_codes_get_string)
         self.patch('eccodes.codes_get_native_type',
                    _mock_codes_get_native_type)
-        self.tell = mock.Mock(side_effect=[_message_length])
+        self.patch('eccodes.codes_get_message_offset',
+                   _mock_codes_get_message_offset)
 
     def test_not_edition_1(self):
         def func(grib_message, key):
@@ -71,7 +77,7 @@ class Test_edition(tests.IrisGribTest):
 
     def test_edition_1(self):
         grib_message = 'regular_ll'
-        grib_fh = mock.Mock(tell=self.tell)
+        grib_fh = mock.Mock()
         wrapper = GribWrapper(grib_message, grib_fh)
         self.assertEqual(wrapper.grib_message, grib_message)
 
@@ -99,9 +105,10 @@ class Test_deferred_proxy_args(tests.IrisTest):
         self.patch('eccodes.codes_get_string', _mock_codes_get_string)
         self.patch('eccodes.codes_get_native_type',
                    _mock_codes_get_native_type)
-        tell_tale = np.arange(1, 5) * _message_length
-        self.expected = tell_tale - _message_length
-        self.grib_fh = mock.Mock(tell=mock.Mock(side_effect=tell_tale))
+        self.patch('eccodes.codes_get_message_offset',
+                   _mock_codes_get_message_offset)
+        self.expected = np.atleast_1d(_offset)
+        self.grib_fh = mock.Mock()
         self.dtype = np.float64
         self.path = self.grib_fh.name
         self.lookup = _mock_codes_get_long
