@@ -17,7 +17,9 @@ import numpy as np
 import iris.coords
 from iris.coord_systems import GeogCS, LambertAzimuthalEqualArea
 
-from iris_grib._save_rules import grid_definition_template_140 as grid_definition_template
+from iris_grib._save_rules import (
+    grid_definition_template_140 as grid_definition_template,
+)
 from iris_grib.tests.unit.save_rules import GdtTestMixin
 
 
