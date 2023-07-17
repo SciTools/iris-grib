@@ -694,14 +694,15 @@ def grid_definition_template_140(cube, grib):
         y_coord.points[0],
         cs.as_cartopy_crs())
     first_x = first_x % 360
-    central_lon = cs.longitude_of_projection_origin  % 360
+    central_lon = cs.longitude_of_projection_origin % 360
+    central_lat = cs.latitude_of_projection_origin
 
     eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
                       int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
                       int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, 'standardParallel',
-                      cs.latitude_of_projection_origin / _DEFAULT_DEGREES_UNITS)
+                      central_lat / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, 'centralLongitude',
                       central_lon / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
