@@ -19,7 +19,7 @@ from iris.coord_systems import (GeogCS,
                                 TransverseMercator,
                                 LambertConformal,
                                 AlbersEqualArea,
-                                LamberAzimuthalEqualArea)
+                                LambertAzimuthalEqualArea)
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_section
