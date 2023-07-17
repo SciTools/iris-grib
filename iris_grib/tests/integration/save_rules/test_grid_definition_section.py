@@ -18,7 +18,8 @@ from iris.coord_systems import (GeogCS,
                                 Mercator,
                                 TransverseMercator,
                                 LambertConformal,
-                                AlbersEqualArea)
+                                AlbersEqualArea,
+                                LamberAzimuthalEqualArea)
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_section
@@ -99,6 +100,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
         self._check_key('gridDefinitionTemplateNumber', 30)
+
+    def test_grid_definition_template_140(self):
+        # Lambert Conformal grid.
+        x_points = np.arange(3)
+        y_points = np.arange(3)
+        coord_units = 'm'
+        cs = LambertAzimuthalEqualArea(ellipsoid=self.ellipsoid)
+        test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
+        grid_definition_section(test_cube, self.mock_grib)
+        self._check_key('gridDefinitionTemplateNumber', 140)
 
     def test_coord_system_not_supported(self):
         # Test an unsupported grid - let's choose Albers Equal Area.
