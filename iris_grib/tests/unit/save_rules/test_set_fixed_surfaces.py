@@ -201,7 +201,7 @@ class Test(tests.IrisGribTest):
         with self.assertRaisesRegex(TranslationError, msg):
             set_fixed_surfaces(cube, grib)
 
-    @mock.patch.object(gribapi, "grib_set")
+    @mock.patch.object(eccodes, "codes_set")
     def test_no_vertical(self, mock_set):
         grib = None
         cube = iris.cube.Cube([1, 2, 3, 4, 5])
