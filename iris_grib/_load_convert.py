@@ -1642,8 +1642,9 @@ def vertical_coords(section, metadata):
                           'surface with missing scaled value.'
                     warnings.warn(msg)
             else:
+                fixed_surface_missing = FixedSurface(None, None, None)
                 fixed_surface = _FIXED_SURFACE.get(
-                    typeOfFirstFixedSurface, FixedSurface(None, None, None))
+                    typeOfFirstFixedSurface, fixed_surface_missing)
                 key = 'scaleFactorOfFirstFixedSurface'
                 scaleFactorOfFirstFixedSurface = section[key]
                 typeOfSecondFixedSurface = section['typeOfSecondFixedSurface']
@@ -1668,20 +1669,16 @@ def vertical_coords(section, metadata):
                                          scaleFactorOfSecondFixedSurface)
                         point = 0.5 * (first + second)
                         bounds = [first, second]
-                        coord = DimCoord(
-                            point,
-                            standard_name=fixed_surface.standard_name,
-                            long_name=fixed_surface.long_name,
-                            units=fixed_surface.units,
-                            bounds=bounds)
                 else:
                     point = unscale(scaledValueOfFirstFixedSurface,
                                     scaleFactorOfFirstFixedSurface)
-                    coord = DimCoord(point,
-                                     standard_name=fixed_surface.standard_name,
-                                     long_name=fixed_surface.long_name,
-                                     units=fixed_surface.units)
-                if coord.name() == 'unknown':
+                    bounds = None
+                coord = DimCoord(point,
+                                 standard_name=fixed_surface.standard_name,
+                                 long_name=fixed_surface.long_name,
+                                 units=fixed_surface.units,
+                                 bounds=bounds)
+                if fixed_surface == fixed_surface_missing:
                     coord.attributes['GRIB_fixed_surface_type'] = \
                         typeOfFirstFixedSurface
 

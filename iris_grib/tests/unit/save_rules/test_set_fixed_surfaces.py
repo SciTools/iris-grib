@@ -155,15 +155,11 @@ class Test(tests.IrisGribTest):
     def test_unknown_vertical_bounded(self):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
-            iris.coords.AuxCoord([450], bounds=np.array([900.0, 0.0]),
+            iris.coords.AuxCoord([700], bounds=np.array([900.0, 500.0]),
                                  attributes={'GRIB_fixed_surface_type': 108}))
         grib = gribapi.grib_new_from_samples("GRIB2")
         with warnings.catch_warnings(record=True) as warn:
             set_fixed_surfaces(cube, grib)
-
-        self.assertEqual(len(warn), 1)
-        message = "vertical-axis coordinate unit may not be encoded correctly"
-        self.assertRegex(str(warn[0].message), message)
 
         self.assertEqual(
             gribapi.grib_get_long(grib, "typeOfFirstFixedSurface"), 108)
@@ -177,7 +173,7 @@ class Test(tests.IrisGribTest):
             gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"), 108)
         self.assertEqual(
             gribapi.grib_get_long(grib, "scaledValueOfSecondFixedSurface"),
-            0)
+            500)
         self.assertEqual(
             gribapi.grib_get_long(grib, "scaleFactorOfSecondFixedSurface"),
             0)
@@ -200,12 +196,12 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([450], attributes={'positive': 'up'}))
-        msg = r"coordinate\(s\) \('unknown'\) are not recognised or handled."
+        msg = r"vertical-axis coordinate\(s\) \('unknown'\) are not" \
+               "recognised or handled."
         with self.assertRaisesRegex(TranslationError, msg):
             set_fixed_surfaces(cube, grib)
 
     @mock.patch.object(gribapi, "grib_set")
->>>>>>> 395d8c8... Add loading+saving for non-supported fixed surfaces."
     def test_no_vertical(self, mock_set):
         grib = None
         cube = iris.cube.Cube([1, 2, 3, 4, 5])

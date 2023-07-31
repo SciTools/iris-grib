@@ -86,21 +86,25 @@ class Test(tests.IrisGribTest):
 
     def test_unknown_first_fixed_surface(self):
         metadata = deepcopy(self.metadata)
+        expected = deepcopy(self.metadata)
+        coord = DimCoord(600.0, attributes={'GRIB_fixed_surface_type': 106})
+        expected['aux_coords_and_dims'].append((coord, None))
+
         section = {'NV': 0,
                    'typeOfFirstFixedSurface': 106,
                    'scaledValueOfFirstFixedSurface': 600,
                    'scaleFactorOfFirstFixedSurface': 0,
                    'typeOfSecondFixedSurface': MISSING_SURFACE}
         vertical_coords(section, metadata)
-        coord = DimCoord(600.0, attributes={'GRIB_fixed_surface_type': 106})
-
-        expected = deepcopy(self.metadata)
-        expected['aux_coords_and_dims'].append((coord, None))
-
         self.assertEqual(metadata, expected)
 
     def test_unknown_first_fixed_surface_with_second_fixed_surface(self):
         metadata = deepcopy(self.metadata)
+        expected = deepcopy(self.metadata)
+        coord = DimCoord(9000.0, bounds=[18000, 0],
+                         attributes={'GRIB_fixed_surface_type': 108})
+        expected['aux_coords_and_dims'].append((coord, None))
+
         section = {'NV': 0,
                    'typeOfFirstFixedSurface': 108,
                    'scaledValueOfFirstFixedSurface': 18000,
@@ -109,10 +113,6 @@ class Test(tests.IrisGribTest):
                    'scaledValueOfSecondFixedSurface': 0,
                    'scaleFactorOfSecondFixedSurface': 0}
         vertical_coords(section, metadata)
-        coord = DimCoord(9000.0, bounds=[18000, 0],
-                         attributes={'GRIB_fixed_surface_type': 108})
-        expected = deepcopy(self.metadata)
-        expected['aux_coords_and_dims'].append((coord, None))
         self.assertEqual(metadata, expected)
 
     def test_pressure_with_no_second_fixed_surface(self):

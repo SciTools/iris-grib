@@ -920,8 +920,6 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                              f"of fixed surface type: {fs_types}")
         elif len(fs_v_coords) == 1:
             v_coord = fs_v_coords[0]
-            warnings.warn("The vertical-axis coordinate unit may not be "
-                          "encoded correctly.")
             grib_v_code = v_coord.attributes['GRIB_fixed_surface_type']
         else:
             # check for *ANY* height coords at all...
