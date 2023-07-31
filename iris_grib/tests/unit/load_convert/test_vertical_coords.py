@@ -61,6 +61,7 @@ class Test(tests.IrisGribTest):
                    'scaleFactorOfFirstFixedSurface': 0,
                    'typeOfSecondFixedSurface': 255}
         vertical_coords(section, metadata)
+        # No metadata change, as surfaceType=1 translates to "no vertical coord" without error or warning.
         self.assertEqual(metadata, self.metadata)
 
     def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
