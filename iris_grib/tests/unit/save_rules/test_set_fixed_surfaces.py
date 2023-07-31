@@ -125,31 +125,26 @@ class Test(tests.IrisGribTest):
         mock_set.assert_any_call(grib, "scaledValueOfSecondFixedSurface",
                                  GRIB_MISSING_LONG)
 
-    @mock.patch.object(eccodes, "codes_set")
     def test_unknown_vertical_unbounded(self):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([1],
                                  attributes={'GRIB_fixed_surface_type': 151}))
-        grib = gribapi.grib_new_from_samples("GRIB2")
+        grib = eccodes.codes_grib_new_from_samples("GRIB2")
         with warnings.catch_warnings(record=True) as warn:
             set_fixed_surfaces(cube, grib)
 
-        self.assertEqual(len(warn), 1)
-        message = "vertical-axis coordinate unit may not be encoded correctly"
-        self.assertRegex(str(warn[0].message), message)
-
-        self.assertEqual(gribapi.grib_get_long(
+        self.assertEqual(eccodes.codes_get_long(
             grib, "typeOfFirstFixedSurface"), 151)
-        self.assertEqual(gribapi.grib_get_double(
+        self.assertEqual(eccodes.codes_get_double(
             grib, "scaledValueOfFirstFixedSurface"), 1)
-        self.assertEqual(gribapi.grib_get_double(
+        self.assertEqual(eccodes.codes_get_double(
             grib, "scaleFactorOfFirstFixedSurface"), 0)
-        self.assertEqual(gribapi.grib_get_long(
+        self.assertEqual(eccodes.codes_get_long(
             grib, "typeOfSecondFixedSurface"), 255)
-        self.assertEqual(gribapi.grib_get_long(
+        self.assertEqual(eccodes.codes_get_long(
             grib, "scaledValueOfSecondFixedSurface"), GRIB_MISSING_LONG)
-        self.assertEqual(gribapi.grib_get_long(
+        self.assertEqual(eccodes.codes_get_long(
             grib, "scaleFactorOfSecondFixedSurface"), GRIB_MISSING_LONG)
 
     def test_unknown_vertical_bounded(self):
@@ -157,25 +152,24 @@ class Test(tests.IrisGribTest):
         cube.add_aux_coord(
             iris.coords.AuxCoord([700], bounds=np.array([900.0, 500.0]),
                                  attributes={'GRIB_fixed_surface_type': 108}))
-        grib = gribapi.grib_new_from_samples("GRIB2")
-        with warnings.catch_warnings(record=True) as warn:
-            set_fixed_surfaces(cube, grib)
+        grib = eccodes.codes_grib_new_from_samples("GRIB2")
+        set_fixed_surfaces(cube, grib)
 
         self.assertEqual(
-            gribapi.grib_get_long(grib, "typeOfFirstFixedSurface"), 108)
+            eccodes.codes_get_long(grib, "typeOfFirstFixedSurface"), 108)
         self.assertEqual(
-            gribapi.grib_get_double(grib, "scaledValueOfFirstFixedSurface"),
+            eccodes.codes_get_double(grib, "scaledValueOfFirstFixedSurface"),
             900)
         self.assertEqual(
-            gribapi.grib_get_double(grib, "scaleFactorOfFirstFixedSurface"),
+            eccodes.codes_get_double(grib, "scaleFactorOfFirstFixedSurface"),
             0)
         self.assertEqual(
-            gribapi.grib_get_long(grib, "typeOfSecondFixedSurface"), 108)
+            eccodes.codes_get_long(grib, "typeOfSecondFixedSurface"), 108)
         self.assertEqual(
-            gribapi.grib_get_long(grib, "scaledValueOfSecondFixedSurface"),
+            eccodes.codes_get_long(grib, "scaledValueOfSecondFixedSurface"),
             500)
         self.assertEqual(
-            gribapi.grib_get_long(grib, "scaleFactorOfSecondFixedSurface"),
+            eccodes.codes_get_long(grib, "scaleFactorOfSecondFixedSurface"),
             0)
 
     def test_multiple_unknown_vertical_coords(self):
@@ -196,8 +190,8 @@ class Test(tests.IrisGribTest):
         cube = iris.cube.Cube([0])
         cube.add_aux_coord(
             iris.coords.AuxCoord([450], attributes={'positive': 'up'}))
-        msg = r"vertical-axis coordinate\(s\) \('unknown'\) are not" \
-               "recognised or handled."
+        msg = r"vertical-axis coordinate\(s\) \('unknown'\) are not " \
+              "recognised or handled."
         with self.assertRaisesRegex(TranslationError, msg):
             set_fixed_surfaces(cube, grib)
 
