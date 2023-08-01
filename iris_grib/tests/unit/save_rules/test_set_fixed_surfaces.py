@@ -13,7 +13,6 @@ Unit tests for :func:`iris_grib._save_rules.set_fixed_surfaces`.
 import iris_grib.tests as tests
 
 from unittest import mock
-import warnings
 
 import eccodes
 from eccodes import CODES_MISSING_LONG as GRIB_MISSING_LONG
@@ -131,8 +130,7 @@ class Test(tests.IrisGribTest):
             iris.coords.AuxCoord([1],
                                  attributes={'GRIB_fixed_surface_type': 151}))
         grib = eccodes.codes_grib_new_from_samples("GRIB2")
-        with warnings.catch_warnings(record=True) as warn:
-            set_fixed_surfaces(cube, grib)
+        set_fixed_surfaces(cube, grib)
 
         self.assertEqual(eccodes.codes_get_long(
             grib, "typeOfFirstFixedSurface"), 151)
