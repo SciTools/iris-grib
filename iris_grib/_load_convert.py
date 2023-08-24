@@ -1630,63 +1630,58 @@ def vertical_coords(section, metadata):
     else:
         # Generate vertical coordinate.
         typeOfFirstFixedSurface = section['typeOfFirstFixedSurface']
-        key = 'scaledValueOfFirstFixedSurface'
-        scaledValueOfFirstFixedSurface = section[key]
-        fixed_surface = _FIXED_SURFACE.get(typeOfFirstFixedSurface)
 
-        if fixed_surface is None:
-            if typeOfFirstFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
-                if scaledValueOfFirstFixedSurface == _MDI:
-                    if options.warn_on_unsupported:
-                        msg = 'Unable to translate type of first fixed ' \
-                            'surface with missing scaled value.'
-                        warnings.warn(msg)
-                else:
-                    if options.warn_on_unsupported:
-                        msg = 'Unable to translate type of first fixed ' \
-                            'surface with scaled value.'
-                        warnings.warn(msg)
-        else:
-            key = 'scaleFactorOfFirstFixedSurface'
-            scaleFactorOfFirstFixedSurface = section[key]
-            typeOfSecondFixedSurface = section['typeOfSecondFixedSurface']
-
-            if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
-                if typeOfFirstFixedSurface != typeOfSecondFixedSurface:
-                    msg = 'Product definition section 4 has different ' \
-                        'types of first and second fixed surface'
-                    raise TranslationError(msg)
-
-                key = 'scaledValueOfSecondFixedSurface'
-                scaledValueOfSecondFixedSurface = section[key]
-
-                if scaledValueOfSecondFixedSurface == _MDI:
-                    msg = 'Product definition section 4 has missing ' \
-                        'scaled value of second fixed surface'
-                    raise TranslationError(msg)
-                else:
-                    key = 'scaleFactorOfSecondFixedSurface'
-                    scaleFactorOfSecondFixedSurface = section[key]
-                    first = unscale(scaledValueOfFirstFixedSurface,
-                                    scaleFactorOfFirstFixedSurface)
-                    second = unscale(scaledValueOfSecondFixedSurface,
-                                     scaleFactorOfSecondFixedSurface)
-                    point = 0.5 * (first + second)
-                    bounds = [first, second]
-                    coord = DimCoord(point,
-                                     standard_name=fixed_surface.standard_name,
-                                     long_name=fixed_surface.long_name,
-                                     units=fixed_surface.units,
-                                     bounds=bounds)
-                    # Add the vertical coordinate to metadata aux coords.
-                    metadata['aux_coords_and_dims'].append((coord, None))
+        # We treat fixed surface level type=1 as having no vertical coordinate.
+        # See https://github.com/SciTools/iris/issues/519
+        if typeOfFirstFixedSurface not in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
+            key = 'scaledValueOfFirstFixedSurface'
+            scaledValueOfFirstFixedSurface = section[key]
+            if scaledValueOfFirstFixedSurface == _MDI:
+                if options.warn_on_unsupported:
+                    msg = 'Unable to translate type of first fixed ' \
+                          'surface with missing scaled value.'
+                    warnings.warn(msg)
             else:
-                point = unscale(scaledValueOfFirstFixedSurface,
-                                scaleFactorOfFirstFixedSurface)
+                fixed_surface_missing = FixedSurface(None, None, None)
+                fixed_surface = _FIXED_SURFACE.get(
+                    typeOfFirstFixedSurface, fixed_surface_missing)
+                key = 'scaleFactorOfFirstFixedSurface'
+                scaleFactorOfFirstFixedSurface = section[key]
+                typeOfSecondFixedSurface = section['typeOfSecondFixedSurface']
+                if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
+                    if typeOfFirstFixedSurface != typeOfSecondFixedSurface:
+                        msg = 'Product definition section 4 has different ' \
+                            'types of first and second fixed surface'
+                        raise TranslationError(msg)
+                    key = 'scaledValueOfSecondFixedSurface'
+                    scaledValueOfSecondFixedSurface = section[key]
+
+                    if scaledValueOfSecondFixedSurface == _MDI:
+                        msg = 'Product definition section 4 has missing ' \
+                            'scaled value of second fixed surface'
+                        raise TranslationError(msg)
+                    else:
+                        key = 'scaleFactorOfSecondFixedSurface'
+                        scaleFactorOfSecondFixedSurface = section[key]
+                        first = unscale(scaledValueOfFirstFixedSurface,
+                                        scaleFactorOfFirstFixedSurface)
+                        second = unscale(scaledValueOfSecondFixedSurface,
+                                         scaleFactorOfSecondFixedSurface)
+                        point = 0.5 * (first + second)
+                        bounds = [first, second]
+                else:
+                    point = unscale(scaledValueOfFirstFixedSurface,
+                                    scaleFactorOfFirstFixedSurface)
+                    bounds = None
                 coord = DimCoord(point,
                                  standard_name=fixed_surface.standard_name,
                                  long_name=fixed_surface.long_name,
-                                 units=fixed_surface.units)
+                                 units=fixed_surface.units,
+                                 bounds=bounds)
+                if fixed_surface == fixed_surface_missing:
+                    coord.attributes['GRIB_fixed_surface_type'] = \
+                        typeOfFirstFixedSurface
+
                 # Add the vertical coordinate to metadata aux coords.
                 metadata['aux_coords_and_dims'].append((coord, None))
 
