@@ -1,8 +1,7 @@
 # Copyright iris-grib contributors
 #
-# This file is part of iris-grib and is released under the LGPL license.
-# See COPYING and COPYING.LESSER in the root of the repository for full
-# licensing details.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Tests for specific implementation aspects of the grib saver.
 Ported here from 'iris.tests.integration.test_grib_save'.

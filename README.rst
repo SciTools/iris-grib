@@ -5,19 +5,7 @@ iris-grib
 
 GRIB interface for `Iris <https://github.com/SciTools/iris>`_.
 
-Code
-----
-iris-grib is licenced under the GNU Lesser General Public License (LGPLv3).
-
-The full text of the licence can be found in the COPYING and COPYING.LESSER
-files.
-
-Copyright and licence
----------------------
-iris-grib may be freely distributed, modified and used commercially under the
-terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
-
-\(C) British Crown Copyright 2010 - 2021, Met Office
+iris-grib is licensed under the BSD-3 license.
 
 .. |CirrusCI| image:: https://api.cirrus-ci.com/github/SciTools/iris-grib.svg?branch=main
 .. _CirrusCI: https://cirrus-ci.com/github/SciTools/iris-grib
@@ -31,8 +19,8 @@ terms of its `GNU LGPLv3 license <COPYING.LESSER>`_.
 .. |pypi| image:: https://img.shields.io/pypi/v/iris-grib?color=orange&label=pypi&logo=python&logoColor=white
 .. _pypi: https://pypi.org/project/iris-grib
 
-.. |License| image:: https://img.shields.io/github/license/SciTools/iris-grib?style=plastic
-.. _License: https://github.com/SciTools/iris-grib/blob/main/COPYING
+.. |License| image:: https://img.shields.io/badge/BSD-3?style=plastic&label=License
+.. _License: https://github.com/SciTools/iris-grib/blob/main/LICENSE
 
 .. |Contributors| image:: https://img.shields.io/github/contributors/SciTools/iris-grib?style=plastic
 .. _Contributors: https://github.com/SciTools/iris-grib/graphs/contributors
