@@ -413,17 +413,13 @@ class Section:
             if key == 'numberOfSection':
                 value = self._number
             else:
-                keys = [key]
-                # Also check known alias alternatives
-                if key in KEY_ALIAS:
-                    keys.append(KEY_ALIAS[key])
-                keys = np.array(keys)
-                found = [k in self._keys for k in keys]
-                if not any(found):
-                    emsg = f"{key} not defined in section {self._number}"
-                    raise KeyError(emsg)
-                # Take the first valid key, original or alias.
-                key = keys[found][0]
+                if key not in self._keys:
+                    key2 = KEY_ALIAS.get(key)
+                    if key2 and key2 in self._keys:
+                        key = key2
+                    else:
+                        emsg = f"{key} not defined in section {self._number}"
+                        raise KeyError(emsg)
                 value = self._get_key_value(key)
 
             self._cache[key] = value
