@@ -237,14 +237,29 @@ class _DataProxy:
         return bitmap
 
     def __getitem__(self, keys):
-        # NB. Currently assumes that the validity of this interpretation
+        # N.B. Assumes that the validity of this interpretation
         # is checked before this proxy is created.
 
         message = self.recreate_raw()
         sections = message.sections
+        data = None
+
+        if 5 in sections:
+            # Data Representation Section.
+            if sections[5]["bitsPerValue"] == 0:
+                # Auto-generate zero data of the expected shape and dtype, as
+                # there is no data stored within the Data Section of this GRIB
+                # message. Also flatten the result to 1-D for potential bitmap
+                # post-processing.
+                data = np.ravel(np.zeros(self.shape, dtype=self.dtype))
+
+        if data is None:
+            # Data Section.
+            data = sections[7]["codedValues"]
+
+        # Bit-map Section.
         bitmap_section = sections[6]
         bitmap = self._bitmap(bitmap_section)
-        data = sections[7]['codedValues']
 
         if bitmap is not None:
             # Note that bitmap and data are both 1D arrays at this point.

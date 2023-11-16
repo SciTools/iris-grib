@@ -28,8 +28,8 @@ env:
   PIP_CACHE_PACKAGES: "pip setuptools wheel nox pyyaml"
   # Base directory for the iris-test-data.
   IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
-  # Git commit hash for iris test data.
-  IRIS_TEST_DATA_REF: "2.0.0"
+  # Tagged release version of the iris-test-data.
+  IRIS_TEST_DATA_REF: "2.23"
 
 #
 # Linting
