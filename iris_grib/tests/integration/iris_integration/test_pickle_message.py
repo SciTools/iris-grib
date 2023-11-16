@@ -9,7 +9,6 @@
 import iris_grib.tests as tests
 
 import pickle
-import unittest
 
 from iris.tests.integration.test_pickle import Common as PickleCommon
 
@@ -39,15 +38,12 @@ class TestPickleGribMessage(PickleCommon, tests.IrisGribTest):
 
     # These probably "ought" to work, but currently fail.
     # see https://github.com/SciTools/iris-grib/issues/202
-    @unittest.expectedFailure
     def test_protocol_0(self):
         super().test_protocol_0()
 
-    @unittest.expectedFailure
     def test_protocol_1(self):
         super().test_protocol_1()
 
-    @unittest.expectedFailure
     def test_protocol_2(self):
         super().test_protocol_2()
 
