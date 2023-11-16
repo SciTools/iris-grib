@@ -20,6 +20,14 @@ from iris.exceptions import TranslationError
 
 _SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90, 140)
 
+# Alias names for eccodes spatial computed keys.
+KEY_ALIAS = {
+    'latitude': 'latitudes',
+    'longitude': 'longitudes',
+    'latitudes': 'latitude',
+    'longitudes': 'longitude',
+}
+
 
 class _OpenFileRef:
     """
@@ -404,12 +412,18 @@ class Section:
         if key not in self._cache:
             if key == 'numberOfSection':
                 value = self._number
-            elif key not in self._keys:
-                raise KeyError('{!r} not defined in section {}'.format(
-                    key, self._number))
             else:
+                if key not in self._keys:
+                    key2 = KEY_ALIAS.get(key)
+                    if key2 and key2 in self._keys:
+                        key = key2
+                    else:
+                        emsg = f"{key} not defined in section {self._number}"
+                        raise KeyError(emsg)
                 value = self._get_key_value(key)
+
             self._cache[key] = value
+
         return self._cache[key]
 
     def __setitem__(self, key, value):
@@ -437,6 +451,7 @@ class Section:
                        'satelliteNumber', 'instrumentType',
                        'scaleFactorOfCentralWaveNumber',
                        'scaledValueOfCentralWaveNumber',
+                       'longitude', 'latitude',
                        'longitudes', 'latitudes')
         if key in vector_keys:
             res = eccodes.codes_get_array(self._message_id, key)

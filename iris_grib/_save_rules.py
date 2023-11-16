@@ -315,9 +315,9 @@ def latlon_points_irregular(cube, grib):
     # So, this only works at present if the x and y dimensions are **equal**.
     lon_values = x_coord.points / _DEFAULT_DEGREES_UNITS
     lat_values = y_coord.points / _DEFAULT_DEGREES_UNITS
-    eccodes.codes_set_array(grib, 'longitudes',
+    eccodes.codes_set_array(grib, 'longitude',
                             np.array(np.round(lon_values), dtype=np.int64))
-    eccodes.codes_set_array(grib, 'latitudes',
+    eccodes.codes_set_array(grib, 'latitude',
                             np.array(np.round(lat_values), dtype=np.int64))
 
 

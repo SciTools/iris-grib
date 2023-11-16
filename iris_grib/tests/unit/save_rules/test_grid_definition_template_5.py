@@ -112,8 +112,8 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         grid_definition_template_5(test_cube, self.mock_grib)
         x_longs = np.array(np.round(1e6 * x_floats), dtype=int)
         y_longs = np.array(np.round(1e6 * y_floats), dtype=int)
-        self._check_key("longitudes", x_longs)
-        self._check_key("latitudes", y_longs)
+        self._check_key("longitude", x_longs)
+        self._check_key("latitude", y_longs)
 
     def test__true_winds_orientation(self):
         self.test_cube.rename('eastward_wind')
