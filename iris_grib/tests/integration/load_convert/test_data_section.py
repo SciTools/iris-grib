@@ -72,6 +72,10 @@ class TestDRT3(tests.IrisGribTest):
 class TestDataProxy(tests.IrisGribTest):
     def test_data_representation__no_bitsPerValue(self):
         """Ensures that zero data is auto-generated."""
+        # This test file contains one GRIB2 message with no data payload
+        # in Data Section [7], but has "bitsPerValue=0" in the Data
+        # Representation Section [5] to trigger auto-generation of zero
+        # data payload by the DataProxy.
         path = tests.get_data_path(
             ("GRIB", "missing_values", "ice_severity__no_bitsPerValue.grib2")
         )
