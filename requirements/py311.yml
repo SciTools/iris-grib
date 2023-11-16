@@ -11,7 +11,8 @@ dependencies:
 
 # Core dependencies.
   - iris>=3.0.2
-  - python-eccodes
+  - python-eccodes>=1.6.1
+  - eccodes>=2.32.1
 
 # Optional dependencies.
   - mo_pack
