@@ -24,3 +24,11 @@ dependencies:
   - pep8
   - requests
   - nose
+
+# Documentation dependencies.
+  - sphinx 
+  #- sphinxcontrib-apidoc
+  #- sphinx-copybutton
+  #- sphinx-gallery >=0.11.0
+  #- sphinx-design
+  - sphinx_rtd_theme
