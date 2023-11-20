@@ -16,6 +16,7 @@ import numpy as np
 
 import iris.coords
 from iris.coord_systems import GeogCS, LambertAzimuthalEqualArea
+from iris.exceptions import TranslationError
 
 from iris_grib._save_rules import (
     grid_definition_template_140 as grid_definition_template,
@@ -53,9 +54,11 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         test_cube.add_dim_coord(x_coord, 1)
         return test_cube
 
-    def _default_coord_system(self):
+    def _default_coord_system(self, false_easting=0, false_northing=0):
         return LambertAzimuthalEqualArea(latitude_of_projection_origin=54.9,
                                          longitude_of_projection_origin=-2.5,
+                                         false_easting=false_easting,
+                                         false_northing=false_northing,
                                          ellipsoid=self.default_ellipsoid)
 
     def test__template_number(self):
@@ -102,6 +105,28 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         grid_definition_template(test_cube, self.mock_grib)
         self._check_key('iScansPositively', 0)
         self._check_key('jScansPositively', 1)
+
+    def __fail_false_easting_northing(self, false_easting, false_northing):
+        cs = self._default_coord_system(false_easting=false_easting,
+                                        false_northing=false_northing)
+        test_cube = self._make_test_cube(cs=cs)
+        msg = ('non zero false easting ({:.2f}) or '
+               'non zero false northing ({:.2f})'
+               '; unsupported by GRIB Template 3.140'
+               '.').format(false_easting, false_northing)
+        with self.assertRaisesRegex(
+                TranslationError,
+                msg):
+            grid_definition_template(test_cube, self.mock_grib)
+
+    def test__fail_false_easting(self):
+        self.__fail_false_easting_northing(10.0, 0.0)
+
+    def test__fail_false_northing(self):
+        self.__fail_false_easting_northing(0.0, 10.0)
+
+    def test__fail_false_easting_northing(self):
+        self.__fail_false_easting_northing(10.0, 10.0)
 
 
 if __name__ == "__main__":

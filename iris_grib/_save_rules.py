@@ -707,6 +707,13 @@ def grid_definition_template_140(cube, grib):
                       central_lon / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
                       0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+    if (not (np.isclose(cs.false_easting, 0.0, atol=1e-6)) or
+            not (np.isclose(cs.false_northing, 0.0, atol=1e-6))):
+        msg = ('non zero false easting ({:.2f}) or '
+               'non zero false northing ({:.2f})'
+               '; unsupported by GRIB Template 3.140'
+               '.').format(cs.false_easting, cs.false_northing)
+        raise TranslationError(msg)
 
 
 def grid_definition_section(cube, grib):
