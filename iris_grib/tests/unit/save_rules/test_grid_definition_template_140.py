@@ -89,8 +89,8 @@ class Test(tests.IrisGribTest, GdtTestMixin):
     # specific to grid_definition_template_140
     def test__template_specifics(self):
         grid_definition_template(self.test_cube, self.mock_grib)
-        self._check_key("standardParallel", 54900000)
-        self._check_key("centralLongitude", 357500000)
+        self._check_key("standardParallelInMicrodegrees", 54900000)
+        self._check_key("centralLongitudeInMicrodegrees", 357500000)
 
     def test__scanmode(self):
         grid_definition_template(self.test_cube, self.mock_grib)

@@ -701,9 +701,9 @@ def grid_definition_template_140(cube, grib):
                       int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
                       int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
-    eccodes.codes_set(grib, 'standardParallel',
+    eccodes.codes_set(grib, 'standardParallelInMicrodegrees',
                       central_lat / _DEFAULT_DEGREES_UNITS)
-    eccodes.codes_set(grib, 'centralLongitude',
+    eccodes.codes_set(grib, 'centralLongitudeInMicrodegrees',
                       central_lon / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
                       0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
