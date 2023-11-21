@@ -110,10 +110,10 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         cs = self._default_coord_system(false_easting=false_easting,
                                         false_northing=false_northing)
         test_cube = self._make_test_cube(cs=cs)
-        msg = ('non zero false easting ({:.2f}) or '
-               'non zero false northing ({:.2f})'
-               '; unsupported by GRIB Template 3.140'
-               '.').format(false_easting, false_northing)
+        msg = (r'non zero false easting \(\d*\.\d{2}\) or '
+               r'non zero false northing \(\d*\.\d{2}\)'
+               r'; unsupported by GRIB Template 3\.140'
+               r'')
         with self.assertRaisesRegex(
                 TranslationError,
                 msg):

@@ -712,7 +712,7 @@ def grid_definition_template_140(cube, grib):
         msg = ('non zero false easting ({:.2f}) or '
                'non zero false northing ({:.2f})'
                '; unsupported by GRIB Template 3.140'
-               '.').format(cs.false_easting, cs.false_northing)
+               '').format(cs.false_easting, cs.false_northing)
         raise TranslationError(msg)
 
 
