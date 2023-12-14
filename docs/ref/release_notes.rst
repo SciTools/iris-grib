@@ -6,19 +6,24 @@ What's new in iris-grib v0.19.0
 -------------------------------
 
 :Release: 0.19.0
-:Date: [unreleased]
+:Date: 16 November 2023
 
+Release page : https://github.com/SciTools/iris-grib/releases/tag/v0.19.0
 
-=======
 Features
 ^^^^^^^^
-* `@lbdreyer <https://github.com/lbdreyer>`_ and 
+* `@lbdreyer <https://github.com/lbdreyer>`_ and
   `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the loading of GRIB
   messages with an unrecognised fixed surface type. These are now loaded in as
   an unnamed coordinate with an attribute called GRIB_fixed_surface_type.
   iris-grib will also save out cubes with this attribute as the given fixed
-  surface type.`(PR#318) <https://github.com/SciTools/iris-grib/pull/288>`_
-
+  surface type. `(PR#318) <https://github.com/SciTools/iris-grib/pull/318>`_
+* `@trexfeathers <https://github.com/trexfeathers>`_ extended Transverse Mercator
+  to support negative scanning.
+  `(PR#296) <https://github.com/SciTools/iris-grib/pull/296>`_
+* `@trexfeathers <https://github.com/trexfeathers>`_  added a number of new GRIB-CF
+   mappings.
+   `(PR#297) <https://github.com/SciTools/iris-grib/pull/297>`_
 
 Bugs Fixed
 ^^^^^^^^^^
@@ -31,11 +36,36 @@ Bugs Fixed
   in Earth's radius will result in a different coordinate system and may also
   affect the coordinate values.
   `(PR#316) <https://github.com/SciTools/iris-grib/pull/316>`_
+* `@s-boardman <https://github.com/s-boardman>`_ corrected the calculation of bounded
+  forecast periods in GRIB1 loading.
+  `(PR#322) <https://github.com/SciTools/iris-grib/pull/322>`_
+* `@david-bentley <https://github.com/david-bentley>`_  fixed the calculation of message
+  offsets to work in boht Linux and Windows.
+  `(PR#287) <https://github.com/SciTools/iris-grib/pull/287>`_
+* `@bjlittle <https://github.com/bjlittle>`_  fixed an error that occurred when a
+  message had all data points missing.
+  `(PR#362) <https://github.com/SciTools/iris-grib/pull/362>`_
 
+
+Internal
+^^^^^^^^
+* `@lbdreyer <https://github.com/lbdreyer>`_ relicensed the repo from LGPL-3 to BSD-3.
+  `(PR#359) <https://github.com/SciTools/iris-grib/pull/359>`_
 
 Dependencies
 ^^^^^^^^^^^^
 * now requires Python version >= 3.9
+* replaced deprecated eccodes-python PyPI package with new eccodes by @valeriupredoi in #357
+* `@valeriupredoi <https://github.com/valeriupredoi>`_ replaced the deprecated
+  eccodes-python PyPI package with eccodes.
+  `(PR#357) <https://github.com/SciTools/iris-grib/pull/357>`_
+
+New Contributors
+^^^^^^^^^^^^^^^^
+Welcome to
+* `@s-boardman <https://github.com/s-boardman>`_
+* `@david-bentley <https://github.com/david-bentley>`_
+* `@valeriupredoi <https://github.com/valeriupredoi>`_
 
 
 What's new in iris-grib v0.18.0
