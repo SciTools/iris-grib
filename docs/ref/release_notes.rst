@@ -8,7 +8,8 @@ What's new in iris-grib v0.19.0
 :Release: 0.19.0
 :Date: 16 November 2023
 
-Release page : https://github.com/SciTools/iris-grib/releases/tag/v0.19.0
+See also :
+`GitHub v0.19.0 release page <https://github.com/SciTools/iris-grib/releases/tag/v0.19.0>`_
 
 Features
 ^^^^^^^^
