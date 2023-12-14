@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+What's new in iris-grib v0.19.1
+-------------------------------
+
+:Release: 0.19.1
+:Date: 14 December 2023
+
+Documentation
+^^^^^^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ updated the release notes with v0.19 changes.
+  `(PR#370) <https://github.com/SciTools/iris-grib/pull/370>`_
+
 
 What's new in iris-grib v0.19.0
 -------------------------------
