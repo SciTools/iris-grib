@@ -18,12 +18,14 @@ Features
   an unnamed coordinate with an attribute called GRIB_fixed_surface_type.
   iris-grib will also save out cubes with this attribute as the given fixed
   surface type. `(PR#318) <https://github.com/SciTools/iris-grib/pull/318>`_
+
 * `@trexfeathers <https://github.com/trexfeathers>`_ extended Transverse Mercator
   to support negative scanning.
   `(PR#296) <https://github.com/SciTools/iris-grib/pull/296>`_
+
 * `@trexfeathers <https://github.com/trexfeathers>`_  added a number of new GRIB-CF
-   mappings.
-   `(PR#297) <https://github.com/SciTools/iris-grib/pull/297>`_
+  mappings, i.e. translations from GRIB parameters to CF standard names and vice-versa.
+  `(PR#297) <https://github.com/SciTools/iris-grib/pull/297>`_
 
 Bugs Fixed
 ^^^^^^^^^^
@@ -40,10 +42,10 @@ Bugs Fixed
   forecast periods in GRIB1 loading.
   `(PR#322) <https://github.com/SciTools/iris-grib/pull/322>`_
 * `@david-bentley <https://github.com/david-bentley>`_  fixed the calculation of message
-  offsets to work in boht Linux and Windows.
+  file offsets to work in Windows as well as Linux, which was causing load failures.
   `(PR#287) <https://github.com/SciTools/iris-grib/pull/287>`_
 * `@bjlittle <https://github.com/bjlittle>`_  fixed an error that occurred when a
-  message had all data points missing.
+  message had all-missing data points.
   `(PR#362) <https://github.com/SciTools/iris-grib/pull/362>`_
 
 
