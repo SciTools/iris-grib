@@ -24,3 +24,7 @@ dependencies:
   - pep8
   - requests
   - nose
+
+# Documentation dependencies.
+  - sphinx 
+  - sphinx_rtd_theme
