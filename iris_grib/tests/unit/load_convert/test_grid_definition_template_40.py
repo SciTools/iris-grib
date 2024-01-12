@@ -8,6 +8,9 @@ Unit tests for
 
 """
 
+# MEANINGLESS CHANGE
+# - temporary tweak to force licence check on this file (otherwise unchanged).
+
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
