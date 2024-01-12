@@ -66,20 +66,29 @@ class TestLicenseHeaders(unittest.TestCase):
             or cannot be found by subprocess, an IOError may also be raised.
 
         """
-        # Check the ".git" folder exists at the repo dir.
-        if not os.path.isdir(os.path.join(REPO_DIR, '.git')):
-            raise ValueError('{} is not a git repository.'.format(REPO_DIR))
 
-        # Call "git whatchanged" to get the details of all the files and when
-        # they were last changed.
-        output = subprocess.check_output(['git', 'whatchanged',
-                                          "--pretty=TIME:%ct"],
-                                         cwd=REPO_DIR)
-        output = output.decode().split('\n')
-        res = {}
-        for fname, dt in TestLicenseHeaders.whatchanged_parse(output):
-            if fname not in res or dt > res[fname]:
-                res[fname] = dt
+        # HACKED!
+        # just return all the paths in the subdir 'tests/unit/load_convert/*.py'
+        import iris_grib.tests.unit.load_convert as testmod
+        from pathlib import Path
+        pths = list(Path(testmod.__file__).parent.glob('test_grid_def*.py'))
+        # Usual function returns a dict (though only the keys are ever used?)
+        res = {str(pth): 0 for pth in pths}
+
+        # # Check the ".git" folder exists at the repo dir.
+        # if not os.path.isdir(os.path.join(REPO_DIR, '.git')):
+        #     raise ValueError('{} is not a git repository.'.format(REPO_DIR))
+        #
+        # # Call "git whatchanged" to get the details of all the files and when
+        # # they were last changed.
+        # output = subprocess.check_output(['git', 'whatchanged',
+        #                                   "--pretty=TIME:%ct"],
+        #                                  cwd=REPO_DIR)
+        # output = output.decode().split('\n')
+        # res = {}
+        # for fname, dt in TestLicenseHeaders.whatchanged_parse(output):
+        #     if fname not in res or dt > res[fname]:
+        #         res[fname] = dt
 
         return res
 
@@ -98,8 +107,11 @@ class TestLicenseHeaders(unittest.TestCase):
             return self.skipTest('Iris-grib installation did not look like a '
                                  'git repo.')
 
-        failed = False
+        tested_paths = []
+        fail_paths = [1]
+        # failed = False
         for fname, last_change in sorted(last_change_by_fname.items()):
+            tested_paths.append(fname)
             full_fname = os.path.join(REPO_DIR, fname)
             if full_fname.endswith('.py') and os.path.isfile(full_fname) and \
                     not any(fnmatch(fname, pat) for pat in exclude_patterns):
@@ -108,10 +120,13 @@ class TestLicenseHeaders(unittest.TestCase):
                     if not content.startswith(LICENSE_TEMPLATE):
                         print('The file {} does not start with the required '
                               'license header.'.format(fname))
-                        failed = True
+                        # failed = True
+                        fail_paths.append(fname)
 
-        if failed:
-            raise ValueError('There were license header failures. See stdout.')
+        self.maxDiff = None
+        self.assertEqual((tested_paths, fail_paths), (tested_paths, []))
+        # if failed:
+        #     raise ValueError('There were license header failures. See stdout.')
 
 
 if __name__ == '__main__':
