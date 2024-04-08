@@ -2061,7 +2061,7 @@ def product_definition_template_1(section, metadata, frt_coord):
         Dictionary of coded key/value pairs from section 4 of the message.
 
     * metadata:
-        :class:`collectins.OrderedDict` of metadata.
+        :class:`collections.OrderedDict` of metadata.
 
     * frt_coord:
         The scalar forecast reference time :class:`iris.coords.DimCoord`.
@@ -2090,7 +2090,7 @@ def product_definition_template_6(section, metadata, frt_coord):
         Dictionary of coded key/value pairs from section 4 of the message.
 
     * metadata:
-        :class:`collectins.OrderedDict` of metadata.
+        :class:`collections.OrderedDict` of metadata.
 
     * frt_coord:
         The scalar forecast reference time :class:`iris.coords.DimCoord`.
@@ -2103,7 +2103,7 @@ def product_definition_template_6(section, metadata, frt_coord):
                           long_name='percentile',
                           units='%')
 
-    # Add the realization coordinate to the metadata aux coords.
+    # Add the percentile coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((percentile, None))
 
 

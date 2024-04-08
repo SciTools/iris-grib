@@ -715,72 +715,6 @@ def grid_definition_template_140(cube, grib):
         raise TranslationError(msg)
 
 
-def grid_definition_template_140(cube, grib):
-    """
-    Set keys within the provided grib message based on
-    Grid Definition Template 3.140.
-
-    Template 3.140 is used to represent a Lambert azimuthal equal area
-    projection grid.
-
-    """
-
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 140)
-
-    # Retrieve some information from the cube.
-    y_coord = cube.coord(dimensions=[0])
-    x_coord = cube.coord(dimensions=[1])
-    cs = y_coord.coord_system
-
-    # Normalise the coordinate values to millimetres - the resolution
-    # used in the GRIB message.
-    y_mm = points_in_unit(y_coord, 'mm')
-    x_mm = points_in_unit(x_coord, 'mm')
-
-    # Encode the horizontal points.
-
-    # NB. Since we're already in millimetres, our tolerance for
-    # discrepancy in the differences is 1.
-    try:
-        x_step = step(x_mm, atol=1)
-        y_step = step(y_mm, atol=1)
-    except ValueError:
-        msg = ('Irregular coordinates not supported for Lambert '
-               'Conformal.')
-        raise TranslationError(msg)
-    gribapi.grib_set(grib, 'Dx', abs(x_step))
-    gribapi.grib_set(grib, 'Dy', abs(y_step))
-
-    horizontal_grid_common(cube, grib, xy=True)
-
-    # Transform first point into geographic CS
-    geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
-    first_x, first_y = geog.as_cartopy_crs().transform_point(
-        x_coord.points[0],
-        y_coord.points[0],
-        cs.as_cartopy_crs())
-    first_x = first_x % 360
-    proj_origin_lon = cs.longitude_of_projection_origin % 360
-
-    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
-    s_parallel = proj_origin_lon / _DEFAULT_DEGREES_UNITS
-    s_parallel = int(np.round(s_parallel))
-    gribapi.grib_set(grib, "standardParallel", s_parallel)
-    c_longitude = cs.longitude_of_projection_origin / _DEFAULT_DEGREES_UNITS
-    c_longitude = int(np.round(c_longitude))
-    gribapi.grib_set(grib, "centralLongitude", c_longitude)
-    if cs.false_easting != 0.0 or cs.false_northing != 0.0:
-        msg = ('false easting non zero ({}) or false northing non zero ({}) '
-               '\n; unsupported by GRIB Template 3.140'
-               '.').format(cs.false_easting, cs.false_northing)
-        raise TranslationError(msg)
-
-
 def grid_definition_section(cube, grib):
     """
     Set keys within the grid definition section of the provided grib message,
@@ -1399,13 +1333,13 @@ def product_definition_template_6(cube, grib, full3d_cube=None):
     interval.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 6)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 6)
     if not (cube.coords('percentile') and
             len(cube.coord('percentile').points) == 1):
         raise ValueError("A cube 'percentile' coordinate with one "
                          "point is required, but not present.")
-    gribapi.grib_set(grib, "percentileValue",
-                     int(cube.coord('percentile').points[0]))
+    eccodes.codes_set(grib, "percentileValue",
+                      int(cube.coord('percentile').points[0]))
 
 
 def product_definition_template_8(cube, grib, full3d_cube=None):
