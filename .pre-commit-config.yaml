@@ -1,0 +1,69 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+files: |
+    (?x)(
+        noxfile\.py|
+        setup\.py|
+        docs\/.+\.py|
+        benchmarks\/.+\.py|
+        iris_grib\/.+\.py
+    )
+minimum_pre_commit_version: 1.21.0
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+        # Prevent giant files from being committed.
+    -   id: check-added-large-files
+        # Check whether files parse as valid Python.
+    -   id: check-ast
+        # Check for file name conflicts on case-insensitive filesytems.
+    -   id: check-case-conflict
+        # Check for files that contain merge conflict strings.
+    -   id: check-merge-conflict
+        # Check for debugger imports and py37+ `breakpoint()` calls in Python source.
+    -   id: debug-statements
+        # Don't commit to main branch.
+    -   id: no-commit-to-branch
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.3.4"
+    hooks:
+    -   id: ruff
+        types: [file, python]
+        args: [--fix, --show-fixes]
+    -   id: ruff-format
+        types: [file, python]
+
+-   repo: https://github.com/codespell-project/codespell
+    rev: "v2.2.6"
+    hooks:
+    -   id: codespell
+        types_or: [asciidoc, python, markdown, rst]
+        additional_dependencies: [tomli]
+
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+    -   id: flake8
+        types: [file, python]
+
+-   repo: https://github.com/asottile/blacken-docs
+    rev: 1.16.0
+    hooks:
+    -   id: blacken-docs
+        types: [file, rst]
+
+-   repo: https://github.com/aio-libs/sort-all
+    rev: v1.2.0
+    hooks:
+    -   id: sort-all
+        types: [file, python]
+
+-   repo: https://github.com/numpy/numpydoc
+    rev: v1.7.0
+    hooks:
+      - id: numpydoc-validation
+        types: [file, python]
