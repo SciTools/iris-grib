@@ -28,14 +28,15 @@ repos:
         # Don't commit to main branch.
     -   id: no-commit-to-branch
 
--   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.3.4"
-    hooks:
-    -   id: ruff
-        types: [file, python]
-        args: [--fix, --show-fixes]
-    -   id: ruff-format
-        types: [file, python]
+# TODO: pending the addition of ruff, including config file(s) - iris-grib#384
+#-   repo: https://github.com/astral-sh/ruff-pre-commit
+#    rev: "v0.3.4"
+#    hooks:
+#    -   id: ruff
+#        types: [file, python]
+#        args: [--fix, --show-fixes]
+#    -   id: ruff-format
+#        types: [file, python]
 
 -   repo: https://github.com/codespell-project/codespell
     rev: "v2.2.6"
@@ -62,8 +63,9 @@ repos:
     -   id: sort-all
         types: [file, python]
 
--   repo: https://github.com/numpy/numpydoc
-    rev: v1.7.0
-    hooks:
-      - id: numpydoc-validation
-        types: [file, python]
+# TODO: pending the addition of numpydoc, including config file(s).
+#-   repo: https://github.com/numpy/numpydoc
+#    rev: v1.7.0
+#    hooks:
+#      - id: numpydoc-validation
+#        types: [file, python]
