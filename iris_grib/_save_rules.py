@@ -656,7 +656,7 @@ def grid_definition_template_20(cube, grib):
     if cs.central_lat == -90.0:
         # XXX: is this the correct value? We read bit 0x80 in load, but set bit
         #      0x1 when saving GDT30...
-        centre_flag = 0x1
+        centre_flag = 0x80
     elif cs.central_lat == 90.0:
         centre_flag = 0x0
     else:
@@ -689,7 +689,7 @@ def grid_definition_template_30(cube, grib):
     eccodes.codes_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
 
     poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
-    centre_flag = 0x0 if poliest_secant > 0 else 0x1
+    centre_flag = 0x0 if poliest_secant > 0 else 0x80
     eccodes.codes_set(grib, 'projectionCentreFlag', centre_flag)
 
     eccodes.codes_set(grib, "latitudeOfSouthernPole", 0)
