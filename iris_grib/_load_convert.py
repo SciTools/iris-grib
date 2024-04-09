@@ -2486,6 +2486,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         # Process individual ensemble forecast, control and perturbed, at
         # a horizontal level or in a horizontal layer at a point in time.
         product_definition_template_1(section, metadata, rt_coord)
+    elif template == 6:
+        # Process percentile forecast, at a horizontal level or in a horizontal
+        # layer at a point in time.
+        product_definition_template_6(section, metadata, rt_coord)
     elif template == 8:
         # Process statistically processed values at a horizontal level or in a
         # horizontal layer in a continuous or non-continuous time interval.

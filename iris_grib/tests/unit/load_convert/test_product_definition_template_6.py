@@ -4,7 +4,7 @@
 # See LICENSE in the root of the repository for full licensing details.
 """
 Test function
-:func:`iris_grib._load_convert.product_definition_template_1`.
+:func:`iris_grib._load_convert.product_definition_template_6`.
 
 """
 

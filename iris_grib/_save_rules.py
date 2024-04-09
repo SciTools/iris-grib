@@ -1334,6 +1334,7 @@ def product_definition_template_6(cube, grib, full3d_cube=None):
 
     """
     eccodes.codes_set(grib, "productDefinitionTemplateNumber", 6)
+    product_definition_template_common(cube, grib, full3d_cube)
     if not (cube.coords('percentile') and
             len(cube.coord('percentile').points) == 1):
         raise ValueError("A cube 'percentile' coordinate with one "
