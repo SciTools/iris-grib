@@ -1324,6 +1324,25 @@ def product_definition_template_1(cube, grib, full3d_cube=None):
     set_ensemble(cube, grib)
 
 
+def product_definition_template_6(cube, grib, full3d_cube=None):
+    """
+    Set keys within the provided grib message based on Product Definition
+    Template 4.6.
+
+    Template 4.6 is used to represent a percentile forecast at a point in time
+    interval.
+
+    """
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 6)
+    product_definition_template_common(cube, grib, full3d_cube)
+    if not (cube.coords('percentile') and
+            len(cube.coord('percentile').points) == 1):
+        raise ValueError("A cube 'percentile' coordinate with one "
+                         "point is required, but not present.")
+    eccodes.codes_set(grib, "percentileValue",
+                      int(cube.coord('percentile').points[0]))
+
+
 def product_definition_template_8(cube, grib, full3d_cube=None):
     """
     Set keys within the provided grib message based on Product
@@ -1518,6 +1537,8 @@ def product_definition_section(cube, grib, full3d_cube=None):
         elif 'spatial_processing_type' in cube.attributes:
             # spatial process (template 4.15)
             product_definition_template_15(cube, grib, full3d_cube)
+        elif cube.coords('percentile'):
+            product_definition_template_6(cube, grib, full3d_cube)
         else:
             # forecast (template 4.0)
             product_definition_template_0(cube, grib, full3d_cube)

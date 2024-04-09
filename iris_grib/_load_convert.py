@@ -2061,7 +2061,7 @@ def product_definition_template_1(section, metadata, frt_coord):
         Dictionary of coded key/value pairs from section 4 of the message.
 
     * metadata:
-        :class:`collectins.OrderedDict` of metadata.
+        :class:`collections.OrderedDict` of metadata.
 
     * frt_coord:
         The scalar forecast reference time :class:`iris.coords.DimCoord`.
@@ -2074,6 +2074,37 @@ def product_definition_template_1(section, metadata, frt_coord):
 
     # Add the realization coordinate to the metadata aux coords.
     metadata['aux_coords_and_dims'].append((realization, None))
+
+
+def product_definition_template_6(section, metadata, frt_coord):
+    """
+    Translate template representing percentile forecast,
+    at a horizontal level or in a horizontal layer at a
+    point in time.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 4 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+
+    * frt_coord:
+        The scalar forecast reference time :class:`iris.coords.DimCoord`.
+
+    """
+    # Perform identical message processing.
+    product_definition_template_0(section, metadata, frt_coord)
+
+    percentile = DimCoord(section['percentileValue'],
+                          long_name='percentile',
+                          units='%')
+
+    # Add the percentile coordinate to the metadata aux coords.
+    metadata['aux_coords_and_dims'].append((percentile, None))
 
 
 def product_definition_template_8(section, metadata, frt_coord):
@@ -2455,6 +2486,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         # Process individual ensemble forecast, control and perturbed, at
         # a horizontal level or in a horizontal layer at a point in time.
         product_definition_template_1(section, metadata, rt_coord)
+    elif template == 6:
+        # Process percentile forecast, at a horizontal level or in a horizontal
+        # layer at a point in time.
+        product_definition_template_6(section, metadata, rt_coord)
     elif template == 8:
         # Process statistically processed values at a horizontal level or in a
         # horizontal layer in a continuous or non-continuous time interval.
