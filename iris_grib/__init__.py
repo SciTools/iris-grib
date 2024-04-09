@@ -287,7 +287,9 @@ class GribWrapper:
                            # files, and reduce the very long line lengths.
                            '_x_points': None,
                            '_y_points': None,
-                           '_cf_data': None}
+                           '_cf_data': None,
+                           '_grib_code': None,
+                           }
 
         # cf phenomenon translation
         # Get centre code (N.B. self.centre has default type = string)
@@ -298,6 +300,12 @@ class GribWrapper:
             centre_number=centre_number,
             param_number=self.indicatorOfParameter)
         self.extra_keys['_cf_data'] = cf_data
+        self.extra_keys['_grib_code'] = gptx.GRIBCode(
+            edition_or_string=1,
+            discipline=self.table2Version,
+            category=centre_number,
+            number=self.indicatorOfParameter
+        )
 
         # reference date
         self.extra_keys['_referenceDateTime'] = \
