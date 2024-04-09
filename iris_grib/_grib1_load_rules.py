@@ -148,7 +148,8 @@ def grib1_convert(grib):
         units = grib._cf_data.units
 
     # N.B. in addition to the previous cf translated phenomenon info,
-    # **always** add a GRIB_PARAM attribute to identify the input phenomenon identity.
+    # **always** add a GRIB_PARAM attribute to identify the input phenomenon
+    # identity.
     attributes['GRIB_PARAM'] = grib._grib_code
 
     if \
