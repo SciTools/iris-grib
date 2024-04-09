@@ -21,7 +21,8 @@ import numpy.ma as ma
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
-                                TransverseMercator, LambertConformal)
+                                TransverseMercator, LambertConformal,
+                                LambertAzimuthalEqualArea)
 from iris.exceptions import TranslationError
 
 
@@ -648,6 +649,72 @@ def grid_definition_template_30(cube, grib):
     eccodes.codes_set(grib, "longitudeOfSouthernPole", 0)
 
 
+def grid_definition_template_140(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.140.
+
+    Template 3.140 is used to represent a Lambert Azimuthual Equal Area grid.
+
+    """
+
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 140)
+
+    # Retrieve some information from the cube.
+    y_coord = cube.coord(dimensions=[0])
+    x_coord = cube.coord(dimensions=[1])
+    cs = y_coord.coord_system
+
+    # Normalise the coordinate values to millimetres - the resolution
+    # used in the GRIB message.
+    y_mm = points_in_unit(y_coord, 'mm')
+    x_mm = points_in_unit(x_coord, 'mm')
+
+    # Encode the horizontal points.
+
+    # NB. Since we're already in millimetres, our tolerance for
+    # discrepancy in the differences is 1.
+    try:
+        x_step = step(x_mm, atol=1)
+        y_step = step(y_mm, atol=1)
+    except ValueError:
+        msg = ('Irregular coordinates not supported for Lambert '
+               'Azimuthal Equal Area.')
+        raise TranslationError(msg)
+    eccodes.codes_set(grib, 'Dx', abs(x_step))
+    eccodes.codes_set(grib, 'Dy', abs(y_step))
+
+    horizontal_grid_common(cube, grib, xy=True)
+
+    # Transform first point into geographic CS
+    geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
+    first_x, first_y = geog.as_cartopy_crs().transform_point(
+        x_coord.points[0],
+        y_coord.points[0],
+        cs.as_cartopy_crs())
+    first_x = first_x % 360
+    central_lon = cs.longitude_of_projection_origin % 360
+    central_lat = cs.latitude_of_projection_origin
+
+    eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, 'standardParallelInMicrodegrees',
+                      central_lat / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, 'centralLongitudeInMicrodegrees',
+                      central_lon / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, 'resolutionAndComponentFlags',
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+    if (not (np.isclose(cs.false_easting, 0.0, atol=1e-6)) or
+            not (np.isclose(cs.false_northing, 0.0, atol=1e-6))):
+        msg = ('non zero false easting ({:.2f}) or '
+               'non zero false northing ({:.2f})'
+               '; unsupported by GRIB Template 3.140'
+               '').format(cs.false_easting, cs.false_northing)
+        raise TranslationError(msg)
+
+
 def grid_definition_section(cube, grib):
     """
     Set keys within the grid definition section of the provided grib message,
@@ -684,6 +751,11 @@ def grid_definition_section(cube, grib):
     elif isinstance(cs, LambertConformal):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
+
+    elif isinstance(cs, LambertAzimuthalEqualArea):
+        # Lambert Azimuthal Equal Area coordinate system (template 3.140).
+        grid_definition_template_140(cube, grib)
+
     else:
         name = cs.grid_mapping_name.replace('_', ' ').title()
         emsg = 'Grib saving is not supported for coordinate system {!r}'
