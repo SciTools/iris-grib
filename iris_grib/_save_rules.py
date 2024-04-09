@@ -654,8 +654,6 @@ def grid_definition_template_20(cube, grib):
 
     # Is this a north or south polar stereographic projection?
     if cs.central_lat == -90.0:
-        # XXX: is this the correct value? We read bit 0x80 in load, but set bit
-        #      0x1 when saving GDT30...
         centre_flag = 0x80
     elif cs.central_lat == 90.0:
         centre_flag = 0x0
