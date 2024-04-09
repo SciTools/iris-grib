@@ -1,33 +1,19 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for
 :func:`iris_grib._load_convert.grid_definition_template_12`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 import numpy as np
+import warnings
 
 import iris.coord_systems
 import iris.coords
@@ -67,7 +53,7 @@ class Test(tests.IrisGribTest):
         }
         return section
 
-    def expected(self, y_dim, x_dim):
+    def expected(self, y_dim, x_dim, x_negative=False, y_negative=False):
         # Prepare the expectation.
         expected = empty_metadata()
         ellipsoid = iris.coord_systems.GeogCS(6377563.396, 6356256.909)
@@ -76,13 +62,19 @@ class Test(tests.IrisGribTest):
         nx = 4
         x_origin = 293000
         dx = 2000
-        x = iris.coords.DimCoord(np.arange(nx) * dx + x_origin,
+        x_array = np.arange(nx) * dx + x_origin
+        if x_negative:
+            x_array = np.flip(x_array)
+        x = iris.coords.DimCoord(x_array,
                                  'projection_x_coordinate', units='m',
                                  coord_system=cs)
         ny = 3
         y_origin = 92000
         dy = 1000
-        y = iris.coords.DimCoord(np.arange(ny) * dy + y_origin,
+        y_array = np.arange(ny) * dy + y_origin
+        if y_negative:
+            y_array = np.flip(y_array)
+        y = iris.coords.DimCoord(y_array,
                                  'projection_y_coordinate', units='m',
                                  coord_system=cs)
         expected['dim_coords_and_dims'].append((y, y_dim))
@@ -109,17 +101,63 @@ class Test(tests.IrisGribTest):
     def test_negative_x(self):
         section = self.section_3()
         section['scanningMode'] = 0b11000000
+        section['X1'], section['X2'] = section['X2'], section['X1']
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     '-x scanning'):
+        grid_definition_template_12(section, metadata)
+        expected = self.expected(0, 1, x_negative=True)
+        self.assertEqual(metadata, expected)
+
+    def test_x_inconsistent_direction(self):
+        section = self.section_3()
+        section['scanningMode'] = 0b11000000
+        metadata = empty_metadata()
+        with warnings.catch_warnings(record=True) as warn:
+            grid_definition_template_12(section, metadata)
+        self.assertEqual(len(warn), 1)
+        message = "X definition inconsistent: scanningMode"
+        self.assertRegex(str(warn[0].message), message)
+        expected = self.expected(0, 1)
+        self.assertEqual(metadata, expected)
+
+    def test_x_inconsistent_steps(self):
+        section = self.section_3()
+        section['Ni'] += 1
+        metadata = empty_metadata()
+        expected_regex = (
+            "X definition inconsistent: .* incompatible with step-size")
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    expected_regex):
             grid_definition_template_12(section, metadata)
 
     def test_negative_y(self):
         section = self.section_3()
         section['scanningMode'] = 0b00000000
+        section['Y1'], section['Y2'] = section['Y2'], section['Y1']
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     '-y scanning'):
+        grid_definition_template_12(section, metadata)
+        expected = self.expected(0, 1, y_negative=True)
+        self.assertEqual(metadata, expected)
+
+    def test_y_inconsistent_direction(self):
+        section = self.section_3()
+        section['scanningMode'] = 0b00000000
+        metadata = empty_metadata()
+        with warnings.catch_warnings(record=True) as warn:
+            grid_definition_template_12(section, metadata)
+        self.assertEqual(len(warn), 1)
+        message = "Y definition inconsistent: scanningMode"
+        self.assertRegex(str(warn[0].message), message)
+        expected = self.expected(0, 1)
+        self.assertEqual(metadata, expected)
+
+    def test_y_inconsistent_steps(self):
+        section = self.section_3()
+        section['Nj'] += 1
+        metadata = empty_metadata()
+        expected_regex = (
+            "Y definition inconsistent: .* incompatible with step-size")
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    expected_regex):
             grid_definition_template_12(section, metadata)
 
     def test_transposed(self):
@@ -146,8 +184,8 @@ class Test(tests.IrisGribTest):
         section = self.section_3()
         section['X2'] += 100
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'grid'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'grid'):
             grid_definition_template_12(section, metadata)
 
     def test_scale_workaround(self):

@@ -1,26 +1,11 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Test function :func:`iris_grib._load_convert.ellipsoid.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
@@ -45,7 +30,7 @@ class Test(tests.IrisGribTest):
         unsupported = [8, 9, 10, MDI]
         emsg = 'unsupported shape of the earth'
         for shape in unsupported:
-            with self.assertRaisesRegexp(TranslationError, emsg):
+            with self.assertRaisesRegex(TranslationError, emsg):
                 ellipsoid(shape, MDI, MDI, MDI)
 
     def test_spherical_default_supported(self):
@@ -58,7 +43,7 @@ class Test(tests.IrisGribTest):
     def test_spherical_shape_1_no_radius(self):
         shape = 1
         emsg = 'radius to be specified'
-        with self.assertRaisesRegexp(ValueError, emsg):
+        with self.assertRaisesRegex(ValueError, emsg):
             ellipsoid(shape, MDI, MDI, MDI)
 
     def test_spherical_shape_1(self):
@@ -71,19 +56,19 @@ class Test(tests.IrisGribTest):
     def test_oblate_shape_3_7_no_axes(self):
         for shape in [3, 7]:
             emsg = 'axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, MDI, MDI, MDI)
 
     def test_oblate_shape_3_7_no_major(self):
         for shape in [3, 7]:
             emsg = 'major axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, MDI, 1, MDI)
 
     def test_oblate_shape_3_7_no_minor(self):
         for shape in [3, 7]:
             emsg = 'minor axis to be specified'
-            with self.assertRaisesRegexp(ValueError, emsg):
+            with self.assertRaisesRegex(ValueError, emsg):
                 ellipsoid(shape, 1, MDI, MDI)
 
     def test_oblate_shape_3_7(self):

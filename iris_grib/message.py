@@ -1,42 +1,34 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Defines a lightweight wrapper class to wrap a single GRIB message.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 from collections import namedtuple
 import re
 
-import gribapi
+import eccodes
 import numpy as np
 import numpy.ma as ma
 
 from iris._lazy_data import as_lazy_data
 from iris.exceptions import TranslationError
 
-_SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90)
+_SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90, 140)
+
+# Alias names for eccodes spatial computed keys.
+KEY_ALIAS = {
+    'latitude': 'latitudes',
+    'longitude': 'longitudes',
+    'latitudes': 'latitude',
+    'longitudes': 'longitude',
+}
 
 
-class _OpenFileRef(object):
+class _OpenFileRef:
     """
     A reference to an open file that ensures that the file is closed
     when the object is garbage collected.
@@ -49,7 +41,7 @@ class _OpenFileRef(object):
             self.open_file.close()
 
 
-class GribMessage(object):
+class GribMessage:
     """
     An in-memory representation of a GribMessage, providing
     access to the :meth:`~GribMessage.data` payload and the metadata
@@ -74,10 +66,11 @@ class GribMessage(object):
         file_ref = _OpenFileRef(grib_fh)
 
         while True:
-            offset = grib_fh.tell()
-            grib_id = gribapi.grib_new_from_file(grib_fh)
+            grib_id = eccodes.codes_new_from_file(grib_fh,
+                                                  eccodes.CODES_PRODUCT_GRIB)
             if grib_id is None:
                 break
+            offset = eccodes.codes_get_message_offset(grib_id)
             raw_message = _RawGribMessage(grib_id)
             recreate_raw = _MessageLocation(filename, offset)
             yield GribMessage(raw_message, recreate_raw, file_ref=file_ref)
@@ -89,7 +82,7 @@ class GribMessage(object):
         them directly.
 
         """
-        # A RawGribMessage giving gribapi access to the original grib message.
+        # A RawGribMessage giving ecCodes access to the original grib message.
         self._raw_message = raw_message
         # A _MessageLocation which dask uses to read the message data array,
         # by which time this message may be dead and the original grib file
@@ -158,6 +151,9 @@ class GribMessage(object):
                 raise TranslationError(msg)
             if template in (20, 30, 90):
                 shape = (grid_section['Ny'], grid_section['Nx'])
+            elif template == 140:
+                shape = (grid_section['numberOfPointsAlongYAxis'],
+                         grid_section['numberOfPointsAlongXAxis'])
             elif template == 40 and reduced:
                 shape = (grid_section['numberOfDataPoints'],)
             else:
@@ -188,7 +184,7 @@ class _MessageLocation(namedtuple('_MessageLocation', 'filename offset')):
         return _RawGribMessage.from_file_offset(self.filename, self.offset)
 
 
-class _DataProxy(object):
+class _DataProxy:
     """A reference to the data payload of a single GRIB message."""
 
     __slots__ = ('shape', 'dtype', 'recreate_raw')
@@ -241,13 +237,29 @@ class _DataProxy(object):
         return bitmap
 
     def __getitem__(self, keys):
-        # NB. Currently assumes that the validity of this interpretation
+        # N.B. Assumes that the validity of this interpretation
         # is checked before this proxy is created.
+
         message = self.recreate_raw()
         sections = message.sections
+        data = None
+
+        if 5 in sections:
+            # Data Representation Section.
+            if sections[5]["bitsPerValue"] == 0:
+                # Auto-generate zero data of the expected shape and dtype, as
+                # there is no data stored within the Data Section of this GRIB
+                # message. Also flatten the result to 1-D for potential bitmap
+                # post-processing.
+                data = np.ravel(np.zeros(self.shape, dtype=self.dtype))
+
+        if data is None:
+            # Data Section.
+            data = sections[7]["codedValues"]
+
+        # Bit-map Section.
         bitmap_section = sections[6]
         bitmap = self._bitmap(bitmap_section)
-        data = sections[7]['codedValues']
 
         if bitmap is not None:
             # Note that bitmap and data are both 1D arrays at this point.
@@ -264,8 +276,9 @@ class _DataProxy(object):
                 raise TranslationError(msg)
 
         data = data.reshape(self.shape)
+        result = data.__getitem__(keys)
 
-        return data.__getitem__(keys)
+        return result
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
@@ -276,11 +289,11 @@ class _DataProxy(object):
         return {attr: getattr(self, attr) for attr in self.__slots__}
 
     def __setstate__(self, state):
-        for key, value in six.iteritems(state):
+        for key, value in state.items():
             setattr(self, key, value)
 
 
-class _RawGribMessage(object):
+class _RawGribMessage:
     """
     Lightweight GRIB message wrapper, containing **only** the coded keys
     of the input GRIB message.
@@ -292,7 +305,9 @@ class _RawGribMessage(object):
     def from_file_offset(filename, offset):
         with open(filename, 'rb') as f:
             f.seek(offset)
-            message_id = gribapi.grib_new_from_file(f)
+            message_id = eccodes.codes_new_from_file(
+                f, eccodes.CODES_PRODUCT_GRIB
+            )
             if message_id is None:
                 fmt = 'Invalid GRIB message: {} @ {}'
                 raise RuntimeError(fmt.format(filename, offset))
@@ -315,10 +330,10 @@ class _RawGribMessage(object):
 
     def __del__(self):
         """
-        Release the gribapi reference to the message at end of object's life.
+        Release the ecCodes reference to the message at end of object's life.
 
         """
-        gribapi.grib_release(self._message_id)
+        eccodes.codes_release(self._message_id)
 
     @property
     def sections(self):
@@ -340,11 +355,11 @@ class _RawGribMessage(object):
     def _get_message_keys(self):
         """Creates a generator of all the keys in the message."""
 
-        keys_itr = gribapi.grib_keys_iterator_new(self._message_id)
-        gribapi.grib_skip_computed(keys_itr)
-        while gribapi.grib_keys_iterator_next(keys_itr):
-            yield gribapi.grib_keys_iterator_get_name(keys_itr)
-        gribapi.grib_keys_iterator_delete(keys_itr)
+        keys_itr = eccodes.codes_keys_iterator_new(self._message_id)
+        eccodes.codes_skip_computed(keys_itr)
+        while eccodes.codes_keys_iterator_next(keys_itr):
+            yield eccodes.codes_keys_iterator_get_name(keys_itr)
+        eccodes.codes_keys_iterator_delete(keys_itr)
 
     def _get_message_sections(self):
         """
@@ -381,7 +396,7 @@ class _RawGribMessage(object):
         return sections
 
 
-class Section(object):
+class Section:
     """
     A Section of a GRIB message, supporting dictionary like access to
     attributes using gribapi key strings.
@@ -411,12 +426,18 @@ class Section(object):
         if key not in self._cache:
             if key == 'numberOfSection':
                 value = self._number
-            elif key not in self._keys:
-                raise KeyError('{!r} not defined in section {}'.format(
-                    key, self._number))
             else:
+                if key not in self._keys:
+                    key2 = KEY_ALIAS.get(key)
+                    if key2 and key2 in self._keys:
+                        key = key2
+                    else:
+                        emsg = f"{key} not defined in section {self._number}"
+                        raise KeyError(emsg)
                 value = self._get_key_value(key)
+
             self._cache[key] = value
+
         return self._cache[key]
 
     def __setitem__(self, key, value):
@@ -444,14 +465,15 @@ class Section(object):
                        'satelliteNumber', 'instrumentType',
                        'scaleFactorOfCentralWaveNumber',
                        'scaledValueOfCentralWaveNumber',
+                       'longitude', 'latitude',
                        'longitudes', 'latitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = eccodes.codes_get_array(self._message_id, key)
         elif key == 'bitmap':
             # The bitmap is stored as contiguous boolean bits, one bit for each
-            # data point. GRIBAPI returns these as strings, so it must be
+            # data point. ecCodes returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
-            res = gribapi.grib_get_array(self._message_id, key, int)
+            res = eccodes.codes_get_array(self._message_id, key, int)
         elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
             # By default these values are returned as unhelpful strings but
             # we can use int representation to compare against instead.
@@ -476,7 +498,7 @@ class Section(object):
         """
         vector_keys = ('longitudes', 'latitudes', 'distinctLatitudes')
         if key in vector_keys:
-            res = gribapi.grib_get_array(self._message_id, key)
+            res = eccodes.codes_get_array(self._message_id, key)
         else:
             res = self._get_value_or_missing(key)
         return res
@@ -491,11 +513,11 @@ class Section(object):
         Implementation of Regulations 92.1.4 and 92.1.5 via ECCodes.
 
         """
-        if gribapi.grib_is_missing(self._message_id, key):
+        if eccodes.codes_is_missing(self._message_id, key):
             result = None
         else:
             if use_int:
-                result = gribapi.grib_get(self._message_id, key, int)
+                result = eccodes.codes_get(self._message_id, key, int)
             else:
-                result = gribapi.grib_get(self._message_id, key)
+                result = eccodes.codes_get(self._message_id, key)
         return result

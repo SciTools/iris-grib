@@ -1,25 +1,11 @@
-# (C) British Crown Copyright 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for :func:`iris_grib._save_rules.data_section`.
 
 """
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised before
 # importing anything else
@@ -28,11 +14,11 @@ import iris_grib.tests as tests
 import numpy as np
 
 import iris
-from iris.cube import Cube
 
 from iris_grib import save_pairs_from_cube, save_messages, GribMessage
 
 
+@tests.skip_grib_data
 class TestSaveHybridHeight(tests.IrisGribTest):
     def setUp(self):
         reference_data_filepath = self.get_testdata_path('hybrid_height.nc')
@@ -70,8 +56,7 @@ class TestSaveHybridHeight(tests.IrisGribTest):
             # Note: gaps here are because we took model levels = (1, 3, 5).
             self.assertArrayAllClose(
                 msgs[0].sections[4]['pv'],
-                [5., 0, 45., 0, 111.667, 0,
-                 0.999, 0, 0.995, 0, 0.987, 0],
+                [0, 5., 0, 45., 0, 111.667, 0, 0.999, 0, 0.995, 0, 0.987],
                 atol=0.0015)
 
             # Check message #2-of-3 has the correctly encoded hybrid height.
@@ -94,6 +79,7 @@ class TestSaveHybridHeight(tests.IrisGribTest):
                 255)
 
 
+@tests.skip_grib_data
 class TestSaveHybridPressure(tests.IrisGribTest):
     def setUp(self):
         reference_data_filepath = self.get_testdata_path(
@@ -127,8 +113,8 @@ class TestSaveHybridPressure(tests.IrisGribTest):
             # Note: HUGE gaps here because we took model levels = (1, 51, 91).
             self.assertEqual(msgs[0].sections[4]['NV'], 184)
             pv_expected = np.zeros(184, dtype=np.float64)
-            pv_expected[[0, 50, 90]] = [0., 18191.03, 0.003]
-            pv_expected[[92, 142, 182]] = [0., 0.036, 0.998]
+            pv_expected[[1, 51, 91]] = [0., 18191.03, 0.003]
+            pv_expected[[93, 143, 183]] = [0., 0.036, 0.998]
             self.assertArrayAllClose(
                 msgs[0].sections[4]['pv'], pv_expected, atol=0.001)
 

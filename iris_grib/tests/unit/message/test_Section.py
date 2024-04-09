@@ -1,32 +1,17 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for `iris_grib.message.Section`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
+import eccodes
 import numpy as np
 
 from iris_grib.message import Section
@@ -37,7 +22,9 @@ class Test___getitem__(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
         with open(filename, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
 
     def test_scalar(self):
         section = Section(self.grib_id, None, ['Ni'])
@@ -61,7 +48,7 @@ class Test___getitem__(tests.IrisGribTest):
 
     def test_invalid(self):
         section = Section(self.grib_id, None, ['Ni'])
-        with self.assertRaisesRegexp(KeyError, 'Nii'):
+        with self.assertRaisesRegex(KeyError, 'Nii'):
             section['Nii']
 
 
@@ -70,7 +57,9 @@ class Test__getitem___pdt_31(tests.IrisGribTest):
     def setUp(self):
         filename = tests.get_data_path(('GRIB', 'umukv', 'ukv_chan9.grib2'))
         with open(filename, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
         self.keys = ['satelliteSeries', 'satelliteNumber', 'instrumentType',
                      'scaleFactorOfCentralWaveNumber',
                      'scaledValueOfCentralWaveNumber']
@@ -88,7 +77,9 @@ class Test_get_computed_key(tests.IrisGribTest):
     def test_gdt40_computed(self):
         fname = tests.get_data_path(('GRIB', 'gaussian', 'regular_gg.grib2'))
         with open(fname, 'rb') as grib_fh:
-            self.grib_id = gribapi.grib_new_from_file(grib_fh)
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
             section = Section(self.grib_id, None, [])
         latitudes = section.get_computed_key('latitudes')
         self.assertTrue(88.55 < latitudes[0] < 88.59)

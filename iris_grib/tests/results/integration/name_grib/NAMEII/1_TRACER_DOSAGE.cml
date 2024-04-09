@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" units="unknown">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB2:d255c255n255"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord bounds="[[0., 3.]]" id="1d45e087" points="[3.]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="float64"/>
+      </coord>
+      <coord>
+        <dimCoord bounds="[[  0., 100.]]" id="1a539915" long_name="height above ground level" points="[50.]" shape="(1,)" standard_name="height" units="Unit('m')" value_type="float64">
+          <attributes>
+            <attribute name="positive" value="up"/>
+          </attributes>
+        </dimCoord>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord id="77a50eb5" points="[52.367102, 52.368208, 52.369314, ..., 52.584984,
+ 52.58609 , 52.587196]" shape="(200,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6371229.0"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord id="f913a8b3" points="[357.9144  , 357.916209, 357.918018, ...,
+ 358.270773, 358.272582, 358.274391]" shape="(200,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6371229.0"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <dimCoord bounds="[[351249., 351252.]]" id="cb784457" points="[351252.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods>
+      <cellMethod method="sum">
+        <coord name="time"/>
+      </cellMethod>
+    </cellMethods>
+    <data checksum="0x69a4721e" dtype="float64" shape="(200, 200)"/>
+  </cube>
+</cubes>

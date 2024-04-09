@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" units="unknown">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB2:d000c019n037"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord id="1d45e087" points="[18]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int64"/>
+      </coord>
+      <coord>
+        <dimCoord id="9c8bdf81" points="[472014.]" shape="(1,)" standard_name="forecast_reference_time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord id="77a50eb5" points="[90.  , 89.75, 89.5 , ..., 60.5 , 60.25, 60.  ]" shape="(121,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6371229.0"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord id="f913a8b3" points="[ 60.  ,  60.25,  60.5 , ..., 209.5 , 209.75,
+ 210.  ]" shape="(601,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6371229.0"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <dimCoord id="302bf438" long_name="pressure" points="[30090.]" shape="(1,)" units="Unit('Pa')" value_type="float64"/>
+      </coord>
+      <coord>
+        <dimCoord id="cb784457" points="[472032.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods/>
+    <data checksum="0x13d8eac8" dtype="float64" shape="(121, 601)"/>
+  </cube>
+</cubes>

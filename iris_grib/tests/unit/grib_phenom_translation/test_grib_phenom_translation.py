@@ -1,19 +1,7 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 '''
 Unit tests for the mod:`iris_grib.grib_phenom_translation` module.
 
@@ -21,8 +9,6 @@ Carried over from old iris/tests/test_grib_phenom_translation.py.
 Code is out of step with current test conventions and standards.
 
 '''
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
@@ -31,6 +17,7 @@ import iris_grib.tests as tests
 import cf_units
 
 import iris_grib.grib_phenom_translation as gptx
+from iris_grib.grib_phenom_translation import GRIBCode
 
 
 class TestGribLookupTableType(tests.IrisTest):
@@ -162,6 +149,114 @@ class TestGribPhenomenonLookup(tests.IrisTest):
                        expect_none=True)
         check_cf_grib2(None, None, 0, 0, 0, '',
                        expect_none=True)
+
+
+class TestGRIBcode(tests.IrisTest):
+    # GRIBCode is basically a namedtuple, so not all behaviour needs testing.
+    # However, creation is a bit special so exercise all those cases.
+    def test_create_from_keys(self):
+        gribcode = GRIBCode(
+            edition_or_string=5,
+            discipline=7,
+            category=4,
+            number=199)
+        self.assertEqual(gribcode.edition, 5)
+        self.assertEqual(gribcode.discipline, 7)
+        self.assertEqual(gribcode.category, 4)
+        self.assertEqual(gribcode.number, 199)
+
+    def test_create_from_args(self):
+        gribcode = GRIBCode(7, 3, 12, 99)
+        self.assertEqual(gribcode.edition, 7)
+        self.assertEqual(gribcode.discipline, 3)
+        self.assertEqual(gribcode.category, 12)
+        self.assertEqual(gribcode.number, 99)
+
+    def test_create_is_copy(self):
+        gribcode1 = GRIBCode(7, 3, 12, 99)
+        gribcode2 = GRIBCode(7, 3, 12, 99)
+        self.assertEqual(gribcode1, gribcode2)
+        self.assertIsNot(gribcode1, gribcode2)
+
+    def test_create_from_gribcode(self):
+        gribcode1 = GRIBCode((4, 3, 2, 1))
+        gribcode2 = GRIBCode(gribcode1)
+        self.assertEqual(gribcode1, gribcode2)
+        # NOTE: *not* passthrough : it creates a copy
+        # (though maybe not too significant, as it is immutable anyway?)
+        self.assertIsNot(gribcode1, gribcode2)
+
+    def test_create_from_string(self):
+        gribcode = GRIBCode('xxx12xs-34 -5,678qqqq')
+        # NOTE: args 2 and 3 are *not* negative.
+        self.assertEqual(gribcode, GRIBCode(12, 34, 5, 678))
+
+    def test_create_from_own_string(self):
+        # Check that GRIBCode string reprs are valid as create arguments.
+        gribcode = GRIBCode(
+            edition_or_string=2,
+            discipline=17,
+            category=94,
+            number=231)
+        grib_param_string = str(gribcode)
+        newcode = GRIBCode(grib_param_string)
+        self.assertEqual(newcode, gribcode)
+
+    def test_create_from_tuple(self):
+        gribcode = GRIBCode((4, 3, 2, 1))
+        self.assertEqual(gribcode, GRIBCode(4, 3, 2, 1))
+
+    def test_create_bad_nargs(self):
+        # Between 1 and 4 args is not invalid call syntax, but it should fail.
+        with self.assertRaisesRegex(
+                ValueError,
+                'Cannot create GRIBCode from 2 arguments'):
+            GRIBCode(1, 2)
+
+    def test_create_bad_single_arg_None(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Cannot create GRIBCode from 0 arguments'):
+            GRIBCode(None)
+
+    def test_create_bad_single_arg_empty_string(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Invalid argument for GRIBCode creation'):
+            GRIBCode('')
+
+    def test_create_bad_single_arg_nonums(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Invalid argument for GRIBCode creation'):
+            GRIBCode('saas- dsa- ')
+
+    def test_create_bad_single_arg_less_than_4_nums(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Invalid argument for GRIBCode creation'):
+            GRIBCode('1,2,3')
+
+    def test_create_bad_single_arg_number(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Invalid argument for GRIBCode creation'):
+            GRIBCode(4)
+
+    def test_create_bad_single_arg_single_numeric(self):
+        with self.assertRaisesRegex(
+                ValueError,
+                'Invalid argument for GRIBCode creation'):
+            GRIBCode('44')
+
+    def test_create_string_more_than_4_nums(self):
+        # Note: does not error, just discards the extra.
+        gribcode = GRIBCode('1,2,3,4,5,6,7,8')
+        self.assertEqual(gribcode, GRIBCode(1, 2, 3, 4))
+
+    def test__str__(self):
+        result = str(GRIBCode(2, 17, 3, 123))
+        self.assertEqual(result, 'GRIB2:d017c003n123')
 
 
 if __name__ == '__main__':

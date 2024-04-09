@@ -1,27 +1,12 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Tests for function
 :func:`iris_grib._load_convert.statistical_cell_method`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
@@ -59,6 +44,12 @@ class Test(tests.IrisGribTest):
         self.assertEqual(cell_method,
                          self.expected_cell_method(intervals=('3 hours',)))
 
+    def test_increment_missing(self):
+        self.section['timeIncrement'] = 2 ** 32 - 1
+        self.section['indicatorOfUnitForTimeIncrement'] = 255
+        cell_method = statistical_cell_method(self.section)
+        self.assertEqual(cell_method, self.expected_cell_method())
+
     def test_different_statistic(self):
         self.section['typeOfStatisticalProcessing'] = 6
         cell_method = statistical_cell_method(self.section)
@@ -68,28 +59,28 @@ class Test(tests.IrisGribTest):
 
     def test_fail_bad_ranges(self):
         self.section['numberOfTimeRange'] = 0
-        with self.assertRaisesRegexp(TranslationError,
-                                     'aggregation over "0 time ranges"'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'aggregation over "0 time ranges"'):
             statistical_cell_method(self.section)
 
     def test_fail_multiple_ranges(self):
         self.section['numberOfTimeRange'] = 2
-        with self.assertRaisesRegexp(TranslationError,
-                                     'multiple time ranges \[2\]'):
+        with self.assertRaisesRegex(TranslationError,
+                                    r'multiple time ranges \[2\]'):
             statistical_cell_method(self.section)
 
     def test_fail_unknown_statistic(self):
         self.section['typeOfStatisticalProcessing'] = 17
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 TranslationError,
-                'contains an unsupported statistical process type \[17\]'):
+                r'contains an unsupported statistical process type \[17\]'):
             statistical_cell_method(self.section)
 
     def test_fail_bad_increment_type(self):
         self.section['typeOfTimeIncrement'] = 7
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 TranslationError,
-                'time-increment type \[7\] is not supported'):
+                r'time-increment type \[7\] is not supported'):
             statistical_cell_method(self.section)
 
     def test_pdt_9(self):
@@ -123,7 +114,7 @@ class Test(tests.IrisGribTest):
         # Rejects PDTs other than the ones tested above.
         self.section['productDefinitionTemplateNumber'] = 101
         msg = "can't get statistical method for unsupported pdt : 4.101"
-        with self.assertRaisesRegexp(ValueError, msg):
+        with self.assertRaisesRegex(ValueError, msg):
             statistical_cell_method(self.section)
 
 

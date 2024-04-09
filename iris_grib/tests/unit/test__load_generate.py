@@ -1,33 +1,15 @@
-# (C) British Crown Copyright 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """Unit tests for the `iris_grib._load_generate` function."""
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
-import iris
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import Loader
 
-import iris_grib
 from iris_grib import GribWrapper
 from iris_grib import _load_generate
 from iris_grib.message import GribMessage
@@ -72,7 +54,7 @@ class Test(tests.IrisGribTest):
         mfunc = 'iris_grib.GribMessage.messages_from_filename'
         emsg = 'GRIB edition 0 is not supported'
         with mock.patch(mfunc, return_value=[message]):
-            with self.assertRaisesRegexp(TranslationError, emsg):
+            with self.assertRaisesRegex(TranslationError, emsg):
                 next(_load_generate(self.fname))
 
 

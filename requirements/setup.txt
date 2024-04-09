@@ -1,0 +1,4 @@
+# Dependencies necessary to run setup.py of iris-grib
+# ---------------------------------------------------
+
+setuptools

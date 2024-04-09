@@ -1,33 +1,17 @@
-# (C) British Crown Copyright 2013 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """Unit tests for :func:`iris_grib._grib1_load_rules.grib1_convert`."""
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else
 import iris_grib.tests as tests
 
-import cf_units
-import gribapi
-import mock
+import eccodes
+from unittest import mock
 
-import iris
+from iris.aux_factory import HybridPressureFactory
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
@@ -40,7 +24,7 @@ class TestBadEdition(tests.IrisGribTest):
     def test(self):
         message = mock.Mock(edition=2)
         emsg = 'GRIB edition 2 is not supported'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             grib1_convert(message)
 
 
@@ -73,77 +57,105 @@ class TestBoundedTime(TestField):
                              expected_points=[100],
                              expected_bounds=[[80, 120]])
 
+    def assert_bounded_message_3hours(self, **kwargs):
+        attributes = {'productDefinitionTemplateNumber': 0,
+                      'edition': 1, '_forecastTime': 252,
+                      '_forecastTimeUnit': '3 hours',
+                      'phenomenon_bounds': lambda u: (252, 258),
+                      '_phenomenonDateTime': -1,
+                      'table2Version': 9999,
+                      '_originatingCentre': 'xxx',
+                      }
+        attributes.update(kwargs)
+        message = mock.Mock(**attributes)
+        self._test_for_coord(message, grib1_convert, self.is_forecast_period,
+                             expected_points=[255],
+                             expected_bounds=[[252, 258]])
+        self._test_for_coord(message, grib1_convert, self.is_time,
+                             expected_points=[255],
+                             expected_bounds=[[252, 258]])
+
     def test_time_range_indicator_2(self):
         self.assert_bounded_message(timeRangeIndicator=2)
+        self.assert_bounded_message_3hours(timeRangeIndicator=2)
 
     def test_time_range_indicator_3(self):
         self.assert_bounded_message(timeRangeIndicator=3)
+        self.assert_bounded_message_3hours(timeRangeIndicator=3)
 
     def test_time_range_indicator_4(self):
         self.assert_bounded_message(timeRangeIndicator=4)
+        self.assert_bounded_message_3hours(timeRangeIndicator=4)
 
     def test_time_range_indicator_5(self):
         self.assert_bounded_message(timeRangeIndicator=5)
+        self.assert_bounded_message_3hours(timeRangeIndicator=5)
 
     def test_time_range_indicator_51(self):
         self.assert_bounded_message(timeRangeIndicator=51)
+        self.assert_bounded_message_3hours(timeRangeIndicator=51)
 
     def test_time_range_indicator_113(self):
         self.assert_bounded_message(timeRangeIndicator=113)
+        self.assert_bounded_message_3hours(timeRangeIndicator=113)
 
     def test_time_range_indicator_114(self):
         self.assert_bounded_message(timeRangeIndicator=114)
+        self.assert_bounded_message_3hours(timeRangeIndicator=114)
 
     def test_time_range_indicator_115(self):
         self.assert_bounded_message(timeRangeIndicator=115)
+        self.assert_bounded_message_3hours(timeRangeIndicator=115)
 
     def test_time_range_indicator_116(self):
         self.assert_bounded_message(timeRangeIndicator=116)
+        self.assert_bounded_message_3hours(timeRangeIndicator=116)
 
     def test_time_range_indicator_117(self):
         self.assert_bounded_message(timeRangeIndicator=117)
+        self.assert_bounded_message_3hours(timeRangeIndicator=117)
 
     def test_time_range_indicator_118(self):
         self.assert_bounded_message(timeRangeIndicator=118)
+        self.assert_bounded_message_3hours(timeRangeIndicator=118)
 
     def test_time_range_indicator_123(self):
         self.assert_bounded_message(timeRangeIndicator=123)
+        self.assert_bounded_message_3hours(timeRangeIndicator=123)
 
     def test_time_range_indicator_124(self):
         self.assert_bounded_message(timeRangeIndicator=124)
+        self.assert_bounded_message_3hours(timeRangeIndicator=124)
 
     def test_time_range_indicator_125(self):
         self.assert_bounded_message(timeRangeIndicator=125)
+        self.assert_bounded_message_3hours(timeRangeIndicator=125)
 
 
 class Test_GribLevels(tests.IrisTest):
     def test_grib1_hybrid_height(self):
-        gm = gribapi.grib_new_from_samples('regular_gg_ml_grib1')
+        gm = eccodes.codes_grib_new_from_samples('regular_gg_ml_grib1')
         gw = GribWrapper(gm)
         results = grib1_convert(gw)
 
         factory, = results[0]
-        self.assertEqual(factory.factory_class,
-                         iris.aux_factory.HybridPressureFactory)
+        self.assertEqual(factory.factory_class, HybridPressureFactory)
         delta, sigma, ref = factory.args
         self.assertEqual(delta, {'long_name': 'level_pressure'})
         self.assertEqual(sigma, {'long_name': 'sigma'})
         self.assertEqual(ref, Reference(name='surface_pressure'))
 
-        ml_ref = iris.coords.CoordDefn('model_level_number', None, None,
-                                       cf_units.Unit('1'),
-                                       {'positive': 'up'}, None)
-        lp_ref = iris.coords.CoordDefn(None, 'level_pressure', None,
-                                       cf_units.Unit('Pa'),
-                                       {}, None)
-        s_ref = iris.coords.CoordDefn(None, 'sigma', None,
-                                      cf_units.Unit('1'),
-                                      {}, None)
-
-        aux_coord_defns = [coord._as_defn() for coord, dim in results[8]]
-        self.assertIn(ml_ref, aux_coord_defns)
-        self.assertIn(lp_ref, aux_coord_defns)
-        self.assertIn(s_ref, aux_coord_defns)
+        coords_and_dims = results[8]
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'model_level_number']
+        self.assertEqual(coord.units, '1')
+        self.assertEqual(coord.attributes['positive'], 'up')
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'level_pressure']
+        self.assertEqual(coord.units, 'Pa')
+        coord, = [co for co, _ in coords_and_dims
+                  if co.name() == 'sigma']
+        self.assertEqual(coord.units, '1')
 
 
 if __name__ == "__main__":

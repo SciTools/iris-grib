@@ -1,19 +1,7 @@
-# (C) British Crown Copyright 2010 - 2019, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Grib save implementation.
 
@@ -22,22 +10,20 @@ It is invoked from :meth:`iris_grib.save_grib2`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 import warnings
 
 import cf_units
-import gribapi
+import eccodes
+from eccodes import CODES_MISSING_LONG as GRIB_MISSING_LONG
 import numpy as np
 import numpy.ma as ma
-import cartopy.crs as ccrs
 
 import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
-                                TransverseMercator, Stereographic,
-                                LambertConformal)
+                                TransverseMercator, LambertConformal,
+                                LambertAzimuthalEqualArea,
+                                TransverseMercator, Stereographic)
 from iris.exceptions import TranslationError
 
 
@@ -45,6 +31,7 @@ from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
                             _SPATIAL_PROCESSING_TYPES)
+from .grib_phenom_translation import GRIBCode
 from iris.util import is_regular, regular_step
 
 
@@ -70,7 +57,7 @@ def fixup_float32_as_int32(value):
         # Convert from two's-complement to sign-and-magnitude.
         # NB. Because of the silly representation of negative
         # integers in GRIB2, there is no value we can pass to
-        # grib_set that will result in the bit pattern 0x80000000.
+        # codes_set that will result in the bit pattern 0x80000000.
         # But since that bit pattern corresponds to a floating
         # point value of negative-zero, we can safely treat it as
         # positive-zero instead.
@@ -107,10 +94,10 @@ def ensure_set_int32_value(grib, key, value):
 
     """
     try:
-        gribapi.grib_set(grib, key, value)
-    except gribapi.GribInternalError:
+        eccodes.codes_set(grib, key, value)
+    except eccodes.CodesInternalError:
         value = fixup_int32_as_uint32(value)
-        gribapi.grib_set(grib, key, value)
+        eccodes.codes_set(grib, key, value)
 
 
 ###############################################################################
@@ -135,8 +122,8 @@ _DEFAULT_DEGREES_UNITS = 1.0e-6
 
 def centre(cube, grib):
     # TODO: read centre from cube
-    gribapi.grib_set_long(grib, "centre", 74)  # UKMO
-    gribapi.grib_set_long(grib, "subCentre", 0)  # exeter is not in the spec
+    eccodes.codes_set_long(grib, "centre", 74)  # UKMO
+    eccodes.codes_set_long(grib, "subCentre", 0)  # exeter is not in the spec
 
 
 def reference_time(cube, grib):
@@ -152,10 +139,10 @@ def reference_time(cube, grib):
     else:
         rt, rt_meaning, _, _ = _missing_forecast_period(cube)
 
-    gribapi.grib_set_long(grib, "significanceOfReferenceTime", rt_meaning)
-    gribapi.grib_set_long(
+    eccodes.codes_set_long(grib, "significanceOfReferenceTime", rt_meaning)
+    eccodes.codes_set_long(
         grib, "dataDate", "%04d%02d%02d" % (rt.year, rt.month, rt.day))
-    gribapi.grib_set_long(
+    eccodes.codes_set_long(
         grib, "dataTime", "%02d%02d" % (rt.hour, rt.minute))
 
     # TODO: Set the calendar, when we find out what happened to the proposal!
@@ -169,7 +156,7 @@ def identification(cube, grib):
 
     # operational product, operational test, research product, etc
     # (missing for now)
-    gribapi.grib_set_long(grib, "productionStatusOfProcessedData", 255)
+    eccodes.codes_set_long(grib, "productionStatusOfProcessedData", 255)
 
     # Code table 1.4
     # analysis, forecast, processed satellite, processed radar,
@@ -177,11 +164,11 @@ def identification(cube, grib):
         # assume realization will always have 1 and only 1 point
         # as cubes saving to GRIB2 a 2D horizontal slices
         if cube.coord('realization').points[0] != 0:
-            gribapi.grib_set_long(grib, "typeOfProcessedData", 4)
+            eccodes.codes_set_long(grib, "typeOfProcessedData", 4)
         else:
-            gribapi.grib_set_long(grib, "typeOfProcessedData", 3)
+            eccodes.codes_set_long(grib, "typeOfProcessedData", 3)
     else:
-        gribapi.grib_set_long(grib, "typeOfProcessedData", 2)
+        eccodes.codes_set_long(grib, "typeOfProcessedData", 2)
 
 
 ###############################################################################
@@ -195,13 +182,16 @@ def shape_of_the_earth(cube, grib):
     # assume latlon
     cs = cube.coord(dimensions=[0]).coord_system
 
-    # Initially set shape_of_earth keys to missing (255 for byte, -1 for long).
-    gribapi.grib_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfRadiusOfSphericalEarth", -1)
-    gribapi.grib_set_long(grib, "scaleFactorOfEarthMajorAxis", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis", -1)
-    gribapi.grib_set_long(grib, "scaleFactorOfEarthMinorAxis", 255)
-    gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis", -1)
+    # Initially set shape_of_earth keys to missing (255 for byte).
+    eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 255)
+    eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
+                           GRIB_MISSING_LONG)
+    eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 255)
+    eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis",
+                           GRIB_MISSING_LONG)
+    eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 255)
+    eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis",
+                           GRIB_MISSING_LONG)
 
     if isinstance(cs, GeogCS):
         ellipsoid = cs
@@ -214,28 +204,28 @@ def shape_of_the_earth(cube, grib):
 
     # Spherical earth.
     if ellipsoid.inverse_flattening == 0.0:
-        gribapi.grib_set_long(grib, "shapeOfTheEarth", 1)
-        gribapi.grib_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
-        gribapi.grib_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
-                              ellipsoid.semi_major_axis)
-        gribapi.grib_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
-        gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
-        gribapi.grib_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
-        gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis", 0)
+        eccodes.codes_set_long(grib, "shapeOfTheEarth", 1)
+        eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
+        eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
+                               ellipsoid.semi_major_axis)
+        eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
+        eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
+        eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
+        eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis", 0)
     # Oblate spheroid earth.
     else:
-        gribapi.grib_set_long(grib, "shapeOfTheEarth", 7)
-        gribapi.grib_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
-        gribapi.grib_set_long(grib, "scaledValueOfEarthMajorAxis",
-                              ellipsoid.semi_major_axis)
-        gribapi.grib_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
-        gribapi.grib_set_long(grib, "scaledValueOfEarthMinorAxis",
-                              ellipsoid.semi_minor_axis)
+        eccodes.codes_set_long(grib, "shapeOfTheEarth", 7)
+        eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
+        eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis",
+                               ellipsoid.semi_major_axis)
+        eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
+        eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis",
+                               ellipsoid.semi_minor_axis)
 
 
 def grid_dims(x_coord, y_coord, grib, x_str, y_str):
-    gribapi.grib_set_long(grib, x_str, x_coord.shape[0])
-    gribapi.grib_set_long(grib, y_str, y_coord.shape[0])
+    eccodes.codes_set_long(grib, x_str, x_coord.shape[0])
+    eccodes.codes_set_long(grib, y_str, y_coord.shape[0])
 
 
 def latlon_first_last(x_coord, y_coord, grib):
@@ -243,23 +233,23 @@ def latlon_first_last(x_coord, y_coord, grib):
         warnings.warn("Ignoring xy bounds")
 
 # XXX Pending #1125
-#    gribapi.grib_set_double(grib, "latitudeOfFirstGridPointInDegrees",
+#    eccodes.codes_set_double(grib, "latitudeOfFirstGridPointInDegrees",
 #                            float(y_coord.points[0]))
-#    gribapi.grib_set_double(grib, "latitudeOfLastGridPointInDegrees",
+#    eccodes.codes_set_double(grib, "latitudeOfLastGridPointInDegrees",
 #                            float(y_coord.points[-1]))
-#    gribapi.grib_set_double(grib, "longitudeOfFirstGridPointInDegrees",
+#    eccodes.codes_set_double(grib, "longitudeOfFirstGridPointInDegrees",
 #                            float(x_coord.points[0]))
-#    gribapi.grib_set_double(grib, "longitudeOfLastGridPointInDegrees",
+#    eccodes.codes_set_double(grib, "longitudeOfLastGridPointInDegrees",
 #                            float(x_coord.points[-1]))
 # WORKAROUND
-    gribapi.grib_set_long(grib, "latitudeOfFirstGridPoint",
-                          int(y_coord.points[0]*1000000))
-    gribapi.grib_set_long(grib, "latitudeOfLastGridPoint",
-                          int(y_coord.points[-1]*1000000))
-    gribapi.grib_set_long(grib, "longitudeOfFirstGridPoint",
-                          int((x_coord.points[0] % 360)*1000000))
-    gribapi.grib_set_long(grib, "longitudeOfLastGridPoint",
-                          int((x_coord.points[-1] % 360)*1000000))
+    eccodes.codes_set_long(grib, "latitudeOfFirstGridPoint",
+                           int(y_coord.points[0]*1000000))
+    eccodes.codes_set_long(grib, "latitudeOfLastGridPoint",
+                           int(y_coord.points[-1]*1000000))
+    eccodes.codes_set_long(grib, "longitudeOfFirstGridPoint",
+                           int((x_coord.points[0] % 360)*1000000))
+    eccodes.codes_set_long(grib, "longitudeOfLastGridPoint",
+                           int((x_coord.points[-1] % 360)*1000000))
 
 
 def dx_dy(x_coord, y_coord, grib):
@@ -269,24 +259,24 @@ def dx_dy(x_coord, y_coord, grib):
     # 1 * 10^6 * floating point value.
     # WMO Manual on Codes regulation 92.1.6
     if x_coord.units == 'degrees':
-        gribapi.grib_set(grib, "iDirectionIncrement",
-                         round(1e6 * float(abs(x_step))))
+        eccodes.codes_set(grib, "iDirectionIncrement",
+                          round(1e6 * float(abs(x_step))))
     else:
         raise ValueError('X coordinate must be in degrees, not {}'
                          '.'.format(x_coord.units))
     if y_coord.units == 'degrees':
-        gribapi.grib_set(grib, "jDirectionIncrement",
-                         round(1e6 * float(abs(y_step))))
+        eccodes.codes_set(grib, "jDirectionIncrement",
+                          round(1e6 * float(abs(y_step))))
     else:
         raise ValueError('Y coordinate must be in degrees, not {}'
                          '.'.format(y_coord.units))
 
 
 def scanning_mode_flags(x_coord, y_coord, grib):
-    gribapi.grib_set_long(grib, "iScansPositively",
-                          int(x_coord.points[1] - x_coord.points[0] > 0))
-    gribapi.grib_set_long(grib, "jScansPositively",
-                          int(y_coord.points[1] - y_coord.points[0] > 0))
+    eccodes.codes_set_long(grib, "iScansPositively",
+                           int(x_coord.points[1] - x_coord.points[0] > 0))
+    eccodes.codes_set_long(grib, "jScansPositively",
+                           int(y_coord.points[1] - y_coord.points[0] > 0))
 
 
 def horizontal_grid_common(cube, grib, xy=False):
@@ -317,7 +307,7 @@ def latlon_points_irregular(cube, grib):
     component_flags = 0
     if is_grid_wind:
         component_flags |= 2 ** _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT
-    gribapi.grib_set(grib, 'resolutionAndComponentFlags', component_flags)
+    eccodes.codes_set(grib, 'resolutionAndComponentFlags', component_flags)
 
     # Record the  X and Y coordinate values.
     # NOTE: there is currently a bug in the gribapi which means that the size
@@ -326,10 +316,10 @@ def latlon_points_irregular(cube, grib):
     # So, this only works at present if the x and y dimensions are **equal**.
     lon_values = x_coord.points / _DEFAULT_DEGREES_UNITS
     lat_values = y_coord.points / _DEFAULT_DEGREES_UNITS
-    gribapi.grib_set_array(grib, 'longitudes',
-                           np.array(np.round(lon_values), dtype=np.int64))
-    gribapi.grib_set_array(grib, 'latitudes',
-                           np.array(np.round(lat_values), dtype=np.int64))
+    eccodes.codes_set_array(grib, 'longitude',
+                            np.array(np.round(lon_values), dtype=np.int64))
+    eccodes.codes_set_array(grib, 'latitude',
+                            np.array(np.round(lat_values), dtype=np.int64))
 
 
 def rotated_pole(cube, grib):
@@ -341,18 +331,18 @@ def rotated_pole(cube, grib):
             'Grib save does not yet support Rotated-pole coordinates with '
             'a rotated prime meridian.')
 # XXX Pending #1125
-#    gribapi.grib_set_double(grib, "latitudeOfSouthernPoleInDegrees",
+#    eccodes.codes_set_double(grib, "latitudeOfSouthernPoleInDegrees",
 #                            float(cs.n_pole.latitude))
-#    gribapi.grib_set_double(grib, "longitudeOfSouthernPoleInDegrees",
+#    eccodes.codes_set_double(grib, "longitudeOfSouthernPoleInDegrees",
 #                            float(cs.n_pole.longitude))
-#    gribapi.grib_set_double(grib, "angleOfRotationInDegrees", 0)
+#    eccodes.codes_set_double(grib, "angleOfRotationInDegrees", 0)
 # WORKAROUND
     latitude = cs.grid_north_pole_latitude / _DEFAULT_DEGREES_UNITS
     longitude = (((cs.grid_north_pole_longitude + 180) % 360) /
                  _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, "latitudeOfSouthernPole", - int(round(latitude)))
-    gribapi.grib_set(grib, "longitudeOfSouthernPole", int(round(longitude)))
-    gribapi.grib_set(grib, "angleOfRotation", 0)
+    eccodes.codes_set(grib, "latitudeOfSouthernPole", - int(round(latitude)))
+    eccodes.codes_set(grib, "longitudeOfSouthernPole", int(round(longitude)))
+    eccodes.codes_set(grib, "angleOfRotation", 0)
 
 
 def points_in_unit(coord, unit):
@@ -380,7 +370,7 @@ def grid_definition_template_0(cube, grib):
 
     """
     # Constant resolution, aka 'regular' true lat-lon grid.
-    gribapi.grib_set_long(grib, "gridDefinitionTemplateNumber", 0)
+    eccodes.codes_set_long(grib, "gridDefinitionTemplateNumber", 0)
     horizontal_grid_common(cube, grib)
     latlon_points_regular(cube, grib)
 
@@ -396,7 +386,7 @@ def grid_definition_template_1(cube, grib):
 
     """
     # Constant resolution, aka 'regular' rotated lat-lon grid.
-    gribapi.grib_set_long(grib, "gridDefinitionTemplateNumber", 1)
+    eccodes.codes_set_long(grib, "gridDefinitionTemplateNumber", 1)
 
     # Record details of the rotated coordinate system.
     rotated_pole(cube, grib)
@@ -416,7 +406,7 @@ def grid_definition_template_4(cube, grib):
 
     """
     # XXX: will we need to set `Ni` and `Nj`?
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 4)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 4)
     horizontal_grid_common(cube, grib)
     latlon_points_irregular(cube, grib)
 
@@ -438,9 +428,9 @@ def grid_definition_template_5(cube, grib):
     # This is acceptable, as the subsequent call to 'horizontal_grid_common'
     # will set these to the correct horizontal dimensions
     # (by calling 'grid_dims').
-    gribapi.grib_set(grib, "Ni", 1)
-    gribapi.grib_set(grib, "Nj", 1)
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 5)
+    eccodes.codes_set(grib, "Ni", 1)
+    eccodes.codes_set(grib, "Nj", 1)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 5)
 
     # Record details of the rotated coordinate system.
     rotated_pole(cube, grib)
@@ -457,7 +447,7 @@ def grid_definition_template_10(cube, grib):
     Template 3.10 is used to represent a Mercator grid.
 
     """
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 10)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 10)
 
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
@@ -480,8 +470,8 @@ def grid_definition_template_10(cube, grib):
         msg = 'Irregular coordinates not supported for Mercator.'
         raise TranslationError(msg)
 
-    gribapi.grib_set(grib, 'Di', abs(x_step))
-    gribapi.grib_set(grib, 'Dj', abs(y_step))
+    eccodes.codes_set(grib, 'Di', abs(x_step))
+    eccodes.codes_set(grib, 'Dj', abs(y_step))
 
     horizontal_grid_common(cube, grib)
 
@@ -498,25 +488,25 @@ def grid_definition_template_10(cube, grib):
     first_x = first_x % 360
     last_x = last_x % 360
 
-    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "latitudeOfLastGridPoint",
-                     int(np.round(last_y / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "longitudeOfLastGridPoint",
-                     int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "latitudeOfLastGridPoint",
+                      int(np.round(last_y / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "longitudeOfLastGridPoint",
+                      int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
 
     # Check and raise a more intelligible error, if the Iris version is too old
     # to support the Mercator 'standard_parallel' property.
     confirm_extended_mercator_supported()
     # Encode the latitude at which the projection intersects the Earth.
-    gribapi.grib_set(grib, 'LaD',
-                     cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, 'LaD',
+                      cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
 
     # Encode resolution and component flags
-    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+    eccodes.codes_set(grib, 'resolutionAndComponentFlags',
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
 
 def grid_definition_template_12(cube, grib):
@@ -527,7 +517,7 @@ def grid_definition_template_12(cube, grib):
     Template 3.12 is used to represent a Transverse Mercator grid.
 
     """
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 12)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 12)
 
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
@@ -551,8 +541,8 @@ def grid_definition_template_12(cube, grib):
         msg = ('Irregular coordinates not supported for Transverse '
                'Mercator.')
         raise TranslationError(msg)
-    gribapi.grib_set(grib, 'Di', abs(x_step))
-    gribapi.grib_set(grib, 'Dj', abs(y_step))
+    eccodes.codes_set(grib, 'Di', abs(x_step))
+    eccodes.codes_set(grib, 'Dj', abs(y_step))
     horizontal_grid_common(cube, grib)
 
     # GRIBAPI expects unsigned ints in X1, X2, Y1, Y2 but it should accept
@@ -564,10 +554,14 @@ def grid_definition_template_12(cube, grib):
     ensure_set_int32_value(grib, 'X2', int(x_cm[-1]))
 
     # Lat and lon of reference point are measured in millionths of a degree.
-    gribapi.grib_set(grib, "latitudeOfReferencePoint",
-                     cs.latitude_of_projection_origin / _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, "longitudeOfReferencePoint",
-                     cs.longitude_of_central_meridian / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(
+        grib, "latitudeOfReferencePoint",
+        cs.latitude_of_projection_origin / _DEFAULT_DEGREES_UNITS
+    )
+    eccodes.codes_set(
+        grib, "longitudeOfReferencePoint",
+        cs.longitude_of_central_meridian / _DEFAULT_DEGREES_UNITS
+    )
 
     # Convert a value in metres into the closest integer number of
     # centimetres.
@@ -575,18 +569,18 @@ def grid_definition_template_12(cube, grib):
         return int(round(value * 100))
 
     # False easting and false northing are measured in units of (10^-2)m.
-    gribapi.grib_set(grib, 'XR', m_to_cm(cs.false_easting))
-    gribapi.grib_set(grib, 'YR', m_to_cm(cs.false_northing))
+    eccodes.codes_set(grib, 'XR', m_to_cm(cs.false_easting))
+    eccodes.codes_set(grib, 'YR', m_to_cm(cs.false_northing))
 
     # GRIBAPI expects a signed int for scaleFactorAtReferencePoint
     # but it should accept a float, so work around this.
     # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
-    key_type = gribapi.grib_get_native_type(grib,
-                                            "scaleFactorAtReferencePoint")
+    key_type = eccodes.codes_get_native_type(grib,
+                                             "scaleFactorAtReferencePoint")
     if key_type is not float:
         value = fixup_float32_as_int32(value)
-    gribapi.grib_set(grib, "scaleFactorAtReferencePoint", value)
+    eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
 
 
 def _perspective_projection_common(cube, grib):
@@ -596,6 +590,9 @@ def _perspective_projection_common(cube, grib):
     Conformal.
 
     """
+
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 30)
+
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
@@ -616,12 +613,12 @@ def _perspective_projection_common(cube, grib):
         cs_name = cs.grid_mapping_name.replace('_', ' ').title()
         msg = 'Irregular coordinates not supported for {!r}.'
         raise TranslationError(msg.format(cs_name))
-    gribapi.grib_set(grib, 'Dx', abs(x_step))
-    gribapi.grib_set(grib, 'Dy', abs(y_step))
+    eccodes.codes_set(grib, 'Dx', abs(x_step))
+    eccodes.codes_set(grib, 'Dy', abs(y_step))
 
     horizontal_grid_common(cube, grib, xy=True)
 
-    gribapi.grib_set(grib, 'resolutionAndComponentFlags',
+    eccodes.codes_set(grib, 'resolutionAndComponentFlags',
                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
     # Transform first point into geographic CS.
@@ -633,12 +630,12 @@ def _perspective_projection_common(cube, grib):
     first_x = first_x % 360
     central_lon = cs.central_lon % 360
 
-    gribapi.grib_set(grib, "latitudeOfFirstGridPoint",
+    eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "longitudeOfFirstGridPoint",
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
-    gribapi.grib_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
 
 
 def grid_definition_template_20(cube, grib):
@@ -649,7 +646,7 @@ def grid_definition_template_20(cube, grib):
     Template 3.20 is used to represent a Polar Stereographic grid.
 
     """
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 20)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 20)
 
     # Retrieve the cube coord system.
     cs = cube.coord(dimensions=[0]).coord_system
@@ -667,7 +664,7 @@ def grid_definition_template_20(cube, grib):
         emsg = ('Bipolar and symmetric polar stereo projections '
                 'are not supported.')
         raise ValueError(emsg)
-    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
+    eccodes.codes_set(grib, 'projectionCentreFlag', centre_flag)
 
 
 def grid_definition_template_30(cube, grib):
@@ -679,7 +676,7 @@ def grid_definition_template_30(cube, grib):
 
     """
 
-    gribapi.grib_set(grib, "gridDefinitionTemplateNumber", 30)
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 30)
 
     # Retrieve the cube coord system.
     cs = cube.coord(dimensions=[0]).coord_system
@@ -689,15 +686,81 @@ def grid_definition_template_30(cube, grib):
     # Which pole are the parallels closest to? That is the direction
     # that the cone converges.
     latin1, latin2 = cs.secant_latitudes
-    gribapi.grib_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
-    gribapi.grib_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
 
     poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
     centre_flag = 0x0 if poliest_secant > 0 else 0x1
-    gribapi.grib_set(grib, 'projectionCentreFlag', centre_flag)
+    eccodes.codes_set(grib, 'projectionCentreFlag', centre_flag)
 
-    gribapi.grib_set(grib, "latitudeOfSouthernPole", 0)
-    gribapi.grib_set(grib, "longitudeOfSouthernPole", 0)
+    eccodes.codes_set(grib, "latitudeOfSouthernPole", 0)
+    eccodes.codes_set(grib, "longitudeOfSouthernPole", 0)
+
+
+def grid_definition_template_140(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.140.
+
+    Template 3.140 is used to represent a Lambert Azimuthual Equal Area grid.
+
+    """
+
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 140)
+
+    # Retrieve some information from the cube.
+    y_coord = cube.coord(dimensions=[0])
+    x_coord = cube.coord(dimensions=[1])
+    cs = y_coord.coord_system
+
+    # Normalise the coordinate values to millimetres - the resolution
+    # used in the GRIB message.
+    y_mm = points_in_unit(y_coord, 'mm')
+    x_mm = points_in_unit(x_coord, 'mm')
+
+    # Encode the horizontal points.
+
+    # NB. Since we're already in millimetres, our tolerance for
+    # discrepancy in the differences is 1.
+    try:
+        x_step = step(x_mm, atol=1)
+        y_step = step(y_mm, atol=1)
+    except ValueError:
+        msg = ('Irregular coordinates not supported for Lambert '
+               'Azimuthal Equal Area.')
+        raise TranslationError(msg)
+    eccodes.codes_set(grib, 'Dx', abs(x_step))
+    eccodes.codes_set(grib, 'Dy', abs(y_step))
+
+    horizontal_grid_common(cube, grib, xy=True)
+
+    # Transform first point into geographic CS
+    geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
+    first_x, first_y = geog.as_cartopy_crs().transform_point(
+        x_coord.points[0],
+        y_coord.points[0],
+        cs.as_cartopy_crs())
+    first_x = first_x % 360
+    central_lon = cs.longitude_of_projection_origin % 360
+    central_lat = cs.latitude_of_projection_origin
+
+    eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+    eccodes.codes_set(grib, 'standardParallelInMicrodegrees',
+                      central_lat / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, 'centralLongitudeInMicrodegrees',
+                      central_lon / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, 'resolutionAndComponentFlags',
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+    if (not (np.isclose(cs.false_easting, 0.0, atol=1e-6)) or
+            not (np.isclose(cs.false_northing, 0.0, atol=1e-6))):
+        msg = ('non zero false easting ({:.2f}) or '
+               'non zero false northing ({:.2f})'
+               '; unsupported by GRIB Template 3.140'
+               '').format(cs.false_easting, cs.false_northing)
+        raise TranslationError(msg)
 
 
 def grid_definition_section(cube, grib):
@@ -741,6 +804,10 @@ def grid_definition_section(cube, grib):
         # Lambert Conformal coordinate system (template 3.30).
         grid_definition_template_30(cube, grib)
 
+    elif isinstance(cs, LambertAzimuthalEqualArea):
+        # Lambert Azimuthal Equal Area coordinate system (template 3.140).
+        grid_definition_template_140(cube, grib)
+
     else:
         name = cs.grid_mapping_name.replace('_', ' ').title()
         emsg = 'Grib saving is not supported for coordinate system {!r}'
@@ -754,21 +821,44 @@ def grid_definition_section(cube, grib):
 ###############################################################################
 
 def set_discipline_and_parameter(cube, grib):
-    # NOTE: for now, can match by *either* standard_name or long_name.
-    # This allows workarounds for data with no identified standard_name.
-    grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
-                                              cube.long_name)
-    if grib2_info is not None:
-        gribapi.grib_set(grib, "discipline", grib2_info.discipline)
-        gribapi.grib_set(grib, "parameterCategory", grib2_info.category)
-        gribapi.grib_set(grib, "parameterNumber", grib2_info.number)
-    else:
-        gribapi.grib_set(grib, "discipline", 255)
-        gribapi.grib_set(grib, "parameterCategory", 255)
-        gribapi.grib_set(grib, "parameterNumber", 255)
+    # Default values for parameter identity keys = effectively "MISSING".
+    discipline, category, number = 255, 255, 255
+    identity_found = False
+
+    # First, see if we can find and interpret a 'GRIB_PARAM' attribute.
+    attr = cube.attributes.get('GRIB_PARAM', None)
+    if attr:
+        try:
+            # Convert to standard tuple-derived form.
+            gc = GRIBCode(attr)
+            if gc.edition == 2:
+                discipline = gc.discipline
+                category = gc.category
+                number = gc.number
+                identity_found = True
+        except Exception:
+            pass
+
+    if not identity_found:
+        # Else, translate a cube phenomenon, if possible.
+        # NOTE: for now, can match by *either* standard_name or long_name.
+        # This allows workarounds for data with no identified standard_name.
+        grib2_info = gptx.cf_phenom_to_grib2_info(cube.standard_name,
+                                                  cube.long_name)
+        if grib2_info is not None:
+            discipline = grib2_info.discipline
+            category = grib2_info.category
+            number = grib2_info.number
+            identity_found = True
+
+    if not identity_found:
         warnings.warn('Unable to determine Grib2 parameter code for cube.\n'
                       'discipline, parameterCategory and parameterNumber '
                       'have been set to "missing".')
+
+    eccodes.codes_set(grib, "discipline", discipline)
+    eccodes.codes_set(grib, "parameterCategory", category)
+    eccodes.codes_set(grib, "parameterNumber", number)
 
 
 def _non_missing_forecast_period(cube):
@@ -874,8 +964,8 @@ def set_forecast_time(cube, grib):
     else:
         _, _, fp, grib_time_code = _missing_forecast_period(cube)
 
-    gribapi.grib_set(grib, "indicatorOfUnitOfTimeRange", grib_time_code)
-    gribapi.grib_set(grib, "forecastTime", fp)
+    eccodes.codes_set(grib, "indicatorOfUnitOfTimeRange", grib_time_code)
+    eccodes.codes_set(grib, "forecastTime", fp)
 
 
 def set_fixed_surfaces(cube, grib, full3d_cube=None):
@@ -931,6 +1021,12 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         output_unit = cf_units.Unit("m")
         v_coord = cube.coord("height")
 
+    # depth
+    elif cube.coords("depth"):
+        grib_v_code = 106
+        output_unit = cf_units.Unit('m')
+        v_coord = cube.coord("depth")
+
     elif cube.coords("air_potential_temperature"):
         grib_v_code = 107
         output_unit = cf_units.Unit('K')
@@ -938,15 +1034,27 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
     # unknown / absent
     else:
-        # check for *ANY* height coords at all...
-        v_coords = cube.coords(axis='z')
-        if v_coords:
-            # There are vertical coordinate(s), but we don't understand them...
-            v_coords_str = ' ,'.join(["'{}'".format(c.name())
-                                      for c in v_coords])
-            raise TranslationError(
-                'The vertical-axis coordinate(s) ({}) '
-                'are not recognised or handled.'.format(v_coords_str))
+        fs_v_coords = [coord for coord in cube.coords() if
+                       'GRIB_fixed_surface_type' in coord.attributes]
+        if len(fs_v_coords) > 1:
+            fs_types = [c.attributes['GRIB_fixed_surface_type']
+                        for c in fs_v_coords]
+            raise ValueError("Multiple vertical-axis coordinates were found "
+                             f"of fixed surface type: {fs_types}")
+        elif len(fs_v_coords) == 1:
+            v_coord = fs_v_coords[0]
+            grib_v_code = v_coord.attributes['GRIB_fixed_surface_type']
+        else:
+            # check for *ANY* height coords at all...
+            v_coords = cube.coords(axis='z')
+            if v_coords:
+                # There are vertical coordinate(s), but we don't understand
+                # them...
+                v_coords_str = ' ,'.join(["'{}'".format(c.name())
+                                          for c in v_coords])
+                raise TranslationError(
+                    'The vertical-axis coordinate(s) ({}) '
+                    'are not recognised or handled.'.format(v_coords_str))
 
     # What did we find?
     if v_coord is None:
@@ -954,39 +1062,47 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         # NOTE: may *not* be truly correct, but seems to be common practice.
         # Still under investigation :
         # See https://github.com/SciTools/iris/issues/519
-        gribapi.grib_set(grib, "typeOfFirstFixedSurface", 1)
-        gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
-        gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", 0)
+        eccodes.codes_set(grib, "typeOfFirstFixedSurface", 1)
+        eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
+        eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface", 0)
         # Set secondary surface = 'missing'.
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", -1)
-        gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
+        eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
+        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
+        eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
     elif not v_coord.has_bounds():
         # No second surface
-        output_v = v_coord.units.convert(v_coord.points[0], output_unit)
+        output_v = v_coord.points[0]
+        if output_unit:
+            output_v = v_coord.units.convert(output_v, output_unit)
         if output_v - abs(output_v):
             warnings.warn("Vertical level encoding problem: scaling required.")
-        output_v = int(output_v)
+        output_v = int(round(output_v))
 
-        gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
-        gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface", output_v)
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", -1)
-        gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 255)
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface", -1)
+        eccodes.codes_set(grib, "typeOfFirstFixedSurface", grib_v_code)
+        eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
+        eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface", output_v)
+        eccodes.codes_set(grib, "typeOfSecondFixedSurface", 255)
+        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
+        eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
+                          GRIB_MISSING_LONG)
     else:
         # bounded : set lower+upper surfaces
-        output_v = v_coord.units.convert(v_coord.bounds[0], output_unit)
+        output_v = v_coord.bounds[0]
+        if output_unit:
+            output_v = v_coord.units.convert(output_v, output_unit)
         if output_v[0] - abs(output_v[0]) or output_v[1] - abs(output_v[1]):
             warnings.warn("Vertical level encoding problem: scaling required.")
-        gribapi.grib_set(grib, "typeOfFirstFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "typeOfSecondFixedSurface", grib_v_code)
-        gribapi.grib_set(grib, "scaleFactorOfFirstFixedSurface", 0)
-        gribapi.grib_set(grib, "scaleFactorOfSecondFixedSurface", 0)
-        gribapi.grib_set(grib, "scaledValueOfFirstFixedSurface",
-                         int(output_v[0]))
-        gribapi.grib_set(grib, "scaledValueOfSecondFixedSurface",
-                         int(output_v[1]))
+        eccodes.codes_set(grib, "typeOfFirstFixedSurface", grib_v_code)
+        eccodes.codes_set(grib, "typeOfSecondFixedSurface", grib_v_code)
+        eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
+        eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 0)
+        eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface",
+                          int(round(output_v[0])))
+        eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface",
+                          int(round(output_v[1])))
 
     if hybrid_factory is not None:
         # Need to record ALL the level coefficents in a 'PV' vector.
@@ -1008,10 +1124,9 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                    'maximum value = {}.')
             raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
-        # value after each set of n-levels coefficients.
-        # For now, we retain that encoding. This should not cause problems as
-        # values are indexed according to model-level-number,
-        # I.E. sigma, delta = PV[i], PV[NV/2+i]
+        # value *before* each set of n-levels coefficients.
+        # Note: values are indexed according to model_level_number,
+        # I.E. sigma, delta = PV[i], PV[NV/2+i] : where i=1..n_levels
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(model_levels,
@@ -1020,14 +1135,15 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             # Record all the level coefficients coming from the 'full' cube.
             # Note: if some model levels are missing, we must still have the
             # coeffs at the correct index according to the model_level_number
-            # value, i.e. at [level - 1] and [NV // 2 + level - 1].
+            # value, i.e. at [level] and [NV // 2 + level].
             # Thus, we can *not* paste the values in a block: each one needs to
             # go in the index corresponding to its 'model_level_number' value.
-            coeffs_array[n_lev - 1] = height
-            coeffs_array[n_coeffs + n_lev - 1] = sigma
+            coeffs_array[n_lev] = height
+            coeffs_array[n_coeffs + n_lev] = sigma
         pv_values = [float(el) for el in coeffs_array]
-        gribapi.grib_set(grib, "NV", n_coeffs * 2)
-        gribapi.grib_set_array(grib, "pv", pv_values)
+        # eccodes does not support writing numpy.int64, cast to python int
+        eccodes.codes_set(grib, "NV", int(n_coeffs * 2))
+        eccodes.codes_set_array(grib, "pv", pv_values)
 
 
 def set_time_range(time_coord, grib):
@@ -1045,8 +1161,8 @@ def set_time_range(time_coord, grib):
         raise ValueError(msg.format(time_coord.nbounds))
 
     # Set type to hours and convert period to this unit.
-    gribapi.grib_set(grib, "indicatorOfUnitForTimeRange",
-                     _TIME_RANGE_UNITS['hours'])
+    eccodes.codes_set(grib, "indicatorOfUnitForTimeRange",
+                      _TIME_RANGE_UNITS['hours'])
     hours_since_units = cf_units.Unit('hours since epoch',
                                       calendar=time_coord.units.calendar)
     start_hours, end_hours = time_coord.units.convert(time_coord.bounds[0],
@@ -1061,7 +1177,7 @@ def set_time_range(time_coord, grib):
         msg = 'Truncating floating point lengthOfTimeRange {} to ' \
               'integer value {}'
         warnings.warn(msg.format(time_range_in_hours, integer_hours))
-    gribapi.grib_set(grib, "lengthOfTimeRange", integer_hours)
+    eccodes.codes_set(grib, "lengthOfTimeRange", integer_hours)
 
 
 def set_time_increment(cell_method, grib):
@@ -1073,7 +1189,7 @@ def set_time_increment(cell_method, grib):
     # Type of time increment, e.g incrementing forecast period, incrementing
     # forecast reference time, etc. Set to missing, but we could use the
     # cell method coord to infer a value (see code table 4.11).
-    gribapi.grib_set(grib, "typeOfTimeIncrement", 255)
+    eccodes.codes_set(grib, "typeOfTimeIncrement", 255)
 
     # Default values for the time increment value and units type.
     inc = 0
@@ -1101,8 +1217,8 @@ def set_time_increment(cell_method, grib):
                               'integer value {}'.format(inc, integer_inc))
             inc = integer_inc
 
-    gribapi.grib_set(grib, "indicatorOfUnitForTimeIncrement", units_type)
-    gribapi.grib_set(grib, "timeIncrement", inc)
+    eccodes.codes_set(grib, "indicatorOfUnitForTimeIncrement", units_type)
+    eccodes.codes_set(grib, "timeIncrement", inc)
 
 
 def _cube_is_time_statistic(cube):
@@ -1205,11 +1321,11 @@ def set_ensemble(cube, grib):
             len(cube.coord('realization').points) == 1):
         raise ValueError("A cube 'realization' coordinate with one "
                          "point is required, but not present")
-    gribapi.grib_set(grib, "perturbationNumber",
-                     int(cube.coord('realization').points[0]))
+    eccodes.codes_set(grib, "perturbationNumber",
+                      int(cube.coord('realization').points[0]))
     # no encoding at present in iris-grib, set to missing
-    gribapi.grib_set(grib, "numberOfForecastsInEnsemble", 255)
-    gribapi.grib_set(grib, "typeOfEnsembleForecast", 255)
+    eccodes.codes_set(grib, "numberOfForecastsInEnsemble", 255)
+    eccodes.codes_set(grib, "typeOfEnsembleForecast", 255)
 
 
 def product_definition_template_common(cube, grib, full3d_cube=None):
@@ -1221,9 +1337,9 @@ def product_definition_template_common(cube, grib, full3d_cube=None):
     set_discipline_and_parameter(cube, grib)
 
     # Various missing values.
-    gribapi.grib_set(grib, "typeOfGeneratingProcess", 255)
-    gribapi.grib_set(grib, "backgroundProcess", 255)
-    gribapi.grib_set(grib, "generatingProcessIdentifier", 255)
+    eccodes.codes_set(grib, "typeOfGeneratingProcess", 255)
+    eccodes.codes_set(grib, "backgroundProcess", 255)
+    eccodes.codes_set(grib, "generatingProcessIdentifier", 255)
 
     # Generic time handling.
     set_forecast_time(cube, grib)
@@ -1241,7 +1357,7 @@ def product_definition_template_0(cube, grib, full3d_cube=None):
     a horizontal level at a point in time.
 
     """
-    gribapi.grib_set_long(grib, "productDefinitionTemplateNumber", 0)
+    eccodes.codes_set_long(grib, "productDefinitionTemplateNumber", 0)
     product_definition_template_common(cube, grib, full3d_cube)
 
 
@@ -1255,7 +1371,7 @@ def product_definition_template_1(cube, grib, full3d_cube=None):
     in time.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 1)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 1)
     product_definition_template_common(cube, grib, full3d_cube)
     set_ensemble(cube, grib)
 
@@ -1269,7 +1385,7 @@ def product_definition_template_8(cube, grib, full3d_cube=None):
     interval.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 8)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 8)
     _product_definition_template_8_10_and_11(cube, grib)
 
 
@@ -1282,13 +1398,13 @@ def product_definition_template_10(cube, grib, full3d_cube=None):
     interval.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 10)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 10)
     if not (cube.coords('percentile_over_time') and
             len(cube.coord('percentile_over_time').points) == 1):
         raise ValueError("A cube 'percentile_over_time' coordinate with one "
                          "point is required, but not present.")
-    gribapi.grib_set(grib, "percentileValue",
-                     int(cube.coord('percentile_over_time').points[0]))
+    eccodes.codes_set(grib, "percentileValue",
+                      int(cube.coord('percentile_over_time').points[0]))
     _product_definition_template_8_10_and_11(cube, grib)
 
 
@@ -1301,7 +1417,7 @@ def product_definition_template_11(cube, grib, full3d_cube=None):
     interval for an ensemble member.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 11)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 11)
     set_ensemble(cube, grib)
     _product_definition_template_8_10_and_11(cube, grib)
 
@@ -1334,18 +1450,18 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
 
     # Set the associated keys for the end of the interval (octets 35-41
     # in section 4).
-    gribapi.grib_set(grib, "yearOfEndOfOverallTimeInterval", end.year)
-    gribapi.grib_set(grib, "monthOfEndOfOverallTimeInterval", end.month)
-    gribapi.grib_set(grib, "dayOfEndOfOverallTimeInterval", end.day)
-    gribapi.grib_set(grib, "hourOfEndOfOverallTimeInterval", end.hour)
-    gribapi.grib_set(grib, "minuteOfEndOfOverallTimeInterval", end.minute)
-    gribapi.grib_set(grib, "secondOfEndOfOverallTimeInterval", end.second)
+    eccodes.codes_set(grib, "yearOfEndOfOverallTimeInterval", end.year)
+    eccodes.codes_set(grib, "monthOfEndOfOverallTimeInterval", end.month)
+    eccodes.codes_set(grib, "dayOfEndOfOverallTimeInterval", end.day)
+    eccodes.codes_set(grib, "hourOfEndOfOverallTimeInterval", end.hour)
+    eccodes.codes_set(grib, "minuteOfEndOfOverallTimeInterval", end.minute)
+    eccodes.codes_set(grib, "secondOfEndOfOverallTimeInterval", end.second)
 
     # Only one time range specification. If there were a series of aggregations
     # (e.g. the mean of an accumulation) one might set this to a higher value,
     # but we currently only handle a single time related cell method.
-    gribapi.grib_set(grib, "numberOfTimeRange", 1)
-    gribapi.grib_set(grib, "numberOfMissingInStatisticalProcess", 0)
+    eccodes.codes_set(grib, "numberOfTimeRange", 1)
+    eccodes.codes_set(grib, "numberOfMissingInStatisticalProcess", 0)
 
     # Period over which statistical processing is performed.
     set_time_range(time_coord, grib)
@@ -1371,7 +1487,7 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
 
         # Type of statistical process (see code table 4.10)
         statistic_type = _STATISTIC_TYPE_NAMES.get(cell_method.method, 255)
-        gribapi.grib_set(grib, "typeOfStatisticalProcessing", statistic_type)
+        eccodes.codes_set(grib, "typeOfStatisticalProcessing", statistic_type)
 
         # Time increment i.e. interval of cell method (if any)
         set_time_increment(cell_method, grib)
@@ -1413,13 +1529,13 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
                              "as a spatial statistical process.")
 
     # Set GRIB messages
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 15)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 15)
     product_definition_template_common(cube, grib, full3d_cube)
-    gribapi.grib_set(grib, "spatialProcessing", spatial_processing)
+    eccodes.codes_set(grib, "spatialProcessing", spatial_processing)
     if number_of_points is not None:
-        gribapi.grib_set(grib, "numberOfPointsUsed", number_of_points)
+        eccodes.codes_set(grib, "numberOfPointsUsed", number_of_points)
     if statistical_process is not None:
-        gribapi.grib_set(grib, "statisticalProcess", statistical_process)
+        eccodes.codes_set(grib, "statisticalProcess", statistical_process)
 
 
 def product_definition_template_40(cube, grib, full3d_cube=None):
@@ -1432,10 +1548,10 @@ def product_definition_template_40(cube, grib, full3d_cube=None):
     constituents.
 
     """
-    gribapi.grib_set(grib, "productDefinitionTemplateNumber", 40)
+    eccodes.codes_set(grib, "productDefinitionTemplateNumber", 40)
     product_definition_template_common(cube, grib)
     constituent_type = cube.attributes['WMO_constituent_type']
-    gribapi.grib_set(grib, "constituentType", constituent_type)
+    eccodes.codes_set(grib, "constituentType", constituent_type)
 
 
 def product_definition_section(cube, grib, full3d_cube=None):
@@ -1518,15 +1634,16 @@ def data_section(cube, grib):
 
     if fill_value is None:
         # Disable missing values in the grib message.
-        gribapi.grib_set(grib, "bitmapPresent", 0)
+        eccodes.codes_set(grib, "bitmapPresent", 0)
     else:
         # Enable missing values in the grib message.
-        gribapi.grib_set(grib, "bitmapPresent", 1)
-        gribapi.grib_set_double(grib, "missingValue", fill_value)
-    gribapi.grib_set_double_array(grib, "values", data.flatten())
+        eccodes.codes_set(grib, "bitmapPresent", 1)
+        eccodes.codes_set_double(grib, "missingValue", fill_value)
+
+    eccodes.codes_set_double_array(grib, "values", data.flatten())
 
     # todo: check packing accuracy?
-#    print("packingError", gribapi.getb_get_double(grib, "packingError"))
+#    print("packingError", eccodes.get_get_double(grib, "packingError"))
 
 
 ###############################################################################
@@ -1558,7 +1675,7 @@ def run(slice2d_cube, grib, full3d_cube):
 
     * grib_message_id:
         ID of a grib message in memory. This is typically the return value of
-        :func:`gribapi.grib_new_from_samples`.
+        :func:`eccodes.codes_grib_new_from_samples`.
 
     * full3d_cube:
         A :class:`iris.slice2d_cube.Cube` representing the entire save cube.

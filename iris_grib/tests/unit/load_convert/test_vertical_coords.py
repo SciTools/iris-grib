@@ -1,33 +1,18 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Test function :func:`iris_grib._load_convert.vertical_coords`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 from copy import deepcopy
-import mock
+from unittest import mock
 
 from iris.coords import DimCoord
 from iris.exceptions import TranslationError
@@ -67,7 +52,19 @@ class Test(tests.IrisGribTest):
         vertical_coords(section, metadata)
         self.assertEqual(metadata, self.metadata)
 
-    def _check(self, value, msg):
+    def test_fixed_surface_type_1(self):
+        metadata = deepcopy(self.metadata)
+        section = {'NV': 0,
+                   'typeOfFirstFixedSurface': 1,
+                   'scaledValueOfFirstFixedSurface': 0,
+                   'scaleFactorOfFirstFixedSurface': 0,
+                   'typeOfSecondFixedSurface': 255}
+        vertical_coords(section, metadata)
+        # No metadata change, as surfaceType=1 translates to "no vertical
+        # coord" without error or warning.
+        self.assertEqual(metadata, self.metadata)
+
+    def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
         this = 'iris_grib._load_convert.options'
         with mock.patch('warnings.warn') as warn:
             with mock.patch(this) as options:
@@ -76,22 +73,48 @@ class Test(tests.IrisGribTest):
                     metadata = deepcopy(self.metadata)
                     section = {'NV': 0,
                                'typeOfFirstFixedSurface': 0,
-                               'scaledValueOfFirstFixedSurface': value}
+                               'scaledValueOfFirstFixedSurface': MISSING_LEVEL}
                     # The call being tested.
                     vertical_coords(section, metadata)
                     self.assertEqual(metadata, self.metadata)
                     if request_warning:
                         self.assertEqual(len(warn.mock_calls), 1)
                         args, _ = warn.call_args
-                        self.assertIn(msg, args[0])
+                        self.assertIn('surface with missing scaled value',
+                                      args[0])
                     else:
                         self.assertEqual(len(warn.mock_calls), 0)
 
-    def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
-        self._check(MISSING_LEVEL, 'surface with missing scaled value')
+    def test_unknown_first_fixed_surface(self):
+        metadata = deepcopy(self.metadata)
+        expected = deepcopy(self.metadata)
+        coord = DimCoord(600.0, attributes={'GRIB_fixed_surface_type': 106})
+        expected['aux_coords_and_dims'].append((coord, None))
 
-    def test_unknown_first_fixed_surface_with_scaled_value(self):
-        self._check(0, 'surface with scaled value')
+        section = {'NV': 0,
+                   'typeOfFirstFixedSurface': 106,
+                   'scaledValueOfFirstFixedSurface': 600,
+                   'scaleFactorOfFirstFixedSurface': 0,
+                   'typeOfSecondFixedSurface': MISSING_SURFACE}
+        vertical_coords(section, metadata)
+        self.assertEqual(metadata, expected)
+
+    def test_unknown_first_fixed_surface_with_second_fixed_surface(self):
+        metadata = deepcopy(self.metadata)
+        expected = deepcopy(self.metadata)
+        coord = DimCoord(9000.0, bounds=[18000, 0],
+                         attributes={'GRIB_fixed_surface_type': 108})
+        expected['aux_coords_and_dims'].append((coord, None))
+
+        section = {'NV': 0,
+                   'typeOfFirstFixedSurface': 108,
+                   'scaledValueOfFirstFixedSurface': 18000,
+                   'scaleFactorOfFirstFixedSurface': 0,
+                   'typeOfSecondFixedSurface': 108,
+                   'scaledValueOfSecondFixedSurface': 0,
+                   'scaleFactorOfSecondFixedSurface': 0}
+        vertical_coords(section, metadata)
+        self.assertEqual(metadata, expected)
 
     def test_pressure_with_no_second_fixed_surface(self):
         metadata = deepcopy(self.metadata)
@@ -122,22 +145,22 @@ class Test(tests.IrisGribTest):
     def test_different_fixed_surfaces(self):
         section = {'NV': 0,
                    'typeOfFirstFixedSurface': 100,
-                   'scaledValueOfFirstFixedSurface': None,
-                   'scaleFactorOfFirstFixedSurface': None,
+                   'scaledValueOfFirstFixedSurface': 10,
+                   'scaleFactorOfFirstFixedSurface': 1,
                    'typeOfSecondFixedSurface': 0}
         emsg = 'different types of first and second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_same_fixed_surfaces_missing_second_scaled_value(self):
         section = {'NV': 0,
                    'typeOfFirstFixedSurface': 100,
-                   'scaledValueOfFirstFixedSurface': None,
-                   'scaleFactorOfFirstFixedSurface': None,
+                   'scaledValueOfFirstFixedSurface': 10,
+                   'scaleFactorOfFirstFixedSurface': 1,
                    'typeOfSecondFixedSurface': 100,
                    'scaledValueOfSecondFixedSurface': MISSING_LEVEL}
         emsg = 'missing scaled value of second fixed surface'
-        with self.assertRaisesRegexp(TranslationError, emsg):
+        with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
     def test_pressure_with_second_fixed_surface(self):

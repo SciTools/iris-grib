@@ -1,39 +1,29 @@
 iris-grib
 =========
 
-|Travis|_ |Coveralls|_
+|CirrusCI|_ |Coveralls|_ |conda-forge|_ |pypi|_ |License|_ |Commits|_ |Contributors|_
 
 GRIB interface for `Iris <https://github.com/SciTools/iris>`_.
 
-Code
-----
-iris-grib is licenced under the GNU Lesser General Public License (LGPLv3).
+iris-grib is licensed under the BSD-3 license.
 
-The full text of the licence can be found in the COPYING and COPYING.LESSER
-files.
+.. |CirrusCI| image:: https://api.cirrus-ci.com/github/SciTools/iris-grib.svg?branch=main
+.. _CirrusCI: https://cirrus-ci.com/github/SciTools/iris-grib
 
-Copyright and licence
----------------------
+.. |Coveralls| image:: https://coveralls.io/repos/github/SciTools/iris-grib/badge.svg?branch=main
+.. _Coveralls: https://coveralls.io/github/SciTools/iris-grib?branch=main
 
-\(C) British Crown Copyright 2010 - 2016, Met Office
+.. |conda-forge| image:: https://img.shields.io/conda/vn/conda-forge/iris-grib?color=orange&label=conda-forge&logo=conda-forge&logoColor=white
+.. _conda-forge: https://anaconda.org/conda-forge/iris-grib
 
-This file is part of iris-grib.
+.. |pypi| image:: https://img.shields.io/pypi/v/iris-grib?color=orange&label=pypi&logo=python&logoColor=white
+.. _pypi: https://pypi.org/project/iris-grib
 
-iris-grib is free software: you can redistribute it and/or modify it under
-the terms of the GNU Lesser General Public License as published by the
-Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+.. |License| image:: https://img.shields.io/badge/BSD-3?style=plastic&label=License
+.. _License: https://github.com/SciTools/iris-grib/blob/main/LICENSE
 
-iris-grib is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
+.. |Contributors| image:: https://img.shields.io/github/contributors/SciTools/iris-grib?style=plastic
+.. _Contributors: https://github.com/SciTools/iris-grib/graphs/contributors
 
-You should have received a copy of the GNU Lesser General Public License
-along with iris-grib.  If not, see `<http://www.gnu.org/licenses/>`_.
-
-.. |Travis| image:: https://travis-ci.org/SciTools/iris-grib.svg?branch=master
-.. _Travis: https://travis-ci.org/SciTools/iris-grib
-
-.. |Coveralls| image:: https://coveralls.io/repos/github/SciTools/iris-grib/badge.svg?branch=master
-.. _Coveralls: https://coveralls.io/github/SciTools/iris-grib?branch=master 
+.. |Commits| image:: https://img.shields.io/github/commits-since/SciTools/iris-grib/latest.svg?style=plastic
+.. _Commits: https://github.com/SciTools/iris-grib/commits/main

@@ -1,36 +1,22 @@
-# (C) British Crown Copyright 2014 - 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Module to support the loading and convertion of a GRIB2 message into
 cube metadata.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 from argparse import Namespace
-from collections import namedtuple, Iterable, OrderedDict
+from collections import namedtuple, OrderedDict
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 import math
 import warnings
 
 import cartopy.crs as ccrs
-from cf_units import CALENDAR_GREGORIAN, date2num, Unit
+from cf_units import CALENDAR_GREGORIAN, Unit
 import numpy as np
 import numpy.ma as ma
 
@@ -39,13 +25,13 @@ import iris.coord_systems as icoord_systems
 from iris.coords import AuxCoord, DimCoord, CellMethod
 from iris.exceptions import TranslationError
 from . import grib_phenom_translation as itranslation
+from .grib_phenom_translation import GRIBCode
 from iris.fileformats.rules import ConversionMetadata, Factory, Reference, \
     ReferenceTarget
 from iris.util import _is_circular
 
 from ._iris_mercator_support import confirm_extended_mercator_supported
 from ._grib1_load_rules import grib1_convert
-from .message import GribMessage
 
 
 # Restrict the names imported from this namespace.
@@ -104,6 +90,8 @@ _TIME_RANGE_UNITS = {
     12: '12 hours',
     13: 'seconds'
 }
+# Regulation 92.1.4
+_TIME_RANGE_MISSING = 2 ** 32 - 1
 
 # Reference Code Table 4.5.
 _FIXED_SURFACE = {
@@ -215,7 +203,7 @@ def unscale(value, factor):
     return result
 
 
-# Use ECCodes gribapi to recognise missing value
+# Use ECCodes to recognise missing value
 _MDI = None
 
 
@@ -303,7 +291,7 @@ def reference_time_coord(section):
     # Current GRIBAPI does not cover GRIB Section 1 - Octets 22-nn (optional)
     # which are part of GRIB spec v12.
     unit = Unit('hours since epoch', calendar=CALENDAR_GREGORIAN)
-    point = unit.date2num(dt)
+    point = float(unit.date2num(dt))
 
     # Reference Code Table 1.2.
     significanceOfReferenceTime = section['significanceOfReferenceTime']
@@ -498,6 +486,15 @@ def ellipsoid_geometry(section):
     return major, minor, radius
 
 
+def _calculate_increment(first_point, last_point, n_increments, mod=math.inf):
+    """
+    Calculates the directional increment from the difference between the grid
+    point values divided by the total number of increments. Required by
+    template 0 & 40 when no increment values are provided.
+    """
+    return (last_point - first_point) % mod / n_increments
+
+
 def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     """
     Translate templates representing regularly spaced latitude/longitude
@@ -533,8 +530,17 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resolution flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1,
+                                       360.0 / _GRID_ACCURACY_IN_DEGREES))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
@@ -544,7 +550,12 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     circular = _is_circular(x_points, 360.0)
 
     # Calculate latitude points.
-    y_inc = section['jDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    y_inc = (section['jDirectionIncrement']
+             if res_flags.j_increments_given
+             else _calculate_increment(section['latitudeOfFirstGridPoint'],
+                                       section['latitudeOfLastGridPoint'],
+                                       section['Nj'] - 1))
+    y_inc *= _GRID_ACCURACY_IN_DEGREES
     y_offset = section['latitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     y_direction = 1 if scan.j_positive else -1
     Nj = section['Nj']
@@ -830,24 +841,40 @@ def grid_definition_template_12(section, metadata):
     # precision, as opposed to using Di and Dj.
     # Check whether Di and Dj are as consistent as possible with that
     # interpretation - i.e. they are within 1cm.
-    def check_range(v1, v2, n, d):
-        min_last = v1 + (n - 1) * (d - 1)
-        max_last = v1 + (n - 1) * (d + 1)
-        if not (min_last < v2 < max_last):
-            raise TranslationError('Inconsistent grid definition')
-    check_range(x1, x2, section['Ni'], section['Di'])
-    check_range(y1, y2, section['Nj'], section['Dj'])
+    def check_range(v1, v2, n, d, axis_name):
+        small = min(v1, v2)
+        large = max(v1, v2)
+        min_last = small + (n - 1) * (d - 1)
+        max_last = small + (n - 1) * (d + 1)
+        if not (min_last < large < max_last):
+            message = (
+                f'File grid {axis_name} definition inconsistent: '
+                f'{v1} to {v2} in {n} steps is incompatible with step-size '
+                f'{d} .'
+            )
+            raise TranslationError(message)
+    check_range(x1, x2, section['Ni'], section['Di'], 'X')
+    check_range(y1, y2, section['Nj'], section['Dj'], 'Y')
+
+    # Further over-specification - the sequence of X1 & X2 is enough to
+    #  generate the sequence in the correct direction (also Y1 & Y2). All
+    #  scanningMode can do is add confusion; warn if there is inconsistency.
+    def validate_scanning(axis: str, stated: bool, encoded: bool):
+        def scan_str(scanning_bool):
+            return "positive" if scanning_bool else "negative"
+        if stated != encoded:
+            message = (
+                f"File grid {axis} definition inconsistent: "
+                f"scanningMode = {scan_str(stated)}, actual grid point "
+                f"direction is {scan_str(encoded)}."
+            )
+            warnings.warn(message)
+    scan = scanning_mode(section['scanningMode'])
+    validate_scanning("X", not scan.i_negative, x1 < x2)
+    validate_scanning("Y", scan.j_positive, y1 < y2)
 
     x_points = np.linspace(x1 * CM_TO_M, x2 * CM_TO_M, section['Ni'])
     y_points = np.linspace(y1 * CM_TO_M, y2 * CM_TO_M, section['Nj'])
-
-    # This has only been tested with +x/+y scanning, so raise an error
-    # for other permutations.
-    scan = scanning_mode(section['scanningMode'])
-    if scan.i_negative:
-        raise TranslationError('Unsupported -x scanning')
-    if not scan.j_positive:
-        raise TranslationError('Unsupported -y scanning')
 
     # Create the X and Y coordinates.
     y_coord = DimCoord(y_points, 'projection_y_coordinate', units='m',
@@ -920,10 +947,16 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
     mm_to_m = 1e-3
 
     if section['gridDefinitionTemplateNumber'] in _XYGRIDLENGTH_GDT_NUMBERS:
-        dx = section['Dx']
-        dy = section['Dy']
-        nx = section['Nx']
-        ny = section['Ny']
+        if section['gridDefinitionTemplateNumber'] == 140:
+            dx = section['xDirectionGridLengthInMillimetres']
+            dy = section['yDirectionGridLengthInMillimetres']
+            nx = section['numberOfPointsAlongXAxis']
+            ny = section['numberOfPointsAlongYAxis']
+        else:
+            dx = section['Dx']
+            dy = section['Dy']
+            nx = section['Nx']
+            ny = section['Ny']
     elif section['gridDefinitionTemplateNumber'] in _IJGRIDLENGTH_GDT_NUMBERS:
         dx = section['Di']
         dy = section['Dj']
@@ -1047,8 +1080,17 @@ def grid_definition_template_40_regular(section, metadata, cs):
     """
     scan = scanning_mode(section['scanningMode'])
 
+    # Set resolution flags
+    res_flags = resolution_flags(section['resolutionAndComponentFlags'])
+
     # Calculate longitude points.
-    x_inc = section['iDirectionIncrement'] * _GRID_ACCURACY_IN_DEGREES
+    x_inc = (section['iDirectionIncrement']
+             if res_flags.i_increments_given
+             else _calculate_increment(section['longitudeOfFirstGridPoint'],
+                                       section['longitudeOfLastGridPoint'],
+                                       section['Ni'] - 1,
+                                       360.0 / _GRID_ACCURACY_IN_DEGREES))
+    x_inc *= _GRID_ACCURACY_IN_DEGREES
     x_offset = section['longitudeOfFirstGridPoint'] * _GRID_ACCURACY_IN_DEGREES
     x_direction = -1 if scan.i_negative else 1
     Ni = section['Ni']
@@ -1174,10 +1216,6 @@ def grid_definition_template_90(section, metadata):
     geog_cs = ellipsoid(section['shapeOfTheEarth'], major, minor, radius)
     height_above_centre = geog_cs.semi_major_axis * section['Nr'] / 1e6
     height_above_ellipsoid = height_above_centre - geog_cs.semi_major_axis
-    cs = icoord_systems.VerticalPerspective(sub_satellite_lat,
-                                            sub_satellite_lon,
-                                            height_above_ellipsoid,
-                                            ellipsoid=geog_cs)
 
     # Figure out how large the Earth would appear in projection coodinates.
     # For both the apparent equatorial and polar diameters this is a
@@ -1201,17 +1239,14 @@ def grid_definition_template_90(section, metadata):
     # This can be simplified using: cos(psi) = a / height_above_centre
     half_apparent_equatorial_angle = math.asin(geog_cs.semi_major_axis /
                                                height_above_centre)
-    x_apparent_diameter = (2 * half_apparent_equatorial_angle *
-                           height_above_ellipsoid)
     parametric_angle = math.acos(geog_cs.semi_major_axis / height_above_centre)
     half_apparent_polar_angle = math.atan(geog_cs.semi_minor_axis /
                                           (height_above_centre *
                                            math.sin(parametric_angle)))
-    y_apparent_diameter = (2 * half_apparent_polar_angle *
-                           height_above_ellipsoid)
-
-    y_step = y_apparent_diameter / section['dy']
-    x_step = x_apparent_diameter / section['dx']
+    y_apparent_angular_diameter = 2 * half_apparent_polar_angle
+    x_apparent_angular_diameter = 2 * half_apparent_equatorial_angle
+    y_step = y_apparent_angular_diameter / section['dy']
+    x_step = x_apparent_angular_diameter / section['dx']
     y_start = y_step * (section['Yo'] - section['Yp'] / 1000)
     x_start = x_step * (section['Xo'] - section['Xp'] / 1000)
     y_points = y_start + np.arange(section['Ny']) * y_step
@@ -1227,10 +1262,20 @@ def grid_definition_template_90(section, metadata):
     if not scan.j_positive:
         raise TranslationError('Unsupported -y scanning')
 
+    # Make a coordinate system for the X and Y coordinates.
+    # Note: false_easting/northing are always just zero, as the calculation of
+    # x_points/y_points takes both Xp/Yp and Xo/Yo into account.
+    cs = icoord_systems.Geostationary(
+        latitude_of_projection_origin=sub_satellite_lat,
+        longitude_of_projection_origin=sub_satellite_lon,
+        perspective_point_height=height_above_ellipsoid,
+        sweep_angle_axis='y',
+        ellipsoid=geog_cs)
+
     # Create the X and Y coordinates.
-    y_coord = DimCoord(y_points, 'projection_y_coordinate', units='m',
+    y_coord = DimCoord(y_points, 'projection_y_coordinate', units='radians',
                        coord_system=cs)
-    x_coord = DimCoord(x_points, 'projection_x_coordinate', units='m',
+    x_coord = DimCoord(x_points, 'projection_x_coordinate', units='radians',
                        coord_system=cs)
 
     # Determine the lat/lon dimensions.
@@ -1239,6 +1284,42 @@ def grid_definition_template_90(section, metadata):
         y_dim, x_dim = 1, 0
 
     # Add the X and Y coordinates to the metadata dim coords.
+    metadata['dim_coords_and_dims'].append((y_coord, y_dim))
+    metadata['dim_coords_and_dims'].append((x_coord, x_dim))
+
+
+def grid_definition_template_140(section, metadata):
+    """
+    Translate template representing Lambert Azimuthal Equal Area.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 3 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+    """
+    # Define the coordinate system
+    major, minor, radius = ellipsoid_geometry(section)
+    cs = icoord_systems.LambertAzimuthalEqualArea(
+        section['standardParallelInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        section['centralLongitudeInMicrodegrees'] * _GRID_ACCURACY_IN_DEGREES,
+        0,
+        0,
+        ellipsoid(section['shapeOfTheEarth'], major, minor, radius))
+
+    x_coord, y_coord, scan = \
+        _calculate_proj_coords_from_grid_lengths(section, cs)
+
+    # Determine the order of the dimensions.
+    y_dim, x_dim = 0, 1
+    if scan.j_consecutive:
+        y_dim, x_dim = 1, 0
+
+    # Add the projection coordinates to the metadata dim coords.
     metadata['dim_coords_and_dims'].append((y_coord, y_dim))
     metadata['dim_coords_and_dims'].append((x_coord, x_dim))
 
@@ -1297,6 +1378,9 @@ def grid_definition_section(section, metadata):
     elif template == 90:
         # Process space view.
         grid_definition_template_90(section, metadata)
+    elif template == 140:
+        # Process Lambert Azimuthal Equal Area.
+        grid_definition_template_140(section, metadata)
     else:
         msg = 'Grid definition template [{}] is not supported'.format(template)
         raise TranslationError(msg)
@@ -1361,6 +1445,13 @@ def translate_phenomenon(metadata, discipline, parameterCategory,
             metadata['standard_name'] = None
             metadata['long_name'] = long_name
             metadata['units'] = Unit(1)
+
+    # Add a standard attribute recording the grib phenomenon identity.
+    metadata['attributes']['GRIB_PARAM'] = GRIBCode(
+        edition_or_string=2,
+        discipline=discipline,
+        category=parameterCategory,
+        number=parameterNumber)
 
     # Identify hybrid height and pressure reference fields.
     # Look for fields at surface level first.
@@ -1472,7 +1563,7 @@ def hybrid_factories(section, metadata):
             # Create the model level number scalar coordinate.
             scaledValue = section['scaledValueOfFirstFixedSurface']
             coord = DimCoord(scaledValue, standard_name='model_level_number',
-                             attributes=dict(positive='up'))
+                             units=1, attributes=dict(positive='up'))
             metadata['aux_coords_and_dims'].append((coord, None))
 
             if typeOfFirstFixedSurface == 118:
@@ -1492,15 +1583,18 @@ def hybrid_factories(section, metadata):
                                 {'long_name': 'sigma'},
                                 Reference('ref_surface_pressure')]
 
-            # Create the level pressure scalar coordinate.
+            # Create the level height/pressure scalar coordinate.
+            # scaledValue represents the level number, which is used to select
+            # the sigma and delta values as follows:
+            # sigma, delta = PV[i], PV[NV/2+i] : where i=1..level_number
             pv = section['pv']
-            offset = scaledValue - 1
+            offset = scaledValue
             coord = DimCoord(pv[offset], long_name=level_value_name,
                              units=level_value_units)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the sigma scalar coordinate.
-            offset = NV // 2 + scaledValue - 1
-            coord = AuxCoord(pv[offset], long_name='sigma')
+            offset = NV // 2 + scaledValue
+            coord = AuxCoord(pv[offset], long_name='sigma', units=1)
             metadata['aux_coords_and_dims'].append((coord, None))
             # Create the associated factory reference.
             factory = Factory(factory_class, factory_args)
@@ -1535,63 +1629,58 @@ def vertical_coords(section, metadata):
     else:
         # Generate vertical coordinate.
         typeOfFirstFixedSurface = section['typeOfFirstFixedSurface']
-        key = 'scaledValueOfFirstFixedSurface'
-        scaledValueOfFirstFixedSurface = section[key]
-        fixed_surface = _FIXED_SURFACE.get(typeOfFirstFixedSurface)
 
-        if fixed_surface is None:
-            if typeOfFirstFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
-                if scaledValueOfFirstFixedSurface == _MDI:
-                    if options.warn_on_unsupported:
-                        msg = 'Unable to translate type of first fixed ' \
-                            'surface with missing scaled value.'
-                        warnings.warn(msg)
-                else:
-                    if options.warn_on_unsupported:
-                        msg = 'Unable to translate type of first fixed ' \
-                            'surface with scaled value.'
-                        warnings.warn(msg)
-        else:
-            key = 'scaleFactorOfFirstFixedSurface'
-            scaleFactorOfFirstFixedSurface = section[key]
-            typeOfSecondFixedSurface = section['typeOfSecondFixedSurface']
-
-            if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
-                if typeOfFirstFixedSurface != typeOfSecondFixedSurface:
-                    msg = 'Product definition section 4 has different ' \
-                        'types of first and second fixed surface'
-                    raise TranslationError(msg)
-
-                key = 'scaledValueOfSecondFixedSurface'
-                scaledValueOfSecondFixedSurface = section[key]
-
-                if scaledValueOfSecondFixedSurface == _MDI:
-                    msg = 'Product definition section 4 has missing ' \
-                        'scaled value of second fixed surface'
-                    raise TranslationError(msg)
-                else:
-                    key = 'scaleFactorOfSecondFixedSurface'
-                    scaleFactorOfSecondFixedSurface = section[key]
-                    first = unscale(scaledValueOfFirstFixedSurface,
-                                    scaleFactorOfFirstFixedSurface)
-                    second = unscale(scaledValueOfSecondFixedSurface,
-                                     scaleFactorOfSecondFixedSurface)
-                    point = 0.5 * (first + second)
-                    bounds = [first, second]
-                    coord = DimCoord(point,
-                                     standard_name=fixed_surface.standard_name,
-                                     long_name=fixed_surface.long_name,
-                                     units=fixed_surface.units,
-                                     bounds=bounds)
-                    # Add the vertical coordinate to metadata aux coords.
-                    metadata['aux_coords_and_dims'].append((coord, None))
+        # We treat fixed surface level type=1 as having no vertical coordinate.
+        # See https://github.com/SciTools/iris/issues/519
+        if typeOfFirstFixedSurface not in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
+            key = 'scaledValueOfFirstFixedSurface'
+            scaledValueOfFirstFixedSurface = section[key]
+            if scaledValueOfFirstFixedSurface == _MDI:
+                if options.warn_on_unsupported:
+                    msg = 'Unable to translate type of first fixed ' \
+                          'surface with missing scaled value.'
+                    warnings.warn(msg)
             else:
-                point = unscale(scaledValueOfFirstFixedSurface,
-                                scaleFactorOfFirstFixedSurface)
+                fixed_surface_missing = FixedSurface(None, None, None)
+                fixed_surface = _FIXED_SURFACE.get(
+                    typeOfFirstFixedSurface, fixed_surface_missing)
+                key = 'scaleFactorOfFirstFixedSurface'
+                scaleFactorOfFirstFixedSurface = section[key]
+                typeOfSecondFixedSurface = section['typeOfSecondFixedSurface']
+                if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
+                    if typeOfFirstFixedSurface != typeOfSecondFixedSurface:
+                        msg = 'Product definition section 4 has different ' \
+                            'types of first and second fixed surface'
+                        raise TranslationError(msg)
+                    key = 'scaledValueOfSecondFixedSurface'
+                    scaledValueOfSecondFixedSurface = section[key]
+
+                    if scaledValueOfSecondFixedSurface == _MDI:
+                        msg = 'Product definition section 4 has missing ' \
+                            'scaled value of second fixed surface'
+                        raise TranslationError(msg)
+                    else:
+                        key = 'scaleFactorOfSecondFixedSurface'
+                        scaleFactorOfSecondFixedSurface = section[key]
+                        first = unscale(scaledValueOfFirstFixedSurface,
+                                        scaleFactorOfFirstFixedSurface)
+                        second = unscale(scaledValueOfSecondFixedSurface,
+                                         scaleFactorOfSecondFixedSurface)
+                        point = 0.5 * (first + second)
+                        bounds = [first, second]
+                else:
+                    point = unscale(scaledValueOfFirstFixedSurface,
+                                    scaleFactorOfFirstFixedSurface)
+                    bounds = None
                 coord = DimCoord(point,
                                  standard_name=fixed_surface.standard_name,
                                  long_name=fixed_surface.long_name,
-                                 units=fixed_surface.units)
+                                 units=fixed_surface.units,
+                                 bounds=bounds)
+                if fixed_surface == fixed_surface_missing:
+                    coord.attributes['GRIB_fixed_surface_type'] = \
+                        typeOfFirstFixedSurface
+
                 # Add the vertical coordinate to metadata aux coords.
                 metadata['aux_coords_and_dims'].append((coord, None))
 
@@ -1760,7 +1849,7 @@ def validity_time_coord(frt_coord, fp_coord):
     # Calculate validity (phenomenon) time in forecast-reference-time units.
     frt_point = frt_coord.units.num2date(frt_coord.points[0])
     point_delta = coord_timedelta(fp_coord, fp_coord.points[0])
-    point = frt_coord.units.date2num(frt_point + point_delta)
+    point = float(frt_coord.units.date2num(frt_point + point_delta))
 
     # Calculate bounds (if any) in the same way.
     if fp_coord.bounds is None:
@@ -1768,7 +1857,7 @@ def validity_time_coord(frt_coord, fp_coord):
     else:
         bounds_deltas = [coord_timedelta(fp_coord, bound_point)
                          for bound_point in fp_coord.bounds[0]]
-        bounds = [frt_coord.units.date2num(frt_point + delta)
+        bounds = [float(frt_coord.units.date2num(frt_point + delta))
                   for delta in bounds_deltas]
 
     # Create the time scalar coordinate.
@@ -1780,7 +1869,7 @@ def validity_time_coord(frt_coord, fp_coord):
 def time_coords(section, metadata, rt_coord):
     if 'forecastTime' in section.keys():
         forecast_time = section['forecastTime']
-    # The gribapi encodes the forecast time as 'startStep' for pdt 4.4x;
+    # ecCodes encodes the forecast time as 'startStep' for pdt 4.4x;
     # product_definition_template_40 makes use of this function. The
     # following will be removed once the suspected bug is fixed.
     elif 'startStep' in section.keys():
@@ -1898,7 +1987,7 @@ def statistical_cell_method(section):
         raise TranslationError(msg)
 
     interval_number = section['timeIncrement']
-    if interval_number == 0:
+    if interval_number in (0, _TIME_RANGE_MISSING):
         intervals_string = None
     else:
         units_string = _TIME_RANGE_UNITS[
@@ -2210,19 +2299,22 @@ def satellite_common(section, metadata):
     if NB > 0:
         # Create the satellite series coordinate.
         satelliteSeries = section['satelliteSeries']
-        coord = AuxCoord(satelliteSeries, long_name='satellite_series')
+        coord = AuxCoord(satelliteSeries, long_name='satellite_series',
+                         units=1)
         # Add the satellite series coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
         # Create the satellite number coordinate.
         satelliteNumber = section['satelliteNumber']
-        coord = AuxCoord(satelliteNumber, long_name='satellite_number')
+        coord = AuxCoord(satelliteNumber, long_name='satellite_number',
+                         units=1)
         # Add the satellite number coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
         # Create the satellite instrument type coordinate.
         instrumentType = section['instrumentType']
-        coord = AuxCoord(instrumentType, long_name='instrument_type')
+        coord = AuxCoord(instrumentType, long_name='instrument_type',
+                         units=1)
         # Add the instrument type coordinate to the metadata aux coords.
         metadata['aux_coords_and_dims'].append((coord, None))
 
@@ -2354,6 +2446,7 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
     template = section['productDefinitionTemplateNumber']
 
     probability = None
+    includes_fixed_surface_keys = True
     if template == 0:
         # Process analysis or forecast at a horizontal level or
         # in a horizontal layer at a point in time.
@@ -2377,8 +2470,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
         product_definition_template_15(section, metadata, rt_coord)
     elif template == 31:
         # Process satellite product.
+        includes_fixed_surface_keys = False
         product_definition_template_31(section, metadata, rt_coord)
     elif template == 32:
+        includes_fixed_surface_keys = False
         product_definition_template_32(section, metadata, rt_coord)
     elif template == 40:
         product_definition_template_40(section, metadata, rt_coord)
@@ -2389,13 +2484,27 @@ def product_definition_section(section, metadata, discipline, tablesVersion,
 
     # Translate GRIB2 phenomenon to CF phenomenon.
     if tablesVersion != _CODE_TABLES_MISSING:
-        translate_phenomenon(metadata, discipline,
-                             section['parameterCategory'],
-                             section['parameterNumber'],
-                             section['typeOfFirstFixedSurface'],
-                             section['scaledValueOfFirstFixedSurface'],
-                             section['typeOfSecondFixedSurface'],
-                             probability=probability)
+        translation_kwargs = {
+            'metadata': metadata,
+            'discipline': discipline,
+            'parameterCategory': section['parameterCategory'],
+            'parameterNumber': section['parameterNumber'],
+            'probability': probability
+        }
+
+        # Won't always be able to populate the below arguments -
+        # missing from some template definitions.
+        fixed_surface_keys = [
+            'typeOfFirstFixedSurface',
+            'scaledValueOfFirstFixedSurface',
+            'typeOfSecondFixedSurface'
+        ]
+
+        for section_key in fixed_surface_keys:
+            translation_kwargs[section_key] = \
+                section[section_key] if includes_fixed_surface_keys else None
+
+        translate_phenomenon(**translation_kwargs)
 
 
 ###############################################################################
@@ -2416,7 +2525,7 @@ def data_representation_section(section):
     template = section['dataRepresentationTemplateNumber']
 
     # Supported templates for both grid point and spectral data:
-    grid_point_templates = (0, 1, 2, 3, 4, 40, 41, 61)
+    grid_point_templates = (0, 1, 2, 3, 4, 40, 41, 42, 61)
     spectral_templates = (50, 51)
     supported_templates = grid_point_templates + spectral_templates
 

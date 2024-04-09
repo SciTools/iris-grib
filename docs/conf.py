@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'iris-grib'
-copyright = u'2016, Met Office'
+copyright = u'2022, Met Office'
 author = u'Met Office'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -65,7 +65,7 @@ release = iris_grib.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -145,7 +145,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -297,5 +297,5 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
-    'iris': ('http://scitools.org.uk/iris/docs/latest/', None),
+    'iris': ('https://scitools-iris.readthedocs.io/en/latest/', None),
 }

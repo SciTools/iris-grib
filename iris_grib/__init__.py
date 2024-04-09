@@ -1,19 +1,7 @@
-# (C) British Crown Copyright 2010 - 2019, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Conversion of cubes to/from GRIB.
 
@@ -21,33 +9,28 @@ See: `ECMWF GRIB API <https://software.ecmwf.int/wiki/display/GRIB/Home>`_.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
 import datetime
 import math  # for fmod
-import warnings
 
 import cartopy.crs as ccrs
 import cf_units
-import gribapi
+import eccodes
 import numpy as np
 import numpy.ma as ma
 
-import iris
+# NOTE: careful here, to avoid circular imports (as iris imports grib)
+import iris  # noqa: F401
 from iris._lazy_data import as_lazy_data
 import iris.coord_systems as coord_systems
 from iris.exceptions import TranslationError, NotYetImplementedError
 
-# NOTE: careful here, to avoid circular imports (as iris imports grib)
 from . import grib_phenom_translation as gptx
 from . import _save_rules
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = '0.15.0dev0'
+__version__ = '0.20.dev0'
 
 __all__ = ['load_cubes', 'save_grib2', 'load_pairs_from_fields',
            'save_pairs_from_cube', 'save_messages']
@@ -96,7 +79,7 @@ TIME_CODES_EDITION1 = {
 unknown_string = "???"
 
 
-class GribDataProxy(object):
+class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
     __slots__ = ('shape', 'dtype', 'path', 'offset')
@@ -114,11 +97,15 @@ class GribDataProxy(object):
     def __getitem__(self, keys):
         with open(self.path, 'rb') as grib_fh:
             grib_fh.seek(self.offset)
-            grib_message = gribapi.grib_new_from_file(grib_fh)
+            grib_message = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
             data = _message_values(grib_message, self.shape)
-            gribapi.grib_release(grib_message)
+            eccodes.codes_release(grib_message)
 
-        return data.__getitem__(keys)
+        result = data.__getitem__(keys)
+
+        return result
 
     def __repr__(self):
         msg = '<{self.__class__.__name__} shape={self.shape} ' \
@@ -130,11 +117,11 @@ class GribDataProxy(object):
         return {attr: getattr(self, attr) for attr in self.__slots__}
 
     def __setstate__(self, state):
-        for key, value in six.iteritems(state):
+        for key, value in state.items():
             setattr(self, key, value)
 
 
-class GribWrapper(object):
+class GribWrapper:
     """
     Contains a pygrib object plus some extra keys of our own.
 
@@ -142,6 +129,7 @@ class GribWrapper(object):
     provides alternative means of working with GRIB message instances.
 
     """
+
     def __init__(self, grib_message, grib_fh=None):
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
@@ -156,10 +144,7 @@ class GribWrapper(object):
         # Store the file pointer and message length from the current
         # grib message before it's changed by calls to the grib-api.
         if deferred:
-            # Note that, the grib-api has already read this message and
-            # advanced the file pointer to the end of the message.
-            offset = grib_fh.tell()
-            message_length = gribapi.grib_get_long(grib_message, 'totalLength')
+            offset = eccodes.codes_get_message_offset(grib_message)
 
         # Initialise the key-extension dictionary.
         # NOTE: this attribute *must* exist, or the the __getattr__ overload
@@ -169,22 +154,19 @@ class GribWrapper(object):
         self._compute_extra_keys()
 
         # Calculate the data payload shape.
-        shape = (gribapi.grib_get_long(grib_message, 'numberOfValues'),)
+        shape = (eccodes.codes_get_long(grib_message, 'numberOfValues'),)
 
         if not self.gridType.startswith('reduced'):
             ni, nj = self.Ni, self.Nj
-            j_fast = gribapi.grib_get_long(grib_message,
-                                           'jPointsAreConsecutive')
+            j_fast = eccodes.codes_get_long(grib_message,
+                                            'jPointsAreConsecutive')
             shape = (nj, ni) if j_fast == 0 else (ni, nj)
 
         if deferred:
             # Wrap the reference to the data payload within the data proxy
             # in order to support deferred data loading.
-            # The byte offset requires to be reset back to the first byte
-            # of this message. The file pointer offset is always at the end
-            # of the current message due to the grib-api reading the message.
             proxy = GribDataProxy(shape, np.array([0.]).dtype, grib_fh.name,
-                                  offset - message_length)
+                                  offset)
             self._data = as_lazy_data(proxy)
         else:
             self.data = _message_values(grib_message, shape)
@@ -205,27 +187,30 @@ class GribWrapper(object):
             # we just get <type 'float'> as the type of the "values"
             # array...special case here...
             if key in ["values", "pv", "latitudes", "longitudes"]:
-                res = gribapi.grib_get_double_array(self.grib_message, key)
+                res = eccodes.codes_get_double_array(self.grib_message, key)
             elif key in ('typeOfFirstFixedSurface',
                          'typeOfSecondFixedSurface'):
-                res = np.int32(gribapi.grib_get_long(self.grib_message, key))
+                res = np.int32(eccodes.codes_get_long(self.grib_message, key))
             else:
-                key_type = gribapi.grib_get_native_type(self.grib_message, key)
+                key_type = eccodes.codes_get_native_type(
+                    self.grib_message, key)
                 if key_type == int:
-                    res = np.int32(gribapi.grib_get_long(self.grib_message,
-                                                         key))
+                    res = np.int32(eccodes.codes_get_long(self.grib_message,
+                                                          key))
                 elif key_type == float:
                     # Because some computer keys are floats, like
                     # longitudeOfFirstGridPointInDegrees, a float32
                     # is not always enough...
-                    res = np.float64(gribapi.grib_get_double(self.grib_message,
-                                                             key))
+                    res = np.float64(eccodes.codes_get_double(
+                        self.grib_message, key
+                        )
+                    )
                 elif key_type == str:
-                    res = gribapi.grib_get_string(self.grib_message, key)
+                    res = eccodes.codes_get_string(self.grib_message, key)
                 else:
                     emsg = "Unknown type for {} : {}"
                     raise ValueError(emsg.format(key, str(key_type)))
-        except gribapi.GribInternalError:
+        except eccodes.CodesInternalError:
             res = None
 
         # ...or is it in our list of extras?
@@ -272,7 +257,7 @@ class GribWrapper(object):
             longitudeOfSouthernPoleInDegrees = 0.0
             latitudeOfSouthernPoleInDegrees = 90.0
 
-        centre = gribapi.grib_get_string(self.grib_message, "centre")
+        centre = eccodes.codes_get_string(self.grib_message, "centre")
 
         # default values
         self.extra_keys = {'_referenceDateTime': -1.0,
@@ -301,7 +286,7 @@ class GribWrapper(object):
 
         # cf phenomenon translation
         # Get centre code (N.B. self.centre has default type = string)
-        centre_number = gribapi.grib_get_long(self.grib_message, "centre")
+        centre_number = eccodes.codes_get_long(self.grib_message, "centre")
         # Look for a known grib1-to-cf translation (or None).
         cf_data = gptx.grib1_phenom_to_cf_info(
             table2_version=self.table2Version,
@@ -349,58 +334,17 @@ class GribWrapper(object):
         # TODO #575 Do we want PP or GRIB style forecast delta?
         self.extra_keys['_forecastTimeUnit'] = self._timeunit_string()
 
-        # shape of the earth
-
-        # pre-defined sphere
-        if self.shapeOfTheEarth == 0:
+        # shape of the Earth
+        oblate_Earth = self.resolutionAndComponentFlags & 0b0100000
+        if oblate_Earth:
+            # Earth assumed oblate spheroidal with size as determined by IAU in
+            # 1965 (6378.160 km, 6356.775 km, f = 1/297.0)
+            raise ValueError("Oblate Spheroidal Earth is not supported.")
+        else:
+            # Earth assumed spherical with radius 6367.47 km
             geoid = coord_systems.GeogCS(semi_major_axis=6367470)
 
-        # custom sphere
-        elif self.shapeOfTheEarth == 1:
-            geoid = coord_systems.GeogCS(
-                self.scaledValueOfRadiusOfSphericalEarth *
-                10 ** -self.scaleFactorOfRadiusOfSphericalEarth)
-
-        # IAU65 oblate sphere
-        elif self.shapeOfTheEarth == 2:
-            geoid = coord_systems.GeogCS(6378160, inverse_flattening=297.0)
-
-        # custom oblate spheroid (km)
-        elif self.shapeOfTheEarth == 3:
-            geoid = coord_systems.GeogCS(
-                semi_major_axis=self.scaledValueOfEarthMajorAxis *
-                10 ** -self.scaleFactorOfEarthMajorAxis * 1000.,
-                semi_minor_axis=self.scaledValueOfEarthMinorAxis *
-                10 ** -self.scaleFactorOfEarthMinorAxis * 1000.)
-
-        # IAG-GRS80 oblate spheroid
-        elif self.shapeOfTheEarth == 4:
-            geoid = coord_systems.GeogCS(6378137, None, 298.257222101)
-
-        # WGS84
-        elif self.shapeOfTheEarth == 5:
-            geoid = \
-                coord_systems.GeogCS(6378137, inverse_flattening=298.257223563)
-
-        # pre-defined sphere
-        elif self.shapeOfTheEarth == 6:
-            geoid = coord_systems.GeogCS(6371229)
-
-        # custom oblate spheroid (m)
-        elif self.shapeOfTheEarth == 7:
-            geoid = coord_systems.GeogCS(
-                semi_major_axis=self.scaledValueOfEarthMajorAxis *
-                10 ** -self.scaleFactorOfEarthMajorAxis,
-                semi_minor_axis=self.scaledValueOfEarthMinorAxis *
-                10 ** -self.scaleFactorOfEarthMinorAxis)
-
-        elif self.shapeOfTheEarth == 8:
-            raise ValueError("unhandled shape of earth : grib earth shape = 8")
-
-        else:
-            raise ValueError("undefined shape of earth")
-
-        gridType = gribapi.grib_get_string(self.grib_message, "gridType")
+        gridType = eccodes.codes_get_string(self.grib_message, "gridType")
 
         if gridType in ["regular_ll", "regular_gg", "reduced_ll",
                         "reduced_gg"]:
@@ -471,7 +415,7 @@ class GribWrapper(object):
             # get the distinct latitudes, and make sure they are sorted
             # (south-to-north) and then put them in the right direction
             # depending on the scan direction
-            latitude_points = gribapi.grib_get_double_array(
+            latitude_points = eccodes.codes_get_double_array(
                 self.grib_message, 'distinctLatitudes').astype(np.float64)
             latitude_points.sort()
             if not self.jScansPositively:
@@ -658,8 +602,12 @@ class GribWrapper(object):
 
         """
         time_reference = '%s since epoch' % time_unit
-        return cf_units.date2num(self._phenomenonDateTime, time_reference,
-                                 cf_units.CALENDAR_GREGORIAN)
+        return float(
+            cf_units.date2num(
+                self._phenomenonDateTime, time_reference,
+                cf_units.CALENDAR_GREGORIAN
+            )
+        )
 
     def phenomenon_bounds(self, time_unit):
         """
@@ -670,8 +618,8 @@ class GribWrapper(object):
         # TODO #576 Investigate when it's valid to get phenomenon_bounds
         time_reference = '%s since epoch' % time_unit
         unit = cf_units.Unit(time_reference, cf_units.CALENDAR_GREGORIAN)
-        return [unit.date2num(self._periodStartDateTime),
-                unit.date2num(self._periodEndDateTime)]
+        return [float(unit.date2num(self._periodStartDateTime)),
+                float(unit.date2num(self._periodEndDateTime))]
 
 
 def _longitude_is_cyclic(points):
@@ -690,8 +638,8 @@ def _longitude_is_cyclic(points):
 
 
 def _message_values(grib_message, shape):
-    gribapi.grib_set_double(grib_message, 'missingValue', np.nan)
-    data = gribapi.grib_get_double_array(grib_message, 'values')
+    eccodes.codes_set_double(grib_message, 'missingValue', np.nan)
+    data = eccodes.codes_get_double_array(grib_message, 'values')
     data = data.reshape(shape)
 
     # Handle missing values in a sensible way.
@@ -838,7 +786,7 @@ def save_pairs_from_cube(cube):
 
     # Save each latlon slice2D in the cube
     for slice2D in cube.slices([y_coords[0], x_coords[0]]):
-        grib_message = gribapi.grib_new_from_samples("GRIB2")
+        grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
         _save_rules.run(slice2D, grib_message, cube)
         yield (slice2D, grib_message)
 
@@ -864,7 +812,7 @@ def save_messages(messages, target, append=False):
 
     """
     # grib file (this bit is common to the pp and grib savers...)
-    if isinstance(target, six.string_types):
+    if isinstance(target, str):
         grib_file = open(target, "ab" if append else "wb")
     elif hasattr(target, "write"):
         if hasattr(target, "mode") and "b" not in target.mode:
@@ -875,9 +823,9 @@ def save_messages(messages, target, append=False):
 
     try:
         for message in messages:
-            gribapi.grib_write(message, grib_file)
-            gribapi.grib_release(message)
+            eccodes.codes_write(message, grib_file)
+            eccodes.codes_release(message)
     finally:
         # (this bit is common to the pp and grib savers...)
-        if isinstance(target, six.string_types):
+        if isinstance(target, str):
             grib_file.close()

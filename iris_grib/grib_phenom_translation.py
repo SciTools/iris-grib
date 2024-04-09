@@ -1,19 +1,7 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 '''
 Provide grib 1 and 2 phenomenon translations to + from CF terms.
 
@@ -27,12 +15,8 @@ Currently supports only these ones:
 * cf --> grib2
 
 '''
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
-
-import collections
+from collections import namedtuple
+import re
 import warnings
 
 import cf_units
@@ -51,7 +35,7 @@ class _LookupTable(dict):
 
     """
     def __init__(self, *args, **kwargs):
-        self._super = super(_LookupTable, self)
+        self._super = super()
         self._super.__init__(*args, **kwargs)
 
     def __getitem__(self, key):
@@ -69,12 +53,12 @@ class _LookupTable(dict):
 
 # Define namedtuples for keys+values of the Grib1 lookup table.
 
-_Grib1ToCfKeyClass = collections.namedtuple(
+_Grib1ToCfKeyClass = namedtuple(
     'Grib1CfKey',
     ('table2_version', 'centre_number', 'param_number'))
 
 # NOTE: this form is currently used for both Grib1 *and* Grib2
-_GribToCfDataClass = collections.namedtuple(
+_GribToCfDataClass = namedtuple(
     'Grib1CfData',
     ('standard_name', 'long_name', 'units', 'set_height'))
 
@@ -112,7 +96,7 @@ def _make_grib1_cf_table():
         return (grib1_key, cf_data)
 
     # Interpret the imported Grib1-to-CF table.
-    for (grib1data, cfdata) in six.iteritems(grcf.GRIB1_LOCAL_TO_CF):
+    for (grib1data, cfdata) in grcf.GRIB1_LOCAL_TO_CF.items():
         assert grib1data.edition == 1
         association_entry = _make_grib1_cf_entry(
             table2_version=grib1data.t2version,
@@ -127,7 +111,7 @@ def _make_grib1_cf_table():
 
     # Do the same for special Grib1 codes that include an implied height level.
     for (grib1data, (cfdata, extra_dimcoord)) \
-            in six.iteritems(grcf.GRIB1_LOCAL_TO_CF_CONSTRAINED):
+            in grcf.GRIB1_LOCAL_TO_CF_CONSTRAINED.items():
         assert grib1data.edition == 1
         if extra_dimcoord.standard_name != 'height':
             raise ValueError('Got implied dimension coord of "{}", '
@@ -161,7 +145,7 @@ _GRIB1_CF_TABLE = _make_grib1_cf_table()
 
 # Define a namedtuple for the keys of the Grib2 lookup table.
 
-_Grib2ToCfKeyClass = collections.namedtuple(
+_Grib2ToCfKeyClass = namedtuple(
     'Grib2CfKey',
     ('param_discipline', 'param_category', 'param_number'))
 
@@ -199,7 +183,7 @@ def _make_grib2_to_cf_table():
         return (grib2_key, cf_data)
 
     # Interpret the grib2 info from grib_cf_map
-    for grib2data, cfdata in six.iteritems(grcf.GRIB2_TO_CF):
+    for grib2data, cfdata in grcf.GRIB2_TO_CF.items():
         assert grib2data.edition == 2
         association_entry = _make_grib2_cf_entry(
             param_discipline=grib2data.discipline,
@@ -220,11 +204,11 @@ _GRIB2_CF_TABLE = _make_grib2_to_cf_table()
 
 # Define namedtuples for key+values of the cf-to-grib2 lookup table.
 
-_CfToGrib2KeyClass = collections.namedtuple(
+_CfToGrib2KeyClass = namedtuple(
     'CfGrib2Key',
     ('standard_name', 'long_name'))
 
-_CfToGrib2DataClass = collections.namedtuple(
+_CfToGrib2DataClass = namedtuple(
     'CfGrib2Data',
     ('discipline', 'category', 'number', 'units'))
 
@@ -259,7 +243,7 @@ def _make_cf_to_grib2_table():
         return (cf_key, grib2_data)
 
     # Interpret the imported CF-to-Grib2 table into a lookup table
-    for cfdata, grib2data in six.iteritems(grcf.CF_TO_GRIB2):
+    for cfdata, grib2data in grcf.CF_TO_GRIB2.items():
         assert grib2data.edition == 2
         a_cf_unit = cf_units.Unit(cfdata.units)
         association_entry = _make_cf_grib2_entry(
@@ -274,6 +258,7 @@ def _make_cf_to_grib2_table():
             table[key] = value
 
     return table
+
 
 _CF_GRIB2_TABLE = _make_cf_to_grib2_table()
 
@@ -331,3 +316,70 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
     if standard_name is not None:
         long_name = None
     return _CF_GRIB2_TABLE[(standard_name, long_name)]
+
+
+class GRIBCode(namedtuple('GRIBCode',
+                          'edition discipline category number')):
+    """
+    An object representing a specific Grib phenomenon identity.
+
+    Basically a namedtuple of (edition, discipline, category, number).
+
+    Also provides a string representation, and supports creation from: another
+    similar object; a tuple of numbers; or any string with 4 separate decimal
+    numbers in it.
+
+    """
+    __slots__ = ()
+
+    def __new__(cls, edition_or_string,
+                discipline=None, category=None, number=None):
+        args = (edition_or_string, discipline, category, number)
+        nargs = sum(arg is not None for arg in args)
+        if nargs == 1:
+            # Single argument: convert to a string and extract 4 integers.
+            # NOTE: this also allows input from a GRIBCode, or a plain tuple.
+            edition_or_string = str(edition_or_string)
+            edition, discipline, category, number = \
+                cls._fournums_from_gribcode_string(edition_or_string)
+        elif nargs == 4:
+            edition = edition_or_string
+            edition, discipline, category, number = [
+                int(arg)
+                for arg in (edition, discipline, category, number)]
+        else:
+            msg = ('Cannot create GRIBCode from {} arguments, '
+                   '"GRIBCode{!r}" : '
+                   'expected either 1 or 4 non-None arguments.')
+            raise ValueError(msg.format(nargs, args))
+
+        return super(GRIBCode, cls).__new__(
+            cls, edition, discipline, category, number)
+
+    RE_PARSE_FOURNUMS = re.compile(4 * r'[^\d]*(\d*)')
+
+    @classmethod
+    def _fournums_from_gribcode_string(cls, edcn_string):
+        parsed_ok = False
+        nums_match = cls.RE_PARSE_FOURNUMS.match(edcn_string).groups()
+        if nums_match is not None:
+            try:
+                nums = [int(grp) for grp in nums_match]
+                parsed_ok = True
+            except ValueError:
+                pass
+
+        if not parsed_ok:
+            msg = ('Invalid argument for GRIBCode creation, '
+                   '"GRIBCode({!r})" : '
+                   'requires 4 numbers, separated by non-numerals.')
+            raise ValueError(msg.format(edcn_string))
+
+        return nums
+
+    PRINT_FORMAT = 'GRIB{:1d}:d{:03d}c{:03d}n{:03d}'
+
+    def __str__(self):
+        result = self.PRINT_FORMAT.format(
+            self.edition, self.discipline, self.category, self.number)
+        return result

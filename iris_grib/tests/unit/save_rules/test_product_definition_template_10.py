@@ -1,34 +1,20 @@
-# (C) British Crown Copyright 2013 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for :func:`iris_grib._save_rules.product_definition_template_10`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
+from unittest import mock
+
 from cf_units import Unit
-import gribapi
-import mock
+import eccodes
 
 from iris.coords import DimCoord
 import iris.tests.stock as stock
@@ -46,7 +32,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
             units=Unit('days since epoch', calendar='julian'))
         self.cube.add_aux_coord(time_coord)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_percentile_value(self, mock_set):
         cube = self.cube
         percentile_coord = DimCoord(95, long_name='percentile_over_time')
@@ -58,7 +44,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
         mock_set.assert_any_call(mock.sentinel.grib,
                                  "percentileValue", 95)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_multiple_percentile_value(self, mock_set):
         cube = self.cube
         percentile_coord = DimCoord([5, 10, 15],
@@ -66,7 +52,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
         cube.add_aux_coord(percentile_coord, 0)
         err_msg = "A cube 'percentile_over_time' coordinate with one point "\
                   "is required"
-        with self.assertRaisesRegexp(ValueError, err_msg):
+        with self.assertRaisesRegex(ValueError, err_msg):
             product_definition_template_10(cube, mock.sentinel.grib)
 
 

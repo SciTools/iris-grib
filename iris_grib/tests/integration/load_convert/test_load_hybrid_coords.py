@@ -1,36 +1,22 @@
-# (C) British Crown Copyright 2018, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Integration test for loading hybrid height data.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
 
-from iris import load_cube, load
+from iris import load_cube
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 
 
+@tests.skip_grib_data
 class TestHybridHeight(tests.IrisGribTest):
     def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hh_grib_data.grib2')
@@ -49,17 +35,17 @@ class TestHybridHeight(tests.IrisGribTest):
                               [1, 11, 21])
 
         # check sigma values correctly loaded from indices 1, 11, 21.
-        # NOTE: level[0] == 1, so sigma[0] == 1.0 :  This makes sense !
         self.assertArrayAllClose(cube.coord('sigma').points,
-                                 [1.0, 0.911, 0.694],
+                                 [0.998, 0.894, 0.667],
                                  atol=0.001)
 
         # check height values too.
         self.assertArrayAllClose(cube.coord('level_height').points,
-                                 [0., 800.,  2933.],
+                                 [20., 953.3,  3220.],
                                  atol=0.5)
 
 
+@tests.skip_grib_data
 class TestHybridPressure(tests.IrisGribTest):
     def setUp(self):
         filepath = self.get_testdata_path('faked_sample_hp_grib_data.grib2')
@@ -77,9 +63,9 @@ class TestHybridPressure(tests.IrisGribTest):
         self.assertArrayEqual(cube.coord('model_level_number').points,
                               [1, 51, 91])
         self.assertArrayAllClose(cube.coord('sigma').points,
-                                 [0., 0.036, 0.998], atol=0.001)
+                                 [0., 0.045, 1.], atol=0.001)
         self.assertArrayAllClose(cube.coord('level_pressure').points,
-                                 [0., 18191.0, 0.00316], rtol=0.001)
+                                 [2.00004, 18716.9688, 0.], rtol=0.0001)
         self.assertArrayAllClose(
             cube.coord('surface_air_pressure')[:2, :3].points,
             [[103493.8, 103493.8, 103493.8],
@@ -88,9 +74,9 @@ class TestHybridPressure(tests.IrisGribTest):
         # Also check a few values from the derived coord.
         self.assertArrayAllClose(
             cube.coord('air_pressure')[:, :3, 0].points,
-            [[0., 0., 0.],
-             [21940.3, 21936.9, 21932.8],
-             [103248.5, 103156.0, 103041.0]], atol=0.1)
+            [[2., 2., 2.],
+             [23389.3, 23385.1, 23379.9],
+             [103493.8, 103401.0, 103285.8]], atol=0.1)
 
 
 if __name__ == '__main__':

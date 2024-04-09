@@ -1,33 +1,18 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Tests for function
 :func:`iris_grib._load_convert.product_definition_template_9`.
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
-import mock
+from unittest import mock
 
 from iris.exceptions import TranslationError
 
@@ -65,22 +50,22 @@ class Test(tests.IrisGribTest):
 
     def test_fail_bad_probability_type(self):
         self.section['probabilityType'] = 17
-        with self.assertRaisesRegexp(TranslationError,
-                                     'unsupported probability type'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'unsupported probability type'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 
     def test_fail_bad_threshold_value(self):
         self.section['scaledValueOfUpperLimit'] = _MDI
-        with self.assertRaisesRegexp(TranslationError,
-                                     'missing scaled value'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'missing scaled value'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 
     def test_fail_bad_threshold_scalefactor(self):
         self.section['scaleFactorOfUpperLimit'] = _MDI
-        with self.assertRaisesRegexp(TranslationError,
-                                     'missing scale factor'):
+        with self.assertRaisesRegex(TranslationError,
+                                    'missing scale factor'):
             product_definition_template_9(
                 self.section, self.metadata, self.frt_coord)
 

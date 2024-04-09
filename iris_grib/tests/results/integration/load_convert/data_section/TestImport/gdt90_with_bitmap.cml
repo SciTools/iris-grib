@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" units="unknown">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB2:d003c000n002"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord id="87abc70d" long_name="instrument_type" points="[207]" shape="(1,)" units="Unit('1')" value_type="int64"/>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord id="dd8ec21c" points="[ 0.01031362,  0.01022977,  0.01014592, ...,
+ -0.02213656, -0.02222041, -0.02230426]" shape="(390,)" standard_name="projection_x_coordinate" units="Unit('radians')" value_type="float64">
+          <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord id="698f23ac" points="[0.12275488, 0.12283872, 0.12292257, ...,
+ 0.14153704, 0.14162089, 0.14170474]" shape="(227,)" standard_name="projection_y_coordinate" units="Unit('radians')" value_type="float64">
+          <geostationary ellipsoid="GeogCS(semi_major_axis=6378168.800000001, semi_minor_axis=6356584.0)" false_easting="0.0" false_northing="0.0" latitude_of_projection_origin="0.0" longitude_of_projection_origin="0.0" perspective_point_height="35785825.85377121" sweep_angle_axis="y"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <dimCoord id="527908e7" long_name="satellite_number" points="[56]" shape="(1,)" units="Unit('1')" value_type="int64"/>
+      </coord>
+      <coord>
+        <dimCoord id="7de00380" long_name="satellite_series" points="[333]" shape="(1,)" units="Unit('1')" value_type="int64"/>
+      </coord>
+      <coord>
+        <dimCoord id="f7861546" points="[92.]" shape="(1,)" standard_name="sensor_band_central_radiation_wavenumber" units="Unit('m-1')" value_type="float64"/>
+      </coord>
+      <coord>
+        <dimCoord id="cb784457" points="[356661.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods/>
+    <data dtype="float64" shape="(227, 390)" state="loaded"/>
+  </cube>
+</cubes>

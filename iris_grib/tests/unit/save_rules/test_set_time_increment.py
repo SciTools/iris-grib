@@ -1,33 +1,19 @@
-# (C) British Crown Copyright 2014 - 2016, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for :func:`iris_grib._save_rules.set_time_increment`
 
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
 
-import gribapi
-import mock
+from unittest import mock
+
+import eccodes
 
 from iris.coords import CellMethod
 
@@ -35,7 +21,7 @@ from iris_grib._save_rules import set_time_increment
 
 
 class Test(tests.IrisGribTest):
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_no_intervals(self, mock_set):
         cell_method = CellMethod('sum', 'time')
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -43,7 +29,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 255)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 0)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_area(self, mock_set):
         cell_method = CellMethod('sum', 'area', '25 km')
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -51,7 +37,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 255)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 0)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_multiple_intervals(self, mock_set):
         cell_method = CellMethod('sum', 'time', ('1 hour', '24 hour'))
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -59,7 +45,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 255)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 0)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_hr(self, mock_set):
         cell_method = CellMethod('sum', 'time', '23 hr')
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -67,7 +53,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 1)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 23)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_hour(self, mock_set):
         cell_method = CellMethod('sum', 'time', '24 hour')
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -75,7 +61,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 1)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 24)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_hours(self, mock_set):
         cell_method = CellMethod('sum', 'time', '25 hours')
         set_time_increment(cell_method, mock.sentinel.grib)
@@ -83,7 +69,7 @@ class Test(tests.IrisGribTest):
                                  'indicatorOfUnitForTimeIncrement', 1)
         mock_set.assert_any_call(mock.sentinel.grib, 'timeIncrement', 25)
 
-    @mock.patch.object(gribapi, 'grib_set')
+    @mock.patch.object(eccodes, 'codes_set')
     def test_fractional_hours(self, mock_set):
         cell_method = CellMethod('sum', 'time', '25.9 hours')
         with mock.patch('warnings.warn') as warn:

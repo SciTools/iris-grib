@@ -1,28 +1,12 @@
-# (C) British Crown Copyright 2014 - 2017, Met Office
+# Copyright iris-grib contributors
 #
-# This file is part of iris-grib.
-#
-# iris-grib is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the
-# Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# iris-grib is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with iris-grib.  If not, see <http://www.gnu.org/licenses/>.
+# This file is part of iris-grib and is released under the BSD license.
+# See LICENSE in the root of the repository for full licensing details.
 """
 Unit tests for
 :func:`iris_grib._load_convert.grid_definition_template_90`.
 
 """
-
-from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
-import six
 
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
@@ -75,19 +59,25 @@ class Test(tests.IrisGribTest):
         height = (6610674e-6 - 1) * major
         lat = lon = 0
         easting = northing = 0
-        cs = iris.coord_systems.VerticalPerspective(lat, lon, height, easting,
-                                                    northing, ellipsoid)
+        cs = iris.coord_systems.Geostationary(
+            latitude_of_projection_origin=lat,
+            longitude_of_projection_origin=lon,
+            perspective_point_height=height,
+            sweep_angle_axis='y',
+            false_easting=easting,
+            false_northing=northing,
+            ellipsoid=ellipsoid)
         nx = 390
-        x_origin = 369081.56145444815
-        dx = -3000.663101255676
+        x_origin = 0.010313624253429191
+        dx = -8.38506036864162e-05
         x = iris.coords.DimCoord(np.arange(nx) * dx + x_origin,
-                                 'projection_x_coordinate', units='m',
+                                 'projection_x_coordinate', units='radians',
                                  coord_system=cs)
         ny = 227
-        y_origin = 4392884.59201891
-        dy = 3000.604229521113
+        y_origin = 0.12275487535118533
+        dy = 8.384895857321404e-05
         y = iris.coords.DimCoord(np.arange(ny) * dy + y_origin,
-                                 'projection_y_coordinate', units='m',
+                                 'projection_y_coordinate', units='radians',
                                  coord_system=cs)
         expected['dim_coords_and_dims'].append((y, y_dim))
         expected['dim_coords_and_dims'].append((x, x_dim))
@@ -101,6 +91,9 @@ class Test(tests.IrisGribTest):
                                               expected['dim_coords_and_dims']):
             result_coord, result_dims = result_pair
             expected_coord, expected_dims = expected_pair
+            # Take copies for safety, as we are going to modify them.
+            result_coord, expected_coord = [co.copy() for co in
+                                            (result_coord, expected_coord)]
             # Ensure the dims match.
             self.assertEqual(result_dims, expected_dims)
             # Ensure the coordinate systems match (allowing for precision).
@@ -125,10 +118,22 @@ class Test(tests.IrisGribTest):
             # rest of the coordinate attributes.
             result_coord.coord_system = None
             expected_coord.coord_system = None
+
+            # Likewise, first compare the points (and optional bounds)
+            # *approximately*, then force those equal + compare other aspects.
+            self.assertArrayAlmostEqual(result_coord.points,
+                                        expected_coord.points)
+            result_coord.points = expected_coord.points
+            if result_coord.has_bounds() and expected_coord.has_bounds():
+                self.assertArrayAlmostEqual(result_coord.bounds,
+                                            expected_coord.bounds)
+                result_coord.bounds = expected_coord.bounds
+
+            # Compare the coords, having equalised the array values.
             self.assertEqual(result_coord, expected_coord)
 
         # Ensure no other metadata was created.
-        for name in six.iterkeys(expected):
+        for name in expected.keys():
             if name == 'dim_coords_and_dims':
                 continue
             self.assertEqual(metadata[name], expected[name])
@@ -152,46 +157,46 @@ class Test(tests.IrisGribTest):
         section = self.uk()
         section['latitudeOfSubSatellitePoint'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'non-zero latitude'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'non-zero latitude'):
             grid_definition_template_90(section, metadata)
 
     def test_rotated_meridian(self):
         section = self.uk()
         section['orientationOfTheGrid'] = 1
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orientation'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orientation'):
             grid_definition_template_90(section, metadata)
 
     def test_zero_height(self):
         section = self.uk()
         section['Nr'] = 0
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'zero'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'zero'):
             grid_definition_template_90(section, metadata)
 
     def test_orthographic(self):
         section = self.uk()
         section['Nr'] = MDI
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError,
-                                     'orthographic'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError,
+                                    'orthographic'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_positive_x(self):
         section = self.uk()
         section['scanningMode'] = 0b01000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, r'\+x'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, r'\+x'):
             grid_definition_template_90(section, metadata)
 
     def test_scanning_mode_negative_y(self):
         section = self.uk()
         section['scanningMode'] = 0b10000000
         metadata = empty_metadata()
-        with self.assertRaisesRegexp(iris.exceptions.TranslationError, '-y'):
+        with self.assertRaisesRegex(iris.exceptions.TranslationError, '-y'):
             grid_definition_template_90(section, metadata)
 
 
