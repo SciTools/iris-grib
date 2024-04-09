@@ -618,7 +618,7 @@ def _perspective_projection_common(cube, grib):
     horizontal_grid_common(cube, grib, xy=True)
 
     eccodes.codes_set(grib, 'resolutionAndComponentFlags',
-                     0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
+                      0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT)
 
     # Transform first point into geographic CS.
     geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
