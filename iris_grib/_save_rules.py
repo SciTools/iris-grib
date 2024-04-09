@@ -22,8 +22,7 @@ import iris
 from iris.aux_factory import HybridHeightFactory, HybridPressureFactory
 from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
                                 TransverseMercator, LambertConformal,
-                                LambertAzimuthalEqualArea,
-                                TransverseMercator, Stereographic)
+                                LambertAzimuthalEqualArea, Stereographic)
 from iris.exceptions import TranslationError
 
 
@@ -631,9 +630,9 @@ def _perspective_projection_common(cube, grib):
     central_lon = cs.central_lon % 360
 
     eccodes.codes_set(grib, "latitudeOfFirstGridPoint",
-                     int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_y / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint",
-                     int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
+                      int(np.round(first_x / _DEFAULT_DEGREES_UNITS)))
     eccodes.codes_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
 
