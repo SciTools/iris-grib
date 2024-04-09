@@ -125,7 +125,7 @@ class FakeGribMessage(dict):
                 "Nj": 1,
                 "numberOfValues": 1,
                 "alternativeRowScanning": 0,
-                "centre": "ecmf",
+                "centre": 74,  # the UKMO centre id
                 "year": 2007,
                 "month": 3,
                 "day": 23,
