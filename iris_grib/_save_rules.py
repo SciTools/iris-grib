@@ -1053,7 +1053,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
                           int(round(output_v[1])))
 
     if hybrid_factory is not None:
-        # Need to record ALL the level coefficents in a 'PV' vector.
+        # Need to record ALL the level coefficients in a 'PV' vector.
         level_delta_coord = hybrid_factory.delta
         sigma_coord = hybrid_factory.sigma
         model_levels = full3d_cube.coord('model_level_number').points
@@ -1062,7 +1062,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             msg = 'model_level_number is not an integer: dtype={}.'
             raise ValueError(msg.format(model_levels.dtype))
         if np.min(model_levels) < 1:
-            msg = 'model_level_number must be > 0: mininum value = {}.'
+            msg = 'model_level_number must be > 0: minimum value = {}.'
             raise ValueError(msg.format(np.min(model_levels)))
         # Need to save enough levels for indexes up to  [max(model_levels)]
         n_levels = np.max(model_levels)

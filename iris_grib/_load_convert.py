@@ -3,7 +3,7 @@
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
 """
-Module to support the loading and convertion of a GRIB2 message into
+Module to support the loading and conversion of a GRIB2 message into
 cube metadata.
 
 """
@@ -35,7 +35,7 @@ from ._grib1_load_rules import grib1_convert
 
 
 # Restrict the names imported from this namespace.
-__all__ = ['convert']
+__all__ = ["convert"]
 
 
 options = Namespace(warn_on_unsupported=False,
@@ -652,7 +652,7 @@ def grid_definition_template_4_and_5(section, metadata, y_name, x_name, cs):
         Name of the X coordinate, e.g. 'longitude' or 'grid_longitude'.
 
     * cs:
-        The :class:`iris.coord_systems.CoordSystem` to use when createing
+        The :class:`iris.coord_systems.CoordSystem` to use when creating
         the X and Y coordinates.
 
     """
@@ -1217,7 +1217,7 @@ def grid_definition_template_90(section, metadata):
     height_above_centre = geog_cs.semi_major_axis * section['Nr'] / 1e6
     height_above_ellipsoid = height_above_centre - geog_cs.semi_major_axis
 
-    # Figure out how large the Earth would appear in projection coodinates.
+    # Figure out how large the Earth would appear in projection coordinates.
     # For both the apparent equatorial and polar diameters this is a
     # two-step process:
     # 1) Determine the angle subtended by the visible surface.
@@ -2432,7 +2432,7 @@ def product_definition_template_40(section, metadata, frt_coord):
         Dictionary of coded key/value pairs from section 4 of the message.
 
     * metadata:
-        :class:`collectins.OrderedDict` of metadata.
+        :class:`collections.OrderedDict` of metadata.
 
     * frt_coord:
         The scalar forecast reference time :class:`iris.coords.DimCoord`.

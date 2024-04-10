@@ -68,21 +68,22 @@ def file_walk_relative(top, remove=''):
 
 
 setup_args = dict(
-    name             = PYPI_NAME,
-    version          = extract_version(),
-    packages         = packages,
-    package_data     = {'iris_grib': list(file_walk_relative('iris_grib/tests/results',
-                                          remove='iris_grib/'))},
-    description      = "GRIB loading for Iris",
-    long_description = long_description(),
-    long_description_content_type = "text/x-rst",
-    url              = 'https://github.com/SciTools/iris-grib',
-    author           = 'UK Met Office',
-    author_email     = 'scitools-iris@googlegroups.com',
-    license          = 'BSD',
-    platforms        = "Linux, Mac OS X, Windows",
-    keywords         = ['iris', 'GRIB'],
-    classifiers=[
+    name             = PYPI_NAME,                                # noqa: E221,E251,E501
+    version          = extract_version(),                        # noqa: E221,E251,E501
+    packages         = packages,                                 # noqa: E221,E251,E501
+    package_data     = {'iris_grib': list(                       # noqa: E221,E251,E501
+        file_walk_relative('iris_grib/tests/results', remove='iris_grib/'))
+    },
+    description      = "GRIB loading for Iris",                  # noqa: E221,E251,E501
+    long_description = long_description(),                       # noqa: E221,E251,E501
+    long_description_content_type = "text/x-rst",                # noqa: E221,E251,E501
+    url              = 'https://github.com/SciTools/iris-grib',  # noqa: E221,E251,E501
+    author           = 'UK Met Office',                          # noqa: E221,E251,E501
+    author_email     = 'scitools-iris@googlegroups.com',         # noqa: E221,E251,E501
+    license          = 'BSD',                                    # noqa: E221,E251,E501
+    platforms        = "Linux, Mac OS X, Windows",               # noqa: E221,E251,E501
+    keywords         = ['iris', 'GRIB'],                         # noqa: E221,E251,E501
+    classifiers=[                                                # noqa: E221,E251,E501
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
