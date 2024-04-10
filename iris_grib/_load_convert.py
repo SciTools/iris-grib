@@ -35,7 +35,7 @@ from ._grib1_load_rules import grib1_convert
 
 
 # Restrict the names imported from this namespace.
-__all__ = ['convert']
+__all__ = ["convert"]
 
 
 options = Namespace(warn_on_unsupported=False,
