@@ -679,7 +679,7 @@ def _load_generate(filename):
 
 def load_cubes(filenames, callback=None):
     """
-    Returns a generator of cubes from the given list of filenames.
+    Returns an iterator over cubes from the given list of filenames.
 
     Args:
 
@@ -692,7 +692,7 @@ def load_cubes(filenames, callback=None):
         Function which can be passed on to :func:`iris.io.run_callback`.
 
     Returns:
-        A generator containing Iris cubes loaded from the GRIB files.
+        An iterator returning Iris cubes loaded from the GRIB files.
 
     """
     import iris.fileformats.rules as iris_rules
@@ -781,9 +781,9 @@ def save_grib2(cube, target, append=False):
 def save_pairs_from_cube(cube):
     """
     Convert one or more cubes to (2D cube, GRIB message) pairs.
-    Returns an iterable of tuples each consisting of one 2D cube and
-    one GRIB message ID, the result of the 2D cube being processed by the GRIB
-    save rules.
+
+    Produces pairs of 2D cubes and GRIB messages, the result of the 2D cube
+    being processed by the GRIB save rules.
 
     Args:
 
@@ -791,6 +791,9 @@ def save_pairs_from_cube(cube):
         A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
         list of cubes.
 
+    Returns:
+        a iterator returning (cube, field) pairs, where each ``cube`` is a 2d slice of
+        the input and each``field`` is a :class:`~iris_grib.message.GribMessage`.
     """
     x_coords = cube.coords(axis='x', dim_coords=True)
     y_coords = cube.coords(axis='y', dim_coords=True)
