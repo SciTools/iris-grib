@@ -115,7 +115,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
                               ellipsoid=self.default_ellipsoid)
         test_cube = self._make_test_cube(cs=cs)
         grid_definition_template_30(test_cube, self.mock_grib)
-        self._check_key("projectionCentreFlag", 128)
+        self._check_key("projectionCentreFlag", 1)
 
 
 if __name__ == "__main__":

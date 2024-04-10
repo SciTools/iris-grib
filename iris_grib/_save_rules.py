@@ -589,9 +589,6 @@ def _perspective_projection_common(cube, grib):
     Conformal.
 
     """
-
-    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 30)
-
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
