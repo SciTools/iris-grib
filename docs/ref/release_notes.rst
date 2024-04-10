@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+
+What's new in iris-grib v0.20.0
+-------------------------------
+
+:Release: 0.20.0
+:Date: [unreleased]
+
+Features
+^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_,
+  `@mo-marqh <https://github.com/mo-marqh>`_  and
+  `@pp-mo <https://github.com/pp-mo>`_ added support for production definition template
+  4.6, i.e. percentile forecasts.
+  `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
+
+
 What's new in iris-grib v0.19.1
 -------------------------------
 

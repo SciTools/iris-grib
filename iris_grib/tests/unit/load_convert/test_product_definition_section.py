@@ -75,7 +75,7 @@ class TestFixedSurfaces(tests.IrisGribTest):
                 del section_4[key]
 
         def run_function():
-            # For re-use in every type of test below.
+            # For reuse in every type of test below.
             product_definition_section(
                 section_4, self.metadata, self.discipline, self.tablesVersion,
                 self.rt_coord)

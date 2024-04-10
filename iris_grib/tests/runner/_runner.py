@@ -65,7 +65,7 @@ class TestRunner:
         self.create_missing = False
 
     def finalize_options(self):
-        # These enviroment variables will be propagated to all the
+        # These environment variables will be propagated to all the
         # processes that nose.run creates.
         if self.no_data:
             print("Running tests in no-data mode...")

@@ -32,11 +32,13 @@ from .message import GribMessage
 
 __version__ = '0.20.dev0'
 
-__all__ = ["load_cubes",
- "load_pairs_from_fields",
- "save_grib2",
- "save_messages",
- "save_pairs_from_cube",]
+
+__all__ = [
+    "load_cubes",
+    "load_pairs_from_fields",
+    "save_grib2",
+    "save_messages",
+    "save_pairs_from_cube",
 
 
 CENTRE_TITLES = {'egrr': 'U.K. Met Office - Exeter',

@@ -302,11 +302,11 @@ class TestGribTimecodes(tests.IrisTest):
 
             # Load the message from the file as a cube.
             cube_generator = iris_grib.load_cubes(temp_gribfile_path)
-            with self.assertRaises(iris.exceptions.TranslationError) as te:
+            with self.assertRaises(iris.exceptions.TranslationError) as t_err:
                 _ = next(cube_generator)
             self.assertEqual(
                 "Product definition template [5]" " is not supported",
-                str(te.exception),
+                str(t_err.exception),
             )
 
 
