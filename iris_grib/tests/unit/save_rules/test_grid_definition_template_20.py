@@ -88,7 +88,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         cs = Stereographic(-90.0, 0, ellipsoid=self.default_ellipsoid)
         stereo_test_cube = self._make_test_cube(cs=cs, coord_units='m')
         grid_definition_template_20(stereo_test_cube, self.mock_grib)
-        self._check_key("projectionCentreFlag", 1)
+        self._check_key("projectionCentreFlag", 128)
 
     def test_projection_centre_bad(self):
         cs = Stereographic(0, 0, ellipsoid=self.default_ellipsoid)
