@@ -15,7 +15,7 @@ from cf_units import Unit
 from iris.coords import DimCoord
 
 from iris_grib._load_convert import Probability, translate_phenomenon
-from iris_grib.grib_phenom_translation import _GribToCfDataClass, GRIBCode
+from iris_grib.grib_phenom_translation import Grib1CfData, GRIBCode
 
 
 class Test_probability(tests.IrisGribTest):
@@ -24,7 +24,7 @@ class Test_probability(tests.IrisGribTest):
         target_module = 'iris_grib._load_convert'
         self.phenom_lookup_patch = self.patch(
             target_module + '.itranslation.grib2_phenom_to_cf_info',
-            return_value=_GribToCfDataClass('air_temperature', '', 'K', None))
+            return_value=Grib1CfData('air_temperature', '', 'K', None))
         # Construct dummy call arguments
         self.probability = Probability('<prob_type>', 22.0)
         self.metadata = {'aux_coords_and_dims': [], 'attributes': {}}
