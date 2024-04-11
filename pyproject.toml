@@ -87,6 +87,6 @@ skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 [tool.mypy]
 ignore_missing_imports = true
 exclude = [
-    "noxfile.py",
-    "docs/conf.py"
+    "^noxfile.py",
+    "^docs/conf.py"
 ]
