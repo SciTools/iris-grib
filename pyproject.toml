@@ -34,10 +34,13 @@ dynamic = [
     "readme",
     "version",
 ]
-description = "GRIB interface for Iris"
+description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
 keywords = [
     "iris",
     "GRIB",
+    "data-analysis",
+    "earth-science",
+    "meteorology",
 ]
 license = {text = "BSD-3-Clause"}
 name = "iris-grib"
