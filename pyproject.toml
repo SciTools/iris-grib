@@ -51,6 +51,7 @@ Issues = "https://github.com/SciTools/iris-grib/issues"
 
 [tool.setuptools]
 licence-files = ["LICENSE"]
+zip-safe = false
 
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements/core.txt"}
