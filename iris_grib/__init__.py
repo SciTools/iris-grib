@@ -780,7 +780,7 @@ def save_grib2(cube, target, append=False):
 
 def save_pairs_from_cube(cube):
     """
-    Convert one or more cubes to (2D cube, GRIB message) pairs.
+    Convert one or more cubes to (2D cube, GRIB-message-id) pairs.
 
     Produces pairs of 2D cubes and GRIB messages, the result of the 2D cube
     being processed by the GRIB save rules.
@@ -793,7 +793,8 @@ def save_pairs_from_cube(cube):
 
     Returns:
         a iterator returning (cube, field) pairs, where each ``cube`` is a 2d slice of
-        the input and each``field`` is a :class:`~iris_grib.message.GribMessage`.
+        the input and each``field`` is an eccodes message "id".
+        N.B. message "id"s are handle-like objects, essentially integers in form.
     """
     x_coords = cube.coords(axis='x', dim_coords=True)
     y_coords = cube.coords(axis='y', dim_coords=True)
