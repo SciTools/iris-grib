@@ -63,9 +63,9 @@ repos:
     -   id: sort-all
         types: [file, python]
 
-- repo: https://github.com/abravalheri/validate-pyproject
-rev: "v0.16"
-hooks:
+-   repo: https://github.com/abravalheri/validate-pyproject
+    rev: "v0.16"
+    hooks:
     - id: validate-pyproject
 
 # TODO: pending the addition of numpydoc, including config file(s).
