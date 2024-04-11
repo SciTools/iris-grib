@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    {name = "Iris-Grib Contributors", email = "scitools.pug@gmail.com"}
+    {name = "Iris-grib Contributors", email = "scitools.pub@gmail.com"}
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -34,10 +34,10 @@ dynamic = [
     "readme",
     "version",
 ]
-description = "Grib interface for Iris"
+description = "GRIB interface for Iris"
 keywords = [
     "iris",
-    "grib",
+    "GRIB",
 ]
 license = {text = "BSD-3-Clause"}
 name = "iris-grib"
@@ -51,12 +51,13 @@ Issues = "https://github.com/SciTools/iris-grib/issues"
 
 [tool.setuptools]
 license-files = ["LICENSE"]
-zip-safe = false
 
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements/core.txt"}
 readme = {file = "README.rst", content-type = "text/x-rst"}
 version = {attr = "iris_grib.__version__"}
+optional-dependencies.all = {file = "requirements/all.txt"}
+optional-dependencies.test = {test = "requirements/test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
