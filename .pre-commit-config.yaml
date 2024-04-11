@@ -68,6 +68,7 @@ repos:
     rev: 'v1.9.0'
     hooks:
     -   id: mypy
+        args: [--config-file pyproject.toml]
 
 -   repo: https://github.com/abravalheri/validate-pyproject
     rev: "v0.16"
