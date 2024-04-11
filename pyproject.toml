@@ -1,0 +1,86 @@
+[build-system]
+# Defined by PEP 518
+requires = [
+    "setuptools>=64",
+    "wheel",
+]
+# Defined by PEP 517
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    {name = "Iris-grib Contributors", email = "scitools.pub@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dynamic = [
+    "dependencies",
+    "readme",
+    "version",
+]
+description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
+keywords = [
+    "iris",
+    "GRIB",
+    "data-analysis",
+    "earth-science",
+    "meteorology",
+]
+license = {text = "BSD-3-Clause"}
+name = "iris-grib"
+requires-python = ">=3.9"
+
+[project.urls]
+Code = "https://github.com/SciTools/iris-grib"
+Discussions = "https://github.com/SciTools/iris-grib/discussions"
+Documentation = "https://iris-grib.readthedocs.io/en/stable/"
+Issues = "https://github.com/SciTools/iris-grib/issues"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements/core.txt"}
+readme = {file = "README.rst", content-type = "text/x-rst"}
+version = {attr = "iris_grib.__version__"}
+optional-dependencies.all = {file = "requirements/all.txt"}
+optional-dependencies.test = {file = "requirements/test.txt"}
+
+[tool.setuptools.packages.find]
+include = ["iris_grib*"]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "iris_grib",
+]
+omit = [
+    "iris_grib/tests/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:"
+]
+
+[tool.codespell]
+ignore-words-list = "alpha-numeric,degreee,discontiguities,lazyness,meaned,nin"
+skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
+
