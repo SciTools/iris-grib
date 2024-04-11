@@ -40,7 +40,7 @@ keywords = [
     "grib",
 ]
 license = {text = "BSD-3-Clause"}
-name = "scitools-iris"
+name = "iris-grib"
 requires-python = ">=3.9"
 
 [project.urls]
