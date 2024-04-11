@@ -57,7 +57,7 @@ dependencies = {file = "requirements/core.txt"}
 readme = {file = "README.rst", content-type = "text/x-rst"}
 version = {attr = "iris_grib.__version__"}
 optional-dependencies.all = {file = "requirements/all.txt"}
-optional-dependencies.test = {test = "requirements/test.txt"}
+optional-dependencies.test = {file = "requirements/test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
