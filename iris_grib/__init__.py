@@ -792,9 +792,9 @@ def save_pairs_from_cube(cube):
         list of cubes.
 
     Returns:
-        a iterator returning (cube, field) pairs, where each ``cube`` is a 2d slice of
-        the input and each``field`` is an eccodes message "id".
-        N.B. message "id"s are handle-like objects, essentially integers in form.
+        a iterator returning (cube, field) pairs, where each ``cube`` is a 2d
+        slice of the input and each``field`` is an eccodes message "id".
+        N.B. the message "id"s are integer handles.
     """
     x_coords = cube.coords(axis='x', dim_coords=True)
     y_coords = cube.coords(axis='y', dim_coords=True)
