@@ -38,6 +38,9 @@ description = "Functionality for converting between weather/climate datasets sto
 keywords = [
     "iris",
     "GRIB",
+    "data-analysis",
+    "earth-science",
+    "meteorology",
 ]
 license = {text = "BSD-3-Clause"}
 name = "iris-grib"
