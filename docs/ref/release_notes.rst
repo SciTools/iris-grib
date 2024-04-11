@@ -2,23 +2,58 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.20.0
+-------------------------------
+
+:Release: 0.20.0
+:Date: [unreleased]
+
+Features
+^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_,
+  `@mo-marqh <https://github.com/mo-marqh>`_  and
+  `@pp-mo <https://github.com/pp-mo>`_ added support for production definition template
+  4.6, i.e. percentile forecasts.
+  `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
+
+
+What's new in iris-grib v0.19.1
+-------------------------------
+
+:Release: 0.19.1
+:Date: 14 December 2023
+
+Documentation
+^^^^^^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ updated the release notes with v0.19 changes.
+  `(PR#370) <https://github.com/SciTools/iris-grib/pull/370>`_
+
+
 What's new in iris-grib v0.19.0
 -------------------------------
 
 :Release: 0.19.0
-:Date: [unreleased]
+:Date: 16 November 2023
 
+See also :
+`GitHub v0.19.0 release page <https://github.com/SciTools/iris-grib/releases/tag/v0.19.0>`_
 
-=======
 Features
 ^^^^^^^^
-* `@lbdreyer <https://github.com/lbdreyer>`_ and 
+* `@lbdreyer <https://github.com/lbdreyer>`_ and
   `@pp-mo <https://github.com/pp-mo>`_ (reviewer) modified the loading of GRIB
   messages with an unrecognised fixed surface type. These are now loaded in as
   an unnamed coordinate with an attribute called GRIB_fixed_surface_type.
   iris-grib will also save out cubes with this attribute as the given fixed
-  surface type.`(PR#318) <https://github.com/SciTools/iris-grib/pull/288>`_
+  surface type. `(PR#318) <https://github.com/SciTools/iris-grib/pull/318>`_
 
+* `@trexfeathers <https://github.com/trexfeathers>`_ extended Transverse Mercator
+  to support negative scanning.
+  `(PR#296) <https://github.com/SciTools/iris-grib/pull/296>`_
+
+* `@trexfeathers <https://github.com/trexfeathers>`_  added a number of new GRIB-CF
+  mappings, i.e. translations from GRIB parameters to CF standard names and vice-versa.
+  `(PR#297) <https://github.com/SciTools/iris-grib/pull/297>`_
 
 Bugs Fixed
 ^^^^^^^^^^
@@ -31,11 +66,36 @@ Bugs Fixed
   in Earth's radius will result in a different coordinate system and may also
   affect the coordinate values.
   `(PR#316) <https://github.com/SciTools/iris-grib/pull/316>`_
+* `@s-boardman <https://github.com/s-boardman>`_ corrected the calculation of bounded
+  forecast periods in GRIB1 loading.
+  `(PR#322) <https://github.com/SciTools/iris-grib/pull/322>`_
+* `@david-bentley <https://github.com/david-bentley>`_  fixed the calculation of message
+  file offsets to work in Windows as well as Linux, which was causing load failures.
+  `(PR#287) <https://github.com/SciTools/iris-grib/pull/287>`_
+* `@bjlittle <https://github.com/bjlittle>`_  fixed an error that occurred when a
+  message had all-missing data points.
+  `(PR#362) <https://github.com/SciTools/iris-grib/pull/362>`_
 
+
+Internal
+^^^^^^^^
+* `@lbdreyer <https://github.com/lbdreyer>`_ relicensed the repo from LGPL-3 to BSD-3.
+  `(PR#359) <https://github.com/SciTools/iris-grib/pull/359>`_
 
 Dependencies
 ^^^^^^^^^^^^
 * now requires Python version >= 3.9
+* replaced deprecated eccodes-python PyPI package with new eccodes by @valeriupredoi in #357
+* `@valeriupredoi <https://github.com/valeriupredoi>`_ replaced the deprecated
+  eccodes-python PyPI package with eccodes.
+  `(PR#357) <https://github.com/SciTools/iris-grib/pull/357>`_
+
+New Contributors
+^^^^^^^^^^^^^^^^
+Welcome to
+* `@s-boardman <https://github.com/s-boardman>`_
+* `@david-bentley <https://github.com/david-bentley>`_
+* `@valeriupredoi <https://github.com/valeriupredoi>`_
 
 
 What's new in iris-grib v0.18.0
