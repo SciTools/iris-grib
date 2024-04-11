@@ -68,9 +68,6 @@ repos:
     rev: 'v1.9.0'
     hooks:
     -   id: mypy
-        language: system
-        entry: mypy
-        types: [python]
 
 -   repo: https://github.com/abravalheri/validate-pyproject
     rev: "v0.16"
