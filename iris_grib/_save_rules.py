@@ -37,7 +37,9 @@ from iris.util import is_regular, regular_step
 # Invert code tables from :mod:`iris_grib._load_convert`.
 _STATISTIC_TYPE_NAMES_INVERTED = {val: key for key, val in
                                   _STATISTIC_TYPE_NAMES.items()}
-_TIME_RANGE_UNITS_INVERTED = {val: key for key, val in _TIME_RANGE_UNITS.items()}
+_TIME_RANGE_UNITS_INVERTED = {
+    val: key for key, val in _TIME_RANGE_UNITS.items()
+}
 
 
 def fixup_float32_as_int32(value):
@@ -1453,7 +1455,9 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
                                  cell_method.coord_names))
 
         # Type of statistical process (see code table 4.10)
-        statistic_type = _STATISTIC_TYPE_NAMES_INVERTED.get(cell_method.method, 255)
+        statistic_type = _STATISTIC_TYPE_NAMES_INVERTED.get(
+            cell_method.method, 255
+        )
         eccodes.codes_set(grib, "typeOfStatisticalProcessing", statistic_type)
 
         # Time increment i.e. interval of cell method (if any)
