@@ -5,6 +5,7 @@ files: |
     (?x)(
         noxfile\.py|
         setup\.py|
+        pyproject\.toml|
         docs\/.+\.py|
         benchmarks\/.+\.py|
         iris_grib\/.+\.py
