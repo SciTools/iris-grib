@@ -94,19 +94,6 @@ def fixup_int32_as_uint32(value):
     return value
 
 
-def ensure_set_int32_value(grib, key, value):
-    """
-    Ensure the workaround function :func:`fixup_int32_as_uint32` is applied as
-    necessary to problem keys.
-
-    """
-    try:
-        eccodes.codes_set(grib, key, value)
-    except eccodes.CodesInternalError:
-        value = fixup_int32_as_uint32(value)
-        eccodes.codes_set(grib, key, value)
-
-
 ###############################################################################
 #
 # Constants
@@ -578,10 +565,10 @@ def grid_definition_template_12(cube, grib):
     # GRIBAPI expects unsigned ints in X1, X2, Y1, Y2 but it should accept
     # signed ints, so work around this.
     # See https://software.ecmwf.int/issues/browse/SUP-1101
-    ensure_set_int32_value(grib, "Y1", int(y_cm[0]))
-    ensure_set_int32_value(grib, "Y2", int(y_cm[-1]))
-    ensure_set_int32_value(grib, "X1", int(x_cm[0]))
-    ensure_set_int32_value(grib, "X2", int(x_cm[-1]))
+    eccodes.codes_set(grib, "Y1", int(y_cm[0]))
+    eccodes.codes_set(grib, "Y2", int(y_cm[-1]))
+    eccodes.codes_set(grib, "X1", int(x_cm[0]))
+    eccodes.codes_set(grib, "X2", int(x_cm[-1]))
 
     # Lat and lon of reference point are measured in millionths of a degree.
     eccodes.codes_set(
@@ -608,9 +595,6 @@ def grid_definition_template_12(cube, grib):
     # but it should accept a float, so work around this.
     # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
-    key_type = eccodes.codes_get_native_type(grib, "scaleFactorAtReferencePoint")
-    if key_type is not float:
-        value = fixup_float32_as_int32(value)
     eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
 
 
