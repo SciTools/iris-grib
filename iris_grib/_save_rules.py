@@ -35,9 +35,11 @@ from iris.util import is_regular, regular_step
 
 
 # Invert code tables from :mod:`iris_grib._load_convert`.
-_STATISTIC_TYPE_NAMES = {val: key for key, val in
-                         _STATISTIC_TYPE_NAMES.items()}
-_TIME_RANGE_UNITS = {val: key for key, val in _TIME_RANGE_UNITS.items()}
+_STATISTIC_TYPE_NAMES_INVERTED = {val: key for key, val in
+                                  _STATISTIC_TYPE_NAMES.items()}
+_TIME_RANGE_UNITS_INVERTED = {
+    val: key for key, val in _TIME_RANGE_UNITS.items()
+}
 
 
 def fixup_float32_as_int32(value):
@@ -1110,7 +1112,7 @@ def set_time_range(time_coord, grib):
 
     # Set type to hours and convert period to this unit.
     eccodes.codes_set(grib, "indicatorOfUnitForTimeRange",
-                      _TIME_RANGE_UNITS['hours'])
+                      _TIME_RANGE_UNITS_INVERTED['hours'])
     hours_since_units = cf_units.Unit('hours since epoch',
                                       calendar=time_coord.units.calendar)
     start_hours, end_hours = time_coord.units.convert(time_coord.bounds[0],
@@ -1150,7 +1152,7 @@ def set_time_increment(cell_method, grib):
             inc, units = interval.split()
             inc = float(inc)
             if units in ('hr', 'hour', 'hours'):
-                units_type = _TIME_RANGE_UNITS['hours']
+                units_type = _TIME_RANGE_UNITS_INVERTED['hours']
             else:
                 raise ValueError('Unable to parse units of interval')
         except ValueError:
@@ -1231,7 +1233,7 @@ def statistical_method_code(cell_method_name):
     """
     Decode cell_method string as statistic code integer.
     """
-    statistic_code = _STATISTIC_TYPE_NAMES.get(cell_method_name, None)
+    statistic_code = _STATISTIC_TYPE_NAMES_INVERTED.get(cell_method_name, None)
     if statistic_code is None:
         msg = ('Product definition section 4 contains an unsupported '
                'statistical process type [{}] ')
@@ -1453,7 +1455,9 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
                                  cell_method.coord_names))
 
         # Type of statistical process (see code table 4.10)
-        statistic_type = _STATISTIC_TYPE_NAMES.get(cell_method.method, 255)
+        statistic_type = _STATISTIC_TYPE_NAMES_INVERTED.get(
+            cell_method.method, 255
+        )
         eccodes.codes_set(grib, "typeOfStatisticalProcessing", statistic_type)
 
         # Time increment i.e. interval of cell method (if any)
