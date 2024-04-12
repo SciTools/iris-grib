@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.11"]
+        python-version: ["3.9"]
 
     env:
       IRIS_TEST_DATA_VERSION: "2.9"
