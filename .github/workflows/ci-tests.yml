@@ -35,9 +35,9 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.9"]
+        python-version: ["3.11"]
         session: ["tests"]
-        iris-source : ["conda-forge"]
+        iris-source : ["cforge"]
 
     env:
       IRIS_TEST_DATA_VERSION: "2.24"
