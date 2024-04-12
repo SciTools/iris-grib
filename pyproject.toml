@@ -86,10 +86,9 @@ skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
 [tool.mypy]
 ignore_missing_imports = true
-warn_return_any = true
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 exclude = [
-    '^noxfile\.py$',
-    '^docs/conf\.py$'
+    'noxfile\.py',
+    'docs/conf\.py'
 ]
