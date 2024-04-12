@@ -53,12 +53,15 @@ class Test(tests.IrisGribTest):
         # Prepare the expectation.
         expected = empty_metadata()
         ellipsoid = iris.coord_systems.GeogCS(6367470)
-        cs = iris.coord_systems.Stereographic(central_lat=90.,
-                                              central_lon=262.,
-                                              false_easting=0,
-                                              false_northing=0,
-                                              true_scale_lat=60.,
-                                              ellipsoid=ellipsoid)
+        # Always expect PolarStereographic - never Stereographic.
+        #  Stereographic is a CF/Iris concept and not something described in
+        #  GRIB.
+        cs = iris.coord_systems.PolarStereographic(central_lat=90.,
+                                                   central_lon=262.,
+                                                   false_easting=0,
+                                                   false_northing=0,
+                                                   true_scale_lat=60.,
+                                                   ellipsoid=ellipsoid)
         lon0 = 225385728 * 1e-6
         lat0 = 32549114 * 1e-6
         x0m, y0m = cs.as_cartopy_crs().transform_point(

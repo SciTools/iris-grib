@@ -14,7 +14,7 @@ from six.moves import (filter, input, map, range, zip)  # noqa
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris.coord_systems import GeogCS, Stereographic
+from iris.coord_systems import GeogCS, PolarStereographic, Stereographic
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_template_20
@@ -29,7 +29,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         GdtTestMixin.setUp(self)
 
     def _default_coord_system(self):
-        return Stereographic(90.0, 0, ellipsoid=self.default_ellipsoid)
+        return PolarStereographic(90.0, 0, ellipsoid=self.default_ellipsoid)
 
     def test__template_number(self):
         grid_definition_template_20(self.stereo_test_cube, self.mock_grib)
@@ -85,6 +85,14 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("projectionCentreFlag", 0)
 
     def test_projection_centre_south_pole(self):
+        cs = PolarStereographic(-90.0, 0, ellipsoid=self.default_ellipsoid)
+        stereo_test_cube = self._make_test_cube(cs=cs, coord_units='m')
+        grid_definition_template_20(stereo_test_cube, self.mock_grib)
+        self._check_key("projectionCentreFlag", 128)
+
+    def test_projection_centre_south_pole_parent(self):
+        # Saving should be able to handle either class (PolarStereographic
+        #  being a subclass of Stereographic).
         cs = Stereographic(-90.0, 0, ellipsoid=self.default_ellipsoid)
         stereo_test_cube = self._make_test_cube(cs=cs, coord_units='m')
         grid_definition_template_20(stereo_test_cube, self.mock_grib)

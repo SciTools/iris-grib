@@ -792,6 +792,7 @@ def grid_definition_section(cube, grib):
 
     elif isinstance(cs, Stereographic):
         # Stereographic coordinate system (template 3.20).
+        # This will also handle the PolarStereographic subclass.
         grid_definition_template_20(cube, grib)
 
     elif isinstance(cs, LambertConformal):
