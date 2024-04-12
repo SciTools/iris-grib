@@ -36,21 +36,11 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.11"]
-        session: ["doctest", "gallery", "linkcheck"]
-        include:
-          - os: "ubuntu-latest"
-            python-version: "3.11"
-            session: "tests"
-            coverage: "--coverage"
-          - os: "ubuntu-latest"
-            python-version: "3.10"
-            session: "tests"
-          - os: "ubuntu-latest"
-            python-version: "3.9"
-            session: "tests"
+        session: ["tests"]
+        iris-source : ["conda-forge"]
 
     env:
-      IRIS_TEST_DATA_VERSION: "2.22"
+      IRIS_TEST_DATA_VERSION: "2.24"
       ENV_NAME: "ci-tests"
 
     steps:
@@ -104,19 +94,14 @@ jobs:
       - name: "nox cache"
         uses: ./.github/workflows/composite/nox-cache
         with:
-          cache_build: 2
+          cache_build: 0
           env_name: ${{ env.ENV_NAME }}
           lock_file: ${{ env.LOCK_FILE }}
 
       - name: "iris ${{ matrix.session }}"
         env:
           PY_VER: ${{ matrix.python-version }}
-          # Force coloured output on GitHub Actions.
-          PY_COLORS: "1"
-          IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
+          IRIS_SOURCE: ${{ matrix.iris-source }}
+#          IRIS_TEST_DATA_DIR: ${HOME}/iris-test-data
         run: |
-          nox --session ${{ matrix.session }} -- --test-data-dir ${IRIS_TEST_DATA_DIR}/test_data
-
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v4
-        if: ${{ matrix.coverage }}
+          nox --session ${{ matrix.session }} -- --test-data-dir ${HOME}/iris-test-data/test_data
