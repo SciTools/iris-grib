@@ -135,7 +135,11 @@ class Test(tests.IrisGribTest, GdtTestMixin):
             coord.points[1] = coord.points[0]
             return coord
 
-        test_cube = self._make_test_cube(coord_units="m")
+        test_cube = self._make_test_cube(
+            # Make the Y dimension longer to make irregularity is possible.
+            y_points=[7.0, 8.0, 9.0],
+            coord_units="m",
+        )
         coord_lon = test_cube.coord('longitude')
         coord_lat = test_cube.coord('latitude')
         if x:

@@ -142,7 +142,10 @@ class Test(tests.IrisGribTest, GdtTestMixin):
             coord.points[1] = coord.points[0]
             return coord
 
-        test_cube = self._make_test_cube()
+        test_cube = self._make_test_cube(
+            # Make the Y dimension longer to make irregularity is possible.
+            y_points=[7.0, 8.0, 9.0],
+        )
         coord_x = test_cube.coord('projection_x_coordinate')
         coord_y = test_cube.coord('projection_y_coordinate')
         if x:
