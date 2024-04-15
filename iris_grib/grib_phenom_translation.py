@@ -8,6 +8,7 @@ Provide grib 1 and 2 phenomenon translations to + from CF terms.
 This is done by wrapping '_grib_cf_map.py',
 which is in a format provided by the metadata translation project.
 
+
 Currently supports only these ones:
 
 * grib1 --> cf
@@ -16,6 +17,7 @@ Currently supports only these ones:
 
 '''
 from collections import namedtuple
+from dataclasses import dataclass
 import re
 import warnings
 
@@ -318,8 +320,15 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
     return _CF_GRIB2_TABLE[(standard_name, long_name)]
 
 
-class GRIBCode(namedtuple('GRIBCode',
-                          'edition discipline category number')):
+@dataclass
+class GRIBCode:
+    edition: int = None
+    grib1_table2_version: int = None
+    grib1_centre_number: int = None
+    grib2_discipline: int = None
+    grib2_parameter_category: int = None
+    parameter_number: int = None
+
     """
     An object representing a specific Grib phenomenon identity.
 
@@ -330,31 +339,85 @@ class GRIBCode(namedtuple('GRIBCode',
     numbers in it.
 
     """
-    __slots__ = ()
+    @staticmethod
+    def _invalid_edition(edition):
+        msg = (
+            f"Invalid grib edition, {edition!r}, for GRIBcode : "
+            "can only be 1 or 2."
+        )
+        raise ValueError(msg)
 
-    def __new__(cls, edition_or_string,
-                discipline=None, category=None, number=None):
-        args = (edition_or_string, discipline, category, number)
-        nargs = sum(arg is not None for arg in args)
-        if nargs == 1:
-            # Single argument: convert to a string and extract 4 integers.
+    @staticmethod
+    def _invalid_nargs(args):
+        nargs = len(args)
+        msg = (
+            f"Cannot create GRIBCode from {nargs} arguments, "
+            f"GRIBCode({args!r}) : expects either 1 or 4 arguments."
+        )
+        raise ValueError(msg)
+
+    def __init__(self, edition, *args, **kwargs):
+        if edition is None:
+            self._invalid_nargs([])
+
+        # Convert single argument to *args
+        if not args and not kwargs:
+            # Convert to a string and extract 4 integers.
             # NOTE: this also allows input from a GRIBCode, or a plain tuple.
-            edition_or_string = str(edition_or_string)
-            edition, discipline, category, number = \
-                cls._fournums_from_gribcode_string(edition_or_string)
-        elif nargs == 4:
-            edition = edition_or_string
-            edition, discipline, category, number = [
-                int(arg)
-                for arg in (edition, discipline, category, number)]
-        else:
-            msg = ('Cannot create GRIBCode from {} arguments, '
-                   '"GRIBCode{!r}" : '
-                   'expected either 1 or 4 non-None arguments.')
-            raise ValueError(msg.format(nargs, args))
+            edition_string = str(edition)
+            edition, arg2, arg3, arg4 = \
+                self._fournums_from_gribcode_string(edition_string)
+            args = [arg2, arg3, arg4]
 
-        return super(GRIBCode, cls).__new__(
-            cls, edition, discipline, category, number)
+        # Check edition + assign relevant keywords
+        if edition == 1:
+            argnames = [
+                "grib1_table2_version",
+                "grib1_centre_number",
+                "parameter_number"
+            ]
+        elif edition == 2:
+            argnames = [
+                "grib2_discipline",
+                "grib2_parameter_category",
+                "parameter_number",
+            ]
+        else:
+            self._invalid_edition(edition)
+
+        # Convert *args to *kwargs
+        if args:
+            if len(args) != 3:
+                nargs = len(args) + 1
+                args = tuple([edition] + list(args))
+                msg = (
+                    f"Cannot create GRIBCode from {nargs} arguments, "
+                    f"GRIBCode({args!r}) : expects either 1 or 4 arguments."
+                )
+                raise ValueError(msg.format(nargs, edition, args))
+
+            for i_arg, (arg, name) in enumerate(zip(args, argnames)):
+                if name in kwargs:
+                    msg = (
+                        f"Keyword {name!r}={kwargs[name]!r} "
+                        "is not compatible with a {i_arg + 1}th argument."
+                    )
+                    raise ValueError(msg)
+                else:
+                    kwargs[name] = arg
+
+        # Check + assign the properties relevant to the edition
+        self.edition = edition
+        for arg_name in argnames:
+            value = kwargs.get(arg_name, None)
+            if value is None:
+                msg = (
+                    "Missing required argument or keyword:"
+                    f"GRIBcode(edition={edition}) must have a value "
+                    f"for {arg_name!r}."
+                )
+                raise ValueError(msg)
+            setattr(self, arg_name, int(value))
 
     RE_PARSE_FOURNUMS = re.compile(4 * r'[^\d]*(\d*)')
 
@@ -377,9 +440,22 @@ class GRIBCode(namedtuple('GRIBCode',
 
         return nums
 
-    PRINT_FORMAT = 'GRIB{:1d}:d{:03d}c{:03d}n{:03d}'
-
     def __str__(self):
-        result = self.PRINT_FORMAT.format(
-            self.edition, self.discipline, self.category, self.number)
+        if self.edition == 1:
+            format = 'GRIB1:t{:03d}c{:03d}n{:03d}'
+            result = format.format(
+                self.grib1_table2_version,
+                self.grib1_centre_number,
+                self.parameter_number
+            )
+        elif self.edition == 2:
+            format = 'GRIB2:d{:03d}c{:03d}n{:03d}'
+            result = format.format(
+                self.grib2_discipline,
+                self.grib2_parameter_category,
+                self.parameter_number
+            )
+        else:
+            self._invalid_edition(self.edition)
+
         return result

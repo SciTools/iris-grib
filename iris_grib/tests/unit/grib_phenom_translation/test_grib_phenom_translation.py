@@ -156,30 +156,30 @@ class TestGRIBcode(tests.IrisTest):
     # However, creation is a bit special so exercise all those cases.
     def test_create_from_keys(self):
         gribcode = GRIBCode(
-            edition_or_string=5,
-            discipline=7,
-            category=4,
-            number=199)
-        self.assertEqual(gribcode.edition, 5)
-        self.assertEqual(gribcode.discipline, 7)
-        self.assertEqual(gribcode.category, 4)
-        self.assertEqual(gribcode.number, 199)
+            edition=2,
+            grib2_discipline=7,
+            grib2_parameter_category=4,
+            parameter_number=199)
+        self.assertEqual(gribcode.edition, 2)
+        self.assertEqual(gribcode.grib2_discipline, 7)
+        self.assertEqual(gribcode.grib2_parameter_category, 4)
+        self.assertEqual(gribcode.parameter_number, 199)
 
     def test_create_from_args(self):
-        gribcode = GRIBCode(7, 3, 12, 99)
-        self.assertEqual(gribcode.edition, 7)
-        self.assertEqual(gribcode.discipline, 3)
-        self.assertEqual(gribcode.category, 12)
-        self.assertEqual(gribcode.number, 99)
+        gribcode = GRIBCode(2, 3, 12, 99)
+        self.assertEqual(gribcode.edition, 2)
+        self.assertEqual(gribcode.grib2_discipline, 3)
+        self.assertEqual(gribcode.grib2_parameter_category, 12)
+        self.assertEqual(gribcode.parameter_number, 99)
 
     def test_create_is_copy(self):
-        gribcode1 = GRIBCode(7, 3, 12, 99)
-        gribcode2 = GRIBCode(7, 3, 12, 99)
+        gribcode1 = GRIBCode(2, 3, 12, 99)
+        gribcode2 = GRIBCode(2, 3, 12, 99)
         self.assertEqual(gribcode1, gribcode2)
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_from_gribcode(self):
-        gribcode1 = GRIBCode((4, 3, 2, 1))
+        gribcode1 = GRIBCode((2, 3, 2, 1))
         gribcode2 = GRIBCode(gribcode1)
         self.assertEqual(gribcode1, gribcode2)
         # NOTE: *not* passthrough : it creates a copy
@@ -187,24 +187,24 @@ class TestGRIBcode(tests.IrisTest):
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_from_string(self):
-        gribcode = GRIBCode('xxx12xs-34 -5,678qqqq')
+        gribcode = GRIBCode('xxx1xs-34 -5,678qqqq')
         # NOTE: args 2 and 3 are *not* negative.
-        self.assertEqual(gribcode, GRIBCode(12, 34, 5, 678))
+        self.assertEqual(gribcode, GRIBCode(1, 34, 5, 678))
 
     def test_create_from_own_string(self):
         # Check that GRIBCode string reprs are valid as create arguments.
         gribcode = GRIBCode(
-            edition_or_string=2,
-            discipline=17,
-            category=94,
-            number=231)
+            edition=2,
+            grib2_discipline=17,
+            grib2_parameter_category=94,
+            parameter_number=231)
         grib_param_string = str(gribcode)
         newcode = GRIBCode(grib_param_string)
         self.assertEqual(newcode, gribcode)
 
     def test_create_from_tuple(self):
-        gribcode = GRIBCode((4, 3, 2, 1))
-        self.assertEqual(gribcode, GRIBCode(4, 3, 2, 1))
+        gribcode = GRIBCode((1, 3, 2, 1))
+        self.assertEqual(gribcode, GRIBCode(1, 3, 2, 1))
 
     def test_create_bad_nargs(self):
         # Between 1 and 4 args is not invalid call syntax, but it should fail.
