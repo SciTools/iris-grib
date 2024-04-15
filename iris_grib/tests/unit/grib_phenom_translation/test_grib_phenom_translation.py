@@ -154,6 +154,9 @@ class TestGribPhenomenonLookup(tests.IrisTest):
 class TestGRIBcode(tests.IrisTest):
     # GRIBCode is basically a namedtuple, so not all behaviour needs testing.
     # However, creation is a bit special so exercise all those cases.
+
+    # TODO: test new + separate GRIB1 behaviour also
+
     def test_create_from_keys(self):
         gribcode = GRIBCode(
             edition=2,
@@ -261,8 +264,9 @@ class TestGRIBcode(tests.IrisTest):
     def test__repr__(self):
         result = repr(GRIBCode(2, 17, 3, 123))
         expected = (
-            'GRIBCode(edition=2, grib1_table2_version=None, grib1_centre_number=None, '
-            'grib2_discipline=17, grib2_parameter_category=3, parameter_number=123)'
+            'GRIBCode(edition=2, grib1_table2_version=None, '
+            'grib1_centre_number=None, grib2_discipline=17, '
+            'grib2_parameter_category=3, parameter_number=123)'
         )
         self.assertEqual(result, expected)
 

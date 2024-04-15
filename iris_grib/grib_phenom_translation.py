@@ -19,6 +19,7 @@ Currently supports only these ones:
 from collections import namedtuple
 from dataclasses import dataclass
 import re
+from typing import Optional
 import warnings
 
 import cf_units
@@ -322,12 +323,12 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
 
 @dataclass
 class GRIBCode:
-    edition: int = None
-    grib1_table2_version: int = None
-    grib1_centre_number: int = None
-    grib2_discipline: int = None
-    grib2_parameter_category: int = None
-    parameter_number: int = None
+    edition: Optional[int] = None
+    grib1_table2_version: Optional[int] = None
+    grib1_centre_number: Optional[int] = None
+    grib2_discipline: Optional[int] = None
+    grib2_parameter_category: Optional[int] = None
+    parameter_number: Optional[int] = None
 
     """
     An object representing a specific Grib phenomenon identity.
@@ -338,6 +339,7 @@ class GRIBCode:
     similar object; a tuple of numbers; or any string with 4 separate decimal
     numbers in it.
 
+    TODO: reorganise into 2 separate dataclasses with different members
     """
     @staticmethod
     def _invalid_edition(edition):
