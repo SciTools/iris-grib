@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   tests:
-    name: "${{ matrix.session }} (py${{ matrix.python-version }} ${{ matrix.os }}) iris-source: ${{ matrix.iris-source }}"
+    name: "${{ matrix.session }} (py${{ matrix.python-version }} ${{ matrix.os }}) [${{ matrix.iris-source }}]"
 
     runs-on: ${{ matrix.os }}
 
@@ -36,7 +36,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.11"]
-#        session: ["doctest", "linkcheck"]
+        session: ["doctest"]
         # conda-forge doesn't fit within nose char limits, change with pytest
         iris-source : ["condaforge"]
         include:
