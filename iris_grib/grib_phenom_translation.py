@@ -339,7 +339,7 @@ class GRIBCode:
     similar object; a tuple of numbers; or any string with 4 separate decimal
     numbers in it.
 
-    TODO: reorganise into 2 separate dataclasses with different members
+    TODO: (still) reorganise into 2 separate dataclasses with different members
     """
     @staticmethod
     def _invalid_edition(edition):

@@ -155,7 +155,7 @@ class TestGRIBcode(tests.IrisTest):
     # GRIBCode is basically a namedtuple, so not all behaviour needs testing.
     # However, creation is a bit special so exercise all those cases.
 
-    # TODO: test new + separate GRIB1 behaviour also
+    # TODO: (still) test new + separate GRIB1 behaviour also
 
     def test_create_from_keys(self):
         gribcode = GRIBCode(
