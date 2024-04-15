@@ -24,3 +24,4 @@ dependencies:
   - pep8
   - requests
   - nose
+  - iris-sample-data
