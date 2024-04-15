@@ -324,11 +324,11 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
 @dataclass
 class GRIBCode:
     edition: Optional[int] = None
-    grib1_table2_version: Optional[int] = None
-    grib1_centre_number: Optional[int] = None
-    grib2_discipline: Optional[int] = None
-    grib2_parameter_category: Optional[int] = None
-    parameter_number: Optional[int] = None
+    table_version: Optional[int] = None
+    centre_number: Optional[int] = None
+    discipline: Optional[int] = None
+    category: Optional[int] = None
+    number: Optional[int] = None
 
     """
     An object representing a specific Grib phenomenon identity.
@@ -374,15 +374,15 @@ class GRIBCode:
         # Check edition + assign relevant keywords
         if edition == 1:
             argnames = [
-                "grib1_table2_version",
-                "grib1_centre_number",
-                "parameter_number"
+                "table_version",
+                "centre_number",
+                "number"
             ]
         elif edition == 2:
             argnames = [
-                "grib2_discipline",
-                "grib2_parameter_category",
-                "parameter_number",
+                "discipline",
+                "category",
+                "number",
             ]
         else:
             self._invalid_edition(edition)
@@ -446,18 +446,49 @@ class GRIBCode:
         if self.edition == 1:
             format = 'GRIB1:t{:03d}c{:03d}n{:03d}'
             result = format.format(
-                self.grib1_table2_version,
-                self.grib1_centre_number,
-                self.parameter_number
+                self.table_version,
+                self.centre_number,
+                self.number
             )
         elif self.edition == 2:
             format = 'GRIB2:d{:03d}c{:03d}n{:03d}'
             result = format.format(
-                self.grib2_discipline,
-                self.grib2_parameter_category,
-                self.parameter_number
+                self.discipline,
+                self.category,
+                self.number
             )
         else:
             self._invalid_edition(self.edition)
+
+        return result
+
+    def __repr__(self):
+        edition = self.edition
+        ok_state = edition in (1, 2)
+        if ok_state:
+            result = f"GRIBCode(edition={edition}"
+            if edition == 1:
+                argnames = [
+                    "table_version",
+                    "centre_number",
+                    "number"
+                ]
+            elif self.edition == 2:
+                argnames = [
+                    "discipline",
+                    "category",
+                    "number",
+                ]
+            for argname in argnames:
+                value = getattr(self, argname, None)
+                if not isinstance(value, int):
+                    ok_state = False
+                    break
+                result += f", {argname}={value}"
+            result += ")"
+
+        if not ok_state:
+            # Invalid content somewhere : fall back on dataclass default repr
+            result = super().__repr__()
 
         return result

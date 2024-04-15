@@ -160,20 +160,21 @@ class TestGRIBcode(tests.IrisTest):
     def test_create_from_keys(self):
         gribcode = GRIBCode(
             edition=2,
-            grib2_discipline=7,
-            grib2_parameter_category=4,
-            parameter_number=199)
+            discipline=7,
+            category=4,
+            number=199
+        )
         self.assertEqual(gribcode.edition, 2)
-        self.assertEqual(gribcode.grib2_discipline, 7)
-        self.assertEqual(gribcode.grib2_parameter_category, 4)
-        self.assertEqual(gribcode.parameter_number, 199)
+        self.assertEqual(gribcode.discipline, 7)
+        self.assertEqual(gribcode.category, 4)
+        self.assertEqual(gribcode.number, 199)
 
     def test_create_from_args(self):
         gribcode = GRIBCode(2, 3, 12, 99)
         self.assertEqual(gribcode.edition, 2)
-        self.assertEqual(gribcode.grib2_discipline, 3)
-        self.assertEqual(gribcode.grib2_parameter_category, 12)
-        self.assertEqual(gribcode.parameter_number, 99)
+        self.assertEqual(gribcode.discipline, 3)
+        self.assertEqual(gribcode.category, 12)
+        self.assertEqual(gribcode.number, 99)
 
     def test_create_is_copy(self):
         gribcode1 = GRIBCode(2, 3, 12, 99)
@@ -198,9 +199,10 @@ class TestGRIBcode(tests.IrisTest):
         # Check that GRIBCode string reprs are valid as create arguments.
         gribcode = GRIBCode(
             edition=2,
-            grib2_discipline=17,
-            grib2_parameter_category=94,
-            parameter_number=231)
+            discipline=17,
+            category=94,
+            number=231
+        )
         grib_param_string = str(gribcode)
         newcode = GRIBCode(grib_param_string)
         self.assertEqual(newcode, gribcode)
@@ -264,9 +266,7 @@ class TestGRIBcode(tests.IrisTest):
     def test__repr__(self):
         result = repr(GRIBCode(2, 17, 3, 123))
         expected = (
-            'GRIBCode(edition=2, grib1_table2_version=None, '
-            'grib1_centre_number=None, grib2_discipline=17, '
-            'grib2_parameter_category=3, parameter_number=123)'
+            'GRIBCode(edition=2, discipline=17, category=3, number=123)'
         )
         self.assertEqual(result, expected)
 
