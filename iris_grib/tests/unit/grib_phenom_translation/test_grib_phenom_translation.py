@@ -258,6 +258,14 @@ class TestGRIBcode(tests.IrisTest):
         result = str(GRIBCode(2, 17, 3, 123))
         self.assertEqual(result, 'GRIB2:d017c003n123')
 
+    def test__repr__(self):
+        result = repr(GRIBCode(2, 17, 3, 123))
+        expected = (
+            'GRIBCode(edition=2, grib1_table2_version=None, grib1_centre_number=None, '
+            'grib2_discipline=17, grib2_parameter_category=3, parameter_number=123)'
+        )
+        self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     tests.main()
