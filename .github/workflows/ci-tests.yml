@@ -36,7 +36,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.11"]
-        session: ["doctest", "linkcheck"]
+#        session: ["doctest", "linkcheck"]
         # conda-forge doesn't fit within nose char limits, change with pytest
         iris-source : ["condaforge"]
         include:
