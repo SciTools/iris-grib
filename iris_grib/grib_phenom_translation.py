@@ -53,12 +53,12 @@ class _LookupTable(dict):
 
 # Define namedtuples for keys+values of the Grib1 lookup table.
 
-_Grib1ToCfKeyClass = namedtuple(
+Grib1CfKey = namedtuple(
     'Grib1CfKey',
     ('table2_version', 'centre_number', 'param_number'))
 
 # NOTE: this form is currently used for both Grib1 *and* Grib2
-_GribToCfDataClass = namedtuple(
+Grib1CfData = namedtuple(
     'Grib1CfData',
     ('standard_name', 'long_name', 'units', 'set_height'))
 
@@ -79,9 +79,9 @@ def _make_grib1_cf_table():
         e.g. "2-metre tempererature".
 
         """
-        grib1_key = _Grib1ToCfKeyClass(table2_version=int(table2_version),
-                                       centre_number=int(centre_number),
-                                       param_number=int(param_number))
+        grib1_key = Grib1CfKey(table2_version=int(table2_version),
+                               centre_number=int(centre_number),
+                               param_number=int(param_number))
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
                 warnings.warn('{} is not a recognised CF standard name '
@@ -89,10 +89,10 @@ def _make_grib1_cf_table():
                 return None
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        cf_data = _GribToCfDataClass(standard_name=standard_name,
-                                     long_name=long_name,
-                                     units=a_cf_unit,
-                                     set_height=set_height)
+        cf_data = Grib1CfData(standard_name=standard_name,
+                              long_name=long_name,
+                              units=a_cf_unit,
+                              set_height=set_height)
         return (grib1_key, cf_data)
 
     # Interpret the imported Grib1-to-CF table.
@@ -145,7 +145,7 @@ _GRIB1_CF_TABLE = _make_grib1_cf_table()
 
 # Define a namedtuple for the keys of the Grib2 lookup table.
 
-_Grib2ToCfKeyClass = namedtuple(
+Grib2CfKey = namedtuple(
     'Grib2CfKey',
     ('param_discipline', 'param_category', 'param_number'))
 
@@ -166,9 +166,9 @@ def _make_grib2_to_cf_table():
         e.g. "2-metre tempererature".
 
         """
-        grib2_key = _Grib2ToCfKeyClass(param_discipline=int(param_discipline),
-                                       param_category=int(param_category),
-                                       param_number=int(param_number))
+        grib2_key = Grib2CfKey(param_discipline=int(param_discipline),
+                               param_category=int(param_category),
+                               param_number=int(param_number))
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
                 warnings.warn('{} is not a recognised CF standard name '
@@ -176,10 +176,10 @@ def _make_grib2_to_cf_table():
                 return None
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        cf_data = _GribToCfDataClass(standard_name=standard_name,
-                                     long_name=long_name,
-                                     units=a_cf_unit,
-                                     set_height=None)
+        cf_data = Grib1CfData(standard_name=standard_name,
+                              long_name=long_name,
+                              units=a_cf_unit,
+                              set_height=None)
         return (grib2_key, cf_data)
 
     # Interpret the grib2 info from grib_cf_map
@@ -204,11 +204,11 @@ _GRIB2_CF_TABLE = _make_grib2_to_cf_table()
 
 # Define namedtuples for key+values of the cf-to-grib2 lookup table.
 
-_CfToGrib2KeyClass = namedtuple(
+CfGrib2Key = namedtuple(
     'CfGrib2Key',
     ('standard_name', 'long_name'))
 
-_CfToGrib2DataClass = namedtuple(
+CfGrib2Data = namedtuple(
     'CfGrib2Data',
     ('discipline', 'category', 'number', 'units'))
 
@@ -233,13 +233,13 @@ def _make_cf_to_grib2_table():
                 warnings.warn('{} is not a recognised CF standard name '
                               '(skipping).'.format(standard_name))
                 return None
-        cf_key = _CfToGrib2KeyClass(standard_name, long_name)
+        cf_key = CfGrib2Key(standard_name, long_name)
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        grib2_data = _CfToGrib2DataClass(discipline=int(param_discipline),
-                                         category=int(param_category),
-                                         number=int(param_number),
-                                         units=a_cf_unit)
+        grib2_data = CfGrib2Data(discipline=int(param_discipline),
+                                 category=int(param_category),
+                                 number=int(param_number),
+                                 units=a_cf_unit)
         return (cf_key, grib2_data)
 
     # Interpret the imported CF-to-Grib2 table into a lookup table
@@ -277,9 +277,9 @@ def grib1_phenom_to_cf_info(table2_version, centre_number, param_number):
     * set_height :  a scalar 'height' value , or None
 
     """
-    grib1_key = _Grib1ToCfKeyClass(table2_version=table2_version,
-                                   centre_number=centre_number,
-                                   param_number=param_number)
+    grib1_key = Grib1CfKey(table2_version=table2_version,
+                           centre_number=centre_number,
+                           param_number=param_number)
     return _GRIB1_CF_TABLE[grib1_key]
 
 
@@ -294,9 +294,9 @@ def grib2_phenom_to_cf_info(param_discipline, param_category, param_number):
     * units : a :class:`cf_units.Unit`
 
     """
-    grib2_key = _Grib2ToCfKeyClass(param_discipline=int(param_discipline),
-                                   param_category=int(param_category),
-                                   param_number=int(param_number))
+    grib2_key = Grib2CfKey(param_discipline=int(param_discipline),
+                           param_category=int(param_category),
+                           param_number=int(param_number))
     return _GRIB2_CF_TABLE[grib2_key]
 
 
