@@ -14,6 +14,8 @@ from __future__ import (absolute_import, division, print_function)
 import iris_grib.tests as tests
 
 from iris.coord_systems import GeogCS, PolarStereographic, Stereographic
+from iris.coords import AuxCoord
+from iris.exceptions import TranslationError
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_template_20
@@ -27,8 +29,14 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
         GdtTestMixin.setUp(self)
 
-    def _default_coord_system(self):
-        return PolarStereographic(90.0, 0, ellipsoid=self.default_ellipsoid)
+    def _default_coord_system(self, false_easting=0, false_northing=0):
+        return PolarStereographic(
+            90.0,
+            0,
+            false_easting=false_easting,
+            false_northing=false_northing,
+            ellipsoid=self.default_ellipsoid,
+        )
 
     def test__template_number(self):
         grid_definition_template_20(self.stereo_test_cube, self.mock_grib)
@@ -101,8 +109,78 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         cs = Stereographic(0, 0, ellipsoid=self.default_ellipsoid)
         stereo_test_cube = self._make_test_cube(cs=cs, coord_units='m')
         exp_emsg = 'Bipolar and symmetric .* not supported.'
-        with self.assertRaisesRegexp(ValueError, exp_emsg):
+        with self.assertRaisesRegexp(TranslationError, exp_emsg):
             grid_definition_template_20(stereo_test_cube, self.mock_grib)
+
+    def __fail_false_easting_northing(self, false_easting, false_northing):
+        cs = self._default_coord_system(false_easting=false_easting,
+                                        false_northing=false_northing)
+        test_cube = self._make_test_cube(cs=cs)
+        message = "Non-zero unsupported"
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_20(test_cube, self.mock_grib)
+
+    def test__fail_false_easting(self):
+        self.__fail_false_easting_northing(10.0, 0.0)
+
+    def test__fail_false_northing(self):
+        self.__fail_false_easting_northing(0.0, 10.0)
+
+    def test__fail_false_easting_northing(self):
+        self.__fail_false_easting_northing(10.0, 10.0)
+
+    def __fail_irregular_coords(self, x=False, y=False):
+        def irregular_coord(coord):
+            coord = AuxCoord.from_coord(coord)
+            coord.points[1] = coord.points[0]
+            return coord
+
+        test_cube = self._make_test_cube(coord_units="m")
+        coord_lon = test_cube.coord('longitude')
+        coord_lat = test_cube.coord('latitude')
+        if x:
+            test_cube.replace_coord(irregular_coord(coord_lon))
+        if y:
+            test_cube.replace_coord(irregular_coord(coord_lat))
+
+        message = "Irregular coordinates not supported"
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_20(test_cube, self.mock_grib)
+
+    def test__fail_irregular_x_coords(self):
+        self.__fail_irregular_coords(x=True)
+
+    def test__fail_irregular_y_coords(self):
+        self.__fail_irregular_coords(y=True)
+
+    def test__fail_irregular_coords(self):
+        self.__fail_irregular_coords(x=True, y=True)
+
+    def test__fail_non_identical_lats(self):
+        coord_system = PolarStereographic(
+            90.0,
+            0,
+            true_scale_lat=60.0,
+            ellipsoid=self.default_ellipsoid,
+        )
+        test_cube = self._make_test_cube(cs=coord_system, coord_units='m')
+        message = (
+            "only write a GRIB Template 3.20 file where these are identical"
+        )
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_20(test_cube, self.mock_grib)
+
+    def test__fail_scale_factor(self):
+        coord_system = PolarStereographic(
+            90.0,
+            0,
+            scale_factor_at_projection_origin=0.5,
+            ellipsoid=self.default_ellipsoid,
+        )
+        test_cube = self._make_test_cube(cs=coord_system, coord_units='m')
+        message = "cannot write scale_factor_at_projection_origin"
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_20(test_cube, self.mock_grib)
 
 
 if __name__ == "__main__":

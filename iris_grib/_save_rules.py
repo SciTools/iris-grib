@@ -595,6 +595,18 @@ def _perspective_projection_common(cube, grib):
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
     cs = y_coord.coord_system
+    cs_name = cs.grid_mapping_name.replace('_', ' ').title()
+
+    both_falses_zero = all([
+        np.isclose(f, 0.0, atol=1e-6)
+        for f in (cs.false_easting, cs.false_northing)
+    ])
+    if not both_falses_zero:
+        message = (
+            f"{cs.false_easting=}, {cs.false_northing=} . Non-zero "
+            f"unsupported for {cs_name}."
+        )
+        raise TranslationError(message)
 
     # Normalise the coordinate values to millimetres - the resolution
     # used in the GRIB message.
@@ -608,7 +620,6 @@ def _perspective_projection_common(cube, grib):
         x_step = step(x_mm, atol=1)
         y_step = step(y_mm, atol=1)
     except ValueError:
-        cs_name = cs.grid_mapping_name.replace('_', ' ').title()
         msg = 'Irregular coordinates not supported for {!r}.'
         raise TranslationError(msg.format(cs_name))
     eccodes.codes_set(grib, 'Dx', abs(x_step))
@@ -658,8 +669,24 @@ def grid_definition_template_20(cube, grib):
         centre_flag = 0x0
     else:
         emsg = ('Bipolar and symmetric polar stereo projections '
-                'are not supported.')
-        raise ValueError(emsg)
+                'are not supported in GRIB Template 3.20.')
+        raise TranslationError(emsg)
+
+    if cs.true_scale_lat and cs.true_scale_lat != cs.central_lat:
+        message = (
+            f"{cs.true_scale_lat=}, {cs.central_lat=} . iris_grib can "
+            "only write a GRIB Template 3.20 file where these are identical."
+        )
+        raise TranslationError(message)
+
+    if cs.scale_factor_at_projection_origin is not None:
+        message = (
+            f"{cs.scale_factor_at_projection_origin=} . iris_grib cannot "
+            "write scale_factor_at_projection_origin to a GRIB Template 3.20 "
+            "file."
+        )
+        raise TranslationError(message)
+
     eccodes.codes_set(grib, 'projectionCentreFlag', centre_flag)
 
 
