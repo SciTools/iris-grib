@@ -301,10 +301,10 @@ class GribWrapper:
             param_number=self.indicatorOfParameter)
         self.extra_keys['_cf_data'] = cf_data
         self.extra_keys['_grib_code'] = gptx.GRIBCode(
-            edition_or_string=1,
-            grib1_table2_version=self.table2Version,
-            grib1_centre_number=centre_number,
-            grib1_indicator_of_parameter=self.indicatorOfParameter
+            edition=1,
+            table_version=self.table2Version,
+            centre_number=centre_number,
+            number=self.indicatorOfParameter
         )
 
         # reference date
