@@ -109,6 +109,13 @@ jobs:
           conda info
           conda list
 
+      - name: "cartopy cache"
+        uses: ./.github/workflows/composite/cartopy-cache
+        with:
+          cache_build: 0
+          cache_period: ${{ env.CACHE_PERIOD }}
+          env_name: ${{ env.ENV_NAME }}
+
       - name: "nox cache"
         uses: ./.github/workflows/composite/nox-cache
         with:
