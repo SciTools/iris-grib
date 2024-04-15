@@ -2,7 +2,7 @@
 <cubes xmlns="urn:x-iris:cubeml-0.2">
   <cube dtype="float64" long_name="UNKNOWN LOCAL PARAM 106.137" units="unknown">
     <attributes>
-      <attribute name="GRIB_PARAM" value="GRIB1:d137c074n106"/>
+      <attribute name="GRIB_PARAM" value="GRIB1:t137c074n106"/>
     </attributes>
     <coords>
       <coord>
