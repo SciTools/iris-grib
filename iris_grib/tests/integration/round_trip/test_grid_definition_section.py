@@ -151,8 +151,8 @@ class GDT20Common:
         """Roundtrip testing that attributes save+load correctly."""
 
         # Enable subclassing to test different permutations.
-        coord_system_class: type[Stereographic]     # noqa: E701
-        pole: Literal["north", "south"]     # noqa: E701
+        coord_system_class: type[Stereographic]
+        pole: Literal["north", "south"]
 
         def setUp(self):
             # Create a Cube to save, inspired by
