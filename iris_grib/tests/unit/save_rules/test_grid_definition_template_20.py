@@ -8,7 +8,6 @@ Unit tests for :meth:`iris_grib._save_rules.grid_definition_template_20`.
 """
 
 from __future__ import (absolute_import, division, print_function)
-from six.moves import (filter, input, map, range, zip)  # noqa
 
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
