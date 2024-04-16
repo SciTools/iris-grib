@@ -103,6 +103,7 @@ addopts = [
     "-v",
 ]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
+# configure logging as recommended by repo-review
 log_cli = "True"
 log_cli_level = "INFO"
 minversion = "6.0"
