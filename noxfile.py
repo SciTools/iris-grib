@@ -311,10 +311,9 @@ def tests(session: nox.sessions.Session, iris_source: str):
     session.run("python", "-m", "eccodes", "selfcheck")
 
     session.run(
-        "python",
-        "-m",
-        "iris_grib.tests.runner",
-        "--default-tests",
+        "pytest",
+        "--pyargs",
+        "iris_grib",
     )
 
 

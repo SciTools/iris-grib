@@ -16,6 +16,11 @@ Features
   4.6, i.e. percentile forecasts.
   `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
 
+Dependencies
+^^^^^^^^^^^^
+* `@bjlittle <https://github.com/bjlittle>`_ migrated to ``pytest``.
+  `(PR#420) <https://github.com/SciTools/iris-grib/pull/420>`_
+
 
 What's new in iris-grib v0.19.1
 -------------------------------
