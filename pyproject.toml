@@ -103,6 +103,8 @@ addopts = [
     "-v",
 ]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
+log_cli = "True"
+log_cli_level = "INFO"
 minversion = "6.0"
 testpaths = "iris_grib"
 xfail_strict = "True"
