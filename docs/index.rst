@@ -63,7 +63,7 @@ Examples :
 
   * This translates to a standard_name and units of "geopotential_height / m"
 
-* ``"GRIB1:d002c007n033"`` is GRIB1 with table2Version=2, centre=7
+* ``"GRIB1:t002c007n033"`` is GRIB1 with table2Version=2, centre=7
   ("US National Weather Service - NCEP (WMC)"), and indicatorOfParameter=33
   ("U-component of wind m s**-1").
 
