@@ -1,7 +1,7 @@
 # Test dependencies.
 
-mock
 filelock
 requests
 iris-sample-data
 pytest
+pytest-mock
