@@ -37,13 +37,12 @@ jobs:
         os: ["ubuntu-latest"]
         python-version: ["3.11"]
         session: ["doctest"]
-        # conda-forge doesn't fit within nose char limits, change with pytest
-        iris-source : ["condaforge"]
+        iris-source : ["conda-forge"]
         include:
           - os: "ubuntu-latest"
             python-version: "3.11"
             session: "tests"
-            iris-source: "condaforge"
+            iris-source: "conda-forge"
           - os: "ubuntu-latest"
             python-version: "3.11"
             session: "tests"
@@ -51,11 +50,11 @@ jobs:
           - os: "ubuntu-latest"
             python-version: "3.10"
             session: "tests"
-            iris-source: "condaforge"
+            iris-source: "conda-forge"
           - os: "ubuntu-latest"
             python-version: "3.9"
             session: "tests"
-            iris-source: "condaforge"
+            iris-source: "conda-forge"
 
     env:
       IRIS_TEST_DATA_VERSION: "2.24"
