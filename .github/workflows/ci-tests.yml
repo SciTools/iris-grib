@@ -125,7 +125,8 @@ jobs:
 
       - name: "iris ${{ matrix.session }}"
         env:
-          PY_VER: ${{ matrix.python-version }}
           IRIS_SOURCE: ${{ matrix.iris-source }}
+          PY_COLORS: 1
+          PY_VER: ${{ matrix.python-version }}
         run: |
           nox --session ${{ matrix.session }} -- --test-data-dir ${HOME}/iris-test-data/test_data

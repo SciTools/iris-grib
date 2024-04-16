@@ -92,3 +92,18 @@ exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--doctest-continue-on-failure",
+    "--doctest-modules",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "-v",
+]
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
+minversion = "6.0"
+testpaths = "iris_grib"
+xfail_strict = "True"
+
