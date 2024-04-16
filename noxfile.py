@@ -163,7 +163,7 @@ def _install_and_cache_venv(session: nox.sessions.Session) -> None:
 
 @contextmanager
 def prepare_venv(
-    session: nox.sessions.Session, iris_source: str = 'conda_forge'
+    session: nox.sessions.Session, iris_source: str = 'conda-forge'
 ) -> None:
     """
     Create and cache the nox session conda environment, and additionally
@@ -177,7 +177,7 @@ def prepare_venv(
         A `nox.sessions.Session` object.
 
     iris_source: str
-        Determines where Iris was sourced from. Either 'conda_forge' (the
+        Determines where Iris was sourced from. Either 'conda-forge' (the
         default), or 'source' which refers to the Iris main branch.
 
     Notes
@@ -302,7 +302,7 @@ def tests(session: nox.sessions.Session, iris_source: str):
         A `nox.sessions.Session` object.
 
     iris_source: str
-        Either 'conda_forge' if using Iris from conda-forge, or 'source' if
+        Either 'conda-forge' if using Iris from conda-forge, or 'source' if
         installing Iris from the Iris' main branch.
 
     """
