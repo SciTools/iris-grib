@@ -9,7 +9,6 @@ Carried over from old iris/tests/test_grib_phenom_translation.py.
 Code is out of step with current test conventions and standards.
 
 '''
-
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -23,17 +22,17 @@ from iris_grib.grib_phenom_translation import GRIBCode
 class TestGribLookupTableType(tests.IrisTest):
     def test_lookuptable_type(self):
         ll = gptx._LookupTable([('a', 1), ('b', 2)])
-        assert ll['a'] == 1
-        assert ll['q'] is None
+        self.assertEqual(1, ll['a'])
+        self.assertIsNone(ll['q'])
         ll['q'] = 15
-        assert ll['q'] == 15
+        self.assertEqual(15, ll['q'])
         ll['q'] = 15
-        assert ll['q'] == 15
+        self.assertEqual(15, ll['q'])
         with self.assertRaises(KeyError):
             ll['q'] = 7
         del ll['q']
         ll['q'] = 7
-        assert ll['q'] == 7
+        self.assertEqual(7, ll['q'])
 
 
 class TestGribPhenomenonLookup(tests.IrisTest):
@@ -273,45 +272,66 @@ class TestGRIBcode(tests.IrisTest):
 
     def test_create_bad_nargs(self):
         # Between 1 and 4 args is not invalid call syntax, but it should fail.
-        with self.assertRaisesRegex(
-                ValueError,
-                'Cannot create GRIBCode from 2 arguments'):
+        msg = (
+            "Cannot create.* from 2 arguments.*"
+            r"GRIBCode\(\(1, 2\)\).*"
+            "expects either 1 or 4 arguments"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode(1, 2)
 
     def test_create_bad_single_arg_None(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Cannot create GRIBCode from 0 arguments'):
+        msg = (
+            "Cannot create GRIBCode from 0 arguments.*"
+            r"GRIBCode\(\(\)\).*"
+            "expects either 1 or 4 arguments"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode(None)
 
     def test_create_bad_single_arg_empty_string(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Invalid argument for GRIBCode creation'):
+        msg = (
+            "Invalid argument for GRIBCode creation.*"
+            r"GRIBCode\(''\).*"
+            "requires 4 numbers, separated by non-numerals"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode('')
 
     def test_create_bad_single_arg_nonums(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Invalid argument for GRIBCode creation'):
+        msg = (
+            "Invalid argument for GRIBCode creation.*"
+            r"GRIBCode\('saas- dsa- '\).*"
+            "requires 4 numbers, separated by non-numerals"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode('saas- dsa- ')
 
     def test_create_bad_single_arg_less_than_4_nums(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Invalid argument for GRIBCode creation'):
+        msg = (
+            "Invalid argument for GRIBCode creation.*"
+            r"GRIBCode\('1,2,3'\).*"
+            "requires 4 numbers, separated by non-numerals"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode('1,2,3')
 
     def test_create_bad_single_arg_number(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Invalid argument for GRIBCode creation'):
+        msg = (
+            "Invalid argument for GRIBCode creation.*"
+            r"GRIBCode\('4'\).*"
+            "requires 4 numbers, separated by non-numerals"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode(4)
 
     def test_create_bad_single_arg_single_numeric(self):
-        with self.assertRaisesRegex(
-                ValueError,
-                'Invalid argument for GRIBCode creation'):
+        msg = (
+            "Invalid argument for GRIBCode creation.*"
+            r"GRIBCode\('44'\).*"
+            "requires 4 numbers, separated by non-numerals"
+        )
+        with self.assertRaisesRegex(ValueError, msg):
             GRIBCode('44')
 
     def test_create_string_more_than_4_nums(self):
@@ -344,6 +364,51 @@ class TestGRIBcode(tests.IrisTest):
 
     def check__repr__grib2(self):
         self.check__repr__(edition=2)
+
+    def test_bad_content__str_repr__badedition(self):
+        gribcode = GRIBCode(2, 11, 12, 13)
+        gribcode.edition = 77
+        str_result = str(gribcode)
+        expected = (
+            "<GRIBCode2 with invalid content: "
+            "{'edition': 77, 'discipline': 11, 'category': 12, 'number': 13}>"
+        )
+        self.assertEqual(expected, str_result)
+        repr_result = repr(gribcode)
+        self.assertEqual(str_result, repr_result)
+
+    def test_bad_content__str_repr__badmembervalue(self):
+        gribcode = GRIBCode(2, 11, 12, 13)
+        gribcode.discipline = None
+        str_result = str(gribcode)
+        expected = (
+            "<GRIBCode2 with invalid content: "
+            "{'edition': 2, 'discipline': None, 'category': 12, 'number': 13}>"
+        )
+        self.assertEqual(expected, str_result)
+        repr_result = repr(gribcode)
+        self.assertEqual(str_result, repr_result)
+
+    def test_bad_content__str_repr__missingmember(self):
+        gribcode = GRIBCode(2, 11, 12, 13)
+        del gribcode.category
+        str_result = str(gribcode)
+        expected = (
+            "<GRIBCode2 with invalid content: "
+            "{'edition': 2, 'discipline': 11, 'number': 13}>"
+        )
+        self.assertEqual(expected, str_result)
+        repr_result = repr(gribcode)
+        self.assertEqual(str_result, repr_result)
+
+    def test_bad_create__invalid_edition(self):
+        with self.assertRaisesRegex(ValueError, "Invalid grib edition"):
+            GRIBCode(77, 1, 2, 3)
+
+    def test_bad_create__arg_and_kwarg(self):
+        msg = "Keyword 'number'=7 is not compatible with a 4th argument."
+        with self.assertRaisesRegex(ValueError, msg):
+            GRIBCode(1, 2, 3, 4, number=7)
 
 
 if __name__ == '__main__':

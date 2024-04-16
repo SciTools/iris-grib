@@ -68,7 +68,7 @@ def GRIBCode(edition, *args, **kwargs):
     separate decimal numbers in it.
     """
     if edition is None:
-        _invalid_nargs([])
+        _invalid_nargs(())
 
     # Convert single argument to *args
     if not args and not kwargs:
@@ -96,17 +96,13 @@ def GRIBCode(edition, *args, **kwargs):
         args = tuple([edition] + list(args))
         nargs = len(args)
         if nargs != 4:
-            msg = (
-                f"Cannot create GRIBCode from {nargs} arguments, "
-                f"GRIBCode({args!r}) : expects either 1 or 4 arguments."
-            )
-            raise ValueError(msg.format(nargs, edition, args))
+            _invalid_nargs(args)
 
         for i_arg, (arg, name) in enumerate(zip(args, instance_cls.argnames)):
             if name in kwargs:
                 msg = (
                     f"Keyword {name!r}={kwargs[name]!r} "
-                    "is not compatible with a {i_arg + 1}th argument."
+                    f"is not compatible with a {i_arg + 1}th argument."
                 )
                 raise ValueError(msg)
             else:
@@ -118,17 +114,31 @@ def GRIBCode(edition, *args, **kwargs):
 
 @dataclass
 class GenericConcreteGRIBCode:
+    """
+    Common behaviour for GRIBCode1 and GRIBCode2
+
+    GRIBCode1 and GRIBCode2 inherit this, making both dataclasses.
+    They contain different data properties.
+    """
     def __init__(self, **kwargs):
         # Note : only support creation with kargs.  In GRIBCode(), any args
         #  get translated into kwargs
+        # Check against "_edition", defined by the specific subclass.
         assert kwargs['edition'] == self._edition
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def _broken_repr(self):
+        result = (
+            f"<{self.__class__.__name__} with invalid content: "
+            f"{self.__dict__}>"
+        )
+        return result
+
     def __str__(self):
         edition = self.edition
-        ok_state = edition in (1, 2)
-        if ok_state:
+        try:
+            # NB fallback to "invalid" if edition not one of (1, 2)
             format = {
                 1: "GRIB{:1d}:t{:03d}c{:03d}n{:03d}",
                 2: "GRIB{:1d}:d{:03d}c{:03d}n{:03d}"
@@ -137,32 +147,28 @@ class GenericConcreteGRIBCode:
                 getattr(self, argname)
                 for argname in self.argnames
             ]
+            # NB fallback to "invalid" if format fails
             result = format.format(*arg_values)
-
-        else:
-            # Invalid content somewhere : fall back on dataclass default repr
-            result = super().__str__()
+        except Exception:
+            # Invalid content somewhere : fall back on default repr
+            result = self._broken_repr()
 
         return result
 
     def __repr__(self):
         edition = self.edition
-        ok_state = edition in (1, 2)
-        if ok_state:
+        try:
+            assert edition in (1, 2)
             key_value_strings = []
             for argname in self.argnames:
                 value = getattr(self, argname, None)
-                if not isinstance(value, int):
-                    # Unexpected property content : abandon "normal" formatting
-                    ok_state = False
-                    break
+                assert isinstance(value, int)
                 key_value_strings.append(f"{argname}={value}")
             inner_text = ', '.join(key_value_strings)
             result = f"GRIBCode({inner_text})"
-
-        else:
-            # Invalid content somewhere : fall back on dataclass default repr
-            result = super().__repr__()
+        except Exception:
+            # Invalid content somewhere : fall back on a default repr
+            result = self._broken_repr()
 
         return result
 
