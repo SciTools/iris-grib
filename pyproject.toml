@@ -1,3 +1,5 @@
+# See https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
 [build-system]
 # Defined by PEP 518
 requires = [
@@ -65,7 +67,10 @@ optional-dependencies.test = {file = "requirements/test.txt"}
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
 
+#------------------------------------------------------------------------------
+
 [tool.coverage.run]
+# See https://coverage.readthedocs.io/en/latest/config.html
 branch = true
 source = [
     "iris_grib",
@@ -77,14 +82,17 @@ omit = [
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
+    "def __repr__",
     "if __name__ == .__main__.:"
 ]
 
 [tool.codespell]
+# See https://github.com/codespell-project/codespell/tree/master?tab=readme-ov-file#using-a-config-file
 ignore-words-list = "alpha-numeric,degreee,discontiguities,lazyness,meaned,nin"
 skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
 [tool.mypy]
+# See https://mypy.readthedocs.io/en/stable/config_file.html
 ignore_missing_imports = true
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -92,8 +100,10 @@ exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
+strict = false  # Default value, make true when introducing type hinting.
 
 [tool.pytest.ini_options]
+# See https://docs.pytest.org/en/stable/reference/customize.html
 addopts = [
     "--doctest-continue-on-failure",
     "--doctest-modules",
@@ -103,7 +113,7 @@ addopts = [
     "-v",
 ]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
-# configure logging as recommended by repo-review
+# configure settings as recommended by repo-review:
 log_cli = "True"
 log_cli_level = "INFO"
 minversion = "6.0"
