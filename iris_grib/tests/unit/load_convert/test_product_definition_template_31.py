@@ -23,21 +23,25 @@ def section_4():
     series = mock.sentinel.satelliteSeries
     number = mock.sentinel.satelliteNumber
     instrument = mock.sentinel.instrumentType
-    return {'NB': 1,
-            'satelliteSeries': series,
-            'satelliteNumber': number,
-            'instrumentType': instrument,
-            'scaleFactorOfCentralWaveNumber': 1,
-            'scaledValueOfCentralWaveNumber': 12}
+    return {
+        "NB": 1,
+        "satelliteSeries": series,
+        "satelliteNumber": number,
+        "instrumentType": instrument,
+        "scaleFactorOfCentralWaveNumber": 1,
+        "scaledValueOfCentralWaveNumber": 12,
+    }
 
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.patch('warnings.warn')
+        self.patch("warnings.warn")
         self.satellite_common_patch = self.patch(
-            'iris_grib._load_convert.satellite_common')
+            "iris_grib._load_convert.satellite_common"
+        )
         self.generating_process_patch = self.patch(
-            'iris_grib._load_convert.generating_process')
+            "iris_grib._load_convert.generating_process"
+        )
 
     def test(self):
         # Prepare the arguments.
@@ -53,8 +57,8 @@ class Test(tests.IrisGribTest):
         # Check that 'generating_process' was called.
         self.assertEqual(self.generating_process_patch.call_count, 1)
         # Check that the scalar time coord was added in.
-        self.assertIn((rt_coord, None), metadata['aux_coords_and_dims'])
+        self.assertIn((rt_coord, None), metadata["aux_coords_and_dims"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

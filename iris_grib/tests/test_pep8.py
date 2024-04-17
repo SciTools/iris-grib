@@ -18,13 +18,14 @@ import iris_grib
 class Test(unittest.TestCase):
     def test_pep8_conformance(self):
         pep8style = pep8.StyleGuide(quiet=False)
-        excluded = ['_grib_cf_map.py', '_grib1_load_rules.py']
+        excluded = ["_grib_cf_map.py", "_grib1_load_rules.py"]
         for fname in excluded:
-            path = '*{}{}'.format(os.path.sep, fname)
+            path = "*{}{}".format(os.path.sep, fname)
             pep8style.options.exclude.append(path)
 
-        extra_exclude_fname = os.path.join(os.path.dirname(__file__),
-                                           '.pep8_test_exclude.txt')
+        extra_exclude_fname = os.path.join(
+            os.path.dirname(__file__), ".pep8_test_exclude.txt"
+        )
 
         if os.path.exists(extra_exclude_fname):
             with open(extra_exclude_fname) as fh:
@@ -33,9 +34,9 @@ class Test(unittest.TestCase):
 
         root = os.path.dirname(os.path.abspath(iris_grib.__file__))
         result = pep8style.check_files([root])
-        emsg = 'Found code pep8 errors (and warnings).'
+        emsg = "Found code pep8 errors (and warnings)."
         self.assertEqual(result.total_errors, 0, emsg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

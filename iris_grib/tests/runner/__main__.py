@@ -12,9 +12,7 @@ import argparse
 from ._runner import TestRunner
 
 
-parser = argparse.ArgumentParser(
-    "iris_grib.tests", description=TestRunner.description
-)
+parser = argparse.ArgumentParser("iris_grib.tests", description=TestRunner.description)
 for long_opt, short_opt, help_text in TestRunner.user_options:
     long_opt = long_opt.strip("=")
     if long_opt in TestRunner.boolean_options:

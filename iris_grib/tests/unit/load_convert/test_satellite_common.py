@@ -27,12 +27,14 @@ class Test(tests.IrisGribTest):
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
-        section = {'NB': 1,
-                   'satelliteSeries': series,
-                   'satelliteNumber': number,
-                   'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': factors,
-                   'scaledValueOfCentralWaveNumber': values}
+        section = {
+            "NB": 1,
+            "satelliteSeries": series,
+            "satelliteNumber": number,
+            "instrumentType": instrument,
+            "scaleFactorOfCentralWaveNumber": factors,
+            "scaledValueOfCentralWaveNumber": values,
+        }
 
         # Call the function.
         metadata = empty_metadata()
@@ -40,17 +42,17 @@ class Test(tests.IrisGribTest):
 
         # Check the result.
         expected = empty_metadata()
-        coord = AuxCoord(series, long_name='satellite_series', units=1)
-        expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(number, long_name='satellite_number', units=1)
-        expected['aux_coords_and_dims'].append((coord, None))
-        coord = AuxCoord(instrument, long_name='instrument_type', units=1)
-        expected['aux_coords_and_dims'].append((coord, None))
-        standard_name = 'sensor_band_central_radiation_wavenumber'
-        coord = AuxCoord(values / (10.0 ** factors),
-                         standard_name=standard_name,
-                         units='m-1')
-        expected['aux_coords_and_dims'].append((coord, None))
+        coord = AuxCoord(series, long_name="satellite_series", units=1)
+        expected["aux_coords_and_dims"].append((coord, None))
+        coord = AuxCoord(number, long_name="satellite_number", units=1)
+        expected["aux_coords_and_dims"].append((coord, None))
+        coord = AuxCoord(instrument, long_name="instrument_type", units=1)
+        expected["aux_coords_and_dims"].append((coord, None))
+        standard_name = "sensor_band_central_radiation_wavenumber"
+        coord = AuxCoord(
+            values / (10.0**factors), standard_name=standard_name, units="m-1"
+        )
+        expected["aux_coords_and_dims"].append((coord, None))
         self.assertEqual(metadata, expected)
 
     def test_basic(self):
@@ -64,5 +66,5 @@ class Test(tests.IrisGribTest):
             self._check(values=values, factors=factors)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

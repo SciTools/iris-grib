@@ -19,7 +19,7 @@ from iris_grib._save_rules import identification
 from iris_grib.tests.unit import TestGribSimple
 
 
-GRIB_API = 'iris_grib._save_rules.eccodes'
+GRIB_API = "iris_grib._save_rules.eccodes"
 
 
 class Test(TestGribSimple):
@@ -32,13 +32,13 @@ class Test(TestGribSimple):
             identification(cube, grib)
 
         mock_eccodes.assert_has_calls(
-            [mock.call.codes_set_long(grib, "typeOfProcessedData", 2)])
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 2)]
+        )
 
     @tests.skip_data
     def test_realization_0(self):
         cube = stock.simple_pp()
-        realisation = iris.coords.AuxCoord((0,), standard_name='realization',
-                                           units='1')
+        realisation = iris.coords.AuxCoord((0,), standard_name="realization", units="1")
         cube.add_aux_coord(realisation)
 
         grib = mock.Mock()
@@ -47,13 +47,13 @@ class Test(TestGribSimple):
             identification(cube, grib)
 
         mock_eccodes.assert_has_calls(
-            [mock.call.codes_set_long(grib, "typeOfProcessedData", 3)])
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 3)]
+        )
 
     @tests.skip_data
     def test_realization_n(self):
         cube = stock.simple_pp()
-        realisation = iris.coords.AuxCoord((2,), standard_name='realization',
-                                           units='1')
+        realisation = iris.coords.AuxCoord((2,), standard_name="realization", units="1")
         cube.add_aux_coord(realisation)
 
         grib = mock.Mock()
@@ -62,7 +62,8 @@ class Test(TestGribSimple):
             identification(cube, grib)
 
         mock_eccodes.assert_has_calls(
-            [mock.call.codes_set_long(grib, "typeOfProcessedData", 4)])
+            [mock.call.codes_set_long(grib, "typeOfProcessedData", 4)]
+        )
 
 
 if __name__ == "__main__":

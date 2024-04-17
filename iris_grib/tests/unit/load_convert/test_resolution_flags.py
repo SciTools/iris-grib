@@ -32,5 +32,5 @@ class Test(tests.IrisGribTest):
         self.assertEqual(resolution_flags(0x08), expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

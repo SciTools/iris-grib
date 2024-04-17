@@ -24,39 +24,44 @@ from iris_grib._load_convert import product_definition_template_1
 class Test(tests.IrisGribTest):
     def setUp(self):
         def func(s, m, f):
-            return m['cell_methods'].append(self.cell_method)
+            return m["cell_methods"].append(self.cell_method)
 
-        module = 'iris_grib._load_convert'
-        self.patch('warnings.warn')
-        this = '{}.product_definition_template_0'.format(module)
+        module = "iris_grib._load_convert"
+        self.patch("warnings.warn")
+        this = "{}.product_definition_template_0".format(module)
         self.cell_method = mock.sentinel.cell_method
         self.patch(this, side_effect=func)
-        self.metadata = {'factories': [], 'references': [],
-                         'standard_name': None,
-                         'long_name': None, 'units': None, 'attributes': {},
-                         'cell_methods': [], 'dim_coords_and_dims': [],
-                         'aux_coords_and_dims': []}
+        self.metadata = {
+            "factories": [],
+            "references": [],
+            "standard_name": None,
+            "long_name": None,
+            "units": None,
+            "attributes": {},
+            "cell_methods": [],
+            "dim_coords_and_dims": [],
+            "aux_coords_and_dims": [],
+        }
 
     def _check(self, request_warning):
-        this = 'iris_grib._load_convert.options'
+        this = "iris_grib._load_convert.options"
         with mock.patch(this, warn_on_unsupported=request_warning):
             metadata = deepcopy(self.metadata)
             perturbationNumber = 666
-            section = {'perturbationNumber': perturbationNumber}
+            section = {"perturbationNumber": perturbationNumber}
             forecast_reference_time = mock.sentinel.forecast_reference_time
             # The called being tested.
-            product_definition_template_1(section, metadata,
-                                          forecast_reference_time)
+            product_definition_template_1(section, metadata, forecast_reference_time)
             expected = deepcopy(self.metadata)
-            expected['cell_methods'].append(self.cell_method)
-            realization = DimCoord(perturbationNumber,
-                                   standard_name='realization',
-                                   units='no_unit')
-            expected['aux_coords_and_dims'].append((realization, None))
+            expected["cell_methods"].append(self.cell_method)
+            realization = DimCoord(
+                perturbationNumber, standard_name="realization", units="no_unit"
+            )
+            expected["aux_coords_and_dims"].append((realization, None))
             self.assertEqual(metadata, expected)
             if request_warning:
                 warn_msgs = [mcall[1][0] for mcall in warnings.warn.mock_calls]
-                expected_msgs = ['type of ensemble', 'number of forecasts']
+                expected_msgs = ["type of ensemble", "number of forecasts"]
                 for emsg in expected_msgs:
                     matches = [wmsg for wmsg in warn_msgs if emsg in wmsg]
                     self.assertEqual(len(matches), 1)
@@ -71,5 +76,5 @@ class Test(tests.IrisGribTest):
         self._check(True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

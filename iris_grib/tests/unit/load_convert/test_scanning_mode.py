@@ -22,18 +22,21 @@ class Test(tests.IrisGribTest):
         self.assertEqual(scanning_mode(0x0), expected)
 
     def test_i_negative(self):
-        expected = ScanningMode(i_negative=True, j_positive=False,
-                                j_consecutive=False, i_alternative=False)
+        expected = ScanningMode(
+            i_negative=True, j_positive=False, j_consecutive=False, i_alternative=False
+        )
         self.assertEqual(scanning_mode(0x80), expected)
 
     def test_j_positive(self):
-        expected = ScanningMode(i_negative=False, j_positive=True,
-                                j_consecutive=False, i_alternative=False)
+        expected = ScanningMode(
+            i_negative=False, j_positive=True, j_consecutive=False, i_alternative=False
+        )
         self.assertEqual(scanning_mode(0x40), expected)
 
     def test_j_consecutive(self):
-        expected = ScanningMode(i_negative=False, j_positive=False,
-                                j_consecutive=True, i_alternative=False)
+        expected = ScanningMode(
+            i_negative=False, j_positive=False, j_consecutive=True, i_alternative=False
+        )
         self.assertEqual(scanning_mode(0x20), expected)
 
     def test_i_alternative(self):
@@ -41,5 +44,5 @@ class Test(tests.IrisGribTest):
             scanning_mode(0x10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

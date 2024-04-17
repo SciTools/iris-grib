@@ -20,7 +20,7 @@ import numpy as np
 from iris_grib._save_rules import data_section
 
 
-GRIB_API = 'iris_grib._save_rules.eccodes'
+GRIB_API = "iris_grib._save_rules.eccodes"
 GRIB_MESSAGE = mock.sentinel.GRIB_MESSAGE
 
 
@@ -28,42 +28,42 @@ class TestMDI(tests.IrisGribTest):
     def assertBitmapOff(self, grib_api):
         # Check the use of a mask has been turned off via:
         #   eccodes.codes_set(grib_message, 'bitmapPresent', 0)
-        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                   'bitmapPresent', 0)
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE, "bitmapPresent", 0)
 
     def assertBitmapOn(self, grib_api, fill_value):
         # Check the use of a mask has been turned on via:
         #   eccodes.codes_set(grib_message, 'bitmapPresent', 1)
         #   eccodes.codes_set_double(grib_message, 'missingValue', fill_value)
-        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                   'bitmapPresent', 1)
-        grib_api.codes_set_double.assert_called_once_with(GRIB_MESSAGE,
-                                                          'missingValue',
-                                                          fill_value)
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE, "bitmapPresent", 1)
+        grib_api.codes_set_double.assert_called_once_with(
+            GRIB_MESSAGE, "missingValue", fill_value
+        )
 
     def assertBitmapRange(self, grib_api, min_data, max_data):
         # Check the use of a mask has been turned on via:
         #   eccodes.codes_set(grib_message, 'bitmapPresent', 1)
         #   eccodes.codes_set_double(grib_message, 'missingValue', ...)
         # and that a suitable fill value has been chosen.
-        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE,
-                                                   'bitmapPresent', 1)
-        args, = grib_api.codes_set_double.call_args_list
+        grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE, "bitmapPresent", 1)
+        (args,) = grib_api.codes_set_double.call_args_list
         (message, key, fill_value), kwargs = args
         self.assertIs(message, GRIB_MESSAGE)
-        self.assertEqual(key, 'missingValue')
-        self.assertTrue(fill_value < min_data or fill_value > max_data,
-                        'Fill value {} is not outside data range '
-                        '{} to {}.'.format(fill_value, min_data, max_data))
+        self.assertEqual(key, "missingValue")
+        self.assertTrue(
+            fill_value < min_data or fill_value > max_data,
+            "Fill value {} is not outside data range " "{} to {}.".format(
+                fill_value, min_data, max_data
+            ),
+        )
         return fill_value
 
     def assertValues(self, grib_api, values):
         # Check the correct data values have been set via:
         #   eccodes.codes_set_double_array(grib_message, 'values', ...)
-        args, = grib_api.codes_set_double_array.call_args_list
+        (args,) = grib_api.codes_set_double_array.call_args_list
         (message, key, values), kwargs = args
         self.assertIs(message, GRIB_MESSAGE)
-        self.assertEqual(key, 'values')
+        self.assertEqual(key, "values")
         self.assertArrayEqual(values, values)
         self.assertEqual(kwargs, {})
 
@@ -79,9 +79,11 @@ class TestMDI(tests.IrisGribTest):
         self.assertValues(grib_api, np.arange(5))
 
     def test_masked_with_finite_fill_value(self):
-        cube = iris.cube.Cube(np.ma.MaskedArray([1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
-                                                mask=[0, 0, 0, 1, 1, 1],
-                                                fill_value=2000))
+        cube = iris.cube.Cube(
+            np.ma.MaskedArray(
+                [1.0, 2.0, 3.0, 1.0, 2.0, 3.0], mask=[0, 0, 0, 1, 1, 1], fill_value=2000
+            )
+        )
         grib_message = mock.sentinel.GRIB_MESSAGE
         with mock.patch(GRIB_API) as grib_api:
             data_section(cube, grib_message)
@@ -92,9 +94,13 @@ class TestMDI(tests.IrisGribTest):
         self.assertValues(grib_api, [1, 2, 3, FILL, FILL, FILL])
 
     def test_masked_with_nan_fill_value(self):
-        cube = iris.cube.Cube(np.ma.MaskedArray([1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
-                                                mask=[0, 0, 0, 1, 1, 1],
-                                                fill_value=np.nan))
+        cube = iris.cube.Cube(
+            np.ma.MaskedArray(
+                [1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
+                mask=[0, 0, 0, 1, 1, 1],
+                fill_value=np.nan,
+            )
+        )
         grib_message = mock.sentinel.GRIB_MESSAGE
         with mock.patch(GRIB_API) as grib_api:
             data_section(cube, grib_message)
@@ -107,8 +113,9 @@ class TestMDI(tests.IrisGribTest):
     def test_scaled(self):
         # If the Cube's units don't match the units required by GRIB
         # ensure the data values are scaled correctly.
-        cube = iris.cube.Cube(np.arange(5),
-                              standard_name='geopotential_height', units='km')
+        cube = iris.cube.Cube(
+            np.arange(5), standard_name="geopotential_height", units="km"
+        )
         grib_message = mock.sentinel.GRIB_MESSAGE
         with mock.patch(GRIB_API) as grib_api:
             data_section(cube, grib_message)
@@ -120,10 +127,13 @@ class TestMDI(tests.IrisGribTest):
     def test_scaled_with_finite_fill_value(self):
         # When re-scaling masked data with a finite fill value, ensure
         # the fill value and any filled values are also re-scaled.
-        cube = iris.cube.Cube(np.ma.MaskedArray([1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
-                                                mask=[0, 0, 0, 1, 1, 1],
-                                                fill_value=2000),
-                              standard_name='geopotential_height', units='km')
+        cube = iris.cube.Cube(
+            np.ma.MaskedArray(
+                [1.0, 2.0, 3.0, 1.0, 2.0, 3.0], mask=[0, 0, 0, 1, 1, 1], fill_value=2000
+            ),
+            standard_name="geopotential_height",
+            units="km",
+        )
         grib_message = mock.sentinel.GRIB_MESSAGE
         with mock.patch(GRIB_API) as grib_api:
             data_section(cube, grib_message)
@@ -137,10 +147,13 @@ class TestMDI(tests.IrisGribTest):
         # When re-scaling masked data with a NaN fill value, ensure
         # a fill value is chosen which allows for the scaling, and any
         # filled values match the chosen fill value.
-        cube = iris.cube.Cube(np.ma.MaskedArray([-1.0, 2.0, -1.0, 2.0],
-                                                mask=[0, 0, 1, 1],
-                                                fill_value=np.nan),
-                              standard_name='geopotential_height', units='km')
+        cube = iris.cube.Cube(
+            np.ma.MaskedArray(
+                [-1.0, 2.0, -1.0, 2.0], mask=[0, 0, 1, 1], fill_value=np.nan
+            ),
+            standard_name="geopotential_height",
+            units="km",
+        )
         grib_message = mock.sentinel.GRIB_MESSAGE
         with mock.patch(GRIB_API) as grib_api:
             data_section(cube, grib_message)
@@ -157,8 +170,7 @@ class TestNonDoubleData(tests.IrisGribTest):
     # fault.
     def check(self, dtype):
         data = np.random.random(1920 * 2560).astype(dtype)
-        cube = iris.cube.Cube(data,
-                              standard_name='geopotential_height', units='km')
+        cube = iris.cube.Cube(data, standard_name="geopotential_height", units="km")
         grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
         data_section(cube, grib_message)
         eccodes.codes_release(grib_message)

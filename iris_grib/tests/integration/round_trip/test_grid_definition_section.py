@@ -72,9 +72,7 @@ class TestGDT5(tests.TestGribMessage):
 
         # Check those re-loaded properties which should match the original.
         for test_cube in (cube, cube_loaded_from_saved):
-            self.assertEqual(
-                test_cube.standard_name, "air_pressure_at_sea_level"
-            )
+            self.assertEqual(test_cube.standard_name, "air_pressure_at_sea_level")
             self.assertEqual(test_cube.units, "Pa")
             self.assertEqual(test_cube.shape, (928, 744))
             self.assertEqual(test_cube.cell_methods, ())
@@ -90,9 +88,7 @@ class TestGDT5(tests.TestGribMessage):
 
         # Check they have all the same coordinates.
         co_names = [coord.name() for coord in cube.coords()]
-        co_names_reload = [
-            coord.name() for coord in cube_loaded_from_saved.coords()
-        ]
+        co_names_reload = [coord.name() for coord in cube_loaded_from_saved.coords()]
         self.assertEqual(sorted(co_names_reload), sorted(co_names))
 
         # Check all the coordinates.
@@ -105,16 +101,13 @@ class TestGDT5(tests.TestGribMessage):
                 self.assertEqual(
                     co_load.shape,
                     co_orig.shape,
-                    'Shape of re-loaded "{}" coord is {} '
-                    "instead of {}".format(
+                    'Shape of re-loaded "{}" coord is {} ' "instead of {}".format(
                         coord_name, co_load.shape, co_orig.shape
                     ),
                 )
 
                 # Check coordinate points equal, within a tolerance.
-                self.assertArrayAllClose(
-                    co_load.points, co_orig.points, rtol=1.0e-6
-                )
+                self.assertArrayAllClose(co_load.points, co_orig.points, rtol=1.0e-6)
 
                 # Check all coords are unbounded.
                 # (NOTE: this is not so for the original X and Y coordinates,
@@ -124,9 +117,7 @@ class TestGDT5(tests.TestGribMessage):
             except AssertionError as err:
                 self.assertTrue(
                     False,
-                    'Failed on coordinate "{}" : {}'.format(
-                        coord_name, str(err)
-                    ),
+                    'Failed on coordinate "{}" : {}'.format(coord_name, str(err)),
                 )
 
         # Check that main data array also matches.

@@ -12,7 +12,7 @@ from cf_units import CALENDAR_GREGORIAN, Unit
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import (ConversionMetadata, Factory, Reference)
+from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 
 
 def grib1_convert(grib):
@@ -29,9 +29,8 @@ def grib1_convert(grib):
 
     """
     if grib.edition != 1:
-        emsg = 'GRIB edition {} is not supported by {!r}.'
-        raise TranslationError(emsg.format(grib.edition,
-                                           type(grib).__name__))
+        emsg = "GRIB edition {} is not supported by {!r}."
+        raise TranslationError(emsg.format(grib.edition, type(grib).__name__))
 
     factories = []
     references = []
@@ -49,10 +48,10 @@ def grib1_convert(grib):
                 AuxCoord(
                     grib._y_points,
                     grib._y_coord_name,
-                    units='degrees',
+                    units="degrees",
                     coord_system=grib._coord_system,
                 ),
-                0
+                0,
             )
         )
         aux_coords_and_dims.append(
@@ -60,10 +59,10 @@ def grib1_convert(grib):
                 AuxCoord(
                     grib._x_points,
                     grib._x_coord_name,
-                    units='degrees',
+                    units="degrees",
                     coord_system=grib._coord_system,
                 ),
-                0
+                0,
             )
         )
     elif grib.gridType in ("regular_ll", "rotated_ll", "regular_gg"):
@@ -77,10 +76,10 @@ def grib1_convert(grib):
                 DimCoord(
                     grib._y_points,
                     grib._y_coord_name,
-                    units='degrees',
+                    units="degrees",
                     coord_system=grib._coord_system,
                 ),
-                j_points_are_consecutive
+                j_points_are_consecutive,
             )
         )
         dim_coords_and_dims.append(
@@ -88,11 +87,11 @@ def grib1_convert(grib):
                 DimCoord(
                     grib._x_points,
                     grib._x_coord_name,
-                    units='degrees',
+                    units="degrees",
                     coord_system=grib._coord_system,
                     circular=grib._x_circular,
                 ),
-                int(not j_points_are_consecutive)
+                int(not j_points_are_consecutive),
             )
         )
 
@@ -105,7 +104,7 @@ def grib1_convert(grib):
                     units="m",
                     coord_system=grib._coord_system,
                 ),
-                0
+                0,
             )
         )
         dim_coords_and_dims.append(
@@ -116,49 +115,49 @@ def grib1_convert(grib):
                     units="m",
                     coord_system=grib._coord_system,
                 ),
-                1
+                1,
             )
         )
 
-    if \
-            (grib.table2Version < 128) and \
-            (grib.indicatorOfParameter == 11) and \
-            (grib._cf_data is None):
+    if (
+        (grib.table2Version < 128)
+        and (grib.indicatorOfParameter == 11)
+        and (grib._cf_data is None)
+    ):
         standard_name = "air_temperature"
         units = "kelvin"
 
-    if \
-            (grib.table2Version < 128) and \
-            (grib.indicatorOfParameter == 33) and \
-            (grib._cf_data is None):
+    if (
+        (grib.table2Version < 128)
+        and (grib.indicatorOfParameter == 33)
+        and (grib._cf_data is None)
+    ):
         standard_name = "x_wind"
         units = "m s-1"
 
-    if \
-            (grib.table2Version < 128) and \
-            (grib.indicatorOfParameter == 34) and \
-            (grib._cf_data is None):
+    if (
+        (grib.table2Version < 128)
+        and (grib.indicatorOfParameter == 34)
+        and (grib._cf_data is None)
+    ):
         standard_name = "y_wind"
         units = "m s-1"
 
-    if \
-            (grib._cf_data is not None):
+    if grib._cf_data is not None:
         standard_name = grib._cf_data.standard_name
         long_name = grib._cf_data.standard_name or grib._cf_data.long_name
         units = grib._cf_data.units
 
-    if \
-            (grib.table2Version >= 128) and \
-            (grib._cf_data is None):
-        long_name = f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}"\
-                    f".{grib.table2Version}"
+    if (grib.table2Version >= 128) and (grib._cf_data is None):
+        long_name = (
+            f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}" f".{grib.table2Version}"
+        )
         units = "???"
 
-    if \
-            (grib.table2Version == 1) and \
-            (grib.indicatorOfParameter >= 128):
-        long_name = f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}"\
-                    f".{grib.table2Version}"
+    if (grib.table2Version == 1) and (grib.indicatorOfParameter >= 128):
+        long_name = (
+            f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}" f".{grib.table2Version}"
+        )
         units = "???"
 
     if grib._phenomenonDateTime != -1.0:
@@ -166,119 +165,110 @@ def grib1_convert(grib):
             (
                 DimCoord(
                     points=grib.startStep,
-                    standard_name='forecast_period',
+                    standard_name="forecast_period",
                     units=grib._forecastTimeUnit,
                 ),
-                None
+                None,
             )
         )
         aux_coords_and_dims.append(
             (
                 DimCoord(
-                    points=grib.phenomenon_points('hours'),
-                    standard_name='time',
-                    units=Unit('hours since epoch', CALENDAR_GREGORIAN),
+                    points=grib.phenomenon_points("hours"),
+                    standard_name="time",
+                    units=Unit("hours since epoch", CALENDAR_GREGORIAN),
                 ),
-                None
+                None,
             )
         )
 
     def add_bounded_time_coords(aux_coords_and_dims, grib):
-        t_bounds = grib.phenomenon_bounds('hours')
+        t_bounds = grib.phenomenon_bounds("hours")
         period = t_bounds[1] - t_bounds[0]
-        aux_coords_and_dims.append((
-            DimCoord(standard_name='forecast_period',
-                     units="hours",
-                     points=grib._forecastTime + 0.5 * period,
-                     bounds=[grib._forecastTime, grib._forecastTime + period]),
-            None))
-        aux_coords_and_dims.append((
-            DimCoord(standard_name='time',
-                     units=Unit('hours since epoch', CALENDAR_GREGORIAN),
-                     points=0.5 * (t_bounds[0] + t_bounds[1]),
-                     bounds=t_bounds),
-            None))
-
-    if \
-            (grib.timeRangeIndicator == 2):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-
-    if \
-            (grib.timeRangeIndicator == 3):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 4):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("sum", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 5):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("_difference", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 51):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 113):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 114):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("sum", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 115):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 116):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("sum", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 117):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 118):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("_covariance", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 123):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("mean", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 124):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("sum", coords="time"))
-
-    if \
-            (grib.timeRangeIndicator == 125):
-        add_bounded_time_coords(aux_coords_and_dims, grib)
-        cell_methods.append(CellMethod("standard_deviation", coords="time"))
-
-    if grib.levelType == 'pl':
         aux_coords_and_dims.append(
             (
                 DimCoord(
-                    points=grib.level, long_name="pressure", units="hPa"
+                    standard_name="forecast_period",
+                    units="hours",
+                    points=grib._forecastTime + 0.5 * period,
+                    bounds=[grib._forecastTime, grib._forecastTime + period],
                 ),
-                None
+                None,
+            )
+        )
+        aux_coords_and_dims.append(
+            (
+                DimCoord(
+                    standard_name="time",
+                    units=Unit("hours since epoch", CALENDAR_GREGORIAN),
+                    points=0.5 * (t_bounds[0] + t_bounds[1]),
+                    bounds=t_bounds,
+                ),
+                None,
             )
         )
 
-    if grib.levelType == 'sfc':
+    if grib.timeRangeIndicator == 2:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+
+    if grib.timeRangeIndicator == 3:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 4:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("sum", coords="time"))
+
+    if grib.timeRangeIndicator == 5:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("_difference", coords="time"))
+
+    if grib.timeRangeIndicator == 51:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 113:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 114:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("sum", coords="time"))
+
+    if grib.timeRangeIndicator == 115:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 116:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("sum", coords="time"))
+
+    if grib.timeRangeIndicator == 117:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 118:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("_covariance", coords="time"))
+
+    if grib.timeRangeIndicator == 123:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("mean", coords="time"))
+
+    if grib.timeRangeIndicator == 124:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("sum", coords="time"))
+
+    if grib.timeRangeIndicator == 125:
+        add_bounded_time_coords(aux_coords_and_dims, grib)
+        cell_methods.append(CellMethod("standard_deviation", coords="time"))
+
+    if grib.levelType == "pl":
+        aux_coords_and_dims.append(
+            (DimCoord(points=grib.level, long_name="pressure", units="hPa"), None)
+        )
+
+    if grib.levelType == "sfc":
         if grib._cf_data is not None and grib._cf_data.set_height is not None:
             aux_coords_and_dims.append(
                 (
@@ -286,77 +276,83 @@ def grib1_convert(grib):
                         points=grib._cf_data.set_height,
                         long_name="height",
                         units="m",
-                        attributes={'positive': 'up'},
+                        attributes={"positive": "up"},
                     ),
-                    None
+                    None,
                 )
             )
-        elif grib.typeOfLevel == 'heightAboveGround':  # required for NCAR
+        elif grib.typeOfLevel == "heightAboveGround":  # required for NCAR
             aux_coords_and_dims.append(
                 (
                     DimCoord(
                         points=grib.level,
                         long_name="height",
                         units="m",
-                        attributes={'positive': 'up'},
+                        attributes={"positive": "up"},
                     ),
-                    None
+                    None,
                 )
             )
 
-    if grib.levelType == 'ml' and hasattr(grib, 'pv'):
+    if grib.levelType == "ml" and hasattr(grib, "pv"):
         aux_coords_and_dims.append(
             (
                 AuxCoord(
                     grib.level,
-                    standard_name='model_level_number',
+                    standard_name="model_level_number",
                     units=1,
-                    attributes={'positive': 'up'},
+                    attributes={"positive": "up"},
                 ),
-                None
+                None,
             )
         )
         aux_coords_and_dims.append(
             (
-                DimCoord(
-                    grib.pv[grib.level], long_name='level_pressure', units='Pa'
-                ),
-                None
+                DimCoord(grib.pv[grib.level], long_name="level_pressure", units="Pa"),
+                None,
             )
         )
         aux_coords_and_dims.append(
             (
                 AuxCoord(
-                    grib.pv[grib.numberOfCoordinatesValues//2 + grib.level],
-                    long_name='sigma',
+                    grib.pv[grib.numberOfCoordinatesValues // 2 + grib.level],
+                    long_name="sigma",
                     units=1,
                 ),
-                None
+                None,
             )
         )
         factories.append(
             Factory(
                 HybridPressureFactory,
                 [
-                    {'long_name': 'level_pressure'},
-                    {'long_name': 'sigma'},
-                    Reference('surface_pressure'),
-                ]
+                    {"long_name": "level_pressure"},
+                    {"long_name": "sigma"},
+                    Reference("surface_pressure"),
+                ],
             )
         )
 
-    if grib._originatingCentre != 'unknown':
+    if grib._originatingCentre != "unknown":
         aux_coords_and_dims.append(
             (
                 AuxCoord(
                     points=grib._originatingCentre,
-                    long_name='originating_centre',
-                    units='no_unit',
+                    long_name="originating_centre",
+                    units="no_unit",
                 ),
-                None
+                None,
             )
         )
 
-    return ConversionMetadata(factories, references, standard_name, long_name,
-                              units, attributes, cell_methods,
-                              dim_coords_and_dims, aux_coords_and_dims)
+    return ConversionMetadata(
+        factories,
+        references,
+        standard_name,
+        long_name,
+        units,
+        attributes,
+        cell_methods,
+        dim_coords_and_dims,
+        aux_coords_and_dims,
+    )
