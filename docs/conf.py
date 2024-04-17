@@ -108,14 +108,25 @@ todo_include_todos = False
 # url link checker. Some links are faulty in old release notes, lets just ignore them.
 # See https://www.sphinx-doc.org/en/1.2/config.html#options-for-the-linkcheck-builder
 linkcheck_ignore = [
-    "https://github.com/Scitools/iris-grib/compare/c4243ae..5c314e3#diff-cf46b46880cae59e82a91c7ab6bb81ba",
-    "https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.VerticalPerspective",
+    "https://github.com/Scitools/iris-grib/compare"
+    "/c4243ae..5c314e3#diff-cf46b46880cae59e82a91c7ab6bb81ba",
+
+    "https://scitools-iris.readthedocs.io/en/latest/generated/api/iris"
+    "/coord_systems.html#iris.coord_systems.VerticalPerspective",
+
     "https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed",
-    "https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective",
-    "https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary",
+
+    "https://scitools.org.uk/cartopy/docs/latest/crs"
+    "/projections.html#nearsideperspective",
+
+    "https://scitools-iris.readthedocs.io/en/latest/generated/api/"
+    "iris/coord_systems.html#iris.coord_systems.Geostationary",
+
     "https://jira.ecmwf.int/browse/ECC-811",
+
     "https://software.ecmwf.int/wiki/display/GRIB/Home",
-    " https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home",
+
+    "https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home",
 ]
 
 
