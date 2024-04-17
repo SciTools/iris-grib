@@ -126,7 +126,9 @@ linkcheck_ignore = [
 
     "https://jira.ecmwf.int/browse/ECC-811",
 
-    "https://confluence.ecmwf.int/wiki/display/GRIB/Home",
+    "https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home",
+
+    "https://software.ecmwf.int/wiki/display/GRIB/Home"
 
 
 ]
