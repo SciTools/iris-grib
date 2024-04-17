@@ -250,25 +250,6 @@ def prepare_venv(
         )
 
 
-@nox.session
-def flake8(session: nox.sessions.Session):
-    """
-    Perform flake8 linting of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("flake8")
-    # Execute the flake8 linter on the package.
-    session.run("flake8", PACKAGE)
-    # Execute the flake8 linter on this file.
-    session.run("flake8", __file__)
-
-
 @nox.session(python=PY_VER, venv_backend="conda")
 @nox.parametrize("iris_source", IRIS_SOURCE)
 def tests(session: nox.sessions.Session, iris_source: str):
