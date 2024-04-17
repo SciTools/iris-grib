@@ -26,7 +26,6 @@ from iris.coord_systems import (GeogCS, RotatedGeogCS, Mercator,
 from iris.exceptions import TranslationError
 
 
-from ._iris_mercator_support import confirm_extended_mercator_supported
 from . import grib_phenom_translation as gptx
 from ._load_convert import (_STATISTIC_TYPE_NAMES, _TIME_RANGE_UNITS,
                             _SPATIAL_PROCESSING_TYPES)
@@ -498,9 +497,6 @@ def grid_definition_template_10(cube, grib):
     eccodes.codes_set(grib, "longitudeOfLastGridPoint",
                       int(np.round(last_x / _DEFAULT_DEGREES_UNITS)))
 
-    # Check and raise a more intelligible error, if the Iris version is too old
-    # to support the Mercator 'standard_parallel' property.
-    confirm_extended_mercator_supported()
     # Encode the latitude at which the projection intersects the Earth.
     eccodes.codes_set(grib, 'LaD',
                       cs.standard_parallel / _DEFAULT_DEGREES_UNITS)
