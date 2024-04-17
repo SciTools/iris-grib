@@ -105,8 +105,10 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-# url link checker. Some links are faulty in old release notes, lets just ignore them.
-# See https://www.sphinx-doc.org/en/1.2/config.html#options-for-the-linkcheck-builder
+# url link checker. Some links are faulty in old release notes, some are just
+# registering as faulty despite being correct.
+# See
+#https://www.sphinx-doc.org/en/1.2/config.html#options-for-the-linkcheck-builder
 linkcheck_ignore = [
     "https://github.com/Scitools/iris-grib/compare"
     "/c4243ae..5c314e3#diff-cf46b46880cae59e82a91c7ab6bb81ba",
