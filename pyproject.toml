@@ -115,11 +115,12 @@ xfail_strict = "True"
 # https://docs.astral.sh/ruff/settings/#exclude
 line-length = 88
 src = [
-    "iris-grib",
+    "iris_grib",
     "docs",
 ]
 
 [tool.ruff.format]
+docstring-code-format = true
 preview = false
 
 [tool.ruff.lint]
@@ -139,13 +140,15 @@ ignore = [
 preview = false
 select = [
     "ALL",
-    # list specific rules to include that is skipped using numpy convention.
+
+    # pydocstyle (D)
+    # https://docs.astral.sh/ruff/rules/multi-line-summary-first-line/
     "D212",  # Multi-line docstring summary should start at the first line
 ]
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = ["iris-grib"]
+known-first-party = ["iris_grib"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

@@ -37,8 +37,11 @@ class TestLicenseHeaders(unittest.TestCase):
 
         Sample input::
 
-            ['TIME:1366884020', '',
-             ':000000 100644 0000000... 5862ced... A\tlib/iris/cube.py']
+            [
+                "TIME:1366884020",
+                "",
+                ":000000 100644 0000000... 5862ced... A\tlib/iris/cube.py",
+            ]
 
         """
         dt = None

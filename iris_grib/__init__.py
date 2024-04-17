@@ -744,16 +744,16 @@ def load_pairs_from_fields(grib_messages):
         >>> import iris
         >>> from iris_grib import load_pairs_from_fields
         >>> from iris_grib.message import GribMessage
-        >>> filename = iris.sample_data_path('polar_stereo.grib2')
+        >>> filename = iris.sample_data_path("polar_stereo.grib2")
         >>> filtered_messages = []
         >>> for message in GribMessage.messages_from_filename(filename):
-        ...     if message.sections[1]['productionStatusOfProcessedData'] == 0:
+        ...     if message.sections[1]["productionStatusOfProcessedData"] == 0:
         ...         filtered_messages.append(message)
         >>> cubes_messages = load_pairs_from_fields(filtered_messages)
         >>> for cube, msg in cubes_messages:
-        ...     prod_stat = msg.sections[1]['productionStatusOfProcessedData']
-        ...     cube.attributes['productionStatusOfProcessedData'] = prod_stat
-        >>> print(cube.attributes['productionStatusOfProcessedData'])
+        ...     prod_stat = msg.sections[1]["productionStatusOfProcessedData"]
+        ...     cube.attributes["productionStatusOfProcessedData"] = prod_stat
+        >>> print(cube.attributes["productionStatusOfProcessedData"])
         0
 
     This capability can also be used to alter fields before they are passed to
@@ -763,8 +763,8 @@ def load_pairs_from_fields(grib_messages):
         >>> from iris_grib import load_pairs_from_fields
         >>> cleaned_messages = GribMessage.messages_from_filename(filename)
         >>> for message in cleaned_messages:
-        ...     if message.sections[1]['productionStatusOfProcessedData'] == 0:
-        ...         message.sections[1]['productionStatusOfProcessedData'] = 4
+        ...     if message.sections[1]["productionStatusOfProcessedData"] == 0:
+        ...         message.sections[1]["productionStatusOfProcessedData"] = 4
         >>> cubes = load_pairs_from_fields(cleaned_messages)
 
     Args:
