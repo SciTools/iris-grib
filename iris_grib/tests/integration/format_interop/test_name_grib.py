@@ -28,7 +28,7 @@ def name_cb(cube, field, filename):
     if z_coord:
         z_coord[0].standard_name = "height"
         z_coord[0].long_name = "height above ground level"
-        z_coord[0].attributes = {'positive': 'up'}
+        z_coord[0].attributes = {"positive": "up"}
 
 
 class TestNameToGRIB(tests.IrisGribTest):
@@ -73,8 +73,8 @@ class TestNameToGRIB(tests.IrisGribTest):
 
             # Iris>=3.2 loads in an extra 'z' coordinate which cannot currently
             # be save to GRIB.
-            if name_cube.coords('z'):
-                name_cube.remove_coord('z')
+            if name_cube.coords("z"):
+                name_cube.remove_coord("z")
 
             with self.temp_filename(".grib2") as temp_filename:
                 iris.save(name_cube, temp_filename)
@@ -99,8 +99,8 @@ class TestNameToGRIB(tests.IrisGribTest):
         for i, name_cube in enumerate(name_cubes):
             # Iris>=3.2 loads in an extra 'z' coordinate which cannot currently
             # be save to GRIB.
-            if name_cube.coord('z') is not None:
-                name_cube.remove_coord('z')
+            if name_cube.coord("z") is not None:
+                name_cube.remove_coord("z")
 
             with self.temp_filename(".grib2") as temp_filename:
                 iris.save(name_cube, temp_filename)

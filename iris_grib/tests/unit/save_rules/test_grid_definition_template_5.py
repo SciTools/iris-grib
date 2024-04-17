@@ -28,9 +28,11 @@ class Test(tests.IrisGribTest, GdtTestMixin):
     def _default_coord_system(self):
         # Define an alternate, rotated coordinate system to test."
         self.default_ellipsoid = GeogCS(PP_DEFAULT_EARTH_RADIUS)
-        cs = RotatedGeogCS(grid_north_pole_latitude=90.0,
-                           grid_north_pole_longitude=0.0,
-                           ellipsoid=self.default_ellipsoid)
+        cs = RotatedGeogCS(
+            grid_north_pole_latitude=90.0,
+            grid_north_pole_longitude=0.0,
+            ellipsoid=self.default_ellipsoid,
+        )
         return cs
 
     def _default_x_points(self):
@@ -39,53 +41,58 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
     def test__template_number(self):
         grid_definition_template_5(self.test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 5)
+        self._check_key("gridDefinitionTemplateNumber", 5)
 
     def test__shape_of_earth_spherical(self):
-        cs = RotatedGeogCS(grid_north_pole_latitude=90.0,
-                           grid_north_pole_longitude=0.0,
-                           ellipsoid=GeogCS(52431.0))
+        cs = RotatedGeogCS(
+            grid_north_pole_latitude=90.0,
+            grid_north_pole_longitude=0.0,
+            ellipsoid=GeogCS(52431.0),
+        )
         test_cube = self._make_test_cube(cs=cs)
         grid_definition_template_5(test_cube, self.mock_grib)
-        self._check_key('shapeOfTheEarth', 1)
-        self._check_key('scaleFactorOfRadiusOfSphericalEarth', 0)
-        self._check_key('scaledValueOfRadiusOfSphericalEarth', 52431.0)
+        self._check_key("shapeOfTheEarth", 1)
+        self._check_key("scaleFactorOfRadiusOfSphericalEarth", 0)
+        self._check_key("scaledValueOfRadiusOfSphericalEarth", 52431.0)
 
     def test__shape_of_earth_flattened(self):
         ellipsoid = GeogCS(semi_major_axis=1456.0, semi_minor_axis=1123.0)
-        cs = RotatedGeogCS(grid_north_pole_latitude=90.0,
-                           grid_north_pole_longitude=0.0,
-                           ellipsoid=ellipsoid)
+        cs = RotatedGeogCS(
+            grid_north_pole_latitude=90.0,
+            grid_north_pole_longitude=0.0,
+            ellipsoid=ellipsoid,
+        )
         test_cube = self._make_test_cube(cs=cs)
         grid_definition_template_5(test_cube, self.mock_grib)
-        self._check_key('shapeOfTheEarth', 7)
-        self._check_key('scaleFactorOfEarthMajorAxis', 0)
-        self._check_key('scaledValueOfEarthMajorAxis', 1456.0)
-        self._check_key('scaleFactorOfEarthMinorAxis', 0)
-        self._check_key('scaledValueOfEarthMinorAxis', 1123.0)
+        self._check_key("shapeOfTheEarth", 7)
+        self._check_key("scaleFactorOfEarthMajorAxis", 0)
+        self._check_key("scaledValueOfEarthMajorAxis", 1456.0)
+        self._check_key("scaleFactorOfEarthMinorAxis", 0)
+        self._check_key("scaledValueOfEarthMinorAxis", 1123.0)
 
     def test__grid_shape(self):
-        test_cube = self._make_test_cube(x_points=np.arange(13),
-                                         y_points=np.arange(6))
+        test_cube = self._make_test_cube(x_points=np.arange(13), y_points=np.arange(6))
         grid_definition_template_5(test_cube, self.mock_grib)
-        self._check_key('Ni', 13)
-        self._check_key('Nj', 6)
+        self._check_key("Ni", 13)
+        self._check_key("Nj", 6)
 
     def test__scanmode(self):
         grid_definition_template_5(self.test_cube, self.mock_grib)
-        self._check_key('iScansPositively', 1)
-        self._check_key('jScansPositively', 1)
+        self._check_key("iScansPositively", 1)
+        self._check_key("jScansPositively", 1)
 
     def test__scanmode_reverse(self):
         test_cube = self._make_test_cube(y_points=[5.0, 2.0])
         grid_definition_template_5(test_cube, self.mock_grib)
-        self._check_key('iScansPositively', 1)
-        self._check_key('jScansPositively', 0)
+        self._check_key("iScansPositively", 1)
+        self._check_key("jScansPositively", 0)
 
     def test__rotated_pole(self):
-        cs = RotatedGeogCS(grid_north_pole_latitude=75.3,
-                           grid_north_pole_longitude=54.321,
-                           ellipsoid=self.default_ellipsoid)
+        cs = RotatedGeogCS(
+            grid_north_pole_latitude=75.3,
+            grid_north_pole_longitude=54.321,
+            ellipsoid=self.default_ellipsoid,
+        )
         test_cube = self._make_test_cube(cs=cs)
         grid_definition_template_5(test_cube, self.mock_grib)
         self._check_key("latitudeOfSouthernPole", -75300000)
@@ -93,14 +100,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("angleOfRotation", 0)
 
     def test__fail_rotated_pole_nonstandard_meridian(self):
-        cs = RotatedGeogCS(grid_north_pole_latitude=90.0,
-                           grid_north_pole_longitude=0.0,
-                           north_pole_grid_longitude=22.5,
-                           ellipsoid=self.default_ellipsoid)
+        cs = RotatedGeogCS(
+            grid_north_pole_latitude=90.0,
+            grid_north_pole_longitude=0.0,
+            north_pole_grid_longitude=22.5,
+            ellipsoid=self.default_ellipsoid,
+        )
         test_cube = self._make_test_cube(cs=cs)
         with self.assertRaisesRegex(
-                TranslationError,
-                'not yet support .* rotated prime meridian.'):
+            TranslationError, "not yet support .* rotated prime meridian."
+        ):
             grid_definition_template_5(test_cube, self.mock_grib)
 
     def test__grid_points(self):
@@ -115,16 +124,16 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("latitude", y_longs)
 
     def test__true_winds_orientation(self):
-        self.test_cube.rename('eastward_wind')
+        self.test_cube.rename("eastward_wind")
         grid_definition_template_5(self.test_cube, self.mock_grib)
-        flags = self.mock_grib.keys['resolutionAndComponentFlags'] & 255
+        flags = self.mock_grib.keys["resolutionAndComponentFlags"] & 255
         flags_expected = 0b00000000
         self.assertEqual(flags, flags_expected)
 
     def test__grid_winds_orientation(self):
-        self.test_cube.rename('x_wind')
+        self.test_cube.rename("x_wind")
         grid_definition_template_5(self.test_cube, self.mock_grib)
-        flags = self.mock_grib.keys['resolutionAndComponentFlags'] & 255
+        flags = self.mock_grib.keys["resolutionAndComponentFlags"] & 255
         flags_expected = 0b00001000
         self.assertEqual(flags, flags_expected)
 

@@ -35,9 +35,7 @@ class TestPDT11(tests.TestGribMessage):
         cube.coord("longitude").coord_system = crs
         # add a realization coordinate
         cube.add_aux_coord(
-            iris.coords.DimCoord(
-                points=1, standard_name="realization", units="1"
-            )
+            iris.coords.DimCoord(points=1, standard_name="realization", units="1")
         )
         with self.temp_filename("testPDT11.GRIB2") as temp_file_path:
             iris.save(cube, temp_file_path)
@@ -62,8 +60,7 @@ class TestPDT40(tests.IrisTest):
         tcoord = iris.coords.DimCoord(
             23, "time", units=Unit("days since epoch", calendar="standard")
         )
-        fpcoord = iris.coords.DimCoord(24, "forecast_period",
-                                       units=Unit("hours"))
+        fpcoord = iris.coords.DimCoord(24, "forecast_period", units=Unit("hours"))
         cube.add_aux_coord(tcoord)
         cube.add_aux_coord(fpcoord)
         cube.attributes["WMO_constituent_type"] = 0

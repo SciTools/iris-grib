@@ -31,10 +31,12 @@ class Test(tests.IrisGribTest):
         self.assertIs(unscale(MDI, 1), ma.masked)
 
     def test_array(self):
-        items = [[1, [0.1, 1.2, 12.3, 123.4]],
-                 [-1, [10.0, 120.0, 1230.0, 12340.0]],
-                 [2, [0.01, 0.12, 1.23, 12.34]],
-                 [-2, [100.0, 1200.0, 12300.0, 123400.0]]]
+        items = [
+            [1, [0.1, 1.2, 12.3, 123.4]],
+            [-1, [10.0, 120.0, 1230.0, 12340.0]],
+            [2, [0.01, 0.12, 1.23, 12.34]],
+            [-2, [100.0, 1200.0, 12300.0, 123400.0]],
+        ]
         values = np.array([1, 12, 123, 1234])
         for factor, expected in items:
             result = unscale(values, [factor] * values.size)
@@ -48,5 +50,5 @@ class Test(tests.IrisGribTest):
         np.testing.assert_array_almost_equal(result, expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

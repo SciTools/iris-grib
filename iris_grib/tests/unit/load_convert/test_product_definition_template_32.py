@@ -19,15 +19,15 @@ from iris_grib._load_convert import product_definition_template_32
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.patch('warnings.warn')
+        self.patch("warnings.warn")
         self.generating_process_patch = self.patch(
-            'iris_grib._load_convert.generating_process')
+            "iris_grib._load_convert.generating_process"
+        )
         self.satellite_common_patch = self.patch(
-            'iris_grib._load_convert.satellite_common')
-        self.time_coords_patch = self.patch(
-            'iris_grib._load_convert.time_coords')
-        self.data_cutoff_patch = self.patch(
-            'iris_grib._load_convert.data_cutoff')
+            "iris_grib._load_convert.satellite_common"
+        )
+        self.time_coords_patch = self.patch("iris_grib._load_convert.time_coords")
+        self.data_cutoff_patch = self.patch("iris_grib._load_convert.data_cutoff")
 
     def test(self, value=10, factor=1):
         # Prepare the arguments.
@@ -35,15 +35,16 @@ class Test(tests.IrisGribTest):
         number = mock.sentinel.satelliteNumber
         instrument = mock.sentinel.instrumentType
         rt_coord = mock.sentinel.observation_time
-        section = {'NB': 1,
-                   'hoursAfterDataCutoff': None,
-                   'minutesAfterDataCutoff': None,
-                   'satelliteSeries': series,
-                   'satelliteNumber': number,
-                   'instrumentType': instrument,
-                   'scaleFactorOfCentralWaveNumber': 1,
-                   'scaledValueOfCentralWaveNumber': 12,
-                   }
+        section = {
+            "NB": 1,
+            "hoursAfterDataCutoff": None,
+            "minutesAfterDataCutoff": None,
+            "satelliteSeries": series,
+            "satelliteNumber": number,
+            "instrumentType": instrument,
+            "scaleFactorOfCentralWaveNumber": 1,
+            "scaledValueOfCentralWaveNumber": 12,
+        }
 
         # Call the function.
         metadata = empty_metadata()
@@ -59,5 +60,5 @@ class Test(tests.IrisGribTest):
         self.assertEqual(self.time_coords_patch.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

@@ -19,18 +19,18 @@ from iris.cube import Cube
 @tests.skip_grib_data
 class TestWAFCCodes(tests.IrisGribTest):
     def setUp(self):
-        self.cat = self.get_testdata_path('CAT_T+24_0600.grib2')
-        self.cb = self.get_testdata_path('CB_T+24_0600.grib2')
-        self.icing = self.get_testdata_path('ICING_T+24_0600.grib2')
-        self.turb = self.get_testdata_path('INCLDTURB_T+24_0600.grib2')
+        self.cat = self.get_testdata_path("CAT_T+24_0600.grib2")
+        self.cb = self.get_testdata_path("CB_T+24_0600.grib2")
+        self.icing = self.get_testdata_path("ICING_T+24_0600.grib2")
+        self.turb = self.get_testdata_path("INCLDTURB_T+24_0600.grib2")
 
     def test_WAFC_CAT_round_trip(self):
-        cubelist = load(self.cat, 'WAFC_CAT_potential')
+        cubelist = load(self.cat, "WAFC_CAT_potential")
         cube = cubelist[0]
         self.assertIsInstance(cube, Cube)
 
         with self.temp_filename() as tmp_save_path:
-            save(cube, tmp_save_path, saver='grib2')
+            save(cube, tmp_save_path, saver="grib2")
             saved_cube = load_cube(tmp_save_path)
             self.assertEqual(saved_cube.metadata, cube.metadata)
 
@@ -40,7 +40,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         self.assertIsInstance(cube, Cube)
 
         with self.temp_filename() as tmp_save_path:
-            save(cube, tmp_save_path, saver='grib2')
+            save(cube, tmp_save_path, saver="grib2")
             saved_cube = load_cube(tmp_save_path)
             self.assertEqual(saved_cube.metadata, cube.metadata)
 
@@ -50,7 +50,7 @@ class TestWAFCCodes(tests.IrisGribTest):
         self.assertIsInstance(cube, Cube)
 
         with self.temp_filename() as tmp_save_path:
-            save(cube, tmp_save_path, saver='grib2')
+            save(cube, tmp_save_path, saver="grib2")
             saved_cube = load_cube(tmp_save_path)
             self.assertEqual(saved_cube.metadata, cube.metadata)
 
@@ -60,10 +60,10 @@ class TestWAFCCodes(tests.IrisGribTest):
         self.assertIsInstance(cube, Cube)
 
         with self.temp_filename() as tmp_save_path:
-            save(cube, tmp_save_path, saver='grib2')
+            save(cube, tmp_save_path, saver="grib2")
             saved_cube = load_cube(tmp_save_path)
             self.assertEqual(saved_cube.metadata, cube.metadata)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

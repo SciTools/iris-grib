@@ -21,7 +21,7 @@ class Test(tests.IrisGribTest):
         files = mock.sentinel.FILES
         callback = mock.sentinel.CALLBACK
         expected_result = mock.sentinel.RESULT
-        with mock.patch('iris.fileformats.rules.load_cubes') as rules_load:
+        with mock.patch("iris.fileformats.rules.load_cubes") as rules_load:
             rules_load.return_value = expected_result
             result = load_cubes(files, callback)
             kwargs = {}
@@ -32,12 +32,10 @@ class Test(tests.IrisGribTest):
 
 @tests.skip_data
 class Test_load_cubes(tests.IrisGribTest):
-
     def test_reduced_raw(self):
         # Loading a GRIB message defined on a reduced grid without
         # interpolating to a regular grid.
-        gribfile = tests.get_data_path(
-            ("GRIB", "reduced", "reduced_gg.grib2"))
+        gribfile = tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
         grib_generator = load_cubes(gribfile)
         self.assertCML(next(grib_generator))
 

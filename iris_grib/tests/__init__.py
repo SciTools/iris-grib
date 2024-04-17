@@ -30,10 +30,10 @@ from iris_grib.message import GribMessage
 
 
 #: Basepath for iris-grib test results.
-_RESULT_PATH = os.path.join(os.path.dirname(__file__), 'results')
+_RESULT_PATH = os.path.join(os.path.dirname(__file__), "results")
 
 #: Basepath for iris-grib loadable test files.
-_TESTDATA_PATH = os.path.join(os.path.dirname(__file__), 'testdata')
+_TESTDATA_PATH = os.path.join(os.path.dirname(__file__), "testdata")
 
 override = os.environ.get("GRIB_TEST_DATA_PATH")
 if override:
@@ -57,9 +57,7 @@ def skip_grib_data(fn):
     no_data = not os.path.isdir(dpath) or os.environ.get(evar)
     reason = "Test(s) require missing external GRIB test data."
 
-    skip = unittest.skipIf(
-        condition=no_data, reason=reason
-    )
+    skip = unittest.skipIf(condition=no_data, reason=reason)
 
     return skip(fn)
 
@@ -79,7 +77,7 @@ class IrisGribTest(IrisTest):
             relative_path = os.path.join(*relative_path)
         return os.path.abspath(os.path.join(_RESULT_PATH, relative_path))
 
-    def result_path(self, basename=None, ext=''):
+    def result_path(self, basename=None, ext=""):
         """
         Return the full path to a test result, generated from the \
         calling file, class and, optionally, method.
@@ -91,27 +89,29 @@ class IrisGribTest(IrisTest):
             * ext         - Appended file extension.
 
         """
-        if ext and not ext.startswith('.'):
-            ext = '.' + ext
+        if ext and not ext.startswith("."):
+            ext = "." + ext
 
         # Generate the folder name from the calling file name.
         path = os.path.abspath(inspect.getfile(self.__class__))
         path = os.path.splitext(path)[0]
-        sub_path = path.rsplit('iris_grib', 1)[1].split('tests', 1)[1][1:]
+        sub_path = path.rsplit("iris_grib", 1)[1].split("tests", 1)[1][1:]
 
         # Generate the file name from the calling function name?
         if basename is None:
             stack = inspect.stack()
             for frame in stack[1:]:
-                if 'test_' in frame[3]:
-                    basename = frame[3].replace('test_', '')
+                if "test_" in frame[3]:
+                    basename = frame[3].replace("test_", "")
                     break
         filename = basename + ext
 
-        result = os.path.join(self.get_result_path(''),
-                              sub_path.replace('test_', ''),
-                              self.__class__.__name__.replace('Test_', ''),
-                              filename)
+        result = os.path.join(
+            self.get_result_path(""),
+            sub_path.replace("test_", ""),
+            self.__class__.__name__.replace("Test_", ""),
+            filename,
+        )
         return result
 
     @staticmethod
@@ -173,9 +173,7 @@ class TestGribMessage(IrisGribTest):
             m2_sect = set(m2.sections.keys())
 
             for missing_section in m1_sect ^ m2_sect:
-                what = (
-                    "introduced" if missing_section in m1_sect else "removed"
-                )
+                what = "introduced" if missing_section in m1_sect else "removed"
                 # Assert that an introduced section is in the diffs.
                 self.assertIn(
                     missing_section,
@@ -211,9 +209,7 @@ class TestGribMessage(IrisGribTest):
                         if isinstance(m1_value, np.ndarray):
                             # A large tolerance appears to be required for
                             # gribapi 1.12, but not for 1.14.
-                            self.assertArrayAlmostEqual(
-                                m1_value, m2_value, decimal=2
-                            )
+                            self.assertArrayAlmostEqual(m1_value, m2_value, decimal=2)
                         else:
                             self.assertEqual(
                                 m1_value,
