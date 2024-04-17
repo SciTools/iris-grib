@@ -2,7 +2,7 @@ prune .github
 prune .nox
 prune docs
 prune requirements
-recursive-include requirements *
+recursive-include requirements *.txt
 recursive-include iris_grib *.cml *.grib2 *.json *.nc *.py
 
 exclude .coveragerc
