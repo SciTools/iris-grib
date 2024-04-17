@@ -96,7 +96,7 @@ Getting Started
 
 To ensure all ``iris-grib`` dependencies, it is sufficient to have installed
 :mod:`Iris <iris>` itself, and
-`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ .
+`ecCodes <https://confluence.ecmwf.int/display/ECC/ecCodes+Home>`_ .
 
 The simplest way to install is with
 `conda <https://conda.io/miniconda.html>`_ ,
@@ -110,7 +110,7 @@ Development sources are hosted at `<https://github.com/SciTools/iris-grib>`_ .
 Releases
 ========
 
-For recent changes, see `Release Notes <ref/release_notes.html>`_ .
+For recent changes, see :ref:`release_notes` .
 
 
 Indices and tables
