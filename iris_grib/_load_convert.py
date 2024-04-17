@@ -810,8 +810,7 @@ def grid_definition_template_10(section, metadata):
     # intersects the Earth
     standard_parallel = section["LaD"] * _GRID_ACCURACY_IN_DEGREES
 
-    cs = icoord_systems.Mercator(standard_parallel=standard_parallel,
-                                 ellipsoid=geog_cs)
+    cs = icoord_systems.Mercator(standard_parallel=standard_parallel, ellipsoid=geog_cs)
 
     # Create the X and Y coordinates.
     x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section, cs)
