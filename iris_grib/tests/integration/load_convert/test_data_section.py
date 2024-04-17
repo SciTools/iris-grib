@@ -19,9 +19,7 @@ from iris import load_cube
 
 class TestImport(tests.IrisGribTest):
     def test_gdt1(self):
-        path = tests.get_data_path(
-            ("GRIB", "rotated_nae_t", "sensible_pole.grib2")
-        )
+        path = tests.get_data_path(("GRIB", "rotated_nae_t", "sensible_pole.grib2"))
         cube = load_cube(path)
         self.assertCMLApproxData(cube)
 
@@ -62,9 +60,7 @@ class TestGDT40(tests.IrisGribTest):
 
 class TestDRT3(tests.IrisGribTest):
     def test_grid_complex_spatial_differencing(self):
-        path = tests.get_data_path(
-            ("GRIB", "missing_values", "missing_values.grib2")
-        )
+        path = tests.get_data_path(("GRIB", "missing_values", "missing_values.grib2"))
         cube = load_cube(path)
         self.assertCMLApproxData(cube)
 
@@ -84,5 +80,5 @@ class TestDataProxy(tests.IrisGribTest):
         self.assertEqual(0, np.sum(cube.data))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

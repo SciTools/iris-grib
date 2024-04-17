@@ -19,13 +19,15 @@ from iris_grib._load_convert import time_range_unit
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.unit_by_indicator = {0: Unit('minutes'),
-                                  1: Unit('hours'),
-                                  2: Unit('days'),
-                                  10: Unit('3 hours'),
-                                  11: Unit('6 hours'),
-                                  12: Unit('12 hours'),
-                                  13: Unit('seconds')}
+        self.unit_by_indicator = {
+            0: Unit("minutes"),
+            1: Unit("hours"),
+            2: Unit("days"),
+            10: Unit("3 hours"),
+            11: Unit("6 hours"),
+            12: Unit("12 hours"),
+            13: Unit("seconds"),
+        }
 
     def test_units(self):
         for indicator, unit in self.unit_by_indicator.items():
@@ -33,10 +35,10 @@ class Test(tests.IrisGribTest):
             self.assertEqual(result, unit)
 
     def test_bad_indicator(self):
-        emsg = 'unsupported time range'
+        emsg = "unsupported time range"
         with self.assertRaisesRegex(TranslationError, emsg):
             time_range_unit(-1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

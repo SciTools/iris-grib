@@ -22,16 +22,16 @@ class Test(tests.IrisGribTest):
         template_nums = [0, 1, 2, 3, 4, 40, 41, 42, 50, 51, 61]
         for template_num in template_nums:
             message = _make_test_message(
-                {5: {'dataRepresentationTemplateNumber': template_num}})
+                {5: {"dataRepresentationTemplateNumber": template_num}}
+            )
             data_representation_section(message.sections[5])
 
     def test_unsupported_template(self):
-        message = _make_test_message(
-            {5: {'dataRepresentationTemplateNumber': 5}})
-        err_msg = r'Template \[5\] is not supported'
+        message = _make_test_message({5: {"dataRepresentationTemplateNumber": 5}})
+        err_msg = r"Template \[5\] is not supported"
         with self.assertRaisesRegex(TranslationError, err_msg):
             data_representation_section(message.sections[5])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

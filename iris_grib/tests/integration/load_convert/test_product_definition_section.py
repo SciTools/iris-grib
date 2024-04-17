@@ -18,9 +18,7 @@ from iris import load_cube
 class TestPDT8(tests.IrisGribTest):
     def setUp(self):
         # Load from the test file.
-        file_path = tests.get_data_path(
-            ("GRIB", "time_processed", "time_bound.grib2")
-        )
+        file_path = tests.get_data_path(("GRIB", "time_processed", "time_bound.grib2"))
         self.cube = load_cube(file_path)
 
     def test_coords(self):
@@ -61,9 +59,7 @@ class TestPDT8(tests.IrisGribTest):
         self.assertEqual(
             len(cell_methods),
             1,
-            "result has {} cell methods, expected one.".format(
-                len(cell_methods)
-            ),
+            "result has {} cell methods, expected one.".format(len(cell_methods)),
         )
         (cell_method,) = cell_methods
         self.assertEqual(cell_method.coord_names, ("time",))

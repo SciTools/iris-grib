@@ -17,12 +17,12 @@ class TestSaveGrib2(tests.IrisGribTest):
     def setUp(self):
         self.cube = mock.sentinel.cube
         self.target = mock.sentinel.target
-        func = 'iris_grib.save_pairs_from_cube'
+        func = "iris_grib.save_pairs_from_cube"
         self.messages = list(range(10))
         slices = self.messages
         side_effect = [zip(slices, self.messages)]
         self.save_pairs_from_cube = self.patch(func, side_effect=side_effect)
-        func = 'iris_grib.save_messages'
+        func = "iris_grib.save_messages"
         self.save_messages = self.patch(func)
 
     def _check(self, append=False):

@@ -120,3 +120,45 @@ minversion = "6.0"
 testpaths = "iris_grib"
 xfail_strict = "True"
 
+[tool.ruff]
+# Exclude the following, in addition to the standard set of exclusions.
+# https://docs.astral.sh/ruff/settings/#exclude
+line-length = 88
+src = [
+    "iris_grib",
+    "docs",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+preview = false
+
+[tool.ruff.lint]
+ignore = [
+    # NOTE: Non-permanent exclusions should be added to the ".ruff.toml" file.
+
+    # flake8-commas (COM)
+    # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+    "COM812",  # Trailing comma missing.
+    "COM819",  # Trailing comma prohibited.
+
+    # flake8-implicit-str-concat (ISC)
+    # https://docs.astral.sh/ruff/rules/single-line-implicit-string-concatenation/
+    # NOTE: This rule may cause conflicts when used with "ruff format".
+    "ISC001",  # Implicitly concatenate string literals on one line.
+    ]
+preview = false
+select = [
+    "ALL",
+
+    # pydocstyle (D)
+    # https://docs.astral.sh/ruff/rules/multi-line-summary-first-line/
+    "D212",  # Multi-line docstring summary should start at the first line
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["iris_grib"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

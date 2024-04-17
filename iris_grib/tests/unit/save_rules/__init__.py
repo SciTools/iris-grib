@@ -19,11 +19,12 @@ from iris.fileformats.pp import EARTH_RADIUS as PP_DEFAULT_EARTH_RADIUS
 
 class GdtTestMixin:
     """Some handy common test capabilities for grib grid-definition tests."""
-    TARGET_MODULE = 'iris_grib._save_rules'
+
+    TARGET_MODULE = "iris_grib._save_rules"
 
     def setUp(self):
         # Patch the ecCodes of the tested module.
-        self.mock_eccodes = self.patch(self.TARGET_MODULE + '.eccodes')
+        self.mock_eccodes = self.patch(self.TARGET_MODULE + ".eccodes")
 
         # Fix the mock ecCodes to record key assignments.
         def codes_set_trap(grib, name, value):
@@ -53,8 +54,9 @@ class GdtTestMixin:
     def _default_y_points(self):
         return [7.0, 8.0]  # N.B. is_regular will *fail* on length-1 coords.
 
-    def _make_test_cube(self, cs=None, x_points=None, y_points=None,
-                        coord_units='degrees'):
+    def _make_test_cube(
+        self, cs=None, x_points=None, y_points=None, coord_units="degrees"
+    ):
         # Create a cube with given properties, or minimal defaults.
         if cs is None:
             cs = self._default_coord_system()
@@ -63,10 +65,12 @@ class GdtTestMixin:
         if y_points is None:
             y_points = self._default_y_points()
 
-        x_coord = DimCoord(x_points, long_name='longitude',
-                           units=coord_units, coord_system=cs)
-        y_coord = DimCoord(y_points, long_name='latitude',
-                           units=coord_units, coord_system=cs)
+        x_coord = DimCoord(
+            x_points, long_name="longitude", units=coord_units, coord_system=cs
+        )
+        y_coord = DimCoord(
+            y_points, long_name="latitude", units=coord_units, coord_system=cs
+        )
         test_cube = Cube(np.zeros((len(y_points), len(x_points))))
         test_cube.add_dim_coord(y_coord, 0)
         test_cube.add_dim_coord(x_coord, 1)
@@ -77,7 +81,6 @@ class GdtTestMixin:
         msg_fmt = 'Expected grib setting "{}" = {}, got {}'
         found = self.mock_grib.keys.get(name)
         if found is None:
-            self.assertEqual(0, 1, msg_fmt.format(name, value, '((UNSET))'))
+            self.assertEqual(0, 1, msg_fmt.format(name, value, "((UNSET))"))
         else:
-            self.assertArrayEqual(found, value,
-                                  msg_fmt.format(name, value, found))
+            self.assertArrayEqual(found, value, msg_fmt.format(name, value, found))

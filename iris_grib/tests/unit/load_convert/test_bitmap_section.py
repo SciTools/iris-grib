@@ -22,11 +22,10 @@ class Test(tests.IrisGribTest):
         # bitMapIndicator in range 1-254.
         # Note that bitMapIndicator = 1-253 and bitMapIndicator = 254 mean two
         # different things, but load_convert treats them identically.
-        message = _make_test_message({6: {'bitMapIndicator': 100,
-                                          'bitmap': None}})
-        with self.assertRaisesRegex(TranslationError, 'unsupported bitmap'):
+        message = _make_test_message({6: {"bitMapIndicator": 100, "bitmap": None}})
+        with self.assertRaisesRegex(TranslationError, "unsupported bitmap"):
             bitmap_section(message.sections[6])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

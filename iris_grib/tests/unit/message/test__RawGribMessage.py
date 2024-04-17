@@ -19,11 +19,9 @@ from iris_grib.message import _RawGribMessage
 @tests.skip_data
 class Test(tests.IrisGribTest):
     def setUp(self):
-        filename = tests.get_data_path(('GRIB', 'uk_t', 'uk_t.grib2'))
-        with open(filename, 'rb') as grib_fh:
-            grib_id = eccodes.codes_new_from_file(
-                grib_fh, eccodes.CODES_PRODUCT_GRIB
-            )
+        filename = tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2"))
+        with open(filename, "rb") as grib_fh:
+            grib_id = eccodes.codes_new_from_file(grib_fh, eccodes.CODES_PRODUCT_GRIB)
             self.message = _RawGribMessage(grib_id)
 
     def test_sections__set(self):
@@ -32,7 +30,7 @@ class Test(tests.IrisGribTest):
         self.assertNotEqual(self.message._sections, None)
 
     def test_sections__indexing(self):
-        res = self.message.sections[3]['scanningMode']
+        res = self.message.sections[3]["scanningMode"]
         expected = 64
         self.assertEqual(expected, res)
 
@@ -46,9 +44,9 @@ class Test(tests.IrisGribTest):
         # This tests that the `_RawGribMessage._get_message_sections`
         # override is functioning.
         section_number = 4
-        res = self.message.sections[section_number]['numberOfSection']
+        res = self.message.sections[section_number]["numberOfSection"]
         self.assertEqual(res, section_number)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

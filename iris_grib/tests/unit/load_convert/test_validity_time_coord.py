@@ -22,30 +22,31 @@ from iris_grib._load_convert import validity_time_coord
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.fp = DimCoord(5, standard_name='forecast_period', units='hours')
+        self.fp = DimCoord(5, standard_name="forecast_period", units="hours")
         self.fp_test_bounds = np.array([[1.0, 9.0]])
-        self.unit = Unit('hours since epoch')
-        self.frt = DimCoord(10, standard_name='forecast_reference_time',
-                            units=self.unit)
+        self.unit = Unit("hours since epoch")
+        self.frt = DimCoord(
+            10, standard_name="forecast_reference_time", units=self.unit
+        )
 
     def test_frt_shape(self):
         frt = mock.Mock(shape=(2,))
         fp = mock.Mock(shape=(1,))
-        emsg = 'scalar forecast reference time'
+        emsg = "scalar forecast reference time"
         with self.assertRaisesRegex(ValueError, emsg):
             validity_time_coord(frt, fp)
 
     def test_fp_shape(self):
         frt = mock.Mock(shape=(1,))
         fp = mock.Mock(shape=(2,))
-        emsg = 'scalar forecast period'
+        emsg = "scalar forecast period"
         with self.assertRaisesRegex(ValueError, emsg):
             validity_time_coord(frt, fp)
 
     def test(self):
         coord = validity_time_coord(self.frt, self.fp)
         self.assertIsInstance(coord, DimCoord)
-        self.assertEqual(coord.standard_name, 'time')
+        self.assertEqual(coord.standard_name, "time")
         self.assertEqual(coord.units, self.unit)
         self.assertEqual(coord.shape, (1,))
         point = self.frt.points[0] + self.fp.points[0]
@@ -56,7 +57,7 @@ class Test(tests.IrisGribTest):
         self.fp.bounds = self.fp_test_bounds
         coord = validity_time_coord(self.frt, self.fp)
         self.assertIsInstance(coord, DimCoord)
-        self.assertEqual(coord.standard_name, 'time')
+        self.assertEqual(coord.standard_name, "time")
         self.assertEqual(coord.units, self.unit)
         self.assertEqual(coord.shape, (1,))
         point = self.frt.points[0] + self.fp.points[0]
@@ -66,5 +67,5 @@ class Test(tests.IrisGribTest):
         self.assertArrayAlmostEqual(coord.bounds, bounds)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

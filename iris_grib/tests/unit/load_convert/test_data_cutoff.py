@@ -20,17 +20,17 @@ from iris_grib._load_convert import data_cutoff
 class TestDataCutoff(tests.IrisGribTest):
     def _check(self, hours, minutes, request_warning, expect_warning=False):
         # Setup the environment.
-        patch_target = 'iris_grib._load_convert.options'
+        patch_target = "iris_grib._load_convert.options"
         with mock.patch(patch_target) as options:
             options.warn_on_unsupported = request_warning
-            with mock.patch('warnings.warn') as warn:
+            with mock.patch("warnings.warn") as warn:
                 # The call being tested.
                 data_cutoff(hours, minutes)
         # Check the result.
         if expect_warning:
             self.assertEqual(len(warn.mock_calls), 1)
             args, kwargs = warn.call_args
-            self.assertIn('data cutoff', args[0])
+            self.assertIn("data cutoff", args[0])
         else:
             self.assertEqual(len(warn.mock_calls), 0)
 
@@ -59,5 +59,5 @@ class TestDataCutoff(tests.IrisGribTest):
         self._check(30, 40, True, True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()
