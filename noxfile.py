@@ -271,25 +271,6 @@ def flake8(session: nox.sessions.Session):
     session.run("flake8", __file__)
 
 
-@nox.session
-def black(session: nox.sessions.Session):
-    """
-    Perform black format checking of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("black==20.8b1")
-    # Execute the black format checker on the package.
-    session.run("black", "--check", PACKAGE)
-    # Execute the black format checker on this file.
-    session.run("black", "--check", __file__)
-
-
 @nox.session(python=PY_VER, venv_backend="conda")
 @nox.parametrize('iris_source', IRIS_SOURCE)
 def tests(session: nox.sessions.Session, iris_source: str):
