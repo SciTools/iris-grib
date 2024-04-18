@@ -1517,7 +1517,7 @@ def translate_phenomenon(
 
     # Add a standard attribute recording the grib phenomenon identity.
     metadata["attributes"]["GRIB_PARAM"] = GRIBCode(
-        edition_or_string=2,
+        edition=2,
         discipline=discipline,
         category=parameterCategory,
         number=parameterNumber,

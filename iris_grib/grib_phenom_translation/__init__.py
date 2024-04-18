@@ -8,6 +8,7 @@ Provide grib 1 and 2 phenomenon translations to + from CF terms.
 This is done by wrapping '_grib_cf_map.py',
 which is in a format provided by the metadata translation project.
 
+
 Currently supports only these ones:
 
 * grib1 --> cf
@@ -17,13 +18,20 @@ Currently supports only these ones:
 """
 
 from collections import namedtuple
-import re
 import warnings
 
 import cf_units
 
-from . import _grib_cf_map as grcf
+from iris_grib import _grib_cf_map as grcf
+from iris_grib.grib_phenom_translation._gribcode import GRIBCode
 import iris.std_names
+
+__all__ = [
+    "GRIBCode",
+    "cf_phenom_to_grib2_info",
+    "grib1_phenom_to_cf_info",
+    "grib2_phenom_to_cf_info",
+]
 
 
 class _LookupTable(dict):
@@ -361,74 +369,3 @@ def cf_phenom_to_grib2_info(standard_name, long_name=None):
     if standard_name is not None:
         long_name = None
     return _CF_GRIB2_TABLE[(standard_name, long_name)]
-
-
-class GRIBCode(namedtuple("GRIBCode", "edition discipline category number")):
-    """
-    An object representing a specific Grib phenomenon identity.
-
-    Basically a namedtuple of (edition, discipline, category, number).
-
-    Also provides a string representation, and supports creation from: another
-    similar object; a tuple of numbers; or any string with 4 separate decimal
-    numbers in it.
-
-    """
-
-    __slots__ = ()
-
-    def __new__(cls, edition_or_string, discipline=None, category=None, number=None):
-        args = (edition_or_string, discipline, category, number)
-        nargs = sum(arg is not None for arg in args)
-        if nargs == 1:
-            # Single argument: convert to a string and extract 4 integers.
-            # NOTE: this also allows input from a GRIBCode, or a plain tuple.
-            edition_or_string = str(edition_or_string)
-            edition, discipline, category, number = cls._fournums_from_gribcode_string(
-                edition_or_string
-            )
-        elif nargs == 4:
-            edition = edition_or_string
-            edition, discipline, category, number = [
-                int(arg) for arg in (edition, discipline, category, number)
-            ]
-        else:
-            msg = (
-                "Cannot create GRIBCode from {} arguments, "
-                '"GRIBCode{!r}" : '
-                "expected either 1 or 4 non-None arguments."
-            )
-            raise ValueError(msg.format(nargs, args))
-
-        return super(GRIBCode, cls).__new__(cls, edition, discipline, category, number)
-
-    RE_PARSE_FOURNUMS = re.compile(4 * r"[^\d]*(\d*)")
-
-    @classmethod
-    def _fournums_from_gribcode_string(cls, edcn_string):
-        parsed_ok = False
-        nums_match = cls.RE_PARSE_FOURNUMS.match(edcn_string).groups()
-        if nums_match is not None:
-            try:
-                nums = [int(grp) for grp in nums_match]
-                parsed_ok = True
-            except ValueError:
-                pass
-
-        if not parsed_ok:
-            msg = (
-                "Invalid argument for GRIBCode creation, "
-                '"GRIBCode({!r})" : '
-                "requires 4 numbers, separated by non-numerals."
-            )
-            raise ValueError(msg.format(edcn_string))
-
-        return nums
-
-    PRINT_FORMAT = "GRIB{:1d}:d{:03d}c{:03d}n{:03d}"
-
-    def __str__(self):
-        result = self.PRINT_FORMAT.format(
-            self.edition, self.discipline, self.category, self.number
-        )
-        return result

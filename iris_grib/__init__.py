@@ -304,6 +304,7 @@ class GribWrapper:
             "_x_points": None,
             "_y_points": None,
             "_cf_data": None,
+            "_grib_code": None,
         }
 
         # cf phenomenon translation
@@ -316,6 +317,14 @@ class GribWrapper:
             param_number=self.indicatorOfParameter,
         )
         self.extra_keys["_cf_data"] = cf_data
+
+        # Record the original parameter encoding
+        self.extra_keys["_grib_code"] = gptx.GRIBCode(
+            edition=1,
+            table_version=self.table2Version,
+            centre_number=centre_number,
+            number=self.indicatorOfParameter,
+        )
 
         # reference date
         self.extra_keys["_referenceDateTime"] = datetime.datetime(
@@ -708,7 +717,7 @@ def _load_generate(filename):
 
 def load_cubes(filenames, callback=None):
     """
-    Returns a generator of cubes from the given list of filenames.
+    Returns an iterator over cubes from the given list of filenames.
 
     Args:
 
@@ -721,7 +730,7 @@ def load_cubes(filenames, callback=None):
         Function which can be passed on to :func:`iris.io.run_callback`.
 
     Returns:
-        A generator containing Iris cubes loaded from the GRIB files.
+        An iterator returning Iris cubes loaded from the GRIB files.
 
     """
     import iris.fileformats.rules as iris_rules
@@ -809,10 +818,10 @@ def save_grib2(cube, target, append=False):
 
 def save_pairs_from_cube(cube):
     """
-    Convert one or more cubes to (2D cube, GRIB message) pairs.
-    Returns an iterable of tuples each consisting of one 2D cube and
-    one GRIB message ID, the result of the 2D cube being processed by the GRIB
-    save rules.
+    Convert one or more cubes to (2D cube, GRIB-message-id) pairs.
+
+    Produces pairs of 2D cubes and GRIB messages, the result of the 2D cube
+    being processed by the GRIB save rules.
 
     Args:
 
@@ -820,6 +829,10 @@ def save_pairs_from_cube(cube):
         A :class:`iris.cube.Cube`, :class:`iris.cube.CubeList` or
         list of cubes.
 
+    Returns:
+        a iterator returning (cube, field) pairs, where each ``cube`` is a 2d
+        slice of the input and each``field`` is an eccodes message "id".
+        N.B. the message "id"s are integer handles.
     """
     x_coords = cube.coords(axis="x", dim_coords=True)
     y_coords = cube.coords(axis="y", dim_coords=True)

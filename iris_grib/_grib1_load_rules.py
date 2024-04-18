@@ -148,13 +148,17 @@ def grib1_convert(grib):
         long_name = grib._cf_data.standard_name or grib._cf_data.long_name
         units = grib._cf_data.units
 
-    if (grib.table2Version >= 128) and (grib._cf_data is None):
-        long_name = (
-            f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}" f".{grib.table2Version}"
-        )
-        units = "???"
+    # N.B. in addition to the previous cf translated phenomenon info,
+    # **always** add a GRIB_PARAM attribute to identify the input phenomenon
+    # identity.
+    attributes["GRIB_PARAM"] = grib._grib_code
 
-    if (grib.table2Version == 1) and (grib.indicatorOfParameter >= 128):
+    if (
+        (grib.table2Version >= 128)
+        and (grib._cf_data is None)
+        or (grib.table2Version == 1)
+        and (grib.indicatorOfParameter >= 128)
+    ):
         long_name = (
             f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}" f".{grib.table2Version}"
         )
