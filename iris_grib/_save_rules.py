@@ -48,52 +48,6 @@ _STATISTIC_TYPE_NAMES_INVERTED = {
 _TIME_RANGE_UNITS_INVERTED = {val: key for key, val in _TIME_RANGE_UNITS.items()}
 
 
-def fixup_float32_as_int32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats an IEEE 32-bit
-    floating-point value as a signed, 4-byte integer.
-
-    Returns the integer value which will result in the on-disk
-    representation corresponding to the IEEE 32-bit floating-point
-    value.
-
-    """
-    value_as_float32 = np.array(value, dtype="f4")
-    value_as_uint32 = value_as_float32.view(dtype="u4")
-    if value_as_uint32 >= 0x80000000:
-        # Convert from two's-complement to sign-and-magnitude.
-        # NB. Because of the silly representation of negative
-        # integers in GRIB2, there is no value we can pass to
-        # codes_set that will result in the bit pattern 0x80000000.
-        # But since that bit pattern corresponds to a floating
-        # point value of negative-zero, we can safely treat it as
-        # positive-zero instead.
-        value_as_grib_int = 0x80000000 - int(value_as_uint32)
-    else:
-        value_as_grib_int = int(value_as_uint32)
-    return value_as_grib_int
-
-
-def fixup_int32_as_uint32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats a signed, 4-byte
-    integer value as an unsigned, 4-byte integer.
-
-    Returns the unsigned integer value which will result in the on-disk
-    representation corresponding to the signed, 4-byte integer value.
-
-    """
-    value = int(value)
-    if -0x7FFFFFFF <= value <= 0x7FFFFFFF:
-        if value < 0:
-            # Convert from two's-complement to sign-and-magnitude.
-            value = 0x80000000 - value
-    else:
-        msg = "{} out of range -2147483647 to 2147483647.".format(value)
-        raise ValueError(msg)
-    return value
-
-
 ###############################################################################
 #
 # Constants
