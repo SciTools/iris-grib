@@ -29,24 +29,28 @@ def _invalid_nargs(args):
     raise ValueError(msg)
 
 
+# Regexp to extract four integers from a string:
+# - for four times ...
+# - match any non-digits (including none) and discard
+# - then match any digits (including none), and return as a "group"
 _RE_PARSE_FOURNUMS = re.compile(4 * r'[^\d]*(\d*)')
 
 
-def _fournums_from_gribcode_string(edcn_string):
-    parsed_ok = False
-    nums_match = _RE_PARSE_FOURNUMS.match(edcn_string).groups()
-    if nums_match is not None:
-        try:
-            nums = [int(grp) for grp in nums_match]
-            parsed_ok = True
-        except ValueError:
-            pass
+def _fournums_from_gribcode_string(grib_param_string):
+    parsed_ok = True
+    # get the numbers..
+    match_groups = _RE_PARSE_FOURNUMS.match(grib_param_string).groups()
+    # N.B. always produces 4 "strings of digits", but some can be empty
+    try:
+        nums = [int(grp) for grp in match_groups]
+    except ValueError:
+        parsed_ok = False
 
     if not parsed_ok:
         msg = ('Invalid argument for GRIBCode creation, '
                '"GRIBCode({!r})" : '
                'requires 4 numbers, separated by non-numerals.')
-        raise ValueError(msg.format(edcn_string))
+        raise ValueError(msg.format(grib_param_string))
 
     return nums
 

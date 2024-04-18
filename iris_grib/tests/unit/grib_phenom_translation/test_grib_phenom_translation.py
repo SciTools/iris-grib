@@ -154,7 +154,6 @@ class TestGRIBcode(tests.IrisTest):
     # GRIBCode is basically a namedtuple, so not all behaviour needs testing.
     # However, creation is a bit special so exercise all those cases.
 
-    # TODO: (still) test new + separate GRIB1 behaviour also
     # TODO: convert to pytest + replace duplications with parameterisation
     #   (mostly grib1/grib2, but also in one case str/repr)
     def test_create_from_keys__grib2(self):
@@ -170,7 +169,6 @@ class TestGRIBcode(tests.IrisTest):
         self.assertEqual(gribcode.number, 199)
 
     def test_create_from_keys__grib1(self):
-        # TODO: when we get pytest, combine with above using parameters
         gribcode = GRIBCode(
             edition=1,
             table_version=7,
@@ -190,7 +188,6 @@ class TestGRIBcode(tests.IrisTest):
         self.assertEqual(gribcode.number, 99)
 
     def test_create_from_args__grib1(self):
-        # TODO: when we get pytest, combine with above using parameters
         gribcode = GRIBCode(1, 3, 12, 99)
         self.assertEqual(gribcode.edition, 1)
         self.assertEqual(gribcode.table_version, 3)
@@ -204,12 +201,10 @@ class TestGRIBcode(tests.IrisTest):
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_is_copy__grib1(self):
-        # TODO: when we get pytest, combine with above using parameters
         self.check_create_is_copy(edition=1)
 
     def test_create_is_copy__grib2(self):
-        # TODO: when we get pytest, combine with above using parameters
-        self.check_create_is_copy(edition=1)
+        self.check_create_is_copy(edition=2)
 
     def check_create_from_gribcode(self, edition):
         gribcode1 = GRIBCode((edition, 3, 2, 1))
@@ -220,11 +215,9 @@ class TestGRIBcode(tests.IrisTest):
         self.assertIsNot(gribcode1, gribcode2)
 
     def test_create_from_gribcode__grib1(self):
-        # TODO: when we get pytest, combine with above using parameters
         self.check_create_from_gribcode(edition=1)
 
     def test_create_from_gribcode__grib2(self):
-        # TODO: when we get pytest, combine with above using parameters
         self.check_create_from_gribcode(edition=2)
 
     def check_create_from_string(self, edition):
@@ -233,11 +226,9 @@ class TestGRIBcode(tests.IrisTest):
         self.assertEqual(gribcode, GRIBCode(edition, 34, 5, 678))
 
     def test_create_from_string__grib1(self):
-        # TODO: when we get pytest, combine with above using parameters
         self.check_create_from_string(edition=1)
 
     def test_create_from_string__grib2(self):
-        # TODO: when we get pytest, combine with above using parameters
         self.check_create_from_string(edition=2)
 
     def check_create_from_own_string(self, string_function, edition):
@@ -353,16 +344,22 @@ class TestGRIBcode(tests.IrisTest):
 
     def check__repr__(self, edition):
         result = repr(GRIBCode(edition, 17, 3, 123))
-        expected = (
-            f"GRIBCode(edition={edition}, discipline=17, "
-            "category=3, number=123)"
-        )
+        if edition == 1:
+            expected = (
+                "GRIBCode(edition=1, table_version=17, "
+                "centre_number=3, number=123)"
+            )
+        elif edition == 2:
+            expected = (
+                "GRIBCode(edition=2, discipline=17, "
+                "category=3, number=123)"
+            )
         self.assertEqual(result, expected)
 
-    def check__repr__grib1(self):
+    def test__repr__grib1(self):
         self.check__repr__(edition=1)
 
-    def check__repr__grib2(self):
+    def test__repr__grib2(self):
         self.check__repr__(edition=2)
 
     def test_bad_content__str_repr__badedition(self):
