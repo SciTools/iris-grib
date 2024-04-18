@@ -90,8 +90,8 @@ To load from a GRIB file with ``iris-grib``, you can call the
 :func:`~iris_grib.load_cubes` function :
 
     >>> cubes_iter = iris_grib.load_cubes('testfile.grib')
-    >>> print(type(cubes_iter))
-    <class 'generator'>
+    >>> print(cubes_iter)
+    <generator object load_cubes at ...>
 
 As we can see, this returns a generator object. The generator object may be iterated
 over to access all the Iris cubes loaded from the GRIB file, or converted directly
