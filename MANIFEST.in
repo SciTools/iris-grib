@@ -12,3 +12,4 @@ exclude .pre-commit-config.yaml
 exclude .readthedocs.yml
 include *.md
 include *.py
+include *.toml
