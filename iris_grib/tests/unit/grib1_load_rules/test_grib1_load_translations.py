@@ -71,12 +71,8 @@ _mock_eccodes.CodesInternalError = Exception
 _mock_eccodes.codes_get_long = mock.Mock(side_effect=_mock_eccodes_fetch)
 _mock_eccodes.codes_get_string = mock.Mock(side_effect=_mock_eccodes_fetch)
 _mock_eccodes.codes_get_double = mock.Mock(side_effect=_mock_eccodes_fetch)
-_mock_eccodes.codes_get_double_array = mock.Mock(
-    side_effect=_mock_eccodes_fetch
-)
-_mock_eccodes.codes_is_missing = mock.Mock(
-    side_effect=_mock_eccodes__codes_is_missing
-)
+_mock_eccodes.codes_get_double_array = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_is_missing = mock.Mock(side_effect=_mock_eccodes__codes_is_missing)
 _mock_eccodes.codes_get_native_type = mock.Mock(
     side_effect=_mock_eccodes__codes_get_native_type
 )
@@ -191,9 +187,7 @@ class TestGribTimecodes(tests.IrisTest):
                     # Expect GribWrapper construction to fail.
                     with self.assertRaises(type(expected_error)) as ar_context:
                         _ = iris_grib.GribWrapper(message)
-                    self.assertEqual(
-                        ar_context.exception.args, expected_error.args
-                    )
+                    self.assertEqual(ar_context.exception.args, expected_error.args)
                     continue
 
                 # 'ELSE'...
@@ -218,8 +212,7 @@ class TestGribTimecodes(tests.IrisTest):
 
                 # Check the data-starttime calculation.
                 interval_start_to_end = (
-                    wrapped_msg._phenomenonDateTime -
-                    wrapped_msg._referenceDateTime
+                    wrapped_msg._phenomenonDateTime - wrapped_msg._referenceDateTime
                 )
                 if grib_edition == 1:
                     interval_from_units = wrapped_msg.P1
@@ -281,9 +274,7 @@ class TestGribTimecodes(tests.IrisTest):
         TestGribTimecodes._run_timetests(self, tests)
 
     def test_timeunits_invalid(self):
-        tests = (
-            (1, 111, TestGribTimecodes._err_bad_timeunit(111), 1.0, "??"),
-        )
+        tests = ((1, 111, TestGribTimecodes._err_bad_timeunit(111), 1.0, "??"),)
         TestGribTimecodes._run_timetests(self, tests)
 
     def test_warn_unknown_pdts(self):

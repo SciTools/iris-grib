@@ -18,16 +18,16 @@ from iris_grib.message import _MessageLocation
 
 class Test(tests.IrisGribTest):
     def test(self):
-        message_location = _MessageLocation(mock.sentinel.filename,
-                                            mock.sentinel.location)
-        patch_target = 'iris_grib.message._RawGribMessage.from_file_offset'
+        message_location = _MessageLocation(
+            mock.sentinel.filename, mock.sentinel.location
+        )
+        patch_target = "iris_grib.message._RawGribMessage.from_file_offset"
         expected = mock.sentinel.message
         with mock.patch(patch_target, return_value=expected) as rgm:
             result = message_location()
-        rgm.assert_called_once_with(mock.sentinel.filename,
-                                    mock.sentinel.location)
+        rgm.assert_called_once_with(mock.sentinel.filename, mock.sentinel.location)
         self.assertIs(result, expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

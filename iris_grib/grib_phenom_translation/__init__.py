@@ -2,7 +2,7 @@
 #
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
-'''
+"""
 Provide grib 1 and 2 phenomenon translations to + from CF terms.
 
 This is done by wrapping '_grib_cf_map.py',
@@ -15,14 +15,15 @@ Currently supports only these ones:
 * grib2 --> cf
 * cf --> grib2
 
-'''
+"""
+
 from collections import namedtuple
 import warnings
 
 import cf_units
 
-from .. import _grib_cf_map as grcf
-from ._gribcode import GRIBCode
+from iris_grib import _grib_cf_map as grcf
+from iris_grib.grib_phenom_translation._gribcode import GRIBCode
 import iris.std_names
 
 __all__ = [
@@ -42,6 +43,7 @@ class _LookupTable(dict):
     (but it is still possible to remove keys)
 
     """
+
     def __init__(self, *args, **kwargs):
         self._super = super()
         self._super.__init__(*args, **kwargs)
@@ -53,32 +55,41 @@ class _LookupTable(dict):
 
     def __setitem__(self, key, value):
         if key in self and self[key] is not value:
-            raise KeyError('Attempted to set dict[{}] = {}, '
-                           'but this is already set to {}.'.format(
-                               key, value, self[key]))
+            raise KeyError(
+                "Attempted to set dict[{}] = {}, "
+                "but this is already set to {}.".format(key, value, self[key])
+            )
         self._super.__setitem__(key, value)
 
 
 # Define namedtuples for keys+values of the Grib1 lookup table.
 
 Grib1CfKey = namedtuple(
-    'Grib1CfKey',
-    ('table2_version', 'centre_number', 'param_number'))
+    "Grib1CfKey", ("table2_version", "centre_number", "param_number")
+)
 
 # NOTE: this form is currently used for both Grib1 *and* Grib2
 Grib1CfData = namedtuple(
-    'Grib1CfData',
-    ('standard_name', 'long_name', 'units', 'set_height'))
+    "Grib1CfData", ("standard_name", "long_name", "units", "set_height")
+)
 
 
 # Create the grib1-to-cf lookup table.
 
+
 def _make_grib1_cf_table():
-    """ Build the Grib1 to CF phenomenon translation table. """
+    """Build the Grib1 to CF phenomenon translation table."""
     table = _LookupTable()
 
-    def _make_grib1_cf_entry(table2_version, centre_number, param_number,
-                             standard_name, long_name, units, set_height=None):
+    def _make_grib1_cf_entry(
+        table2_version,
+        centre_number,
+        param_number,
+        standard_name,
+        long_name,
+        units,
+        set_height=None,
+    ):
         """
         Check data, convert types and create a new _GRIB1_CF_TABLE key/value.
 
@@ -87,24 +98,31 @@ def _make_grib1_cf_table():
         e.g. "2-metre tempererature".
 
         """
-        grib1_key = Grib1CfKey(table2_version=int(table2_version),
-                               centre_number=int(centre_number),
-                               param_number=int(param_number))
+        grib1_key = Grib1CfKey(
+            table2_version=int(table2_version),
+            centre_number=int(centre_number),
+            param_number=int(param_number),
+        )
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
-                warnings.warn('{} is not a recognised CF standard name '
-                              '(skipping).'.format(standard_name))
+                warnings.warn(
+                    "{} is not a recognised CF standard name " "(skipping).".format(
+                        standard_name
+                    )
+                )
                 return None
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        cf_data = Grib1CfData(standard_name=standard_name,
-                              long_name=long_name,
-                              units=a_cf_unit,
-                              set_height=set_height)
+        cf_data = Grib1CfData(
+            standard_name=standard_name,
+            long_name=long_name,
+            units=a_cf_unit,
+            set_height=set_height,
+        )
         return (grib1_key, cf_data)
 
     # Interpret the imported Grib1-to-CF table.
-    for (grib1data, cfdata) in grcf.GRIB1_LOCAL_TO_CF.items():
+    for grib1data, cfdata in grcf.GRIB1_LOCAL_TO_CF.items():
         assert grib1data.edition == 1
         association_entry = _make_grib1_cf_entry(
             table2_version=grib1data.t2version,
@@ -112,27 +130,35 @@ def _make_grib1_cf_table():
             param_number=grib1data.iParam,
             standard_name=cfdata.standard_name,
             long_name=cfdata.long_name,
-            units=cfdata.units)
+            units=cfdata.units,
+        )
         if association_entry is not None:
             key, value = association_entry
             table[key] = value
 
     # Do the same for special Grib1 codes that include an implied height level.
-    for (grib1data, (cfdata, extra_dimcoord)) \
-            in grcf.GRIB1_LOCAL_TO_CF_CONSTRAINED.items():
+    for grib1data, (
+        cfdata,
+        extra_dimcoord,
+    ) in grcf.GRIB1_LOCAL_TO_CF_CONSTRAINED.items():
         assert grib1data.edition == 1
-        if extra_dimcoord.standard_name != 'height':
-            raise ValueError('Got implied dimension coord of "{}", '
-                             'currently can only handle "height".'.format(
-                                 extra_dimcoord.standard_name))
-        if extra_dimcoord.units != 'm':
-            raise ValueError('Got implied dimension units of "{}", '
-                             'currently can only handle "m".'.format(
-                                 extra_dimcoord.units))
+        if extra_dimcoord.standard_name != "height":
+            raise ValueError(
+                'Got implied dimension coord of "{}", '
+                'currently can only handle "height".'.format(
+                    extra_dimcoord.standard_name
+                )
+            )
+        if extra_dimcoord.units != "m":
+            raise ValueError(
+                'Got implied dimension units of "{}", '
+                'currently can only handle "m".'.format(extra_dimcoord.units)
+            )
         if len(extra_dimcoord.points) != 1:
-            raise ValueError('Implied dimension has {} points, '
-                             'currently can only handle 1.'.format(
-                                 len(extra_dimcoord.points)))
+            raise ValueError(
+                "Implied dimension has {} points, "
+                "currently can only handle 1.".format(len(extra_dimcoord.points))
+            )
         association_entry = _make_grib1_cf_entry(
             table2_version=int(grib1data.t2version),
             centre_number=int(grib1data.centre),
@@ -140,7 +166,8 @@ def _make_grib1_cf_table():
             standard_name=cfdata.standard_name,
             long_name=cfdata.long_name,
             units=cfdata.units,
-            set_height=extra_dimcoord.points[0])
+            set_height=extra_dimcoord.points[0],
+        )
         if association_entry is not None:
             key, value = association_entry
             table[key] = value
@@ -154,18 +181,20 @@ _GRIB1_CF_TABLE = _make_grib1_cf_table()
 # Define a namedtuple for the keys of the Grib2 lookup table.
 
 Grib2CfKey = namedtuple(
-    'Grib2CfKey',
-    ('param_discipline', 'param_category', 'param_number'))
+    "Grib2CfKey", ("param_discipline", "param_category", "param_number")
+)
 
 
 # Create the grib2-to-cf lookup table.
 
+
 def _make_grib2_to_cf_table():
-    """ Build the Grib2 to CF phenomenon translation table. """
+    """Build the Grib2 to CF phenomenon translation table."""
     table = _LookupTable()
 
-    def _make_grib2_cf_entry(param_discipline, param_category, param_number,
-                             standard_name, long_name, units):
+    def _make_grib2_cf_entry(
+        param_discipline, param_category, param_number, standard_name, long_name, units
+    ):
         """
         Check data, convert types and make a _GRIB2_CF_TABLE key/value pair.
 
@@ -174,20 +203,27 @@ def _make_grib2_to_cf_table():
         e.g. "2-metre tempererature".
 
         """
-        grib2_key = Grib2CfKey(param_discipline=int(param_discipline),
-                               param_category=int(param_category),
-                               param_number=int(param_number))
+        grib2_key = Grib2CfKey(
+            param_discipline=int(param_discipline),
+            param_category=int(param_category),
+            param_number=int(param_number),
+        )
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
-                warnings.warn('{} is not a recognised CF standard name '
-                              '(skipping).'.format(standard_name))
+                warnings.warn(
+                    "{} is not a recognised CF standard name " "(skipping).".format(
+                        standard_name
+                    )
+                )
                 return None
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        cf_data = Grib1CfData(standard_name=standard_name,
-                              long_name=long_name,
-                              units=a_cf_unit,
-                              set_height=None)
+        cf_data = Grib1CfData(
+            standard_name=standard_name,
+            long_name=long_name,
+            units=a_cf_unit,
+            set_height=None,
+        )
         return (grib2_key, cf_data)
 
     # Interpret the grib2 info from grib_cf_map
@@ -199,7 +235,8 @@ def _make_grib2_to_cf_table():
             param_number=grib2data.number,
             standard_name=cfdata.standard_name,
             long_name=cfdata.long_name,
-            units=cfdata.units)
+            units=cfdata.units,
+        )
         if association_entry is not None:
             key, value = association_entry
             table[key] = value
@@ -212,24 +249,21 @@ _GRIB2_CF_TABLE = _make_grib2_to_cf_table()
 
 # Define namedtuples for key+values of the cf-to-grib2 lookup table.
 
-CfGrib2Key = namedtuple(
-    'CfGrib2Key',
-    ('standard_name', 'long_name'))
+CfGrib2Key = namedtuple("CfGrib2Key", ("standard_name", "long_name"))
 
-CfGrib2Data = namedtuple(
-    'CfGrib2Data',
-    ('discipline', 'category', 'number', 'units'))
+CfGrib2Data = namedtuple("CfGrib2Data", ("discipline", "category", "number", "units"))
 
 
 # Create the cf-to-grib2 lookup table.
 
+
 def _make_cf_to_grib2_table():
-    """ Build the Grib1 to CF phenomenon translation table. """
+    """Build the Grib1 to CF phenomenon translation table."""
     table = _LookupTable()
 
-    def _make_cf_grib2_entry(standard_name, long_name,
-                             param_discipline, param_category, param_number,
-                             units):
+    def _make_cf_grib2_entry(
+        standard_name, long_name, param_discipline, param_category, param_number, units
+    ):
         """
         Check data, convert types and make a new _CF_TABLE key/value pair.
 
@@ -238,16 +272,21 @@ def _make_cf_to_grib2_table():
         if standard_name is not None:
             long_name = None
             if standard_name not in iris.std_names.STD_NAMES:
-                warnings.warn('{} is not a recognised CF standard name '
-                              '(skipping).'.format(standard_name))
+                warnings.warn(
+                    "{} is not a recognised CF standard name " "(skipping).".format(
+                        standard_name
+                    )
+                )
                 return None
         cf_key = CfGrib2Key(standard_name, long_name)
         # convert units string to iris Unit (i.e. mainly, check it is good)
         a_cf_unit = cf_units.Unit(units)
-        grib2_data = CfGrib2Data(discipline=int(param_discipline),
-                                 category=int(param_category),
-                                 number=int(param_number),
-                                 units=a_cf_unit)
+        grib2_data = CfGrib2Data(
+            discipline=int(param_discipline),
+            category=int(param_category),
+            number=int(param_number),
+            units=a_cf_unit,
+        )
         return (cf_key, grib2_data)
 
     # Interpret the imported CF-to-Grib2 table into a lookup table
@@ -260,7 +299,8 @@ def _make_cf_to_grib2_table():
             param_discipline=grib2data.discipline,
             param_category=grib2data.category,
             param_number=grib2data.number,
-            units=a_cf_unit)
+            units=a_cf_unit,
+        )
         if association_entry is not None:
             key, value = association_entry
             table[key] = value
@@ -272,6 +312,7 @@ _CF_GRIB2_TABLE = _make_cf_to_grib2_table()
 
 
 # Interface functions for translation lookup
+
 
 def grib1_phenom_to_cf_info(table2_version, centre_number, param_number):
     """
@@ -285,9 +326,11 @@ def grib1_phenom_to_cf_info(table2_version, centre_number, param_number):
     * set_height :  a scalar 'height' value , or None
 
     """
-    grib1_key = Grib1CfKey(table2_version=table2_version,
-                           centre_number=centre_number,
-                           param_number=param_number)
+    grib1_key = Grib1CfKey(
+        table2_version=table2_version,
+        centre_number=centre_number,
+        param_number=param_number,
+    )
     return _GRIB1_CF_TABLE[grib1_key]
 
 
@@ -302,9 +345,11 @@ def grib2_phenom_to_cf_info(param_discipline, param_category, param_number):
     * units : a :class:`cf_units.Unit`
 
     """
-    grib2_key = Grib2CfKey(param_discipline=int(param_discipline),
-                           param_category=int(param_category),
-                           param_number=int(param_number))
+    grib2_key = Grib2CfKey(
+        param_discipline=int(param_discipline),
+        param_category=int(param_category),
+        param_number=int(param_number),
+    )
     return _GRIB2_CF_TABLE[grib2_key]
 
 

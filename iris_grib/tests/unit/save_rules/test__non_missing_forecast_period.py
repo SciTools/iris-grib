@@ -15,10 +15,12 @@ from iris_grib._save_rules import _non_missing_forecast_period
 
 class Test(tests.IrisGribTest):
     def _cube(self, t_bounds=False):
-        time_coord = iris.coords.DimCoord(15, standard_name='time',
-                                          units='hours since epoch')
-        fp_coord = iris.coords.DimCoord(10, standard_name='forecast_period',
-                                        units='hours')
+        time_coord = iris.coords.DimCoord(
+            15, standard_name="time", units="hours since epoch"
+        )
+        fp_coord = iris.coords.DimCoord(
+            10, standard_name="forecast_period", units="hours"
+        )
         if t_bounds:
             time_coord.bounds = [[8, 100]]
             fp_coord.bounds = [[3, 95]]
@@ -39,7 +41,7 @@ class Test(tests.IrisGribTest):
 
     def test_time_bounds_in_minutes(self):
         cube = self._cube(t_bounds=True)
-        cube.coord('forecast_period').convert_units('minutes')
+        cube.coord("forecast_period").convert_units("minutes")
         rt, rt_meaning, fp, fp_meaning = _non_missing_forecast_period(cube)
         self.assertEqual((rt_meaning, fp, fp_meaning), (1, 180, 0))
 

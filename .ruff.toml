@@ -1,0 +1,207 @@
+extend = "pyproject.toml"
+
+lint.ignore = [
+    # pydocstyle (D)
+    # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D105",  # Missing docstring in magic method
+    "D200",  # One-line docstring should fit on one line
+    "D202",  # No blank lines allowed after function docstring
+    "D205",  # 1 blank line required between summary line and description
+    "D212",  # Multi-line docstring summary should start at the second line
+    "D300",  # Use triple double quotes """
+    "D301",  # Use r""" if any backslashes in a docstring
+    "D400",  # First line should end with a period
+    "D401",  # First line of docstring should be in imperative mood
+    "D406",  # Section name should end with a newline
+    "D407",  # Missing dashed underline after section
+
+    # isort (I)
+    # https://docs.astral.sh/ruff/rules/#isort-i
+    "I001",  # Import block is un-sorted or un-formatted
+
+    # Numpy-specific rules (NPY)
+    # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+    "NPY002",
+
+    # flake8-builtins (A)
+    # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    "A001",
+    "A002",
+
+    # flake8-annotations (ANN)
+    "ANN001",
+    "ANN002",
+    "ANN003",
+    "ANN101",
+    "ANN102",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "ANN205",
+    "ANN206",
+
+    # flake8-unused-arguments (ARG)
+    # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+    "ARG001",
+    "ARG002",
+    "ARG005",
+
+    # flake8-bugbear (B)
+    # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+    "B007",
+    "B018",
+    "B028",
+    "B904",
+
+    # flake8-blind-except (BLE)
+    # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
+    "BLE001",
+
+    # flake8-comprehensions (C4)
+    # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+    "C408",
+    "C901",
+
+    # flake8-datetimez (DTZ)
+    # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+    "DTZ001",
+    "DTZ006",
+
+    # flake8-errmsg (EM)
+    "EM101",
+    "EM102",
+    "EM103",
+
+    # eradicate (ERA)
+    # https://docs.astral.sh/ruff/rules/#eradicate-era
+    "ERA001",
+
+    # flake8-boolean-trap (FBT)
+    # https://docs.astral.sh/ruff/rules/#flake8-boolean-trap-fbt
+    "FBT001",
+    "FBT002",
+    "FBT003",
+
+    # flake8-fixme (FIX)
+    # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
+    "FIX002",
+    "FIX003",
+
+    # pep8-naming (N)
+    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+    "N801",
+    "N802",
+    "N803",
+    "N806",
+    "N999",
+
+    # Perflint (PERF)
+    # https://docs.astral.sh/ruff/rules/#perflint-perf
+    "PERF203",
+    "PERF401",
+
+    # Refactor (R)
+    # https://docs.astral.sh/ruff/rules/#refactor-r
+    "PLR0402",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PLR1714",
+    "PLR1722",
+    "PLR2004",
+    "PLR5501",
+
+    # Warning (W)
+    # https://docs.astral.sh/ruff/rules/#warning-w
+    "PLW0602",
+    "PLW2901",
+
+    # flake8-pytest-style (PT)
+    "PT009",
+    "PT027",
+
+    # flake8-use-pathlib (PTH)
+    # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+    "PTH100",
+    "PTH107",
+    "PTH110",
+    "PTH111",
+    "PTH112",
+    "PTH113",
+    "PTH118",
+    "PTH120",
+    "PTH122",
+    "PTH123",
+
+    # flake8-pyi (PYI)
+    # https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+    "PYI024",
+
+    # flake8-return (RET)
+    # https://docs.astral.sh/ruff/rules/#flake8-return-ret
+    "RET503",
+    "RET504",
+    "RET505",
+    "RET506",
+
+    # flake8-raise (RSE)
+    # https://docs.astral.sh/ruff/rules/#flake8-raise-rse
+    "RSE102",
+
+    # Ruff-specific rules (RUF)
+    # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+    "RUF005",
+    "RUF012",
+    "RUF015",
+
+    # flake8-bandit (S)
+    # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+    "S101",
+    "S110",
+    "S603",
+    "S607",
+
+    # flake8-simplify (SIM)
+    # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "SIM102",
+    "SIM108",
+    "SIM115",
+    "SIM117",
+    "SIM118",
+
+    # flake8-self (SLF)
+    # https://docs.astral.sh/ruff/rules/#flake8-self-slf
+    "SLF001",
+
+    # flake8-print (T20)
+    # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+    "T201",
+
+    # flake8-todos (TD)
+    # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+    "TD001",
+    "TD002",
+    "TD003",
+    "TD004",
+    "TD005",
+    "TD006",
+
+    # tryceratops (TRY)
+    # https://docs.astral.sh/ruff/rules/#tryceratops-try
+    "TRY003",
+    "TRY004",
+    "TRY301",
+
+    # pyupgrade (UP)
+    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+    "UP008",
+    "UP009",
+    "UP018",
+    "UP027",
+    "UP031",
+    "UP032",
+]

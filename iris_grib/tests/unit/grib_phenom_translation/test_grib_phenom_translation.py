@@ -2,13 +2,14 @@
 #
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
-'''
+"""
 Unit tests for the mod:`iris_grib.grib_phenom_translation` module.
 
 Carried over from old iris/tests/test_grib_phenom_translation.py.
 Code is out of step with current test conventions and standards.
 
-'''
+"""
+
 # Import iris_grib.tests first so that some things can be initialised before
 # importing anything else.
 import iris_grib.tests as tests
@@ -21,30 +22,36 @@ from iris_grib.grib_phenom_translation import GRIBCode
 
 class TestGribLookupTableType(tests.IrisTest):
     def test_lookuptable_type(self):
-        ll = gptx._LookupTable([('a', 1), ('b', 2)])
-        self.assertEqual(1, ll['a'])
-        self.assertIsNone(ll['q'])
-        ll['q'] = 15
-        self.assertEqual(15, ll['q'])
-        ll['q'] = 15
-        self.assertEqual(15, ll['q'])
+        ll = gptx._LookupTable([("a", 1), ("b", 2)])
+        self.assertEqual(1, ll["a"])
+        self.assertIsNone(ll["q"])
+        ll["q"] = 15
+        self.assertEqual(15, ll["q"])
+        ll["q"] = 15
+        self.assertEqual(15, ll["q"])
         with self.assertRaises(KeyError):
-            ll['q'] = 7
-        del ll['q']
-        ll['q'] = 7
-        self.assertEqual(7, ll['q'])
+            ll["q"] = 7
+        del ll["q"]
+        ll["q"] = 7
+        self.assertEqual(7, ll["q"])
 
 
 class TestGribPhenomenonLookup(tests.IrisTest):
     def test_grib1_cf_lookup(self):
-        def check_grib1_cf(param,
-                           standard_name, long_name, units,
-                           height=None,
-                           t2version=128, centre=98, expect_none=False):
+        def check_grib1_cf(
+            param,
+            standard_name,
+            long_name,
+            units,
+            height=None,
+            t2version=128,
+            centre=98,
+            expect_none=False,
+        ):
             a_cf_unit = cf_units.Unit(units)
-            cfdata = gptx.grib1_phenom_to_cf_info(param_number=param,
-                                                  table2_version=t2version,
-                                                  centre_number=centre)
+            cfdata = gptx.grib1_phenom_to_cf_info(
+                param_number=param, table2_version=t2version, centre_number=centre
+            )
             if expect_none:
                 self.assertIsNone(cfdata)
             else:
@@ -56,25 +63,34 @@ class TestGribPhenomenonLookup(tests.IrisTest):
                 else:
                     self.assertEqual(cfdata.set_height, float(height))
 
-        check_grib1_cf(165, 'x_wind', None, 'm s-1', 10.0)
-        check_grib1_cf(168, 'dew_point_temperature', None, 'K', 2)
-        check_grib1_cf(130, 'air_temperature', None, 'K')
+        check_grib1_cf(165, "x_wind", None, "m s-1", 10.0)
+        check_grib1_cf(168, "dew_point_temperature", None, "K", 2)
+        check_grib1_cf(130, "air_temperature", None, "K")
         check_grib1_cf(235, None, "grib_skin_temperature", "K")
-        check_grib1_cf(235, None, "grib_skin_temperature", "K",
-                       t2version=9999, expect_none=True)
-        check_grib1_cf(235, None, "grib_skin_temperature", "K",
-                       centre=9999, expect_none=True)
-        check_grib1_cf(9999, None, "grib_skin_temperature", "K",
-                       expect_none=True)
+        check_grib1_cf(
+            235, None, "grib_skin_temperature", "K", t2version=9999, expect_none=True
+        )
+        check_grib1_cf(
+            235, None, "grib_skin_temperature", "K", centre=9999, expect_none=True
+        )
+        check_grib1_cf(9999, None, "grib_skin_temperature", "K", expect_none=True)
 
     def test_grib2_cf_lookup(self):
-        def check_grib2_cf(discipline, category, number,
-                           standard_name, long_name, units,
-                           expect_none=False):
+        def check_grib2_cf(
+            discipline,
+            category,
+            number,
+            standard_name,
+            long_name,
+            units,
+            expect_none=False,
+        ):
             a_cf_unit = cf_units.Unit(units)
-            cfdata = gptx.grib2_phenom_to_cf_info(param_discipline=discipline,
-                                                  param_category=category,
-                                                  param_number=number)
+            cfdata = gptx.grib2_phenom_to_cf_info(
+                param_discipline=discipline,
+                param_category=category,
+                param_number=number,
+            )
             if expect_none:
                 self.assertIsNone(cfdata)
             else:
@@ -89,23 +105,26 @@ class TestGribPhenomenonLookup(tests.IrisTest):
         check_grib2_cf(10, 2, 0, "sea_ice_area_fraction", None, 1)
         check_grib2_cf(2, 0, 0, "land_area_fraction", None, 1)
         check_grib2_cf(0, 19, 1, None, "grib_physical_atmosphere_albedo", "%")
-        check_grib2_cf(0, 1, 64,
-                       "atmosphere_mass_content_of_water_vapor", None,
-                       "kg m-2")
+        check_grib2_cf(
+            0, 1, 64, "atmosphere_mass_content_of_water_vapor", None, "kg m-2"
+        )
         check_grib2_cf(2, 0, 7, "surface_altitude", None, "m")
 
         # These should fail
-        check_grib2_cf(9999, 2, 0, "sea_ice_area_fraction", None, 1,
-                       expect_none=True)
-        check_grib2_cf(10, 9999, 0, "sea_ice_area_fraction", None, 1,
-                       expect_none=True)
-        check_grib2_cf(10, 2, 9999, "sea_ice_area_fraction", None, 1,
-                       expect_none=True)
+        check_grib2_cf(9999, 2, 0, "sea_ice_area_fraction", None, 1, expect_none=True)
+        check_grib2_cf(10, 9999, 0, "sea_ice_area_fraction", None, 1, expect_none=True)
+        check_grib2_cf(10, 2, 9999, "sea_ice_area_fraction", None, 1, expect_none=True)
 
     def test_cf_grib2_lookup(self):
-        def check_cf_grib2(standard_name, long_name,
-                           discipline, category, number, units,
-                           expect_none=False):
+        def check_cf_grib2(
+            standard_name,
+            long_name,
+            discipline,
+            category,
+            number,
+            units,
+            expect_none=False,
+        ):
             a_cf_unit = cf_units.Unit(units)
             gribdata = gptx.cf_phenom_to_grib2_info(standard_name, long_name)
             if expect_none:
@@ -117,37 +136,27 @@ class TestGribPhenomenonLookup(tests.IrisTest):
                 self.assertEqual(gribdata.units, a_cf_unit)
 
         # These should work
-        check_cf_grib2("sea_surface_temperature", None,
-                       10, 3, 0, 'K')
-        check_cf_grib2("air_temperature", None,
-                       0, 0, 0, 'K')
-        check_cf_grib2("soil_temperature", None,
-                       2, 0, 2, "K")
-        check_cf_grib2("land_area_fraction", None,
-                       2, 0, 0, '1')
-        check_cf_grib2("land_binary_mask", None,
-                       2, 0, 0, '1')
-        check_cf_grib2("atmosphere_mass_content_of_water_vapor", None,
-                       0, 1, 64, "kg m-2")
-        check_cf_grib2("surface_altitude", None,
-                       2, 0, 7, "m")
+        check_cf_grib2("sea_surface_temperature", None, 10, 3, 0, "K")
+        check_cf_grib2("air_temperature", None, 0, 0, 0, "K")
+        check_cf_grib2("soil_temperature", None, 2, 0, 2, "K")
+        check_cf_grib2("land_area_fraction", None, 2, 0, 0, "1")
+        check_cf_grib2("land_binary_mask", None, 2, 0, 0, "1")
+        check_cf_grib2(
+            "atmosphere_mass_content_of_water_vapor", None, 0, 1, 64, "kg m-2"
+        )
+        check_cf_grib2("surface_altitude", None, 2, 0, 7, "m")
 
         # These should fail
-        check_cf_grib2("air_temperature", "user_long_UNRECOGNISED",
-                       0, 0, 0, 'K')
-        check_cf_grib2("air_temperature_UNRECOGNISED", None,
-                       0, 0, 0, 'K',
-                       expect_none=True)
-        check_cf_grib2(None, "user_long_UNRECOGNISED",
-                       0, 0, 0, 'K',
-                       expect_none=True)
-        check_cf_grib2(None, "precipitable_water",
-                       0, 1, 3, 'kg m-2')
-        check_cf_grib2("invalid_unknown", "precipitable_water",
-                       0, 1, 3, 'kg m-2',
-                       expect_none=True)
-        check_cf_grib2(None, None, 0, 0, 0, '',
-                       expect_none=True)
+        check_cf_grib2("air_temperature", "user_long_UNRECOGNISED", 0, 0, 0, "K")
+        check_cf_grib2(
+            "air_temperature_UNRECOGNISED", None, 0, 0, 0, "K", expect_none=True
+        )
+        check_cf_grib2(None, "user_long_UNRECOGNISED", 0, 0, 0, "K", expect_none=True)
+        check_cf_grib2(None, "precipitable_water", 0, 1, 3, "kg m-2")
+        check_cf_grib2(
+            "invalid_unknown", "precipitable_water", 0, 1, 3, "kg m-2", expect_none=True
+        )
+        check_cf_grib2(None, None, 0, 0, 0, "", expect_none=True)
 
 
 class TestGRIBcode(tests.IrisTest):
@@ -157,24 +166,14 @@ class TestGRIBcode(tests.IrisTest):
     # TODO: convert to pytest + replace duplications with parameterisation
     #   (mostly grib1/grib2, but also in one case str/repr)
     def test_create_from_keys__grib2(self):
-        gribcode = GRIBCode(
-            edition=2,
-            discipline=7,
-            category=4,
-            number=199
-        )
+        gribcode = GRIBCode(edition=2, discipline=7, category=4, number=199)
         self.assertEqual(gribcode.edition, 2)
         self.assertEqual(gribcode.discipline, 7)
         self.assertEqual(gribcode.category, 4)
         self.assertEqual(gribcode.number, 199)
 
     def test_create_from_keys__grib1(self):
-        gribcode = GRIBCode(
-            edition=1,
-            table_version=7,
-            centre_number=4,
-            number=199
-        )
+        gribcode = GRIBCode(edition=1, table_version=7, centre_number=4, number=199)
         self.assertEqual(gribcode.edition, 1)
         self.assertEqual(gribcode.table_version, 7)
         self.assertEqual(gribcode.centre_number, 4)
@@ -221,7 +220,7 @@ class TestGRIBcode(tests.IrisTest):
         self.check_create_from_gribcode(edition=2)
 
     def check_create_from_string(self, edition):
-        gribcode = GRIBCode(f'xxx{edition}xs-34 -5,678qqqq')
+        gribcode = GRIBCode(f"xxx{edition}xs-34 -5,678qqqq")
         # NOTE: args 2 and 3 are *not* negative.
         self.assertEqual(gribcode, GRIBCode(edition, 34, 5, 678))
 
@@ -287,7 +286,7 @@ class TestGRIBcode(tests.IrisTest):
             "requires 4 numbers, separated by non-numerals"
         )
         with self.assertRaisesRegex(ValueError, msg):
-            GRIBCode('')
+            GRIBCode("")
 
     def test_create_bad_single_arg_nonums(self):
         msg = (
@@ -296,7 +295,7 @@ class TestGRIBcode(tests.IrisTest):
             "requires 4 numbers, separated by non-numerals"
         )
         with self.assertRaisesRegex(ValueError, msg):
-            GRIBCode('saas- dsa- ')
+            GRIBCode("saas- dsa- ")
 
     def test_create_bad_single_arg_less_than_4_nums(self):
         msg = (
@@ -305,7 +304,7 @@ class TestGRIBcode(tests.IrisTest):
             "requires 4 numbers, separated by non-numerals"
         )
         with self.assertRaisesRegex(ValueError, msg):
-            GRIBCode('1,2,3')
+            GRIBCode("1,2,3")
 
     def test_create_bad_single_arg_number(self):
         msg = (
@@ -323,17 +322,17 @@ class TestGRIBcode(tests.IrisTest):
             "requires 4 numbers, separated by non-numerals"
         )
         with self.assertRaisesRegex(ValueError, msg):
-            GRIBCode('44')
+            GRIBCode("44")
 
     def test_create_string_more_than_4_nums(self):
         # Note: does not error, just discards the extra.
-        gribcode = GRIBCode('1,2,3,4,5,6,7,8')
+        gribcode = GRIBCode("1,2,3,4,5,6,7,8")
         self.assertEqual(gribcode, GRIBCode(1, 2, 3, 4))
 
     def check__str__(self, edition):
         result = str(GRIBCode(edition, 17, 3, 123))
         arg1_char = {1: "t", 2: "d"}[edition]
-        expected = f'GRIB{edition}:{arg1_char}017c003n123'
+        expected = f"GRIB{edition}:{arg1_char}017c003n123"
         self.assertEqual(expected, result)
 
     def test__str__grib1(self):
@@ -346,14 +345,10 @@ class TestGRIBcode(tests.IrisTest):
         result = repr(GRIBCode(edition, 17, 3, 123))
         if edition == 1:
             expected = (
-                "GRIBCode(edition=1, table_version=17, "
-                "centre_number=3, number=123)"
+                "GRIBCode(edition=1, table_version=17, " "centre_number=3, number=123)"
             )
         elif edition == 2:
-            expected = (
-                "GRIBCode(edition=2, discipline=17, "
-                "category=3, number=123)"
-            )
+            expected = "GRIBCode(edition=2, discipline=17, " "category=3, number=123)"
         self.assertEqual(result, expected)
 
     def test__repr__grib1(self):
@@ -408,5 +403,5 @@ class TestGRIBcode(tests.IrisTest):
             GRIBCode(1, 2, 3, 4, number=7)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

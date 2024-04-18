@@ -144,9 +144,7 @@ class TestCubeSave(tests.IrisGribTest):
         lat_coord = cube.coord("latitude")
         cube.remove_coord("latitude")
 
-        new_lats = np.append(
-            lat_coord.points[:-1], lat_coord.points[0]
-        )  # Irregular
+        new_lats = np.append(lat_coord.points[:-1], lat_coord.points[0])  # Irregular
         cube.add_aux_coord(
             iris.coords.AuxCoord(
                 new_lats,
@@ -158,18 +156,14 @@ class TestCubeSave(tests.IrisGribTest):
         )
 
         saved_grib = iris.util.create_temp_filename(suffix=".grib2")
-        self.assertRaises(
-            iris.exceptions.TranslationError, iris.save, cube, saved_grib
-        )
+        self.assertRaises(iris.exceptions.TranslationError, iris.save, cube, saved_grib)
         os.remove(saved_grib)
 
     def test_non_latlon(self):
         cube = self._load_basic()
         cube.coord(dimensions=[0]).coord_system = None
         saved_grib = iris.util.create_temp_filename(suffix=".grib2")
-        self.assertRaises(
-            iris.exceptions.TranslationError, iris.save, cube, saved_grib
-        )
+        self.assertRaises(iris.exceptions.TranslationError, iris.save, cube, saved_grib)
         os.remove(saved_grib)
 
     def test_forecast_period(self):
@@ -177,9 +171,7 @@ class TestCubeSave(tests.IrisGribTest):
         cube = self._load_basic()
         cube.coord("forecast_period").units = cf_units.Unit("years")
         saved_grib = iris.util.create_temp_filename(suffix=".grib2")
-        self.assertRaises(
-            iris.exceptions.TranslationError, iris.save, cube, saved_grib
-        )
+        self.assertRaises(iris.exceptions.TranslationError, iris.save, cube, saved_grib)
         os.remove(saved_grib)
 
     def test_unhandled_vertical(self):
@@ -204,25 +196,17 @@ class TestCubeSave(tests.IrisGribTest):
             iris.save(cube, testfile)
 
     def test_bounded_level(self):
-        cube = iris.load_cube(
-            tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2"))
-        )
+        cube = iris.load_cube(tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2")))
         with self.temp_filename(".grib2") as testfile:
             iris.save(cube, testfile)
             with open(testfile, "rb") as saved_file:
-                g = eccodes.codes_new_from_file(
-                    saved_file, eccodes.CODES_PRODUCT_GRIB
-                )
+                g = eccodes.codes_new_from_file(saved_file, eccodes.CODES_PRODUCT_GRIB)
                 self.assertEqual(
-                    eccodes.codes_get_double(
-                        g, "scaledValueOfFirstFixedSurface"
-                    ),
+                    eccodes.codes_get_double(g, "scaledValueOfFirstFixedSurface"),
                     0.0,
                 )
                 self.assertEqual(
-                    eccodes.codes_get_double(
-                        g, "scaledValueOfSecondFixedSurface"
-                    ),
+                    eccodes.codes_get_double(g, "scaledValueOfSecondFixedSurface"),
                     2147483647.0,
                 )
 
@@ -259,9 +243,7 @@ class TestHandmade(tests.IrisGribTest):
 
     def _cube_time_no_forecast(self):
         cube = self._lat_lon_cube_no_time()
-        unit = cf_units.Unit(
-            "hours since epoch", calendar=cf_units.CALENDAR_GREGORIAN
-        )
+        unit = cf_units.Unit("hours since epoch", calendar=cf_units.CALENDAR_GREGORIAN)
         dt = datetime.datetime(2010, 12, 31, 12, 0)
         cube.add_aux_coord(
             iris.coords.AuxCoord(
@@ -296,17 +278,13 @@ class TestHandmade(tests.IrisGribTest):
     def test_no_time_cube(self):
         cube = self._lat_lon_cube_no_time()
         saved_grib = iris.util.create_temp_filename(suffix=".grib2")
-        self.assertRaises(
-            iris.exceptions.TranslationError, iris.save, cube, saved_grib
-        )
+        self.assertRaises(iris.exceptions.TranslationError, iris.save, cube, saved_grib)
         os.remove(saved_grib)
 
     def test_cube_with_time_bounds(self):
         cube = self._cube_with_time_bounds()
         saved_grib = iris.util.create_temp_filename(suffix=".grib2")
-        self.assertRaises(
-            iris.exceptions.TranslationError, iris.save, cube, saved_grib
-        )
+        self.assertRaises(iris.exceptions.TranslationError, iris.save, cube, saved_grib)
         os.remove(saved_grib)
 
 

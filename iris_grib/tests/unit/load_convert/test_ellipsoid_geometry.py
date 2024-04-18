@@ -16,17 +16,19 @@ from iris_grib._load_convert import ellipsoid_geometry
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.section = {'scaledValueOfEarthMajorAxis': 10,
-                        'scaleFactorOfEarthMajorAxis': 1,
-                        'scaledValueOfEarthMinorAxis': 100,
-                        'scaleFactorOfEarthMinorAxis': 2,
-                        'scaledValueOfRadiusOfSphericalEarth': 1000,
-                        'scaleFactorOfRadiusOfSphericalEarth': 3}
+        self.section = {
+            "scaledValueOfEarthMajorAxis": 10,
+            "scaleFactorOfEarthMajorAxis": 1,
+            "scaledValueOfEarthMinorAxis": 100,
+            "scaleFactorOfEarthMinorAxis": 2,
+            "scaledValueOfRadiusOfSphericalEarth": 1000,
+            "scaleFactorOfRadiusOfSphericalEarth": 3,
+        }
 
     def test_geometry(self):
         result = ellipsoid_geometry(self.section)
         self.assertEqual(result, (1.0, 1.0, 1.0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

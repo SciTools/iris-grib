@@ -29,8 +29,8 @@ class Test(tests.IrisGribTest):
 
     def test_both(self):
         expected = ProjectionCentre(True, True)
-        self.assertEqual(projection_centre(0xc0), expected)
+        self.assertEqual(projection_centre(0xC0), expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

@@ -21,10 +21,10 @@ _SUPPORTED_GRID_DEFINITIONS = (0, 1, 5, 10, 12, 20, 30, 40, 90, 140)
 
 # Alias names for eccodes spatial computed keys.
 KEY_ALIAS = {
-    'latitude': 'latitudes',
-    'longitude': 'longitudes',
-    'latitudes': 'latitude',
-    'longitudes': 'longitude',
+    "latitude": "latitudes",
+    "longitude": "longitudes",
+    "latitudes": "latitude",
+    "longitudes": "longitude",
 }
 
 
@@ -33,6 +33,7 @@ class _OpenFileRef:
     A reference to an open file that ensures that the file is closed
     when the object is garbage collected.
     """
+
     def __init__(self, open_file):
         self.open_file = open_file
 
@@ -61,13 +62,12 @@ class GribMessage:
             Name of the file to generate fields from.
 
         """
-        grib_fh = open(filename, 'rb')
+        grib_fh = open(filename, "rb")
         # create an _OpenFileRef to manage the closure of the file handle
         file_ref = _OpenFileRef(grib_fh)
 
         while True:
-            grib_id = eccodes.codes_new_from_file(grib_fh,
-                                                  eccodes.CODES_PRODUCT_GRIB)
+            grib_id = eccodes.codes_new_from_file(grib_fh, eccodes.CODES_PRODUCT_GRIB)
             if grib_id is None:
                 break
             offset = eccodes.codes_get_message_offset(grib_id)
@@ -130,38 +130,46 @@ class GribMessage:
         """
         sections = self.sections
         grid_section = sections[3]
-        if grid_section['sourceOfGridDefinition'] != 0:
+        if grid_section["sourceOfGridDefinition"] != 0:
             raise TranslationError(
-                'Unsupported source of grid definition: {}'.format(
-                    grid_section['sourceOfGridDefinition']))
+                "Unsupported source of grid definition: {}".format(
+                    grid_section["sourceOfGridDefinition"]
+                )
+            )
 
-        reduced = (grid_section['numberOfOctectsForNumberOfPoints'] != 0 or
-                   grid_section['interpretationOfNumberOfPoints'] != 0)
-        template = grid_section['gridDefinitionTemplateNumber']
+        reduced = (
+            grid_section["numberOfOctectsForNumberOfPoints"] != 0
+            or grid_section["interpretationOfNumberOfPoints"] != 0
+        )
+        template = grid_section["gridDefinitionTemplateNumber"]
         if reduced and template not in (40,):
-            raise TranslationError('Grid definition Section 3 contains '
-                                   'unsupported quasi-regular grid.')
+            raise TranslationError(
+                "Grid definition Section 3 contains " "unsupported quasi-regular grid."
+            )
 
         if template in _SUPPORTED_GRID_DEFINITIONS:
             # We can ignore the first two bits (i-neg, j-pos) because
             # that is already captured in the coordinate values.
-            if grid_section['scanningMode'] & 0x3f:
-                msg = 'Unsupported scanning mode: {}'.format(
-                    grid_section['scanningMode'])
+            if grid_section["scanningMode"] & 0x3F:
+                msg = "Unsupported scanning mode: {}".format(
+                    grid_section["scanningMode"]
+                )
                 raise TranslationError(msg)
             if template in (20, 30, 90):
-                shape = (grid_section['Ny'], grid_section['Nx'])
+                shape = (grid_section["Ny"], grid_section["Nx"])
             elif template == 140:
-                shape = (grid_section['numberOfPointsAlongYAxis'],
-                         grid_section['numberOfPointsAlongXAxis'])
+                shape = (
+                    grid_section["numberOfPointsAlongYAxis"],
+                    grid_section["numberOfPointsAlongXAxis"],
+                )
             elif template == 40 and reduced:
-                shape = (grid_section['numberOfDataPoints'],)
+                shape = (grid_section["numberOfDataPoints"],)
             else:
-                shape = (grid_section['Nj'], grid_section['Ni'])
-            proxy = _DataProxy(shape, np.dtype('f8'), self._recreate_raw)
+                shape = (grid_section["Nj"], grid_section["Ni"])
+            proxy = _DataProxy(shape, np.dtype("f8"), self._recreate_raw)
             data = as_lazy_data(proxy)
         else:
-            fmt = 'Grid definition template {} is not supported'
+            fmt = "Grid definition template {} is not supported"
             raise TranslationError(fmt.format(template))
         return data
 
@@ -175,7 +183,7 @@ class GribMessage:
         return self
 
 
-class _MessageLocation(namedtuple('_MessageLocation', 'filename offset')):
+class _MessageLocation(namedtuple("_MessageLocation", "filename offset")):
     """A reference to a specific GRIB message within a file."""
 
     __slots__ = ()
@@ -187,7 +195,7 @@ class _MessageLocation(namedtuple('_MessageLocation', 'filename offset')):
 class _DataProxy:
     """A reference to the data payload of a single GRIB message."""
 
-    __slots__ = ('shape', 'dtype', 'recreate_raw')
+    __slots__ = ("shape", "dtype", "recreate_raw")
 
     def __init__(self, shape, dtype, recreate_raw):
         self.shape = shape
@@ -224,15 +232,18 @@ class _DataProxy:
 
         """
         # Reference GRIB2 Code Table 6.0.
-        bitMapIndicator = bitmap_section['bitMapIndicator']
+        bitMapIndicator = bitmap_section["bitMapIndicator"]
 
         if bitMapIndicator == 0:
-            bitmap = bitmap_section['bitmap']
+            bitmap = bitmap_section["bitmap"]
         elif bitMapIndicator == 255:
             bitmap = None
         else:
-            msg = 'Bitmap Section 6 contains unsupported ' \
-                  'bitmap indicator [{}]'.format(bitMapIndicator)
+            msg = (
+                "Bitmap Section 6 contains unsupported " "bitmap indicator [{}]".format(
+                    bitMapIndicator
+                )
+            )
             raise TranslationError(msg)
         return bitmap
 
@@ -269,10 +280,11 @@ class _DataProxy:
                 _data[bitmap.astype(bool)] = data
                 # `ma.masked_array` masks where input = 1, the opposite of
                 # the behaviour specified by the GRIB spec.
-                data = ma.masked_array(_data, mask=np.logical_not(bitmap),
-                                       fill_value=np.nan)
+                data = ma.masked_array(
+                    _data, mask=np.logical_not(bitmap), fill_value=np.nan
+                )
             else:
-                msg = 'Shapes of data and bitmap do not match.'
+                msg = "Shapes of data and bitmap do not match."
                 raise TranslationError(msg)
 
         data = data.reshape(self.shape)
@@ -281,8 +293,10 @@ class _DataProxy:
         return result
 
     def __repr__(self):
-        msg = '<{self.__class__.__name__} shape={self.shape} ' \
-            'dtype={self.dtype!r} recreate_raw={self.recreate_raw!r} '
+        msg = (
+            "<{self.__class__.__name__} shape={self.shape} "
+            "dtype={self.dtype!r} recreate_raw={self.recreate_raw!r} "
+        )
         return msg.format(self=self)
 
     def __getstate__(self):
@@ -299,17 +313,16 @@ class _RawGribMessage:
     of the input GRIB message.
 
     """
-    _NEW_SECTION_KEY_MATCHER = re.compile(r'section([0-9]{1})Length')
+
+    _NEW_SECTION_KEY_MATCHER = re.compile(r"section([0-9]{1})Length")
 
     @staticmethod
     def from_file_offset(filename, offset):
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             f.seek(offset)
-            message_id = eccodes.codes_new_from_file(
-                f, eccodes.CODES_PRODUCT_GRIB
-            )
+            message_id = eccodes.codes_new_from_file(f, eccodes.CODES_PRODUCT_GRIB)
             if message_id is None:
-                fmt = 'Invalid GRIB message: {} @ {}'
+                fmt = "Invalid GRIB message: {} @ {}"
                 raise RuntimeError(fmt.format(filename, offset))
         return _RawGribMessage(message_id)
 
@@ -384,11 +397,10 @@ class _RawGribMessage:
             key_match = re.match(self._NEW_SECTION_KEY_MATCHER, key_name)
             if key_match is not None:
                 new_section = int(key_match.group(1))
-            elif key_name == '7777':
+            elif key_name == "7777":
                 new_section = 8
             if section != new_section:
-                sections[section] = Section(self._message_id, section,
-                                            section_keys)
+                sections[section] = Section(self._message_id, section, section_keys)
                 section_keys = []
                 section = new_section
             section_keys.append(key_name)
@@ -405,6 +417,7 @@ class Section:
     write to the file.
 
     """
+
     # Keys are read from the file as required and values are cached.
     # Within GribMessage instances all keys will have been fetched
 
@@ -417,14 +430,13 @@ class Section:
     def __repr__(self):
         items = []
         for key in self._keys:
-            value = self._cache.get(key, '?')
-            items.append('{}={}'.format(key, value))
-        return '<{} {}: {}>'.format(type(self).__name__, self._number,
-                                    ', '.join(items))
+            value = self._cache.get(key, "?")
+            items.append("{}={}".format(key, value))
+        return "<{} {}: {}>".format(type(self).__name__, self._number, ", ".join(items))
 
     def __getitem__(self, key):
         if key not in self._cache:
-            if key == 'numberOfSection':
+            if key == "numberOfSection":
                 value = self._number
             else:
                 if key not in self._keys:
@@ -445,8 +457,9 @@ class Section:
         if key in self._cache:
             self._cache[key] = value
         else:
-            raise KeyError('{!r} cannot be redefined in '
-                           'section {}'.format(key, self._number))
+            raise KeyError(
+                "{!r} cannot be redefined in " "section {}".format(key, self._number)
+            )
 
     def _get_key_value(self, key):
         """
@@ -461,20 +474,27 @@ class Section:
         message.
 
         """
-        vector_keys = ('codedValues', 'pv', 'satelliteSeries',
-                       'satelliteNumber', 'instrumentType',
-                       'scaleFactorOfCentralWaveNumber',
-                       'scaledValueOfCentralWaveNumber',
-                       'longitude', 'latitude',
-                       'longitudes', 'latitudes')
+        vector_keys = (
+            "codedValues",
+            "pv",
+            "satelliteSeries",
+            "satelliteNumber",
+            "instrumentType",
+            "scaleFactorOfCentralWaveNumber",
+            "scaledValueOfCentralWaveNumber",
+            "longitude",
+            "latitude",
+            "longitudes",
+            "latitudes",
+        )
         if key in vector_keys:
             res = eccodes.codes_get_array(self._message_id, key)
-        elif key == 'bitmap':
+        elif key == "bitmap":
             # The bitmap is stored as contiguous boolean bits, one bit for each
             # data point. ecCodes returns these as strings, so it must be
             # type-cast to return an array of ints (0, 1).
             res = eccodes.codes_get_array(self._message_id, key, int)
-        elif key in ('typeOfFirstFixedSurface', 'typeOfSecondFixedSurface'):
+        elif key in ("typeOfFirstFixedSurface", "typeOfSecondFixedSurface"):
             # By default these values are returned as unhelpful strings but
             # we can use int representation to compare against instead.
             res = self._get_value_or_missing(key, use_int=True)
@@ -496,7 +516,7 @@ class Section:
         message.
 
         """
-        vector_keys = ('longitudes', 'latitudes', 'distinctLatitudes')
+        vector_keys = ("longitudes", "latitudes", "distinctLatitudes")
         if key in vector_keys:
             res = eccodes.codes_get_array(self._message_id, key)
         else:

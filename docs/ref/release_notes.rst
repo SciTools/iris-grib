@@ -29,6 +29,11 @@ Documentation
   doctests.
   `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_
 
+Dependencies
+^^^^^^^^^^^^
+* `@bjlittle <https://github.com/bjlittle>`_ migrated to ``pytest``.
+  `(PR#420) <https://github.com/SciTools/iris-grib/pull/420>`_
+
 
 What's new in iris-grib v0.19.1
 -------------------------------

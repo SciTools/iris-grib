@@ -28,20 +28,25 @@ class TestProductDefinitionIdentifier(tests.IrisGribTest):
     def setUp(self):
         self.cube = stock.lat_lon_cube()
         # Rename cube to avoid warning about unknown discipline/parameter.
-        self.cube.rename('air_temperature')
-        coord = DimCoord(23, 'time', bounds=[0, 100],
-                         units=Unit('days since epoch', calendar='standard'))
+        self.cube.rename("air_temperature")
+        coord = DimCoord(
+            23,
+            "time",
+            bounds=[0, 100],
+            units=Unit("days since epoch", calendar="standard"),
+        )
         self.cube.add_aux_coord(coord)
 
-    @mock.patch.object(eccodes, 'codes_set')
+    @mock.patch.object(eccodes, "codes_set")
     def test_product_definition(self, mock_set):
         cube = self.cube
-        cell_method = CellMethod(method='sum', coords=['time'])
+        cell_method = CellMethod(method="sum", coords=["time"])
         cube.add_cell_method(cell_method)
 
         product_definition_template_8(cube, mock.sentinel.grib)
-        mock_set.assert_any_call(mock.sentinel.grib,
-                                 "productDefinitionTemplateNumber", 8)
+        mock_set.assert_any_call(
+            mock.sentinel.grib, "productDefinitionTemplateNumber", 8
+        )
 
 
 class Test_type_of_statistical_processing(tests.IrisTest):

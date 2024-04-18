@@ -19,11 +19,11 @@ dependencies:
   - pip
 
 # Test dependencies.
-  - mock
   - filelock
   - requests
-  - nose
   - iris-sample-data
+  - pytest
+  - pytest-mock
 
 # Documentation dependencies.
   - sphinx
