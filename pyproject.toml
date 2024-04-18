@@ -4,6 +4,7 @@
 # Defined by PEP 518
 requires = [
     "setuptools>=64",
+    "setuptools_scm>=7.0",
     "wheel",
 ]
 # Defined by PEP 517
@@ -66,6 +67,11 @@ optional-dependencies.test = {file = "requirements/test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
+
+[tool.setuptools_scm]
+write_to = "iris_grib/_version.py"
+local_scheme = "dirty-tag"
+version_scheme = "release-branch-semver"
 
 #------------------------------------------------------------------------------
 

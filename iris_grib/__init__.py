@@ -30,7 +30,10 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = "0.20.dev0"
+try:
+    from ._version import version as __version__ # noqa: F401
+except ModuleNotFoundError:
+    __version__ = "unknown"
 
 __all__ = [
     "load_cubes",
