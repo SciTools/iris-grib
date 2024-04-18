@@ -25,8 +25,9 @@ and ``iris-grib`` installed in your Python environment.
 
    import iris
    import iris_grib
-   import iris.tests.stock as stock
-   cube = stock.realistic_3d()
+   import warnings
+   warnings.simplefilter('ignore')
+   cube = iris.load_cube(iris.sample_data_path("rotated_pole.nc"))
    iris.save(cube, 'testfile.grib', saver='grib2')
 
 For example, to load GRIB data :
@@ -182,19 +183,15 @@ You can convert Iris cubes to eccodes messages, and modify or filter them before
 
 .. testsetup::
 
-   import iris.tests.stock as stock
    from iris.coords import DimCoord
    import eccodes
-   import warnings
-   cube2 = stock.realistic_3d()
-   cube2.remove_coord('air_pressure')
-   cube2.add_aux_coord(DimCoord([2.5], standard_name="height", units="m"), ())
-   # warnings.simplefilter('ignore')
+   cube_height_2m5 = iris.load_cube(iris.sample_data_path("rotated_pole.nc"))
+   cube_height_2m5.add_aux_coord(DimCoord([2.5], standard_name="height", units="m"), ())
 
 For example:
 
   >>> # translate data to grib2 fields
-  >>> cube_field_pairs = list(iris_grib.save_pairs_from_cube(cube2))
+  >>> cube_field_pairs = list(iris_grib.save_pairs_from_cube(cube_height_2m5))
   >>> # adjust some of them
   >>> for cube, field in cube_field_pairs:
   ...   if cube.coords('height') and cube.coord('height').points[0] == 2.5:
