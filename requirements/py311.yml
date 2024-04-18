@@ -8,6 +8,7 @@ dependencies:
 
 # Setup dependencies.
   - setuptools
+  - setuptools_scm >=7
 
 # Core dependencies.
   - iris>=3.0.2
