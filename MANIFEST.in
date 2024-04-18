@@ -13,4 +13,3 @@ exclude .readthedocs.yml
 exclude .ruff.toml
 include *.md
 include *.py
-include *.toml
