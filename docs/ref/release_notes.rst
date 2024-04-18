@@ -117,7 +117,7 @@ Bugs Fixed
   iris-grib to work with the latest versions of
   `iris <https://scitools-iris.readthedocs.io/en/stable/>`_,
   `cf-units <https://cf-units.readthedocs.io/en/latest/>`_,
-  `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ and
+  `ecCodes <https://confluence.ecmwf.int/display/ECC/What+is+ecCodes>`_ and
   `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
   the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
   values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
@@ -236,7 +236,7 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed loading of grid definition
   template 3.90, "Space view perspective or orthographic grid", which was
   **broken since Iris 2.3**.  This now produces data with an iris
-  `Geostationary <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary>`_
+  `Geostationary <https://scitools-iris.readthedocs.io/en/stable/generated/api/iris.coord_systems.html#iris.coord_systems.Geostationary>`_
   coordinate system.  Prior to Iris 2.3, what is now the Iris 'Geostationary'
   class was (incorrectly) named "VerticalPerspective" :  When that was
   `corrected in Iris 2.3 <https://github.com/SciTools/iris/pull/3406>`_ , it
@@ -282,8 +282,7 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed a problem that caused very slow
   loading, and possible memory overflows, with Dask versions >= 2.0.
   **This requires Iris >= 2.4**, as a new minimum dependency.
-  ( This problem was shared with UM file access in Iris : see
-  https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed ).
+  ( This problem was shared with UM file access in Iris, fixed in Iris 2.4.
   `(PR#190) <https://github.com/SciTools/iris-grib/pull/190>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ fixed all the tests to
