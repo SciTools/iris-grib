@@ -16,12 +16,7 @@ from typing import Literal
 import numpy as np
 
 from iris import load_cube, save
-from iris.coord_systems import (
-    GeogCS,
-    PolarStereographic,
-    RotatedGeogCS,
-    Stereographic
-)
+from iris.coord_systems import GeogCS, PolarStereographic, RotatedGeogCS, Stereographic
 from iris.coords import DimCoord
 from iris.cube import Cube
 from iris.fileformats.pp import EARTH_RADIUS as UM_DEFAULT_EARTH_RADIUS
@@ -83,9 +78,7 @@ class TestGDT5(tests.TestGribMessage):
 
         # Check those re-loaded properties which should match the original.
         for test_cube in (cube, cube_loaded_from_saved):
-            self.assertEqual(
-                test_cube.standard_name, "air_pressure_at_sea_level"
-            )
+            self.assertEqual(test_cube.standard_name, "air_pressure_at_sea_level")
             self.assertEqual(test_cube.units, "Pa")
             self.assertEqual(test_cube.shape, (928, 744))
             self.assertEqual(test_cube.cell_methods, ())
@@ -101,9 +94,7 @@ class TestGDT5(tests.TestGribMessage):
 
         # Check they have all the same coordinates.
         co_names = [coord.name() for coord in cube.coords()]
-        co_names_reload = [
-            coord.name() for coord in cube_loaded_from_saved.coords()
-        ]
+        co_names_reload = [coord.name() for coord in cube_loaded_from_saved.coords()]
         self.assertEqual(sorted(co_names_reload), sorted(co_names))
 
         # Check all the coordinates.
@@ -116,16 +107,13 @@ class TestGDT5(tests.TestGribMessage):
                 self.assertEqual(
                     co_load.shape,
                     co_orig.shape,
-                    'Shape of re-loaded "{}" coord is {} '
-                    "instead of {}".format(
+                    'Shape of re-loaded "{}" coord is {} ' "instead of {}".format(
                         coord_name, co_load.shape, co_orig.shape
                     ),
                 )
 
                 # Check coordinate points equal, within a tolerance.
-                self.assertArrayAllClose(
-                    co_load.points, co_orig.points, rtol=1.0e-6
-                )
+                self.assertArrayAllClose(co_load.points, co_orig.points, rtol=1.0e-6)
 
                 # Check all coords are unbounded.
                 # (NOTE: this is not so for the original X and Y coordinates,
@@ -135,9 +123,7 @@ class TestGDT5(tests.TestGribMessage):
             except AssertionError as err:
                 self.assertTrue(
                     False,
-                    'Failed on coordinate "{}" : {}'.format(
-                        coord_name, str(err)
-                    ),
+                    'Failed on coordinate "{}" : {}'.format(coord_name, str(err)),
                 )
 
         # Check that main data array also matches.
@@ -179,27 +165,19 @@ class GDT20Common:
             coord_x = DimCoord(
                 np.linspace(-2250000, 6750192, 256, endpoint=False),
                 standard_name="projection_x_coordinate",
-                **coord_kwargs
+                **coord_kwargs,
             )
             coord_y = DimCoord(
                 np.linspace(-980000, -6600000, 160, endpoint=False),
                 standard_name="projection_y_coordinate",
-                **coord_kwargs
+                **coord_kwargs,
             )
             coord_t = DimCoord(
-                0,
-                standard_name="time",
-                units="hours since 1970-01-01 00:00:00"
+                0, standard_name="time", units="hours since 1970-01-01 00:00:00"
             )
-            coord_fp = DimCoord(
-                0,
-                standard_name="forecast_period",
-                units="hours"
-            )
+            coord_fp = DimCoord(0, standard_name="forecast_period", units="hours")
             coord_frt = DimCoord(
-                0,
-                standard_name="forecast_reference_time",
-                units=coord_t.units
+                0, standard_name="forecast_reference_time", units=coord_t.units
             )
             shape = (coord_y.shape[0], coord_x.shape[0])
             self.cube = Cube(
@@ -208,7 +186,7 @@ class GDT20Common:
                 aux_coords_and_dims=[
                     (coord_t, None),
                     (coord_fp, None),
-                    (coord_frt, None)
+                    (coord_frt, None),
                 ],
             )
 
@@ -223,9 +201,7 @@ class GDT20Common:
             for coord in cube_expected.dim_coords:
                 # GRIB only describes PolarStereographic, so we always expect
                 #  that system even when we started with Stereographic.
-                coord.coord_system = PolarStereographic(
-                    **self.coord_system_kwargs
-                )
+                coord.coord_system = PolarStereographic(**self.coord_system_kwargs)
 
             # Modifications to remove irrelevant inequalities.
             del cube_reloaded.attributes["GRIB_PARAM"]

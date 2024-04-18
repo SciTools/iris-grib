@@ -29,15 +29,14 @@ repos:
         # Don't commit to main branch.
     -   id: no-commit-to-branch
 
-# TODO: pending the addition of ruff, including config file(s) - iris-grib#384
-#-   repo: https://github.com/astral-sh/ruff-pre-commit
-#    rev: "v0.3.4"
-#    hooks:
-#    -   id: ruff
-#        types: [file, python]
-#        args: [--fix, --show-fixes]
-#    -   id: ruff-format
-#        types: [file, python]
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.3.4"
+    hooks:
+    -   id: ruff
+        types: [file, python]
+        args: [--fix, --show-fixes]
+    -   id: ruff-format
+        types: [file, python]
 
 -   repo: https://github.com/codespell-project/codespell
     rev: "v2.2.6"
@@ -45,12 +44,6 @@ repos:
     -   id: codespell
         types_or: [asciidoc, python, markdown, rst]
         additional_dependencies: [tomli]
-
--   repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
-    hooks:
-    -   id: flake8
-        types: [file, python]
 
 -   repo: https://github.com/asottile/blacken-docs
     rev: 1.16.0

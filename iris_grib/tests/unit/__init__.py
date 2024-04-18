@@ -45,7 +45,7 @@ def _mock_eccodes__codes_is_missing(grib_message, keyname):
     Return whether the key exists in the fake message (dictionary).
 
     """
-    return (keyname not in grib_message)
+    return keyname not in grib_message
 
 
 def _mock_eccodes__codes_get_native_type(grib_message, keyname):
@@ -68,12 +68,11 @@ _mock_eccodes.CodesInternalError = Exception
 _mock_eccodes.codes_get_long = mock.Mock(side_effect=_mock_eccodes_fetch)
 _mock_eccodes.codes_get_string = mock.Mock(side_effect=_mock_eccodes_fetch)
 _mock_eccodes.codes_get_double = mock.Mock(side_effect=_mock_eccodes_fetch)
-_mock_eccodes.codes_get_double_array = mock.Mock(
-    side_effect=_mock_eccodes_fetch)
-_mock_eccodes.codes_is_missing = mock.Mock(
-    side_effect=_mock_eccodes__codes_is_missing)
+_mock_eccodes.codes_get_double_array = mock.Mock(side_effect=_mock_eccodes_fetch)
+_mock_eccodes.codes_is_missing = mock.Mock(side_effect=_mock_eccodes__codes_is_missing)
 _mock_eccodes.codes_get_native_type = mock.Mock(
-    side_effect=_mock_eccodes__codes_get_native_type)
+    side_effect=_mock_eccodes__codes_get_native_type
+)
 
 
 class FakeGribMessage(dict):
@@ -83,6 +82,7 @@ class FakeGribMessage(dict):
     Behaves as a dictionary, containing key-values for message keys.
 
     """
+
     def __init__(self, **kwargs):
         """
         Create a fake message object.
@@ -94,7 +94,7 @@ class FakeGribMessage(dict):
         # Start with a bare dictionary
         dict.__init__(self)
         # Extract specially-recognised keys.
-        time_code = kwargs.pop('time_code', None)
+        time_code = kwargs.pop("time_code", None)
         # Set the minimally required keys.
         self._init_minimal_message()
         # Also set a time-code, if given.
@@ -105,58 +105,71 @@ class FakeGribMessage(dict):
 
     def _init_minimal_message(self):
         # Set values for all the required keys.
-        self.update({
-            'edition': 1,
-            'Ni': 1,
-            'Nj': 1,
-            'numberOfValues': 1,
-            'alternativeRowScanning': 0,
-            'centre': 'ecmf',
-            'year': 2007,
-            'month': 3,
-            'day': 23,
-            'hour': 12,
-            'minute': 0,
-            'indicatorOfUnitOfTimeRange': 1,
-            'gridType': 'rotated_ll',
-            'angleOfRotation': 0.0,
-            'resolutionAndComponentFlags': 128,
-            'iDirectionIncrementInDegrees': 0.036,
-            'jDirectionIncrementInDegrees': 0.036,
-            'iScansNegatively': 0,
-            'jScansPositively': 1,
-            'longitudeOfFirstGridPointInDegrees': -5.70,
-            'latitudeOfFirstGridPointInDegrees': -4.452,
-            'jPointsAreConsecutive': 0,
-            'values': np.array([[1.0]]),
-            'indicatorOfParameter': 9999,
-            'parameterNumber': 9999,
-            'startStep': 24,
-            'timeRangeIndicator': 1,
-            'P1': 2, 'P2': 0,
-            # time unit - needed AS WELL as 'indicatorOfUnitOfTimeRange'
-            'unitOfTime': 1,
-            'table2Version': 9999,
-            })
+        self.update(
+            {
+                "edition": 1,
+                "Ni": 1,
+                "Nj": 1,
+                "numberOfValues": 1,
+                "alternativeRowScanning": 0,
+                "centre": "ecmf",
+                "year": 2007,
+                "month": 3,
+                "day": 23,
+                "hour": 12,
+                "minute": 0,
+                "indicatorOfUnitOfTimeRange": 1,
+                "gridType": "rotated_ll",
+                "angleOfRotation": 0.0,
+                "resolutionAndComponentFlags": 128,
+                "iDirectionIncrementInDegrees": 0.036,
+                "jDirectionIncrementInDegrees": 0.036,
+                "iScansNegatively": 0,
+                "jScansPositively": 1,
+                "longitudeOfFirstGridPointInDegrees": -5.70,
+                "latitudeOfFirstGridPointInDegrees": -4.452,
+                "jPointsAreConsecutive": 0,
+                "values": np.array([[1.0]]),
+                "indicatorOfParameter": 9999,
+                "parameterNumber": 9999,
+                "startStep": 24,
+                "timeRangeIndicator": 1,
+                "P1": 2,
+                "P2": 0,
+                # time unit - needed AS WELL as 'indicatorOfUnitOfTimeRange'
+                "unitOfTime": 1,
+                "table2Version": 9999,
+            }
+        )
 
     def set_timeunit_code(self, timecode):
-        self['indicatorOfUnitOfTimeRange'] = timecode
+        self["indicatorOfUnitOfTimeRange"] = timecode
         # for some odd reason, GRIB1 code uses *both* of these
         # NOTE kludge -- the 2 keys are really the same thing
-        self['unitOfTime'] = timecode
+        self["unitOfTime"] = timecode
 
 
 class TestField(tests.IrisGribTest):
-    def _test_for_coord(self, field, convert, coord_predicate, expected_points,
-                        expected_bounds):
-        (factories, references, standard_name, long_name, units,
-         attributes, cell_methods, dim_coords_and_dims,
-         aux_coords_and_dims) = convert(field)
+    def _test_for_coord(
+        self, field, convert, coord_predicate, expected_points, expected_bounds
+    ):
+        (
+            factories,
+            references,
+            standard_name,
+            long_name,
+            units,
+            attributes,
+            cell_methods,
+            dim_coords_and_dims,
+            aux_coords_and_dims,
+        ) = convert(field)
 
         # Check for one and only one matching coordinate.
         coords_and_dims = dim_coords_and_dims + aux_coords_and_dims
-        matching_coords = [coord for coord, _ in coords_and_dims if
-                           coord_predicate(coord)]
+        matching_coords = [
+            coord for coord, _ in coords_and_dims if coord_predicate(coord)
+        ]
         self.assertEqual(len(matching_coords), 1, str(matching_coords))
         coord = matching_coords[0]
 
@@ -169,8 +182,9 @@ class TestField(tests.IrisGribTest):
         else:
             self.assertArrayEqual(coord.bounds, expected_bounds)
 
-    def assertCoordsAndDimsListsMatch(self, coords_and_dims_got,
-                                      coords_and_dims_expected):
+    def assertCoordsAndDimsListsMatch(
+        self, coords_and_dims_got, coords_and_dims_expected
+    ):
         """
         Check that coords_and_dims lists are equivalent.
 
@@ -180,17 +194,18 @@ class TestField(tests.IrisGribTest):
         It also checks that the coordinate types (DimCoord/AuxCoord) match.
 
         """
+
         def sorted_by_coordname(list):
             return sorted(list, key=lambda item: item[0].name())
 
         coords_and_dims_got = sorted_by_coordname(coords_and_dims_got)
-        coords_and_dims_expected = sorted_by_coordname(
-            coords_and_dims_expected)
+        coords_and_dims_expected = sorted_by_coordname(coords_and_dims_expected)
         self.assertEqual(coords_and_dims_got, coords_and_dims_expected)
         # Also check coordinate type equivalences (as Coord.__eq__ does not).
         self.assertEqual(
             [type(coord) for coord, dims in coords_and_dims_got],
-            [type(coord) for coord, dims in coords_and_dims_expected])
+            [type(coord) for coord, dims in coords_and_dims_expected],
+        )
 
 
 class TestGribSimple(tests.IrisGribTest):
@@ -211,9 +226,10 @@ class TestGribSimple(tests.IrisGribTest):
     def cube_from_message(self, grib):
         # Parameter translation now uses the GribWrapper, so we must convert
         # the Mock-based fake message to a FakeGribMessage.
-        with mock.patch('iris_grib.eccodes', _mock_eccodes):
+        with mock.patch("iris_grib.eccodes", _mock_eccodes):
             grib_message = FakeGribMessage(**grib.__dict__)
             wrapped_msg = iris_grib.GribWrapper(grib_message)
             cube, _, _ = iris.fileformats.rules._make_cube(
-                wrapped_msg, iris_grib._grib1_load_rules.grib1_convert)
+                wrapped_msg, iris_grib._grib1_load_rules.grib1_convert
+            )
         return cube

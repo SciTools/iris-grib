@@ -19,26 +19,29 @@ from iris_grib.tests.unit.load_convert import empty_metadata
 
 class Test(tests.IrisGribTest):
     def setUp(self):
-        self.section_4 = {'hoursAfterDataCutoff': _MDI,
-                          'minutesAfterDataCutoff': _MDI,
-                          'constituentType': 1,
-                          'indicatorOfUnitOfTimeRange': 0,  # minutes
-                          'startStep': 360,
-                          'NV': 0,
-                          'typeOfFirstFixedSurface': 103,
-                          'scaleFactorOfFirstFixedSurface': 0,
-                          'scaledValueOfFirstFixedSurface': 9999,
-                          'typeOfSecondFixedSurface': 255}
+        self.section_4 = {
+            "hoursAfterDataCutoff": _MDI,
+            "minutesAfterDataCutoff": _MDI,
+            "constituentType": 1,
+            "indicatorOfUnitOfTimeRange": 0,  # minutes
+            "startStep": 360,
+            "NV": 0,
+            "typeOfFirstFixedSurface": 103,
+            "scaleFactorOfFirstFixedSurface": 0,
+            "scaledValueOfFirstFixedSurface": 9999,
+            "typeOfSecondFixedSurface": 255,
+        }
 
     def test_constituent_type(self):
         metadata = empty_metadata()
-        rt_coord = iris.coords.DimCoord(24, 'forecast_reference_time',
-                                        units='hours since epoch')
+        rt_coord = iris.coords.DimCoord(
+            24, "forecast_reference_time", units="hours since epoch"
+        )
         product_definition_template_40(self.section_4, metadata, rt_coord)
         expected = empty_metadata()
-        expected['attributes']['WMO_constituent_type'] = 1
-        self.assertEqual(metadata['attributes'], expected['attributes'])
+        expected["attributes"]["WMO_constituent_type"] = 1
+        self.assertEqual(metadata["attributes"], expected["attributes"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

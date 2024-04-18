@@ -12,15 +12,17 @@ to confirm that the correct grid_definition_template is being selected.
 # importing anything else.
 import iris_grib.tests as tests
 
-from iris.coord_systems import (GeogCS,
-                                RotatedGeogCS,
-                                Mercator,
-                                TransverseMercator,
-                                Stereographic,
-                                LambertConformal,
-                                AlbersEqualArea,
-                                LambertAzimuthalEqualArea,
-                                PolarStereographic)
+from iris.coord_systems import (
+    GeogCS,
+    RotatedGeogCS,
+    Mercator,
+    TransverseMercator,
+    LambertConformal,
+    AlbersEqualArea,
+    LambertAzimuthalEqualArea,
+    Stereographic,
+    PolarStereographic,
+)
 import numpy as np
 
 from iris_grib._save_rules import grid_definition_section
@@ -36,66 +38,63 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         # Regular lat/lon (Plate Carree).
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'degrees'
+        coord_units = "degrees"
         cs = self.ellipsoid
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 0)
+        self._check_key("gridDefinitionTemplateNumber", 0)
 
     def test_grid_definition_template_1(self):
         # Rotated lat/lon (Plate Carree).
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'degrees'
+        coord_units = "degrees"
         cs = RotatedGeogCS(34.0, 117.0, ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 1)
+        self._check_key("gridDefinitionTemplateNumber", 1)
 
     def test_grid_definition_template_4(self):
         # Irregular (variable resolution) lat/lon grid.
         x_points = np.array([0, 2, 7])
         y_points = np.array([1, 3, 6])
-        coord_units = '1'
+        coord_units = "1"
         cs = self.ellipsoid
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 4)
+        self._check_key("gridDefinitionTemplateNumber", 4)
 
     def test_grid_definition_template_5(self):
         # Irregular (variable resolution) rotated lat/lon grid.
         x_points = np.array([0, 2, 7])
         y_points = np.array([1, 3, 6])
-        coord_units = '1'
+        coord_units = "1"
         cs = RotatedGeogCS(34.0, 117.0, ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 5)
+        self._check_key("gridDefinitionTemplateNumber", 5)
 
     def test_grid_definition_template_10(self):
         # Mercator grid.
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'm'
+        coord_units = "m"
         cs = Mercator(ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 10)
+        self._check_key("gridDefinitionTemplateNumber", 10)
 
     def test_grid_definition_template_12(self):
         # Transverse Mercator grid.
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'm'
+        coord_units = "m"
         cs = TransverseMercator(0, 0, 0, 0, 1, ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 12)
+        self._check_key("gridDefinitionTemplateNumber", 12)
 
-    def grid_definition_template_20_common(
-        self,
-        coord_system: type[Stereographic]
-    ):
+    def grid_definition_template_20_common(self, coord_system: type[Stereographic]):
         # Stereographic grid.
         # Common code to allow testing PolarStereographic and Stereographic.
         if not issubclass(coord_system, Stereographic):
@@ -103,11 +102,11 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'm'
+        coord_units = "m"
         cs = coord_system(90.0, 0, ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 20)
+        self._check_key("gridDefinitionTemplateNumber", 20)
 
     def test_grid_definition_template_20_s(self):
         self.grid_definition_template_20_common(Stereographic)
@@ -119,32 +118,32 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         # Lambert Conformal grid.
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'm'
+        coord_units = "m"
         cs = LambertConformal(ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 30)
+        self._check_key("gridDefinitionTemplateNumber", 30)
 
     def test_grid_definition_template_140(self):
         # Lambert Conformal grid.
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = 'm'
+        coord_units = "m"
         cs = LambertAzimuthalEqualArea(ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
-        self._check_key('gridDefinitionTemplateNumber', 140)
+        self._check_key("gridDefinitionTemplateNumber", 140)
 
     def test_coord_system_not_supported(self):
         # Test an unsupported grid - let's choose Albers Equal Area.
         x_points = np.arange(3)
         y_points = np.arange(3)
-        coord_units = '1'
+        coord_units = "1"
         cs = AlbersEqualArea(ellipsoid=self.ellipsoid)
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
 
-        exp_name = cs.grid_mapping_name.replace('_', ' ').title()
-        exp_emsg = 'not supported for coordinate system {!r}'.format(exp_name)
+        exp_name = cs.grid_mapping_name.replace("_", " ").title()
+        exp_emsg = "not supported for coordinate system {!r}".format(exp_name)
         with self.assertRaisesRegex(ValueError, exp_emsg):
             grid_definition_section(test_cube, self.mock_grib)
 

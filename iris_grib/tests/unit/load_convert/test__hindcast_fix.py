@@ -18,7 +18,7 @@ from iris_grib._load_convert import _hindcast_fix as hindcast_fix
 
 class TestHindcastFix(tests.IrisGribTest):
     # setup tests : provided value, fix-applies, expected-fixed
-    FixTest = namedtuple('FixTest', ('given', 'fixable', 'fixed'))
+    FixTest = namedtuple("FixTest", ("given", "fixable", "fixed"))
     test_values = [
         FixTest(0, False, None),
         FixTest(100, False, None),
@@ -27,10 +27,11 @@ class TestHindcastFix(tests.IrisGribTest):
         FixTest(2 * 2**30 + 1, True, -1),
         FixTest(2 * 2**30 + 2, True, -2),
         FixTest(3 * 2**30 - 1, True, -(2**30 - 1)),
-        FixTest(3 * 2**30, False, None)]
+        FixTest(3 * 2**30, False, None),
+    ]
 
     def setUp(self):
-        self.patch_warn = self.patch('warnings.warn')
+        self.patch_warn = self.patch("warnings.warn")
 
     def test_fix(self):
         # Check hindcast fixing.
@@ -41,11 +42,12 @@ class TestHindcastFix(tests.IrisGribTest):
 
     def test_fix_warning(self):
         # Check warning appears when enabled.
-        self.patch('iris_grib._load_convert.options.warn_on_unsupported', True)
+        self.patch("iris_grib._load_convert.options.warn_on_unsupported", True)
         hindcast_fix(2 * 2**30 + 5)
         self.assertEqual(self.patch_warn.call_count, 1)
-        self.assertIn('Re-interpreting large grib forecastTime',
-                      self.patch_warn.call_args[0][0])
+        self.assertIn(
+            "Re-interpreting large grib forecastTime", self.patch_warn.call_args[0][0]
+        )
 
     def test_fix_warning_disabled(self):
         # Default is no warning.
@@ -53,5 +55,5 @@ class TestHindcastFix(tests.IrisGribTest):
         self.assertEqual(self.patch_warn.call_count, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

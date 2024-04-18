@@ -13,15 +13,15 @@ from collections import OrderedDict
 
 def empty_metadata():
     metadata = OrderedDict()
-    metadata['factories'] = []
-    metadata['references'] = []
-    metadata['standard_name'] = None
-    metadata['long_name'] = None
-    metadata['units'] = None
-    metadata['attributes'] = {}
-    metadata['cell_methods'] = []
-    metadata['dim_coords_and_dims'] = []
-    metadata['aux_coords_and_dims'] = []
+    metadata["factories"] = []
+    metadata["references"] = []
+    metadata["standard_name"] = None
+    metadata["long_name"] = None
+    metadata["units"] = None
+    metadata["attributes"] = {}
+    metadata["cell_methods"] = []
+    metadata["dim_coords_and_dims"] = []
+    metadata["aux_coords_and_dims"] = []
     return metadata
 
 

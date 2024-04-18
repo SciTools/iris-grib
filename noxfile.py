@@ -25,7 +25,7 @@ PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
 PY_VER = os.environ.get("PY_VER", ["3.9", "3.10", "3.11"])
-IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ['source', 'conda-forge'])
+IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ["source", "conda-forge"])
 
 #: Default cartopy cache directory.
 CARTOPY_CACHE_DIR = os.environ.get("HOME") / Path(".local/share/cartopy")
@@ -64,20 +64,18 @@ def _write_iris_config(session: nox.sessions.Session) -> None:
 
     """
     try:
-        test_data_dir = session.posargs[
-            session.posargs.index('--test-data-dir')+1
-            ]
+        test_data_dir = session.posargs[session.posargs.index("--test-data-dir") + 1]
     except Exception:
         test_data_dir = ""
 
     iris_config_file = os.path.join(
         session.virtualenv.location,
-        'lib',
-        f'python{session.python}',
-        'site-packages',
-        'iris',
-        'etc',
-        'site.cfg',
+        "lib",
+        f"python{session.python}",
+        "site-packages",
+        "iris",
+        "etc",
+        "site.cfg",
     )
     iris_config = f"""
 [Resources]
@@ -91,7 +89,7 @@ udunits2_path = {
     print("Iris config\n-----------")
     print(iris_config)
 
-    with open(iris_config_file, 'w') as f:
+    with open(iris_config_file, "w") as f:
         f.write(iris_config)
 
 
@@ -163,7 +161,7 @@ def _install_and_cache_venv(session: nox.sessions.Session) -> None:
 
 @contextmanager
 def prepare_venv(
-    session: nox.sessions.Session, iris_source: str = 'conda_forge'
+    session: nox.sessions.Session, iris_source: str = "conda-forge"
 ) -> None:
     """
     Create and cache the nox session conda environment, and additionally
@@ -177,7 +175,7 @@ def prepare_venv(
         A `nox.sessions.Session` object.
 
     iris_source: str
-        Determines where Iris was sourced from. Either 'conda_forge' (the
+        Determines where Iris was sourced from. Either 'conda-forge' (the
         default), or 'source' which refers to the Iris main branch.
 
     Notes
@@ -206,7 +204,7 @@ def prepare_venv(
 
     logger.debug(f"Environment up to date: {venv_dir}")
 
-    if iris_source == 'source':
+    if iris_source == "source":
         # get latest iris
         iris_dir = f"{session.create_tmp()}/iris"
 
@@ -219,7 +217,7 @@ def prepare_venv(
                 "pull",
                 "origin",
                 "main",
-                external=True  # use git from host environment
+                external=True,  # use git from host environment
             )
         else:
             session.run(
@@ -227,9 +225,9 @@ def prepare_venv(
                 "clone",
                 "https://github.com/scitools/iris.git",
                 iris_dir,
-                external=True
+                external=True,
             )
-        session.install(iris_dir, '--no-deps')
+        session.install(iris_dir, "--no-deps")
 
     _cache_cartopy(session)
     _write_iris_config(session)
@@ -252,46 +250,8 @@ def prepare_venv(
         )
 
 
-@nox.session
-def flake8(session: nox.sessions.Session):
-    """
-    Perform flake8 linting of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("flake8")
-    # Execute the flake8 linter on the package.
-    session.run("flake8", PACKAGE)
-    # Execute the flake8 linter on this file.
-    session.run("flake8", __file__)
-
-
-@nox.session
-def black(session: nox.sessions.Session):
-    """
-    Perform black format checking of iris-grib.
-
-    Parameters
-    ----------
-    session: object
-        A `nox.sessions.Session` object.
-
-    """
-    # Pip install the session requirements.
-    session.install("black==20.8b1")
-    # Execute the black format checker on the package.
-    session.run("black", "--check", PACKAGE)
-    # Execute the black format checker on this file.
-    session.run("black", "--check", __file__)
-
-
 @nox.session(python=PY_VER, venv_backend="conda")
-@nox.parametrize('iris_source', IRIS_SOURCE)
+@nox.parametrize("iris_source", IRIS_SOURCE)
 def tests(session: nox.sessions.Session, iris_source: str):
     """
     Perform iris-grib tests against release and development versions of iris.
@@ -302,7 +262,7 @@ def tests(session: nox.sessions.Session, iris_source: str):
         A `nox.sessions.Session` object.
 
     iris_source: str
-        Either 'conda_forge' if using Iris from conda-forge, or 'source' if
+        Either 'conda-forge' if using Iris from conda-forge, or 'source' if
         installing Iris from the Iris' main branch.
 
     """
@@ -311,10 +271,9 @@ def tests(session: nox.sessions.Session, iris_source: str):
     session.run("python", "-m", "eccodes", "selfcheck")
 
     session.run(
-        "python",
-        "-m",
-        "iris_grib.tests.runner",
-        "--default-tests",
+        "pytest",
+        "--pyargs",
+        "iris_grib",
     )
 
 

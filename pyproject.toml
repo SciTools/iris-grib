@@ -1,3 +1,5 @@
+# See https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
 [build-system]
 # Defined by PEP 518
 requires = [
@@ -65,7 +67,10 @@ optional-dependencies.test = {file = "requirements/test.txt"}
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
 
+#------------------------------------------------------------------------------
+
 [tool.coverage.run]
+# See https://coverage.readthedocs.io/en/latest/config.html
 branch = true
 source = [
     "iris_grib",
@@ -77,14 +82,17 @@ omit = [
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
+    "def __repr__",
     "if __name__ == .__main__.:"
 ]
 
 [tool.codespell]
+# See https://github.com/codespell-project/codespell/tree/master?tab=readme-ov-file#using-a-config-file
 ignore-words-list = "alpha-numeric,degreee,discontiguities,lazyness,meaned,nin"
 skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
 [tool.mypy]
+# See https://mypy.readthedocs.io/en/stable/config_file.html
 ignore_missing_imports = true
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -92,3 +100,65 @@ exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
+strict = false  # Default value, make true when introducing type hinting.
+
+[tool.pytest.ini_options]
+# See https://docs.pytest.org/en/stable/reference/customize.html
+addopts = [
+    "--doctest-continue-on-failure",
+    "--doctest-modules",
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "-v",
+]
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
+# configure settings as recommended by repo-review:
+log_cli = "True"
+log_cli_level = "INFO"
+minversion = "6.0"
+testpaths = "iris_grib"
+xfail_strict = "True"
+
+[tool.ruff]
+# Exclude the following, in addition to the standard set of exclusions.
+# https://docs.astral.sh/ruff/settings/#exclude
+line-length = 88
+src = [
+    "iris_grib",
+    "docs",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+preview = false
+
+[tool.ruff.lint]
+ignore = [
+    # NOTE: Non-permanent exclusions should be added to the ".ruff.toml" file.
+
+    # flake8-commas (COM)
+    # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+    "COM812",  # Trailing comma missing.
+    "COM819",  # Trailing comma prohibited.
+
+    # flake8-implicit-str-concat (ISC)
+    # https://docs.astral.sh/ruff/rules/single-line-implicit-string-concatenation/
+    # NOTE: This rule may cause conflicts when used with "ruff format".
+    "ISC001",  # Implicitly concatenate string literals on one line.
+    ]
+preview = false
+select = [
+    "ALL",
+
+    # pydocstyle (D)
+    # https://docs.astral.sh/ruff/rules/multi-line-summary-first-line/
+    "D212",  # Multi-line docstring summary should start at the first line
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["iris_grib"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

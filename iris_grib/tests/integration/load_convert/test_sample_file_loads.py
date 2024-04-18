@@ -40,9 +40,7 @@ class TestBasicLoad(tests.IrisGribTest):
         self.assertCML(cubes, _RESULTDIR_PREFIX + ("time_bound_grib2.cml",))
 
     def test_load_3_layer(self):
-        cubes = iris.load(
-            tests.get_data_path(("GRIB", "3_layer_viz", "3_layer.grib2"))
-        )
+        cubes = iris.load(tests.get_data_path(("GRIB", "3_layer_viz", "3_layer.grib2")))
         cubes = iris.cube.CubeList([cubes[1], cubes[0], cubes[2]])
         self.assertCML(cubes, _RESULTDIR_PREFIX + ("3_layer.cml",))
 
@@ -51,8 +49,7 @@ class TestBasicLoad(tests.IrisGribTest):
             ("GRIB", "missing_values", "missing_values.grib2")
         )
         cubes = iris.load(gribfile)
-        self.assertCML(cubes,
-                       _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
+        self.assertCML(cubes, _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
 
     def test_polar_stereo_grib1(self):
         cube = iris.load_cube(
@@ -89,15 +86,11 @@ class TestBasicLoad(tests.IrisGribTest):
         self.assertEqual(pyc.coord_system.true_scale_lat, 60.0)
 
     def test_lambert_grib1(self):
-        cube = iris.load_cube(
-            tests.get_data_path(("GRIB", "lambert", "lambert.grib1"))
-        )
+        cube = iris.load_cube(tests.get_data_path(("GRIB", "lambert", "lambert.grib1")))
         self.assertCML(cube, _RESULTDIR_PREFIX + ("lambert_grib1.cml",))
 
     def test_lambert_grib2(self):
-        cube = iris.load_cube(
-            tests.get_data_path(("GRIB", "lambert", "lambert.grib2"))
-        )
+        cube = iris.load_cube(tests.get_data_path(("GRIB", "lambert", "lambert.grib2")))
         self.assertCML(cube, _RESULTDIR_PREFIX + ("lambert_grib2.cml",))
 
     def test_regular_gg_grib1(self):

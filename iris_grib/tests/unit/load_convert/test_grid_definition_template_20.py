@@ -24,28 +24,27 @@ from iris_grib._load_convert import grid_definition_template_20
 
 
 class Test(tests.IrisGribTest):
-
     def section_3(self):
         section = {
-            'gridDefinitionTemplateNumber': 20,
-            'shapeOfTheEarth': 0,
-            'scaleFactorOfRadiusOfSphericalEarth': 0,
-            'scaledValueOfRadiusOfSphericalEarth': 6367470,
-            'scaleFactorOfEarthMajorAxis': 0,
-            'scaledValueOfEarthMajorAxis': MDI,
-            'scaleFactorOfEarthMinorAxis': 0,
-            'scaledValueOfEarthMinorAxis': MDI,
-            'Nx': 15,
-            'Ny': 10,
-            'latitudeOfFirstGridPoint': 32549114,
-            'longitudeOfFirstGridPoint': 225385728,
-            'resolutionAndComponentFlags': 0b00001000,
-            'LaD': 60000000,
-            'orientationOfTheGrid': 262000000,
-            'Dx': 320000000,
-            'Dy': 320000000,
-            'projectionCentreFlag': 0b00000000,
-            'scanningMode': 0b01000000,
+            "gridDefinitionTemplateNumber": 20,
+            "shapeOfTheEarth": 0,
+            "scaleFactorOfRadiusOfSphericalEarth": 0,
+            "scaledValueOfRadiusOfSphericalEarth": 6367470,
+            "scaleFactorOfEarthMajorAxis": 0,
+            "scaledValueOfEarthMajorAxis": MDI,
+            "scaleFactorOfEarthMinorAxis": 0,
+            "scaledValueOfEarthMinorAxis": MDI,
+            "Nx": 15,
+            "Ny": 10,
+            "latitudeOfFirstGridPoint": 32549114,
+            "longitudeOfFirstGridPoint": 225385728,
+            "resolutionAndComponentFlags": 0b00001000,
+            "LaD": 60000000,
+            "orientationOfTheGrid": 262000000,
+            "Dx": 320000000,
+            "Dy": 320000000,
+            "projectionCentreFlag": 0b00000000,
+            "scanningMode": 0b01000000,
         }
         return section
 
@@ -56,30 +55,35 @@ class Test(tests.IrisGribTest):
         # Always expect PolarStereographic - never Stereographic.
         #  Stereographic is a CF/Iris concept and not something described in
         #  GRIB.
-        cs = iris.coord_systems.PolarStereographic(central_lat=90.,
-                                                   central_lon=262.,
-                                                   false_easting=0,
-                                                   false_northing=0,
-                                                   true_scale_lat=60.,
-                                                   ellipsoid=ellipsoid)
+        cs = iris.coord_systems.PolarStereographic(
+            central_lat=90.0,
+            central_lon=262.0,
+            false_easting=0,
+            false_northing=0,
+            true_scale_lat=60.0,
+            ellipsoid=ellipsoid,
+        )
         lon0 = 225385728 * 1e-6
         lat0 = 32549114 * 1e-6
-        x0m, y0m = cs.as_cartopy_crs().transform_point(
-            lon0, lat0, ccrs.Geodetic())
-        dxm = dym = 320000.
+        x0m, y0m = cs.as_cartopy_crs().transform_point(lon0, lat0, ccrs.Geodetic())
+        dxm = dym = 320000.0
         x_points = x0m + dxm * np.arange(15)
         y_points = y0m + dym * np.arange(10)
-        x = iris.coords.DimCoord(x_points,
-                                 standard_name='projection_x_coordinate',
-                                 units='m',
-                                 coord_system=cs,
-                                 circular=False)
-        y = iris.coords.DimCoord(y_points,
-                                 standard_name='projection_y_coordinate',
-                                 units='m',
-                                 coord_system=cs)
-        expected['dim_coords_and_dims'].append((y, y_dim))
-        expected['dim_coords_and_dims'].append((x, x_dim))
+        x = iris.coords.DimCoord(
+            x_points,
+            standard_name="projection_x_coordinate",
+            units="m",
+            coord_system=cs,
+            circular=False,
+        )
+        y = iris.coords.DimCoord(
+            y_points,
+            standard_name="projection_y_coordinate",
+            units="m",
+            coord_system=cs,
+        )
+        expected["dim_coords_and_dims"].append((y, y_dim))
+        expected["dim_coords_and_dims"].append((x, x_dim))
         return expected
 
     def test(self):
@@ -90,5 +94,5 @@ class Test(tests.IrisGribTest):
         self.assertEqual(metadata, expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()
