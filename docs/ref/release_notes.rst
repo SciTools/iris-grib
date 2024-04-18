@@ -253,7 +253,7 @@ Bugs Fixed
 
 * `@pp-mo <https://github.com/pp-mo>`_ fixed a problem where cubes were loading from GRIB 1 with a changed coordinate
   system, since eccodes versions >= 1.19.  This resulted from a change to eccodes, which now returns a different
-  'shapeOfTheEarth' parameter : see `eccodes issue ECC-811 <https://jira.ecmwf.int/browse/ECC-811>`_ .  This resulted
+  'shapeOfTheEarth' parameter.  This resulted
   in a coordinate system with a different earth radius.
   For backwards compatibilty, the earth radius has now been fixed to the same value as previously.
   However, pending further investigation, this value may be technically incorrect and we may
