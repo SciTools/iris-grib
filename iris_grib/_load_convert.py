@@ -812,8 +812,6 @@ def grid_definition_template_12(section, metadata):
     lat = section["latitudeOfReferencePoint"] * _GRID_ACCURACY_IN_DEGREES
     lon = section["longitudeOfReferencePoint"] * _GRID_ACCURACY_IN_DEGREES
     scale = section["scaleFactorAtReferencePoint"]
-    # Catch bug in ECMWF GRIB API (present at 1.12.1) where the scale
-    # is treated as a signed, 4-byte integer.
     CM_TO_M = 0.01
     easting = section["XR"] * CM_TO_M
     northing = section["YR"] * CM_TO_M

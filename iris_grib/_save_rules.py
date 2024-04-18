@@ -515,10 +515,6 @@ def grid_definition_template_12(cube, grib):
     eccodes.codes_set(grib, "Di", abs(x_step))
     eccodes.codes_set(grib, "Dj", abs(y_step))
     horizontal_grid_common(cube, grib)
-
-    # GRIBAPI expects unsigned ints in X1, X2, Y1, Y2 but it should accept
-    # signed ints, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1101
     eccodes.codes_set(grib, "Y1", int(y_cm[0]))
     eccodes.codes_set(grib, "Y2", int(y_cm[-1]))
     eccodes.codes_set(grib, "X1", int(x_cm[0]))
@@ -544,10 +540,6 @@ def grid_definition_template_12(cube, grib):
     # False easting and false northing are measured in units of (10^-2)m.
     eccodes.codes_set(grib, "XR", m_to_cm(cs.false_easting))
     eccodes.codes_set(grib, "YR", m_to_cm(cs.false_northing))
-
-    # GRIBAPI expects a signed int for scaleFactorAtReferencePoint
-    # but it should accept a float, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
     eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
 
