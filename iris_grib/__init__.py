@@ -413,8 +413,11 @@ class GribWrapper:
             else:
                 raise TranslationError("Unhandled projectionCentreFlag")
 
+            # Always load PolarStereographic - never Stereographic.
+            #  Stereographic is a CF/Iris concept and not something described
+            #  in GRIB.
             # Note: I think the grib api defaults LaDInDegrees to 60 for grib1.
-            self.extra_keys["_coord_system"] = coord_systems.Stereographic(
+            self.extra_keys["_coord_system"] = coord_systems.PolarStereographic(
                 pole_lat,
                 self.orientationOfTheGridInDegrees,
                 0,

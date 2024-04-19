@@ -912,7 +912,10 @@ def grid_definition_template_20(section, metadata):
         central_lat = 90.0
     central_lon = section["orientationOfTheGrid"] * _GRID_ACCURACY_IN_DEGREES
     true_scale_lat = section["LaD"] * _GRID_ACCURACY_IN_DEGREES
-    cs = icoord_systems.Stereographic(
+    # Always load PolarStereographic - never Stereographic.
+    #  Stereographic is a CF/Iris concept and not something described
+    #  in GRIB.
+    cs = icoord_systems.PolarStereographic(
         central_lat=central_lat,
         central_lon=central_lon,
         true_scale_lat=true_scale_lat,

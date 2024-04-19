@@ -75,7 +75,10 @@ class TestBasicLoad(tests.IrisGribTest):
         self.assertAlmostEqual(pyc.points.max(), -216.1459, places=4)
         self.assertAlmostEqual(pyc.points.min(), -5970216.1459, places=4)
         self.assertEqual(pyc.coord_system, pxc.coord_system)
-        self.assertEqual(pyc.coord_system.grid_mapping_name, "stereographic")
+        self.assertEqual(
+            pyc.coord_system.grid_mapping_name,
+            "polar_stereographic",
+        )
         self.assertEqual(pyc.coord_system.central_lat, 90.0)
         self.assertEqual(pyc.coord_system.central_lon, 249.0)
         self.assertEqual(pyc.coord_system.false_easting, 0.0)
