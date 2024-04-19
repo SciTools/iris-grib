@@ -1,5 +1,8 @@
 *.py[co]
 
+# setuptools-scm
+_version.py
+
 # Packages
 *.egg
 *.egg-info
