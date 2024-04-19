@@ -719,7 +719,9 @@ def grid_definition_template_20(cube, grib):
         )
         raise TranslationError(message)
 
-    if cs.scale_factor_at_projection_origin is not None:
+    if cs.scale_factor_at_projection_origin and not np.isclose(
+        cs.scale_factor_at_projection_origin, 1.0
+    ):
         message = (
             f"{cs.scale_factor_at_projection_origin=} . iris_grib cannot "
             "write scale_factor_at_projection_origin to a GRIB Template 3.20 "
