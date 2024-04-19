@@ -810,7 +810,7 @@ def grid_definition_template_10(section, metadata):
     # intersects the Earth
     standard_parallel = section["LaD"] * _GRID_ACCURACY_IN_DEGREES
 
-    if section["orientationOfTheGrid"] and not np.isclose(
+    if "orientationOfTheGrid" in section and not np.isclose(
         section["orientationOfTheGrid"], 0
     ):
         # Could support in future by using the ObliqueMercator class.
