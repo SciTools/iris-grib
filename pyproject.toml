@@ -4,7 +4,7 @@
 # Defined by PEP 518
 requires = [
     "setuptools>=64",
-    "setuptools_scm[toml]>=7.0",
+    "setuptools_scm>=7.0",
     "wheel",
 ]
 # Defined by PEP 517
@@ -61,7 +61,6 @@ license-files = ["LICENSE"]
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements/core.txt"}
 readme = {file = "README.rst", content-type = "text/x-rst"}
-version = {attr = "iris_grib.__version__"}
 optional-dependencies.all = {file = "requirements/all.txt"}
 optional-dependencies.test = {file = "requirements/test.txt"}
 
