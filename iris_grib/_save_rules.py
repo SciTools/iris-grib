@@ -48,65 +48,6 @@ _STATISTIC_TYPE_NAMES_INVERTED = {
 _TIME_RANGE_UNITS_INVERTED = {val: key for key, val in _TIME_RANGE_UNITS.items()}
 
 
-def fixup_float32_as_int32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats an IEEE 32-bit
-    floating-point value as a signed, 4-byte integer.
-
-    Returns the integer value which will result in the on-disk
-    representation corresponding to the IEEE 32-bit floating-point
-    value.
-
-    """
-    value_as_float32 = np.array(value, dtype="f4")
-    value_as_uint32 = value_as_float32.view(dtype="u4")
-    if value_as_uint32 >= 0x80000000:
-        # Convert from two's-complement to sign-and-magnitude.
-        # NB. Because of the silly representation of negative
-        # integers in GRIB2, there is no value we can pass to
-        # codes_set that will result in the bit pattern 0x80000000.
-        # But since that bit pattern corresponds to a floating
-        # point value of negative-zero, we can safely treat it as
-        # positive-zero instead.
-        value_as_grib_int = 0x80000000 - int(value_as_uint32)
-    else:
-        value_as_grib_int = int(value_as_uint32)
-    return value_as_grib_int
-
-
-def fixup_int32_as_uint32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats a signed, 4-byte
-    integer value as an unsigned, 4-byte integer.
-
-    Returns the unsigned integer value which will result in the on-disk
-    representation corresponding to the signed, 4-byte integer value.
-
-    """
-    value = int(value)
-    if -0x7FFFFFFF <= value <= 0x7FFFFFFF:
-        if value < 0:
-            # Convert from two's-complement to sign-and-magnitude.
-            value = 0x80000000 - value
-    else:
-        msg = "{} out of range -2147483647 to 2147483647.".format(value)
-        raise ValueError(msg)
-    return value
-
-
-def ensure_set_int32_value(grib, key, value):
-    """
-    Ensure the workaround function :func:`fixup_int32_as_uint32` is applied as
-    necessary to problem keys.
-
-    """
-    try:
-        eccodes.codes_set(grib, key, value)
-    except eccodes.CodesInternalError:
-        value = fixup_int32_as_uint32(value)
-        eccodes.codes_set(grib, key, value)
-
-
 ###############################################################################
 #
 # Constants
@@ -574,14 +515,10 @@ def grid_definition_template_12(cube, grib):
     eccodes.codes_set(grib, "Di", abs(x_step))
     eccodes.codes_set(grib, "Dj", abs(y_step))
     horizontal_grid_common(cube, grib)
-
-    # GRIBAPI expects unsigned ints in X1, X2, Y1, Y2 but it should accept
-    # signed ints, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1101
-    ensure_set_int32_value(grib, "Y1", int(y_cm[0]))
-    ensure_set_int32_value(grib, "Y2", int(y_cm[-1]))
-    ensure_set_int32_value(grib, "X1", int(x_cm[0]))
-    ensure_set_int32_value(grib, "X2", int(x_cm[-1]))
+    eccodes.codes_set(grib, "Y1", int(y_cm[0]))
+    eccodes.codes_set(grib, "Y2", int(y_cm[-1]))
+    eccodes.codes_set(grib, "X1", int(x_cm[0]))
+    eccodes.codes_set(grib, "X2", int(x_cm[-1]))
 
     # Lat and lon of reference point are measured in millionths of a degree.
     eccodes.codes_set(
@@ -603,14 +540,7 @@ def grid_definition_template_12(cube, grib):
     # False easting and false northing are measured in units of (10^-2)m.
     eccodes.codes_set(grib, "XR", m_to_cm(cs.false_easting))
     eccodes.codes_set(grib, "YR", m_to_cm(cs.false_northing))
-
-    # GRIBAPI expects a signed int for scaleFactorAtReferencePoint
-    # but it should accept a float, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
-    key_type = eccodes.codes_get_native_type(grib, "scaleFactorAtReferencePoint")
-    if key_type is not float:
-        value = fixup_float32_as_int32(value)
     eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
 
 
