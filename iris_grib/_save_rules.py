@@ -706,11 +706,11 @@ def grid_definition_template_20(cube, grib):
     elif np.isclose(cs.central_lat, 90.0):
         centre_flag = 0x0
     else:
-        emsg = (
-            "Bipolar and symmetric polar stereo projections "
-            "are not supported in GRIB Template 3.20."
+        message = (
+            f"{cs.central_lat=} . GRIB Template 3.20 only supports the polar "
+            "stereographic projection; central_lat must be 90.0 or -90.0."
         )
-        raise TranslationError(emsg)
+        raise TranslationError(message)
 
     def non_standard_scale_factor_error(message: str):
         message = f"Non-standard scale factor specified. {message}"
