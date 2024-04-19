@@ -701,9 +701,9 @@ def grid_definition_template_20(cube, grib):
     _perspective_projection_common(cube, grib)
 
     # Is this a north or south polar stereographic projection?
-    if cs.central_lat == -90.0:
+    if np.isclose(cs.central_lat, -90.0):
         centre_flag = 0x80
-    elif cs.central_lat == 90.0:
+    elif np.isclose(cs.central_lat, 90.0):
         centre_flag = 0x0
     else:
         emsg = (
