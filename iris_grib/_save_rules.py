@@ -712,22 +712,24 @@ def grid_definition_template_20(cube, grib):
         )
         raise TranslationError(emsg)
 
+    def non_standard_scale_factor_error(message: str):
+        message = f"Non-standard scale factor specified. {message}"
+        raise TranslationError(message)
+
     if cs.true_scale_lat and cs.true_scale_lat != cs.central_lat:
-        message = (
+        non_standard_scale_factor_error(
             f"{cs.true_scale_lat=}, {cs.central_lat=} . iris_grib can "
             "only write a GRIB Template 3.20 file where these are identical."
         )
-        raise TranslationError(message)
 
     if cs.scale_factor_at_projection_origin and not np.isclose(
         cs.scale_factor_at_projection_origin, 1.0
     ):
-        message = (
+        non_standard_scale_factor_error(
             f"{cs.scale_factor_at_projection_origin=} . iris_grib cannot "
             "write scale_factor_at_projection_origin to a GRIB Template 3.20 "
             "file."
         )
-        raise TranslationError(message)
 
     eccodes.codes_set(grib, "projectionCentreFlag", centre_flag)
 
