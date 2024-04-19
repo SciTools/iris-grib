@@ -106,7 +106,7 @@ class Test(tests.IrisGribTest, GdtTestMixin):
     def test_projection_centre_bad(self):
         cs = Stereographic(0, 0, ellipsoid=self.default_ellipsoid)
         stereo_test_cube = self._make_test_cube(cs=cs, coord_units="m")
-        exp_emsg = "Bipolar and symmetric .* not supported."
+        exp_emsg = "must be 90.0 or -90.0"
         with self.assertRaisesRegex(TranslationError, exp_emsg):
             grid_definition_template_20(stereo_test_cube, self.mock_grib)
 
