@@ -242,9 +242,9 @@ Bugs Fixed
   `corrected in Iris 2.3 <https://github.com/SciTools/iris/pull/3406>`_ , it
   broke the iris-grib loading, since the data was now incorrectly
   assigned the "new-style" Iris
-  `VerticalPerspective <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.VerticalPerspective>`_
+  `VerticalPerspective <https://scitools-iris.readthedocs.io/en/stable/generated/api/iris.coord_systems.html#iris.coord_systems.VerticalPerspective>`_
   coordinate system, equivalent to the Cartopy
-  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective>`_
+  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/reference/projections.html#nearsideperspective>`_
   and Proj
   `"nsper" <https://proj.org/operations/projections/nsper.html>`_ .
   The plotting behaviour of this is now **the same again as before Iris 2.3** :
