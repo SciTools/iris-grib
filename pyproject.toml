@@ -4,6 +4,7 @@
 # Defined by PEP 518
 requires = [
     "setuptools>=64",
+    "setuptools_scm>=7.0",
 ]
 # Defined by PEP 517
 build-backend = "setuptools.build_meta"
@@ -58,13 +59,17 @@ license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements/core.txt"}
-readme = {file = "README.rst", content-type = "text/x-rst"}
-version = {attr = "iris_grib.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
 optional-dependencies.all = {file = "requirements/all.txt"}
 optional-dependencies.test = {file = "requirements/test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
+
+[tool.setuptools_scm]
+write_to = "iris_grib/_version.py"
+local_scheme = "dirty-tag"
+version_scheme = "release-branch-semver"
 
 #------------------------------------------------------------------------------
 
@@ -89,6 +94,11 @@ exclude_lines = [
 # See https://github.com/codespell-project/codespell/tree/master?tab=readme-ov-file#using-a-config-file
 ignore-words-list = "alpha-numeric,degreee,discontiguities,lazyness,meaned,nin"
 skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
+
+[tool.check-manifest]
+ignore = [
+    "iris_grib/_version.py",
+]
 
 [tool.mypy]
 # See https://mypy.readthedocs.io/en/stable/config_file.html

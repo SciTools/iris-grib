@@ -36,13 +36,14 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.11"]
-        session: ["doctest"]
+        session: ["doctest", "linkcheck"]
         iris-source : ["conda-forge"]
         include:
           - os: "ubuntu-latest"
             python-version: "3.11"
             session: "tests"
             iris-source: "conda-forge"
+            coverage: "--coverage"
           - os: "ubuntu-latest"
             python-version: "3.11"
             session: "tests"
@@ -129,3 +130,7 @@ jobs:
           PY_VER: ${{ matrix.python-version }}
         run: |
           nox --session ${{ matrix.session }} -- --test-data-dir ${HOME}/iris-test-data/test_data
+
+      - name: "Upload coverage report"
+        uses: codecov/codecov-action@v4
+        if: ${{ matrix.coverage }}
