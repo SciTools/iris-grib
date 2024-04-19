@@ -817,8 +817,7 @@ def grid_definition_template_12(section, metadata):
     northing = section["YR"] * CM_TO_M
     cs = icoord_systems.TransverseMercator(lat, lon, easting, northing, scale, geog_cs)
 
-    # Deal with bug in ECMWF GRIB API (present at 1.12.1) where these
-    # values are treated as unsigned, 4-byte integers.
+    # Fetch grid extents
     x1 = section["X1"]
     y1 = section["Y1"]
     x2 = section["X2"]
