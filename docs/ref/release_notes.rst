@@ -117,7 +117,7 @@ Bugs Fixed
   iris-grib to work with the latest versions of
   `iris <https://scitools-iris.readthedocs.io/en/stable/>`_,
   `cf-units <https://cf-units.readthedocs.io/en/latest/>`_,
-  `ecCodes <https://confluence.ecmwf.int/display/ECC/What+is+ecCodes>`_ and
+  `ecCodes <https://confluence.ecmwf.int/display/ECC>`_ and
   `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
   the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
   values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
@@ -439,7 +439,7 @@ What's new in iris-grib v0.12
 :Date: 25 Oct 2017
 
 Updated to work with
-`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ as its
+`ecCodes <https://confluence.ecmwf.int/display/ECC>`_ as its
 interface to GRIB files.
 This is ECMWF's replacement for the older GRIB-API, which is now deprecated.
 
