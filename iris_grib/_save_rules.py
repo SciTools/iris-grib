@@ -539,6 +539,9 @@ def grid_definition_template_10(cube, grib):
         0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT,
     )
 
+    # We don't save "orientationOfTheGrid" since we can't represent it -
+    #  would need a future handling of the Iris ObliqueMercator class.
+
 
 def grid_definition_template_12(cube, grib):
     """

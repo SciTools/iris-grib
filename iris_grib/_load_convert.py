@@ -810,10 +810,35 @@ def grid_definition_template_10(section, metadata):
     # intersects the Earth
     standard_parallel = section["LaD"] * _GRID_ACCURACY_IN_DEGREES
 
+    if section["orientationOfTheGrid"] and not np.isclose(
+        section["orientationOfTheGrid"], 0
+    ):
+        # Could support in future by using the ObliqueMercator class.
+        message = (
+            f"{section['orientationOfTheGrid']=} . iris-grib only supports "
+            "0.0 orientation for grid definition template 10."
+        )
+        raise TranslationError(message)
+
     cs = icoord_systems.Mercator(standard_parallel=standard_parallel, ellipsoid=geog_cs)
 
     # Create the X and Y coordinates.
     x_coord, y_coord, scan = _calculate_proj_coords_from_grid_lengths(section, cs)
+    final_x_point = x_coord.points[-1]
+    final_y_point = y_coord.points[-1]
+    if not (
+        np.isclose(section["longitudeOfLastGridPoint"], final_x_point)
+        and np.isclose(section["latitudeOfLastGridPoint"], final_y_point)
+    ):
+        message = (
+            "File grid definition inconsistent. Grid specification produces "
+            f"{final_x_point=}, {final_y_point=}. But "
+            f"{section['longitudeOfLastGridPoint']=} , "
+            f"{section['latitudeOfLastGridPoint']=} .\n\n"
+            "(Grid specification for Longitude: Di, Ni, "
+            "longitudeOfFirstGridPoint, scanningMode. Latitude uses: Dj, Nj)"
+        )
+        warnings.warn(message)
 
     # Determine the lat/lon dimensions.
     y_dim, x_dim = 0, 1
