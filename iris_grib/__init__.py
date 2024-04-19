@@ -5,7 +5,7 @@
 """
 Conversion of cubes to/from GRIB.
 
-See: `ECMWF GRIB API <https://software.ecmwf.int/wiki/display/GRIB/Home>`_.
+See: `ECMWF GRIB API <https://confluence.ecmwf.int/display/MTG2US/Migration+to+Grib+2+-+User+Space+Home>`_.
 
 """
 

@@ -1,3 +1,5 @@
+.. _release_notes:
+
 Release Notes
 =============
 
@@ -128,7 +130,7 @@ Bugs Fixed
   iris-grib to work with the latest versions of
   `iris <https://scitools-iris.readthedocs.io/en/stable/>`_,
   `cf-units <https://cf-units.readthedocs.io/en/latest/>`_,
-  `ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ and
+  `ecCodes <https://confluence.ecmwf.int/display/ECC>`_ and
   `cartopy <https://scitools.org.uk/cartopy/docs/latest/>`_, including casting
   the usage of :meth:`cf_units.Unit.date2num` as float. setting and setting the
   values of some missing keys using ``gribapi.GRIB_MISSING_LONG``.
@@ -247,15 +249,15 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed loading of grid definition
   template 3.90, "Space view perspective or orthographic grid", which was
   **broken since Iris 2.3**.  This now produces data with an iris
-  `Geostationary <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.Geostationary>`_
+  `Geostationary <https://scitools-iris.readthedocs.io/en/stable/generated/api/iris.coord_systems.html#iris.coord_systems.Geostationary>`_
   coordinate system.  Prior to Iris 2.3, what is now the Iris 'Geostationary'
   class was (incorrectly) named "VerticalPerspective" :  When that was
   `corrected in Iris 2.3 <https://github.com/SciTools/iris/pull/3406>`_ , it
   broke the iris-grib loading, since the data was now incorrectly
   assigned the "new-style" Iris
-  `VerticalPerspective <https://scitools-iris.readthedocs.io/en/latest/generated/api/iris/coord_systems.html#iris.coord_systems.VerticalPerspective>`_
+  `VerticalPerspective <https://scitools-iris.readthedocs.io/en/stable/generated/api/iris.coord_systems.html#iris.coord_systems.VerticalPerspective>`_
   coordinate system, equivalent to the Cartopy
-  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/crs/projections.html#nearsideperspective>`_
+  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/reference/projections.html#nearsideperspective>`_
   and Proj
   `"nsper" <https://proj.org/operations/projections/nsper.html>`_ .
   The plotting behaviour of this is now **the same again as before Iris 2.3** :
@@ -264,7 +266,7 @@ Bugs Fixed
 
 * `@pp-mo <https://github.com/pp-mo>`_ fixed a problem where cubes were loading from GRIB 1 with a changed coordinate
   system, since eccodes versions >= 1.19.  This resulted from a change to eccodes, which now returns a different
-  'shapeOfTheEarth' parameter : see `eccodes issue ECC-811 <https://jira.ecmwf.int/browse/ECC-811>`_ .  This resulted
+  'shapeOfTheEarth' parameter.  This resulted
   in a coordinate system with a different earth radius.
   For backwards compatibilty, the earth radius has now been fixed to the same value as previously.
   However, pending further investigation, this value may be technically incorrect and we may
@@ -293,8 +295,7 @@ Bugs Fixed
 * `@pp-mo <https://github.com/pp-mo>`_ fixed a problem that caused very slow
   loading, and possible memory overflows, with Dask versions >= 2.0.
   **This requires Iris >= 2.4**, as a new minimum dependency.
-  ( This problem was shared with UM file access in Iris : see
-  https://scitools.org.uk/iris/docs/v2.4.0/whatsnew/2.4.html#bugs-fixed ).
+  ( This problem was shared with UM file access in Iris, fixed in Iris 2.4.
   `(PR#190) <https://github.com/SciTools/iris-grib/pull/190>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ fixed all the tests to
@@ -451,7 +452,7 @@ What's new in iris-grib v0.12
 :Date: 25 Oct 2017
 
 Updated to work with
-`ecCodes <https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home>`_ as its
+`ecCodes <https://confluence.ecmwf.int/display/ECC>`_ as its
 interface to GRIB files.
 This is ECMWF's replacement for the older GRIB-API, which is now deprecated.
 
