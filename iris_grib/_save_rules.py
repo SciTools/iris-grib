@@ -27,6 +27,7 @@ from iris.coord_systems import (
     TransverseMercator,
     LambertConformal,
     LambertAzimuthalEqualArea,
+    Stereographic,
 )
 from iris.exceptions import TranslationError
 
@@ -46,65 +47,6 @@ _STATISTIC_TYPE_NAMES_INVERTED = {
     val: key for key, val in _STATISTIC_TYPE_NAMES.items()
 }
 _TIME_RANGE_UNITS_INVERTED = {val: key for key, val in _TIME_RANGE_UNITS.items()}
-
-
-def fixup_float32_as_int32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats an IEEE 32-bit
-    floating-point value as a signed, 4-byte integer.
-
-    Returns the integer value which will result in the on-disk
-    representation corresponding to the IEEE 32-bit floating-point
-    value.
-
-    """
-    value_as_float32 = np.array(value, dtype="f4")
-    value_as_uint32 = value_as_float32.view(dtype="u4")
-    if value_as_uint32 >= 0x80000000:
-        # Convert from two's-complement to sign-and-magnitude.
-        # NB. Because of the silly representation of negative
-        # integers in GRIB2, there is no value we can pass to
-        # codes_set that will result in the bit pattern 0x80000000.
-        # But since that bit pattern corresponds to a floating
-        # point value of negative-zero, we can safely treat it as
-        # positive-zero instead.
-        value_as_grib_int = 0x80000000 - int(value_as_uint32)
-    else:
-        value_as_grib_int = int(value_as_uint32)
-    return value_as_grib_int
-
-
-def fixup_int32_as_uint32(value):
-    """
-    Workaround for use when the ECMWF GRIB API treats a signed, 4-byte
-    integer value as an unsigned, 4-byte integer.
-
-    Returns the unsigned integer value which will result in the on-disk
-    representation corresponding to the signed, 4-byte integer value.
-
-    """
-    value = int(value)
-    if -0x7FFFFFFF <= value <= 0x7FFFFFFF:
-        if value < 0:
-            # Convert from two's-complement to sign-and-magnitude.
-            value = 0x80000000 - value
-    else:
-        msg = "{} out of range -2147483647 to 2147483647.".format(value)
-        raise ValueError(msg)
-    return value
-
-
-def ensure_set_int32_value(grib, key, value):
-    """
-    Ensure the workaround function :func:`fixup_int32_as_uint32` is applied as
-    necessary to problem keys.
-
-    """
-    try:
-        eccodes.codes_set(grib, key, value)
-    except eccodes.CodesInternalError:
-        value = fixup_int32_as_uint32(value)
-        eccodes.codes_set(grib, key, value)
 
 
 ###############################################################################
@@ -577,14 +519,10 @@ def grid_definition_template_12(cube, grib):
     eccodes.codes_set(grib, "Di", abs(x_step))
     eccodes.codes_set(grib, "Dj", abs(y_step))
     horizontal_grid_common(cube, grib)
-
-    # GRIBAPI expects unsigned ints in X1, X2, Y1, Y2 but it should accept
-    # signed ints, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1101
-    ensure_set_int32_value(grib, "Y1", int(y_cm[0]))
-    ensure_set_int32_value(grib, "Y2", int(y_cm[-1]))
-    ensure_set_int32_value(grib, "X1", int(x_cm[0]))
-    ensure_set_int32_value(grib, "X2", int(x_cm[-1]))
+    eccodes.codes_set(grib, "Y1", int(y_cm[0]))
+    eccodes.codes_set(grib, "Y2", int(y_cm[-1]))
+    eccodes.codes_set(grib, "X1", int(x_cm[0]))
+    eccodes.codes_set(grib, "X2", int(x_cm[-1]))
 
     # Lat and lon of reference point are measured in millionths of a degree.
     eccodes.codes_set(
@@ -606,32 +544,32 @@ def grid_definition_template_12(cube, grib):
     # False easting and false northing are measured in units of (10^-2)m.
     eccodes.codes_set(grib, "XR", m_to_cm(cs.false_easting))
     eccodes.codes_set(grib, "YR", m_to_cm(cs.false_northing))
-
-    # GRIBAPI expects a signed int for scaleFactorAtReferencePoint
-    # but it should accept a float, so work around this.
-    # See https://software.ecmwf.int/issues/browse/SUP-1100
     value = cs.scale_factor_at_central_meridian
-    key_type = eccodes.codes_get_native_type(grib, "scaleFactorAtReferencePoint")
-    if key_type is not float:
-        value = fixup_float32_as_int32(value)
     eccodes.codes_set(grib, "scaleFactorAtReferencePoint", value)
 
 
-def grid_definition_template_30(cube, grib):
+def _perspective_projection_common(cube, grib):
     """
-    Set keys within the provided grib message based on
-    Grid Definition Template 3.30.
-
-    Template 3.30 is used to represent a Lambert Conformal grid.
+    Common functionality for setting grid keys for the perspective projection
+    grid definition templates (20 and 30; Polar Stereographic and Lambert
+    Conformal.
 
     """
-
-    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 30)
-
     # Retrieve some information from the cube.
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
     cs = y_coord.coord_system
+    cs_name = cs.grid_mapping_name.replace("_", " ").title()
+
+    both_falses_zero = all(
+        np.isclose(f, 0.0, atol=1e-6) for f in (cs.false_easting, cs.false_northing)
+    )
+    if not both_falses_zero:
+        message = (
+            f"{cs.false_easting=}, {cs.false_northing=} . Non-zero "
+            f"unsupported for {cs_name}."
+        )
+        raise TranslationError(message)
 
     # Normalise the coordinate values to millimetres - the resolution
     # used in the GRIB message.
@@ -639,21 +577,26 @@ def grid_definition_template_30(cube, grib):
     x_mm = points_in_unit(x_coord, "mm")
 
     # Encode the horizontal points.
-
     # NB. Since we're already in millimetres, our tolerance for
     # discrepancy in the differences is 1.
     try:
         x_step = step(x_mm, atol=1)
         y_step = step(y_mm, atol=1)
     except ValueError:
-        msg = "Irregular coordinates not supported for Lambert " "Conformal."
-        raise TranslationError(msg)
+        msg = "Irregular coordinates not supported for {!r}."
+        raise TranslationError(msg.format(cs_name))
     eccodes.codes_set(grib, "Dx", abs(x_step))
     eccodes.codes_set(grib, "Dy", abs(y_step))
 
     horizontal_grid_common(cube, grib, xy=True)
 
-    # Transform first point into geographic CS
+    eccodes.codes_set(
+        grib,
+        "resolutionAndComponentFlags",
+        0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT,
+    )
+
+    # Transform first point into geographic CS.
     geog = cs.ellipsoid if cs.ellipsoid is not None else GeogCS(1)
     first_x, first_y = geog.as_cartopy_crs().transform_point(
         x_coord.points[0], y_coord.points[0], cs.as_cartopy_crs()
@@ -673,20 +616,85 @@ def grid_definition_template_30(cube, grib):
     )
     eccodes.codes_set(grib, "LaD", cs.central_lat / _DEFAULT_DEGREES_UNITS)
     eccodes.codes_set(grib, "LoV", central_lon / _DEFAULT_DEGREES_UNITS)
-    latin1, latin2 = cs.secant_latitudes
-    eccodes.codes_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
-    eccodes.codes_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
-    eccodes.codes_set(
-        grib,
-        "resolutionAndComponentFlags",
-        0x1 << _RESOLUTION_AND_COMPONENTS_GRID_WINDS_BIT,
-    )
+
+
+def grid_definition_template_20(cube, grib):
+    """
+    Set keys within the provided GRIB message based on
+    Grid Definition Template 3.20.
+
+    Template 3.20 is used to represent a Polar Stereographic grid.
+
+    """
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 20)
+
+    # Retrieve the cube coord system.
+    cs = cube.coord(dimensions=[0]).coord_system
+
+    _perspective_projection_common(cube, grib)
+
+    # Is this a north or south polar stereographic projection?
+    if np.isclose(cs.central_lat, -90.0):
+        centre_flag = 0x80
+    elif np.isclose(cs.central_lat, 90.0):
+        centre_flag = 0x0
+    else:
+        message = (
+            f"{cs.central_lat=} . GRIB Template 3.20 only supports the polar "
+            "stereographic projection; central_lat must be 90.0 or -90.0."
+        )
+        raise TranslationError(message)
+
+    def non_standard_scale_factor_error(message: str):
+        message = f"Non-standard scale factor specified. {message}"
+        raise TranslationError(message)
+
+    if cs.true_scale_lat and cs.true_scale_lat != cs.central_lat:
+        non_standard_scale_factor_error(
+            f"{cs.true_scale_lat=}, {cs.central_lat=} . iris_grib can "
+            "only write a GRIB Template 3.20 file where these are identical."
+        )
+
+    if cs.scale_factor_at_projection_origin and not np.isclose(
+        cs.scale_factor_at_projection_origin, 1.0
+    ):
+        non_standard_scale_factor_error(
+            f"{cs.scale_factor_at_projection_origin=} . iris_grib cannot "
+            "write scale_factor_at_projection_origin to a GRIB Template 3.20 "
+            "file."
+        )
+
+    eccodes.codes_set(grib, "projectionCentreFlag", centre_flag)
+
+
+def grid_definition_template_30(cube, grib):
+    """
+    Set keys within the provided grib message based on
+    Grid Definition Template 3.30.
+
+    Template 3.30 is used to represent a Lambert Conformal grid.
+
+    """
+
+    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 30)
+
+    # Retrieve the cube coord system.
+    cs = cube.coord(dimensions=[0]).coord_system
+
+    _perspective_projection_common(cube, grib)
 
     # Which pole are the parallels closest to? That is the direction
     # that the cone converges.
-    poliest_sec = latin1 if abs(latin1) > abs(latin2) else latin2
-    centre_flag = 0x0 if poliest_sec > 0 else 0x1
+    latin1, latin2 = cs.secant_latitudes
+    eccodes.codes_set(grib, "Latin1", latin1 / _DEFAULT_DEGREES_UNITS)
+    eccodes.codes_set(grib, "Latin2", latin2 / _DEFAULT_DEGREES_UNITS)
+
+    # Which pole are the parallels closest to? That is the direction
+    # that the cone converges.
+    poliest_secant = latin1 if abs(latin1) > abs(latin2) else latin2
+    centre_flag = 0x0 if poliest_secant > 0 else 0x80
     eccodes.codes_set(grib, "projectionCentreFlag", centre_flag)
+
     eccodes.codes_set(grib, "latitudeOfSouthernPole", 0)
     eccodes.codes_set(grib, "longitudeOfSouthernPole", 0)
 
@@ -801,6 +809,11 @@ def grid_definition_section(cube, grib):
     elif isinstance(cs, TransverseMercator):
         # Transverse Mercator coordinate system (template 3.12).
         grid_definition_template_12(cube, grib)
+
+    elif isinstance(cs, Stereographic):
+        # Stereographic coordinate system (template 3.20).
+        # This will also handle the PolarStereographic subclass.
+        grid_definition_template_20(cube, grib)
 
     elif isinstance(cs, LambertConformal):
         # Lambert Conformal coordinate system (template 3.30).

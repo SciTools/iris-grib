@@ -11,8 +11,14 @@ Integration test for round-trip loading and saving of various grids.
 # before importing anything else.
 import iris_grib.tests as tests
 
+from typing import Literal
+
+import numpy as np
+
 from iris import load_cube, save
-from iris.coord_systems import RotatedGeogCS
+from iris.coord_systems import GeogCS, PolarStereographic, RotatedGeogCS, Stereographic
+from iris.coords import DimCoord
+from iris.cube import Cube
 from iris.fileformats.pp import EARTH_RADIUS as UM_DEFAULT_EARTH_RADIUS
 from iris.util import is_regular
 
@@ -122,6 +128,107 @@ class TestGDT5(tests.TestGribMessage):
 
         # Check that main data array also matches.
         self.assertArrayAllClose(cube.data, cube_loaded_from_saved.data)
+
+
+class GDT20Common:
+    """'Wrapper' to avoid class being detected during test runs."""
+
+    class GDT20Common(tests.TestGribMessage):
+        """Roundtrip testing that attributes save+load correctly."""
+
+        # Enable subclassing to test different permutations.
+        coord_system_class: type[Stereographic]
+        pole: Literal["north", "south"]
+
+        def setUp(self):
+            # Create a Cube to save, inspired by
+            #  iris-sample-data toa_brightness_stereographic.nc
+            if self.pole == "north":
+                central_lat = 90
+            elif self.pole == "south":
+                central_lat = -90
+            else:
+                raise NotImplementedError(f"Invalid pole: {self.pole}")
+
+            self.coord_system_kwargs = dict(
+                central_lat=central_lat,
+                central_lon=325,
+                true_scale_lat=central_lat,
+                ellipsoid=GeogCS(6378169.0),
+            )
+            coord_system = self.coord_system_class(**self.coord_system_kwargs)
+
+            coord_kwargs = dict(
+                units="m",
+                coord_system=coord_system,
+            )
+            coord_x = DimCoord(
+                np.linspace(-2250000, 6750192, 256, endpoint=False),
+                standard_name="projection_x_coordinate",
+                **coord_kwargs,
+            )
+            coord_y = DimCoord(
+                np.linspace(-980000, -6600000, 160, endpoint=False),
+                standard_name="projection_y_coordinate",
+                **coord_kwargs,
+            )
+            coord_t = DimCoord(
+                0, standard_name="time", units="hours since 1970-01-01 00:00:00"
+            )
+            coord_fp = DimCoord(0, standard_name="forecast_period", units="hours")
+            coord_frt = DimCoord(
+                0, standard_name="forecast_reference_time", units=coord_t.units
+            )
+            shape = (coord_y.shape[0], coord_x.shape[0])
+            self.cube = Cube(
+                np.arange(np.prod(shape), dtype=float).reshape(shape),
+                dim_coords_and_dims=[(coord_y, 0), (coord_x, 1)],
+                aux_coords_and_dims=[
+                    (coord_t, None),
+                    (coord_fp, None),
+                    (coord_frt, None),
+                ],
+            )
+
+        def test_save_load(self):
+            with self.temp_filename("polar_stereo.grib2") as temp_file_path:
+                save(self.cube, temp_file_path)
+                cube_reloaded = load_cube(temp_file_path)
+                # Touch the data before destroying the file.
+                _ = cube_reloaded.data
+
+            cube_expected = self.cube.copy()
+            for coord in cube_expected.dim_coords:
+                # GRIB only describes PolarStereographic, so we always expect
+                #  that system even when we started with Stereographic.
+                coord.coord_system = PolarStereographic(**self.coord_system_kwargs)
+
+            # Modifications to remove irrelevant inequalities.
+            del cube_reloaded.attributes["GRIB_PARAM"]
+            for coord in cube_reloaded.dim_coords:
+                coord.points = np.round(coord.points)
+
+            self.assertEqual(cube_expected, cube_reloaded)
+
+
+class TestGDT20StereoNorth(GDT20Common.GDT20Common):
+    coord_system_class = Stereographic
+    pole = "north"
+
+
+class TestGDT20StereoSouth(GDT20Common.GDT20Common):
+    coord_system_class = Stereographic
+    pole = "south"
+
+
+class TestGDT20PolarNorth(GDT20Common.GDT20Common):
+    coord_system_class = PolarStereographic
+    pole = "north"
+
+
+class TestGDT20PolarSouth(GDT20Common.GDT20Common):
+    coord_system_class = PolarStereographic
+    pole = "south"
 
 
 if __name__ == "__main__":

@@ -23,6 +23,11 @@ Features
   `(ISSUE#330) <https://github.com/SciTools/iris-grib/issues/330>`_,
   `(PR#402) <https://github.com/SciTools/iris-grib/pull/402>`_
 
+* `@DPeterK <https://github.com/DPeterK>`_ and
+  `@trexfeathers <https://github.com/trexfeathers>`_ added saving support for
+  grid definition template 20 - polar stereographic.
+  `(PR#405) <https://github.com/SciTools/iris-grib/pull/405>`_
+
 Documentation
 ^^^^^^^^^^^^^
 * `@pp-mo <https://github.com/pp-mo>`_ reworked the main docs page to :
