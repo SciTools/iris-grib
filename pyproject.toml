@@ -98,7 +98,7 @@ skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
 [tool.check-manifest]
 ignore = [
-    "lib/iris/_version.py",
+    "iris-grib/_version.py",
 ]
 
 [tool.mypy]
