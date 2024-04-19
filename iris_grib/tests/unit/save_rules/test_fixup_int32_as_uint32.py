@@ -36,5 +36,5 @@ class Test(tests.IrisGribTest):
             fixup_int32_as_uint32(0x80000000)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

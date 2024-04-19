@@ -14,14 +14,10 @@ import iris
 class TestBoundedTime(tests.IrisTest):
     @tests.skip_data
     def test_time_and_forecast_period_round_trip(self):
-        pp_path = tests.get_data_path(
-            ("PP", "meanMaxMin", "200806081200__qwpb.T24.pp")
-        )
+        pp_path = tests.get_data_path(("PP", "meanMaxMin", "200806081200__qwpb.T24.pp"))
         # Choose the first time-bounded Cube in the PP dataset.
         original = [
-            cube
-            for cube in iris.load(pp_path)
-            if cube.coord("time").has_bounds()
+            cube for cube in iris.load(pp_path) if cube.coord("time").has_bounds()
         ][0]
         # Save it to GRIB2 and re-load.
         with self.temp_filename(".grib2") as grib_path:

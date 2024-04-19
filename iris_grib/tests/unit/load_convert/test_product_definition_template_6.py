@@ -23,35 +23,38 @@ from iris_grib._load_convert import product_definition_template_6
 class Test(tests.IrisGribTest):
     def setUp(self):
         def func(s, m, f):
-            return m['cell_methods'].append(self.cell_method)
+            return m["cell_methods"].append(self.cell_method)
 
-        module = 'iris_grib._load_convert'
-        self.patch('warnings.warn')
-        this = '{}.product_definition_template_0'.format(module)
+        module = "iris_grib._load_convert"
+        self.patch("warnings.warn")
+        this = "{}.product_definition_template_0".format(module)
         self.cell_method = mock.sentinel.cell_method
         self.patch(this, side_effect=func)
-        self.metadata = {'factories': [], 'references': [],
-                         'standard_name': None,
-                         'long_name': None, 'units': None, 'attributes': {},
-                         'cell_methods': [], 'dim_coords_and_dims': [],
-                         'aux_coords_and_dims': []}
+        self.metadata = {
+            "factories": [],
+            "references": [],
+            "standard_name": None,
+            "long_name": None,
+            "units": None,
+            "attributes": {},
+            "cell_methods": [],
+            "dim_coords_and_dims": [],
+            "aux_coords_and_dims": [],
+        }
 
     def _check(self, request_warning):
-        this = 'iris_grib._load_convert.options'
+        this = "iris_grib._load_convert.options"
         with mock.patch(this, warn_on_unsupported=request_warning):
             metadata = deepcopy(self.metadata)
             percentile = 50
-            section = {'percentileValue': percentile}
+            section = {"percentileValue": percentile}
             forecast_reference_time = mock.sentinel.forecast_reference_time
             # The called being tested.
-            product_definition_template_6(section, metadata,
-                                          forecast_reference_time)
+            product_definition_template_6(section, metadata, forecast_reference_time)
             expected = deepcopy(self.metadata)
-            expected['cell_methods'].append(self.cell_method)
-            percentile = DimCoord(percentile,
-                                  long_name='percentile',
-                                  units='%')
-            expected['aux_coords_and_dims'].append((percentile, None))
+            expected["cell_methods"].append(self.cell_method)
+            percentile = DimCoord(percentile, long_name="percentile", units="%")
+            expected["aux_coords_and_dims"].append((percentile, None))
             self.assertEqual(metadata, expected)
 
     def test_pdt_no_warn(self):
@@ -61,5 +64,5 @@ class Test(tests.IrisGribTest):
         self._check(True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

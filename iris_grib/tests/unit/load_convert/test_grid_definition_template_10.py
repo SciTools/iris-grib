@@ -26,25 +26,25 @@ from iris_grib._load_convert import grid_definition_template_10
 class Test(tests.IrisGribTest):
     def section_3(self):
         section = {
-            'gridDefinitionTemplateNumber': 10,
-            'shapeOfTheEarth': 1,
-            'scaleFactorOfRadiusOfSphericalEarth': 0,
-            'scaledValueOfRadiusOfSphericalEarth': 6371200,
-            'scaleFactorOfEarthMajorAxis': 0,
-            'scaledValueOfEarthMajorAxis': 0,
-            'scaleFactorOfEarthMinorAxis': 0,
-            'scaledValueOfEarthMinorAxis': 0,
-            'Ni': 181,
-            'Nj': 213,
-            'latitudeOfFirstGridPoint': 2351555,
-            'latitudeOfLastGridPoint': 25088204,
-            'LaD': 14000000,
-            'longitudeOfFirstGridPoint': 114990304,
-            'longitudeOfLastGridPoint': 135009712,
-            'resolutionAndComponentFlags': 56,
-            'scanningMode': 64,
-            'Di': 12000000,
-            'Dj': 12000000
+            "gridDefinitionTemplateNumber": 10,
+            "shapeOfTheEarth": 1,
+            "scaleFactorOfRadiusOfSphericalEarth": 0,
+            "scaledValueOfRadiusOfSphericalEarth": 6371200,
+            "scaleFactorOfEarthMajorAxis": 0,
+            "scaledValueOfEarthMajorAxis": 0,
+            "scaleFactorOfEarthMinorAxis": 0,
+            "scaledValueOfEarthMinorAxis": 0,
+            "Ni": 181,
+            "Nj": 213,
+            "latitudeOfFirstGridPoint": 2351555,
+            "latitudeOfLastGridPoint": 25088204,
+            "LaD": 14000000,
+            "longitudeOfFirstGridPoint": 114990304,
+            "longitudeOfLastGridPoint": 135009712,
+            "resolutionAndComponentFlags": 56,
+            "scanningMode": 64,
+            "Di": 12000000,
+            "Dj": 12000000,
         }
         return section
 
@@ -52,25 +52,28 @@ class Test(tests.IrisGribTest):
         # Prepare the expectation.
         expected = empty_metadata()
         ellipsoid = iris.coord_systems.GeogCS(6371200.0)
-        cs = iris.coord_systems.Mercator(standard_parallel=14.,
-                                         ellipsoid=ellipsoid)
+        cs = iris.coord_systems.Mercator(standard_parallel=14.0, ellipsoid=ellipsoid)
         nx = 181
         x_origin = 12406918.990644248
         dx = 12000
-        x = iris.coords.DimCoord(np.arange(nx) * dx + x_origin,
-                                 'projection_x_coordinate',
-                                 units='m',
-                                 coord_system=cs)
+        x = iris.coords.DimCoord(
+            np.arange(nx) * dx + x_origin,
+            "projection_x_coordinate",
+            units="m",
+            coord_system=cs,
+        )
         ny = 213
         y_origin = 253793.10903714459
 
         dy = 12000
-        y = iris.coords.DimCoord(np.arange(ny) * dy + y_origin,
-                                 'projection_y_coordinate',
-                                 units='m',
-                                 coord_system=cs)
-        expected['dim_coords_and_dims'].append((y, y_dim))
-        expected['dim_coords_and_dims'].append((x, x_dim))
+        y = iris.coords.DimCoord(
+            np.arange(ny) * dy + y_origin,
+            "projection_y_coordinate",
+            units="m",
+            coord_system=cs,
+        )
+        expected["dim_coords_and_dims"].append((y, y_dim))
+        expected["dim_coords_and_dims"].append((x, x_dim))
         return expected
 
     def test(self):
@@ -81,5 +84,5 @@ class Test(tests.IrisGribTest):
         self.assertEqual(metadata, expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()

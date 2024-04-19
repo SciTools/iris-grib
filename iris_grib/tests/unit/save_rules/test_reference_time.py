@@ -20,25 +20,28 @@ class Test(tests.IrisGribTest):
     def _test(self, cube):
         grib = mock.Mock()
         mock_eccodes = mock.Mock(spec=eccodes)
-        with mock.patch('iris_grib._save_rules.eccodes', mock_eccodes):
+        with mock.patch("iris_grib._save_rules.eccodes", mock_eccodes):
             reference_time(cube, grib)
 
         mock_eccodes.assert_has_calls(
-            [mock.call.codes_set_long(grib, "significanceOfReferenceTime", 1),
-             mock.call.codes_set_long(grib, "dataDate", '19980306'),
-             mock.call.codes_set_long(grib, "dataTime", '0300')])
+            [
+                mock.call.codes_set_long(grib, "significanceOfReferenceTime", 1),
+                mock.call.codes_set_long(grib, "dataDate", "19980306"),
+                mock.call.codes_set_long(grib, "dataTime", "0300"),
+            ]
+        )
 
     @tests.skip_data
     def test_forecast_period(self):
         # The stock cube has a non-compliant forecast_period.
-        fname = tests.get_data_path(('GRIB', 'global_t', 'global.grib2'))
+        fname = tests.get_data_path(("GRIB", "global_t", "global.grib2"))
         [cube] = load_cubes(fname)
         self._test(cube)
 
     @tests.skip_data
     def test_no_forecast_period(self):
         # The stock cube has a non-compliant forecast_period.
-        fname = tests.get_data_path(('GRIB', 'global_t', 'global.grib2'))
+        fname = tests.get_data_path(("GRIB", "global_t", "global.grib2"))
         [cube] = load_cubes(fname)
         cube.remove_coord("forecast_period")
         self._test(cube)

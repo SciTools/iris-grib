@@ -21,16 +21,15 @@ class TestSaveMessages(tests.IrisGribTest):
 
     def test_save(self):
         m = mock.mock_open()
-        with mock.patch('builtins.open', m, create=True):
-            iris_grib.save_messages([self.grib_message], 'foo.grib2')
-        self.assertTrue(mock.call('foo.grib2', 'wb') in m.mock_calls)
+        with mock.patch("builtins.open", m, create=True):
+            iris_grib.save_messages([self.grib_message], "foo.grib2")
+        self.assertTrue(mock.call("foo.grib2", "wb") in m.mock_calls)
 
     def test_save_append(self):
         m = mock.mock_open()
-        with mock.patch('builtins.open', m, create=True):
-            iris_grib.save_messages([self.grib_message], 'foo.grib2',
-                                    append=True)
-        self.assertTrue(mock.call('foo.grib2', 'ab') in m.mock_calls)
+        with mock.patch("builtins.open", m, create=True):
+            iris_grib.save_messages([self.grib_message], "foo.grib2", append=True)
+        self.assertTrue(mock.call("foo.grib2", "ab") in m.mock_calls)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,19 @@ Features
   4.6, i.e. percentile forecasts.
   `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
 
+* `@pp-mo <https://github.com/pp-mo>`_ expanded the use of the "GRIB_PARAM"
+  attributes to GRIB1 loading, and document it more thoroughly.
+  `(ISSUE#330) <https://github.com/SciTools/iris-grib/issues/330>`_,
+  `(PR#402) <https://github.com/SciTools/iris-grib/pull/402>`_
+
+Documentation
+^^^^^^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ reworked the main docs page to :
+  headline basic load + save with Iris, rather than lower-level functions;
+  better explain load-pairs and save-pairs usage; make all usage examples into
+  doctests.
+  `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_
+
 Dependencies
 ^^^^^^^^^^^^
 * `@bjlittle <https://github.com/bjlittle>`_ migrated to ``pytest``.

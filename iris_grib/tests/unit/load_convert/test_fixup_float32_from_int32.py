@@ -16,7 +16,7 @@ from iris_grib._load_convert import fixup_float32_from_int32
 
 class Test(tests.IrisGribTest):
     def test_negative(self):
-        result = fixup_float32_from_int32(-0x3f000000)
+        result = fixup_float32_from_int32(-0x3F000000)
         self.assertEqual(result, -0.5)
 
     def test_zero(self):
@@ -24,9 +24,9 @@ class Test(tests.IrisGribTest):
         self.assertEqual(result, 0)
 
     def test_positive(self):
-        result = fixup_float32_from_int32(0x3f000000)
+        result = fixup_float32_from_int32(0x3F000000)
         self.assertEqual(result, 0.5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tests.main()
