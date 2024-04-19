@@ -15,6 +15,7 @@ import numpy as np
 
 import iris.coords
 from iris.coord_systems import GeogCS, LambertConformal
+from iris.exceptions import TranslationError
 
 from iris_grib._save_rules import grid_definition_template_30
 from iris_grib.tests.unit.save_rules import GdtTestMixin
@@ -53,12 +54,12 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         test_cube.add_dim_coord(x_coord, 1)
         return test_cube
 
-    def _default_coord_system(self):
+    def _default_coord_system(self, false_easting=0.0, false_northing=0.0):
         return LambertConformal(
             central_lat=39.0,
             central_lon=-96.0,
-            false_easting=0.0,
-            false_northing=0.0,
+            false_easting=false_easting,
+            false_northing=false_northing,
             secant_latitudes=(33, 45),
             ellipsoid=self.default_ellipsoid,
         )
@@ -126,7 +127,55 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         )
         test_cube = self._make_test_cube(cs=cs)
         grid_definition_template_30(test_cube, self.mock_grib)
-        self._check_key("projectionCentreFlag", 1)
+        self._check_key("projectionCentreFlag", 128)
+
+    def __fail_false_easting_northing(self, false_easting, false_northing):
+        cs = self._default_coord_system(
+            false_easting=false_easting, false_northing=false_northing
+        )
+        test_cube = self._make_test_cube(cs=cs)
+        message = "Non-zero unsupported"
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_30(test_cube, self.mock_grib)
+
+    def test__fail_false_easting(self):
+        self.__fail_false_easting_northing(10.0, 0.0)
+
+    def test__fail_false_northing(self):
+        self.__fail_false_easting_northing(0.0, 10.0)
+
+    def test__fail_false_easting_northing(self):
+        self.__fail_false_easting_northing(10.0, 10.0)
+
+    def __fail_irregular_coords(self, x=False, y=False):
+        def irregular_coord(coord):
+            coord = iris.coords.AuxCoord.from_coord(coord)
+            coord.points[1] = coord.points[0]
+            return coord
+
+        test_cube = self._make_test_cube(
+            # Make the Y dimension longer to make irregularity is possible.
+            y_points=[7.0, 8.0, 9.0],
+        )
+        coord_x = test_cube.coord("projection_x_coordinate")
+        coord_y = test_cube.coord("projection_y_coordinate")
+        if x:
+            test_cube.replace_coord(irregular_coord(coord_x))
+        if y:
+            test_cube.replace_coord(irregular_coord(coord_y))
+
+        message = "Irregular coordinates not supported"
+        with self.assertRaisesRegex(TranslationError, message):
+            grid_definition_template_30(test_cube, self.mock_grib)
+
+    def test__fail_irregular_x_coords(self):
+        self.__fail_irregular_coords(x=True)
+
+    def test__fail_irregular_y_coords(self):
+        self.__fail_irregular_coords(y=True)
+
+    def test__fail_irregular_coords(self):
+        self.__fail_irregular_coords(x=True, y=True)
 
 
 if __name__ == "__main__":

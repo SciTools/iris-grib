@@ -20,6 +20,8 @@ from iris.coord_systems import (
     LambertConformal,
     AlbersEqualArea,
     LambertAzimuthalEqualArea,
+    Stereographic,
+    PolarStereographic,
 )
 import numpy as np
 
@@ -91,6 +93,26 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
         grid_definition_section(test_cube, self.mock_grib)
         self._check_key("gridDefinitionTemplateNumber", 12)
+
+    def grid_definition_template_20_common(self, coord_system: type[Stereographic]):
+        # Stereographic grid.
+        # Common code to allow testing PolarStereographic and Stereographic.
+        if not issubclass(coord_system, Stereographic):
+            raise ValueError("coord_system must be Stereographic type.")
+
+        x_points = np.arange(3)
+        y_points = np.arange(3)
+        coord_units = "m"
+        cs = coord_system(90.0, 0, ellipsoid=self.ellipsoid)
+        test_cube = self._make_test_cube(cs, x_points, y_points, coord_units)
+        grid_definition_section(test_cube, self.mock_grib)
+        self._check_key("gridDefinitionTemplateNumber", 20)
+
+    def test_grid_definition_template_20_s(self):
+        self.grid_definition_template_20_common(Stereographic)
+
+    def test_grid_definition_template_20_ps(self):
+        self.grid_definition_template_20_common(PolarStereographic)
 
     def test_grid_definition_template_30(self):
         # Lambert Conformal grid.

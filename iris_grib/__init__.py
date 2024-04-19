@@ -5,7 +5,7 @@
 """
 Conversion of cubes to/from GRIB.
 
-See: `ECMWF GRIB API <https://software.ecmwf.int/wiki/display/GRIB/Home>`_.
+See: `ECMWF GRIB API <https://confluence.ecmwf.int/display/MTG2US/Migration+to+Grib+2+-+User+Space+Home>`_.
 
 """
 
@@ -30,7 +30,10 @@ from ._load_convert import convert as load_convert
 from .message import GribMessage
 
 
-__version__ = "0.20.dev0"
+try:
+    from ._version import version as __version__
+except ModuleNotFoundError:
+    __version__ = "unknown"
 
 __all__ = [
     "load_cubes",
@@ -410,8 +413,11 @@ class GribWrapper:
             else:
                 raise TranslationError("Unhandled projectionCentreFlag")
 
+            # Always load PolarStereographic - never Stereographic.
+            #  Stereographic is a CF/Iris concept and not something described
+            #  in GRIB.
             # Note: I think the grib api defaults LaDInDegrees to 60 for grib1.
-            self.extra_keys["_coord_system"] = coord_systems.Stereographic(
+            self.extra_keys["_coord_system"] = coord_systems.PolarStereographic(
                 pole_lat,
                 self.orientationOfTheGridInDegrees,
                 0,
