@@ -146,7 +146,7 @@ https://conda.anaconda.org/conda-forge/noarch/requests-2.31.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/setuptools-scm-8.0.4-pyhd8ed1ab_1.conda#a1986ad21c766ff22f7bae93f0641020
 https://conda.anaconda.org/conda-forge/linux-64/cftime-1.6.3-py39h44dd56e_0.conda#baea2f5dfb3ab7b1c836385d2e1daca7
 https://conda.anaconda.org/conda-forge/linux-64/contourpy-1.2.1-py39h7633fee_0.conda#bdc188e59857d6efab332714e0d01d93
-https://conda.anaconda.org/conda-forge/noarch/dask-core-2024.4.1-pyhd8ed1ab_0.conda#52387f00fee8dcd5cf75f8886025293f
+https://conda.anaconda.org/conda-forge/noarch/dask-core-2024.4.2-pyhd8ed1ab_0.conda#bb4e6c52855aa64a5443ca4eedaa6cfe
 https://conda.anaconda.org/conda-forge/linux-64/jasper-4.2.3-he6dfbbe_0.conda#05c1609de571f7a9a40e6d7d4116c21a
 https://conda.anaconda.org/conda-forge/linux-64/mo_pack-0.3.0-py39hd1e30aa_1.conda#ca63612907462c8e36edcc9bbacc253e
 https://conda.anaconda.org/conda-forge/linux-64/scipy-1.13.0-py39h474f0d3_0.conda#46ae0ecba9726ab4fa44c78fefa522cf
@@ -159,4 +159,3 @@ https://conda.anaconda.org/conda-forge/linux-64/netcdf4-1.6.5-nompi_py39h4282601
 https://conda.anaconda.org/conda-forge/linux-64/cartopy-0.23.0-py39hddac248_0.conda#aa02350ccb542c83272f9cb7e4dfe15e
 https://conda.anaconda.org/conda-forge/linux-64/python-eccodes-1.7.0-py39h44dd56e_1.conda#629e8d066a330f729d0085d86681fd01
 https://conda.anaconda.org/conda-forge/noarch/iris-3.8.1-pyha770c72_0.conda#b08a116ef1607e7e960a4caa902e3a90
-
