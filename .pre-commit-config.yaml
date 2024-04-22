@@ -11,11 +11,10 @@ ci:
 files: |
     (?x)(
         noxfile\.py|
-        setup\.py|
         pyproject\.toml|
         docs\/.+\.py|
         benchmarks\/.+\.py|
-        iris_grib\/.+\.py
+        src\/.+\.py
     )
 minimum_pre_commit_version: 1.21.0
 
