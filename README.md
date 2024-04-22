@@ -1,3 +1,9 @@
+<h1 align="center">
+  <a href="https://iris-grib.readthedocs.io/en/latest/">
+   <img src="https://iris-grib.readthedocs.io/en/latest/_static/iris-logo-title.svg" alt="Iris GRIB" width="300"></a><br>
+</h1>
+
+
 <h4 align="center">
     GRIB (GRIdded Binary) interface for Iris
 </h4>
