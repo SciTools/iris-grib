@@ -96,7 +96,9 @@ class Test(tests.IrisGribTest):
             len(metadata["dim_coords_and_dims"]), len(expected["dim_coords_and_dims"])
         )
         for result_pair, expected_pair in zip(
-            metadata["dim_coords_and_dims"], expected["dim_coords_and_dims"]
+            metadata["dim_coords_and_dims"],
+            expected["dim_coords_and_dims"],
+            strict=False,
         ):
             result_coord, result_dims = result_pair
             expected_coord, expected_dims = expected_pair

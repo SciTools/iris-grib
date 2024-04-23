@@ -20,7 +20,7 @@ class TestSaveGrib2(tests.IrisGribTest):
         func = "iris_grib.save_pairs_from_cube"
         self.messages = list(range(10))
         slices = self.messages
-        side_effect = [zip(slices, self.messages)]
+        side_effect = [zip(slices, self.messages, strict=False)]
         self.save_pairs_from_cube = self.patch(func, side_effect=side_effect)
         func = "iris_grib.save_messages"
         self.save_messages = self.patch(func)
