@@ -3,7 +3,7 @@ prune .nox
 prune docs
 prune requirements
 recursive-include requirements *.txt
-recursive-include iris_grib *.cml *.grib2 *.json *.nc *.py
+recursive-include src *.cml *.grib2 *.json *.nc *.py
 
 exclude .coveragerc
 exclude .flake8

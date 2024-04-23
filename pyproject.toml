@@ -4,7 +4,7 @@
 # Defined by PEP 518
 requires = [
     "setuptools>=64",
-    "setuptools_scm>=7.0",
+    "setuptools_scm>=8.0",
 ]
 # Defined by PEP 517
 build-backend = "setuptools.build_meta"
@@ -65,9 +65,10 @@ optional-dependencies.test = {file = "requirements/test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
+where = ["src"]
 
 [tool.setuptools_scm]
-write_to = "iris_grib/_version.py"
+write_to = "src/iris_grib/_version.py"
 local_scheme = "dirty-tag"
 version_scheme = "release-branch-semver"
 
@@ -77,10 +78,10 @@ version_scheme = "release-branch-semver"
 # See https://coverage.readthedocs.io/en/latest/config.html
 branch = true
 source = [
-    "iris_grib",
+    "src/iris_grib",
 ]
 omit = [
-    "iris_grib/tests/*",
+    "src/iris_grib/tests/*",
 ]
 
 [tool.coverage.report]
@@ -97,7 +98,7 @@ skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
 [tool.check-manifest]
 ignore = [
-    "iris_grib/_version.py",
+    "src/iris_grib/_version.py",
 ]
 
 [tool.mypy]
@@ -126,7 +127,7 @@ doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
 log_cli = "True"
 log_cli_level = "INFO"
 minversion = "6.0"
-testpaths = "iris_grib"
+testpaths = "src/iris_grib"
 xfail_strict = "True"
 
 [tool.ruff]
@@ -134,7 +135,7 @@ xfail_strict = "True"
 # https://docs.astral.sh/ruff/settings/#exclude
 line-length = 88
 src = [
-    "iris_grib",
+    "src",
     "docs",
 ]
 
