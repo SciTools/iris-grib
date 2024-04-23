@@ -27,7 +27,7 @@ class TestSaveGrib2(tests.IrisGribTest):
 
     def _check(self, append=False):
         iris_grib.save_grib2(self.cube, self.target, append=append)
-        self.save_pairs_from_cube.called_once_with(self.cube)
+        self.save_pairs_from_cube.assert_called_once_with(self.cube)
         args, kwargs = self.save_messages.call_args
         self.assertEqual(len(args), 2)
         messages, target = args
