@@ -123,7 +123,7 @@ jobs:
           env_name: ${{ env.ENV_NAME }}
           lock_file: ${{ env.LOCK_FILE }}
 
-      - name: "iris ${{ matrix.session }}"
+      - name: "iris-grib ${{ matrix.session }}"
         env:
           IRIS_SOURCE: ${{ matrix.iris-source }}
           PY_COLORS: 1
