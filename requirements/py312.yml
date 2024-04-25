@@ -4,11 +4,11 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.9
+  - python=3.12
 
 # Setup dependencies.
-  - setuptools
-  - setuptools_scm >=7
+  - setuptools>=64
+  - setuptools_scm>=8
 
 # Core dependencies.
   - iris>=3.0.2
@@ -26,3 +26,6 @@ dependencies:
   - pytest
   - pytest-mock
 
+# Documentation dependencies.
+  - sphinx
+  - sphinx_rtd_theme

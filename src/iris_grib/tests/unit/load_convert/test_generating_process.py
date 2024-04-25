@@ -39,7 +39,7 @@ class TestGeneratingProcess(tests.IrisGribTest):
         generating_process(*call_args, **call_kwargs)
         got_msgs = [call[0][0] for call in self.warn_patch.call_args_list]
         for got_msg, expected_fragment in zip(
-            sorted(got_msgs), sorted(expected_fragments)
+            sorted(got_msgs), sorted(expected_fragments), strict=False
         ):
             self.assertIn(expected_fragment, got_msg)
 

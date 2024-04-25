@@ -989,7 +989,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
     hybrid_factories = [
         factory
         for factory in cube.aux_factories
-        if isinstance(factory, (HybridHeightFactory, HybridPressureFactory))
+        if isinstance(factory, HybridHeightFactory | HybridPressureFactory)
     ]
     if not hybrid_factories:
         hybrid_factory = None
@@ -1145,7 +1145,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         n_coeffs = n_levels + 1
         coeffs_array = np.zeros(n_coeffs * 2, dtype=np.float32)
         for n_lev, height, sigma in zip(
-            model_levels, level_delta_coord.points, sigma_coord.points
+            model_levels, level_delta_coord.points, sigma_coord.points, strict=False
         ):
             # Record all the level coefficients coming from the 'full' cube.
             # Note: if some model levels are missing, we must still have the

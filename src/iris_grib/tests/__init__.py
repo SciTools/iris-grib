@@ -168,7 +168,7 @@ class TestGribMessage(IrisGribTest):
         messages1 = list(GribMessage.messages_from_filename(filename1))
         messages2 = list(GribMessage.messages_from_filename(filename2))
         self.assertEqual(len(messages1), len(messages2))
-        for m1, m2 in zip(messages1, messages2):
+        for m1, m2 in zip(messages1, messages2, strict=False):
             m1_sect = set(m1.sections.keys())
             m2_sect = set(m2.sections.keys())
 

@@ -101,7 +101,9 @@ def GRIBCode(edition, *args, **kwargs):
         if nargs != 4:
             _invalid_nargs(args)
 
-        for i_arg, (arg, name) in enumerate(zip(args, instance_cls.argnames)):
+        for i_arg, (arg, name) in enumerate(
+            zip(args, instance_cls.argnames, strict=False)
+        ):
             if name in kwargs:
                 msg = (
                     f"Keyword {name!r}={kwargs[name]!r} "
