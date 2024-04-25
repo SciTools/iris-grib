@@ -74,6 +74,13 @@ repos:
     hooks:
     - id: validate-pyproject
 
+-   repo: https://github.com/scientific-python/cookie
+    rev: 2024.03.10
+    hooks:
+    - id: sp-repo-review
+      additional_dependencies: ["repo-review[cli]"]
+      args: ["--show=errskip"]
+
 # TODO: pending the addition of numpydoc, including config file(s).
 #-   repo: https://github.com/numpy/numpydoc
 #    rev: v1.7.0

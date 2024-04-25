@@ -108,6 +108,7 @@ ignore = [
 # See https://mypy.readthedocs.io/en/stable/config_file.html
 ignore_missing_imports = true
 warn_unused_configs = true
+warn_unreachable = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 exclude = [
     'noxfile\.py',
@@ -132,6 +133,18 @@ log_cli_level = "INFO"
 minversion = "6.0"
 testpaths = "src/iris_grib"
 xfail_strict = "True"
+
+[tool.repo-review]
+ignore = [
+    # https://learn.scientific-python.org/development/guides/style/#MY102
+    "MY102",  # MyPy show_error_codes deprecated
+    # https://learn.scientific-python.org/development/guides/style/#PC170
+    "PC170",  # Uses PyGrep hooks
+    # https://learn.scientific-python.org/development/guides/style/#PC180
+    "PC180",  # Uses prettier
+    # https://learn.scientific-python.org/development/guides/pytest/#PP309
+    "PP309",  # Filter warnings specified
+]
 
 [tool.ruff]
 # Exclude the following, in addition to the standard set of exclusions.
