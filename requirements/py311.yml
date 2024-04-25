@@ -18,12 +18,16 @@ dependencies:
 # Optional dependencies.
   - mo_pack
   - pip
+  - pre-commit
 
 # Test dependencies.
+  - codecov
   - filelock
+  - nox
   - requests
   - iris-sample-data
   - pytest
+  - pytest-cov
   - pytest-mock
 
 # Documentation dependencies.

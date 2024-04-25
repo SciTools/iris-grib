@@ -270,11 +270,15 @@ def tests(session: nox.sessions.Session, iris_source: str):
 
     session.run("python", "-m", "eccodes", "selfcheck")
 
-    session.run(
+    run_args = [
         "pytest",
         "--pyargs",
         "iris_grib",
-    )
+    ]
+
+    if "-c" in session.posargs or "--coverage" in session.posargs:
+        run_args.extend(["--cov=iris_grib", "--cov-report=xml"])
+    session.run(*run_args)
 
 
 @nox.session(python=PY_VER, venv_backend="conda")

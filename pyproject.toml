@@ -31,12 +31,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Atmospheric Science",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
 dynamic = [
     "dependencies",
+    "optional-dependencies",
     "readme",
     "version",
 ]
-description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
 keywords = [
     "iris",
     "GRIB",
@@ -58,10 +59,12 @@ Issues = "https://github.com/SciTools/iris-grib/issues"
 license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
-dependencies = {file = "requirements/core.txt"}
+dependencies = {file = "requirements/pypi-core.txt"}
 readme = {file = "README.md", content-type = "text/markdown"}
-optional-dependencies.all = {file = "requirements/all.txt"}
-optional-dependencies.test = {file = "requirements/test.txt"}
+
+[tool.setuptools.dynamic.optional-dependencies]
+dev = {file = "requirements/pypi-optional-dev.txt"}
+test = {file = "requirements/pypi-optional-test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]

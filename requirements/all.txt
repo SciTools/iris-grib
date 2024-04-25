@@ -1,3 +1,0 @@
-# Optional dependencies.
-
-mo_pack
