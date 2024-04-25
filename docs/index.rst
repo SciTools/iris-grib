@@ -219,13 +219,13 @@ To ensure all ``iris-grib`` dependencies, it is sufficient to have installed
 The simplest way to install is with
 `conda <https://conda.io/miniconda.html>`_ , using the
 `package on conda-forge <https://anaconda.org/conda-forge/iris-grib>`_ ,
-with the command
+with the command::
 
    $ conda install -c conda-forge iris-grib
 
 Pip can also be used, to install from the
 `package on PyPI <https://pypi.org/project/iris-grib/>`_ ,
-with the command
+with the command::
 
    $ pip install iris-grib
 
