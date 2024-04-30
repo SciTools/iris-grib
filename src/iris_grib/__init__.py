@@ -162,7 +162,7 @@ class GribWrapper:
 
     """
 
-    def __init__(self, grib_message, grib_fh=None):
+    def __init__(self, grib_message, grib_fh=None, has_bitmap=True):
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
 
@@ -195,8 +195,12 @@ class GribWrapper:
         if deferred:
             # Wrap the reference to the data payload within the data proxy
             # in order to support deferred data loading.
-            proxy = GribDataProxy(shape, np.array([0.0]).dtype, grib_fh.name, offset)
-            self._data = as_lazy_data(proxy)
+            dtype = np.dtype(float)  # Use default dtype for python float
+            proxy = GribDataProxy(shape, dtype, grib_fh.name, offset)
+            data_array_class = np.ma if has_bitmap else np
+            meta_shape = tuple([0 for _ in shape])
+            meta = data_array_class.zeros(meta_shape, dtype=dtype)
+            self._data = as_lazy_data(proxy, meta=meta)
         else:
             self.data = _message_values(grib_message, shape)
 
@@ -712,9 +716,10 @@ def _load_generate(filename):
     for message in messages:
         editionNumber = message.sections[0]["editionNumber"]
         if editionNumber == 1:
+            has_bitmap = 3 in message.sections
             message_id = message._raw_message._message_id
             grib_fh = message._file_ref.open_file
-            message = GribWrapper(message_id, grib_fh=grib_fh)
+            message = GribWrapper(message_id, grib_fh=grib_fh, has_bitmap=has_bitmap)
         elif editionNumber != 2:
             emsg = "GRIB edition {} is not supported by {!r}."
             raise TranslationError(emsg.format(editionNumber, type(message).__name__))
