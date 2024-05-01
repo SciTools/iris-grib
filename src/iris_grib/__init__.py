@@ -197,10 +197,11 @@ class GribWrapper:
             # in order to support deferred data loading.
             dtype = np.dtype(float)  # Use default dtype for python float
             proxy = GribDataProxy(shape, dtype, grib_fh.name, offset)
-            data_array_class = np.ma if has_bitmap else np
-            meta_shape = tuple([0 for _ in shape])
-            meta = data_array_class.zeros(meta_shape, dtype=dtype)
-            self._data = as_lazy_data(proxy, meta=meta)
+            as_lazy_kwargs = {}
+            if _aslazydata_has_meta():
+                meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                as_lazy_kwargs["meta"] = meta
+            self._data = as_lazy_data(proxy, **as_lazy_kwargs)
         else:
             self.data = _message_values(grib_message, shape)
 
@@ -895,3 +896,31 @@ def save_messages(messages, target, append=False):
         # (this bit is common to the pp and grib savers...)
         if isinstance(target, str):
             grib_file.close()
+
+
+# Odd utility routines
+def _aslazydata_has_meta():
+    """
+    Work out whether 'iris._lazy_data.as_lazy_data' takes a "meta" kwarg.
+
+    Up to Iris 3.8.0, "as_lazy_data" did not have a 'meta' keyword, but
+    since https://github.com/SciTools/iris/pull/5801, it now *requires* one.
+    """
+    from inspect import signature
+    from iris._lazy_data import as_lazy_data
+
+    sig = signature(as_lazy_data)
+    return "meta" in sig.parameters
+
+
+def _make_dask_meta(shape, dtype, is_masked=True):
+    """
+    Construct a dask 'meta' suitable for 'dask.array.from_array'.
+
+    Result is made from the dtype and shape of an array-like to be mapped,
+    plus whether it will return masked or unmasked arrays.
+    """
+    meta_shape = tuple([0 for _ in shape])
+    array_class = np.ma if is_masked else np
+    meta = array_class.zeros(meta_shape, dtype=dtype)
+    return meta

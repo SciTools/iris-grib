@@ -166,14 +166,20 @@ class GribMessage:
                 shape = (grid_section["numberOfDataPoints"],)
             else:
                 shape = (grid_section["Nj"], grid_section["Ni"])
-            proxy = _DataProxy(shape, np.dtype("f8"), self._recreate_raw)
-            # Make a masked/unmasked dask array when there is/not a bitmap
-            #  section
-            has_bitmap = 6 in sections
-            proxy_array_class = np.ma if has_bitmap else np
-            meta_shape = tuple([0 for _ in shape])
-            meta = proxy_array_class.zeros(meta_shape, dtype=proxy.dtype)
-            data = as_lazy_data(proxy, meta=meta)
+
+            dtype = np.dtype("f8")
+            proxy = _DataProxy(shape, dtype, self._recreate_raw)
+
+            as_lazy_kwargs = {}
+            from . import _aslazydata_has_meta, _make_dask_meta
+
+            if _aslazydata_has_meta():
+                has_bitmap = 6 in sections
+                meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                as_lazy_kwargs["meta"] = meta
+
+            data = as_lazy_data(proxy, **as_lazy_kwargs)
+
         else:
             fmt = "Grid definition template {} is not supported"
             raise TranslationError(fmt.format(template))
