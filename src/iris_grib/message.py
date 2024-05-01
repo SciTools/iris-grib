@@ -171,9 +171,9 @@ class GribMessage:
             proxy = _DataProxy(shape, dtype, self._recreate_raw)
 
             as_lazy_kwargs = {}
-            from . import _aslazydata_has_meta, _make_dask_meta
+            from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta
 
-            if _aslazydata_has_meta():
+            if _ASLAZYDATA_NEEDS_META:
                 has_bitmap = 6 in sections
                 meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
                 as_lazy_kwargs["meta"] = meta
