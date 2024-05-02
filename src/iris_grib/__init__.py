@@ -153,6 +153,39 @@ class GribDataProxy:
             setattr(self, key, value)
 
 
+# Utility routines for the use of dask 'meta' in wrapping proxies
+def _aslazydata_has_meta():
+    """
+    Work out whether 'iris._lazy_data.as_lazy_data' takes a "meta" kwarg.
+
+    Up to Iris 3.8.0, "as_lazy_data" did not have a 'meta' keyword, but
+    since https://github.com/SciTools/iris/pull/5801, it now *requires* one,
+    if the wrapped object is anything other than a numpy or dask array.
+    """
+    from inspect import signature
+    from iris._lazy_data import as_lazy_data
+
+    sig = signature(as_lazy_data)
+    return "meta" in sig.parameters
+
+
+# Work this out just once.
+_ASLAZYDATA_NEEDS_META = _aslazydata_has_meta()
+
+
+def _make_dask_meta(shape, dtype, is_masked=True):
+    """
+    Construct a dask 'meta' object for use in 'dask.array.from_array'.
+
+    A "meta" array is made from the dtype and shape of the array-like to be
+    wrapped, plus whether it will return masked or unmasked data.
+    """
+    meta_shape = tuple([0 for _ in shape])
+    array_class = np.ma if is_masked else np
+    meta = array_class.zeros(meta_shape, dtype=dtype)
+    return meta
+
+
 class GribWrapper:
     """
     Contains a pygrib object plus some extra keys of our own.
@@ -162,7 +195,7 @@ class GribWrapper:
 
     """
 
-    def __init__(self, grib_message, grib_fh=None):
+    def __init__(self, grib_message, grib_fh=None, has_bitmap=True):
         """Store the grib message and compute our extra keys."""
         self.grib_message = grib_message
 
@@ -195,8 +228,13 @@ class GribWrapper:
         if deferred:
             # Wrap the reference to the data payload within the data proxy
             # in order to support deferred data loading.
-            proxy = GribDataProxy(shape, np.array([0.0]).dtype, grib_fh.name, offset)
-            self._data = as_lazy_data(proxy)
+            dtype = np.dtype(float)  # Use default dtype for python float
+            proxy = GribDataProxy(shape, dtype, grib_fh.name, offset)
+            as_lazy_kwargs = {}
+            if _ASLAZYDATA_NEEDS_META:
+                meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                as_lazy_kwargs["meta"] = meta
+            self._data = as_lazy_data(proxy, **as_lazy_kwargs)
         else:
             self.data = _message_values(grib_message, shape)
 
@@ -712,9 +750,10 @@ def _load_generate(filename):
     for message in messages:
         editionNumber = message.sections[0]["editionNumber"]
         if editionNumber == 1:
+            has_bitmap = 3 in message.sections
             message_id = message._raw_message._message_id
             grib_fh = message._file_ref.open_file
-            message = GribWrapper(message_id, grib_fh=grib_fh)
+            message = GribWrapper(message_id, grib_fh=grib_fh, has_bitmap=has_bitmap)
         elif editionNumber != 2:
             emsg = "GRIB edition {} is not supported by {!r}."
             raise TranslationError(emsg.format(editionNumber, type(message).__name__))
