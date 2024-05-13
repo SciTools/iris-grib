@@ -36,7 +36,7 @@ repos:
     -   id: no-commit-to-branch
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.4.3"
+    rev: "v0.4.4"
     hooks:
     -   id: ruff
         types: [file, python]
@@ -70,7 +70,7 @@ repos:
         exclude: 'noxfile\.py|docs/conf\.py'
 
 -   repo: https://github.com/abravalheri/validate-pyproject
-    rev: "v0.16"
+    rev: "v0.17"
     hooks:
     - id: validate-pyproject
 
