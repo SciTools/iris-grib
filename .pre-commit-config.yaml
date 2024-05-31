@@ -8,12 +8,15 @@ ci:
   autoupdate_commit_msg: "chore: update pre-commit hooks"
 
 
+# Alphabetised, for lack of a better order.
 files: |
     (?x)(
+        benchmarks\/.+\.py|
+        docs\/.+\.py|
+        lib\/.+\.py|
         noxfile\.py|
         pyproject\.toml|
-        docs\/.+\.py|
-        benchmarks\/.+\.py|
+        setup\.py|
         src\/.+\.py
     )
 minimum_pre_commit_version: 1.21.0
@@ -26,14 +29,26 @@ repos:
     -   id: check-added-large-files
         # Check whether files parse as valid Python.
     -   id: check-ast
-        # Check for file name conflicts on case-insensitive filesytems.
+        # Check for file name conflicts on case-insensitive filesystems.
     -   id: check-case-conflict
         # Check for files that contain merge conflict strings.
     -   id: check-merge-conflict
         # Check for debugger imports and py37+ `breakpoint()` calls in Python source.
     -   id: debug-statements
+        # Check TOML file syntax.
+    -   id: check-toml
+        # Check YAML file syntax.
+    -   id: check-yaml
+        # Makes sure files end in a newline and only a newline.
+        # Duplicates Ruff W292 but also works on non-Python files.
+    -   id: end-of-file-fixer
+        # Replaces or checks mixed line ending.
+    -   id: mixed-line-ending
         # Don't commit to main branch.
     -   id: no-commit-to-branch
+        # Trims trailing whitespace.
+        # Duplicates Ruff W291 but also works on non-Python files.
+    -   id: trailing-whitespace
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.4.4"
@@ -70,6 +85,7 @@ repos:
         exclude: 'noxfile\.py|docs/conf\.py'
 
 -   repo: https://github.com/abravalheri/validate-pyproject
+    # More exhaustive than Ruff RUF200.
     rev: "v0.18"
     hooks:
     - id: validate-pyproject
