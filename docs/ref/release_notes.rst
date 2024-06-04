@@ -275,7 +275,7 @@ Bugs Fixed
   system, since eccodes versions >= 1.19.  This resulted from a change to eccodes, which now returns a different
   'shapeOfTheEarth' parameter.  This resulted
   in a coordinate system with a different earth radius.
-  For backwards compatibilty, the earth radius has now been fixed to the same value as previously.
+  For backwards compatibility, the earth radius has now been fixed to the same value as previously.
   However, pending further investigation, this value may be technically incorrect and we may
   yet decide to change it in a future release.
   `(PR#240) <https://github.com/SciTools/iris-grib/pull/240>`_
@@ -448,7 +448,7 @@ Bug Fixes
   .. note::
 
       This changes loading behaviour for data on hybrid pressure levels only.
-      This is an incompatible change, but the coefficent values previously
+      This is an incompatible change, but the coefficient values previously
       returned were essentially useless, with some values missing.
 
 
