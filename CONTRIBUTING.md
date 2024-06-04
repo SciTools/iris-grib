@@ -12,7 +12,7 @@ Getting started
 1. If you've not already got one, sign up for a
    [GitHub account](https://github.com/signup/free).
 2. Fork the iris-grib repository, create your new fix/feature branch, and
-   start commiting code.
+   start committing code.
  - The main
    [Iris development guide](https://scitools-iris.readthedocs.io/en/latest/developers_guide/gitwash/index.html)
    has more detail.
