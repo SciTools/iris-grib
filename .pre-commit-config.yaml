@@ -51,7 +51,7 @@ repos:
     -   id: trailing-whitespace
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.4.10"
+    rev: "v0.4.4"
     hooks:
     -   id: ruff
         types: [file, python]
@@ -60,7 +60,7 @@ repos:
         types: [file, python]
 
 -   repo: https://github.com/codespell-project/codespell
-    rev: "v2.3.0"
+    rev: "v2.2.6"
     hooks:
     -   id: codespell
         types_or: [asciidoc, python, markdown, rst]
@@ -97,9 +97,8 @@ repos:
       additional_dependencies: ["repo-review[cli]"]
       args: ["--show=errskip"]
 
-# TODO: pending the addition of numpydoc, including config file(s).
-#-   repo: https://github.com/numpy/numpydoc
-#    rev: v1.7.0
-#    hooks:
-#      - id: numpydoc-validation
-#        types: [file, python]
+-   repo: https://github.com/numpy/numpydoc
+    rev: v1.7.0
+    hooks:
+      - id: numpydoc-validation
+        types: [file, python]
