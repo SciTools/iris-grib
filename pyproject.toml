@@ -138,6 +138,8 @@ xfail_strict = "True"
 ignore = [
     # https://learn.scientific-python.org/development/guides/style/#MY102
     "MY102",  # MyPy show_error_codes deprecated
+    # https://learn.scientific-python.org/development/guides/style/#MY105
+    "MY105",  # MyPy redundant-expr deprecated
     # https://learn.scientific-python.org/development/guides/style/#PC170
     "PC170",  # Uses PyGrep hooks
     # https://learn.scientific-python.org/development/guides/style/#PC180
