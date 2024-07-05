@@ -32,7 +32,7 @@ def section_4_sample():
         "productDefinitionTemplateNumber": 15,
         "hoursAfterDataCutoff": MDI,
         "minutesAfterDataCutoff": MDI,
-        "indicatorOfUnitOfTimeRange": 0,  # minutes
+        "indicatorOfUnitForForecastTime": 0,  # minutes
         "forecastTime": 360,
         "NV": 0,
         "typeOfFirstFixedSurface": 103,

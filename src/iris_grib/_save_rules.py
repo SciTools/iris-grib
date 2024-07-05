@@ -977,7 +977,7 @@ def set_forecast_time(cube, grib):
     else:
         _, _, fp, grib_time_code = _missing_forecast_period(cube)
 
-    eccodes.codes_set(grib, "indicatorOfUnitOfTimeRange", grib_time_code)
+    eccodes.codes_set(grib, "indicatorOfUnitForForecastTime", grib_time_code)
     eccodes.codes_set(grib, "forecastTime", fp)
 
 
