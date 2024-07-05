@@ -101,14 +101,12 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
     def test__scanmode(self):
         grid_definition_template(self.test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 1)
-        self._check_key("jScansPositively", 1)
+        self._check_scanmode(+1, +1)
 
     def test__scanmode_reverse(self):
         test_cube = self._make_test_cube(x_points=np.arange(7e6, 0, -1e6))
         grid_definition_template(test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 0)
-        self._check_key("jScansPositively", 1)
+        self._check_scanmode(-1, +1)
 
     def __fail_false_easting_northing(self, false_easting, false_northing):
         cs = self._default_coord_system(
