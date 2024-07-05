@@ -1816,7 +1816,7 @@ def statistical_forecast_period_coord(section, frt_coord):
     if options.support_hindcast_values:
         # Apply the hindcast fix.
         forecast_time = _hindcast_fix(forecast_time)
-    forecast_units = time_range_unit(section["indicatorOfUnitOfTimeRange"])
+    forecast_units = time_range_unit(section["indicatorOfUnitForForecastTime"])
     forecast_seconds = forecast_units.convert(forecast_time, "seconds")
     start_time_delta = timedelta(seconds=forecast_seconds)
 
@@ -1958,7 +1958,7 @@ def time_coords(section, metadata, rt_coord):
 
     # Calculate the forecast period coordinate.
     fp_coord = forecast_period_coord(
-        section["indicatorOfUnitOfTimeRange"], forecast_time
+        section["indicatorOfUnitForForecastTime"], forecast_time
     )
     # Add the forecast period coordinate to the metadata aux coords.
     metadata["aux_coords_and_dims"].append((fp_coord, None))
