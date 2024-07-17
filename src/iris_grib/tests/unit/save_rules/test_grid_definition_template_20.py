@@ -74,16 +74,14 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
     def test__scanmode(self):
         grid_definition_template_20(self.stereo_test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 1)
-        self._check_key("jScansPositively", 1)
+        self._check_scanmode(+1, +1)
 
     def test__scanmode_reverse(self):
         stereo_test_cube = self._make_test_cube(
             x_points=np.arange(7e6, 0, -1e6), coord_units="m"
         )
         grid_definition_template_20(stereo_test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 0)
-        self._check_key("jScansPositively", 1)
+        self._check_scanmode(-1, +1)
 
     def test_projection_centre(self):
         grid_definition_template_20(self.stereo_test_cube, self.mock_grib)

@@ -230,12 +230,14 @@ def dx_dy(x_coord, y_coord, grib):
 
 
 def scanning_mode_flags(x_coord, y_coord, grib):
-    eccodes.codes_set_long(
-        grib, "iScansPositively", int(x_coord.points[1] - x_coord.points[0] > 0)
-    )
-    eccodes.codes_set_long(
-        grib, "jScansPositively", int(y_coord.points[1] - y_coord.points[0] > 0)
-    )
+    x_positive = x_coord.points[1] - x_coord.points[0] > 0
+    y_positive = y_coord.points[1] - y_coord.points[0] > 0
+    scanningMode = 0
+    if not x_positive:
+        scanningMode |= 0x80  # "bit 1" has negative sense : set=decreasing
+    if y_positive:
+        scanningMode |= 0x40  # "bit2" has positive sense : set=increasing
+    eccodes.codes_set_long(grib, "scanningMode", scanningMode)
 
 
 def horizontal_grid_common(cube, grib, xy=False):
@@ -977,7 +979,7 @@ def set_forecast_time(cube, grib):
     else:
         _, _, fp, grib_time_code = _missing_forecast_period(cube)
 
-    eccodes.codes_set(grib, "indicatorOfUnitOfTimeRange", grib_time_code)
+    eccodes.codes_set(grib, "indicatorOfUnitForForecastTime", grib_time_code)
     eccodes.codes_set(grib, "forecastTime", fp)
 
 

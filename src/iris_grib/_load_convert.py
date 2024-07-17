@@ -1530,14 +1530,14 @@ def ensure_surface_air_pressure_name(cube):
     return {"standard_name": "surface_air_pressure"}
 
 
-def time_range_unit(indicatorOfUnitOfTimeRange):
+def time_range_unit(indicatorOfUnitForForecastTime):
     """
     Translate the time range indicator to an equivalent
     :class:`cf_units.Unit`.
 
     Args:
 
-    * indicatorOfUnitOfTimeRange:
+    * indicatorOfUnitForForecastTime:
         Message section 4, octet 18.
 
     Returns:
@@ -1545,11 +1545,11 @@ def time_range_unit(indicatorOfUnitOfTimeRange):
 
     """
     try:
-        unit = Unit(_TIME_RANGE_UNITS[indicatorOfUnitOfTimeRange])
+        unit = Unit(_TIME_RANGE_UNITS[indicatorOfUnitForForecastTime])
     except (KeyError, ValueError):
         msg = (
             "Product definition section 4 contains unsupported "
-            "time range unit [{}]".format(indicatorOfUnitOfTimeRange)
+            "time range unit [{}]".format(indicatorOfUnitForForecastTime)
         )
         raise TranslationError(msg)
     return unit
@@ -1755,13 +1755,13 @@ def vertical_coords(section, metadata):
                 metadata["aux_coords_and_dims"].append((coord, None))
 
 
-def forecast_period_coord(indicatorOfUnitOfTimeRange, forecastTime):
+def forecast_period_coord(indicatorOfUnitForForecastTime, forecastTime):
     """
     Create the forecast period coordinate.
 
     Args:
 
-    * indicatorOfUnitOfTimeRange:
+    * indicatorOfUnitForForecastTime:
         Message section 4, octets 18.
 
     * forecastTime:
@@ -1772,7 +1772,7 @@ def forecast_period_coord(indicatorOfUnitOfTimeRange, forecastTime):
 
     """
     # Determine the forecast period and associated units.
-    unit = time_range_unit(indicatorOfUnitOfTimeRange)
+    unit = time_range_unit(indicatorOfUnitForForecastTime)
     point = unit.convert(forecastTime, "hours")
     # Create the forecast period scalar coordinate.
     coord = DimCoord(point, standard_name="forecast_period", units="hours")
@@ -1816,7 +1816,7 @@ def statistical_forecast_period_coord(section, frt_coord):
     if options.support_hindcast_values:
         # Apply the hindcast fix.
         forecast_time = _hindcast_fix(forecast_time)
-    forecast_units = time_range_unit(section["indicatorOfUnitOfTimeRange"])
+    forecast_units = time_range_unit(section["indicatorOfUnitForForecastTime"])
     forecast_seconds = forecast_units.convert(forecast_time, "seconds")
     start_time_delta = timedelta(seconds=forecast_seconds)
 
@@ -1958,7 +1958,7 @@ def time_coords(section, metadata, rt_coord):
 
     # Calculate the forecast period coordinate.
     fp_coord = forecast_period_coord(
-        section["indicatorOfUnitOfTimeRange"], forecast_time
+        section["indicatorOfUnitForForecastTime"], forecast_time
     )
     # Add the forecast period coordinate to the metadata aux coords.
     metadata["aux_coords_and_dims"].append((fp_coord, None))
