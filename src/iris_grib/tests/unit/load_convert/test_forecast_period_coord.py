@@ -18,7 +18,7 @@ from iris_grib._load_convert import forecast_period_coord
 
 class Test(tests.IrisGribTest):
     def test(self):
-        # (indicatorOfUnitOfTimeRange, forecastTime, expected-hours)
+        # (indicatorOfUnitForForecastTime, forecastTime, expected-hours)
         times = [
             (0, 60, 1),  # minutes
             (1, 2, 2),  # hours
@@ -29,8 +29,8 @@ class Test(tests.IrisGribTest):
             (13, 3600, 1),
         ]  # seconds
 
-        for indicatorOfUnitOfTimeRange, forecastTime, hours in times:
-            coord = forecast_period_coord(indicatorOfUnitOfTimeRange, forecastTime)
+        for indicatorOfUnitForForecastTime, forecastTime, hours in times:
+            coord = forecast_period_coord(indicatorOfUnitForForecastTime, forecastTime)
             self.assertIsInstance(coord, DimCoord)
             self.assertEqual(coord.standard_name, "forecast_period")
             self.assertEqual(coord.units, "hours")

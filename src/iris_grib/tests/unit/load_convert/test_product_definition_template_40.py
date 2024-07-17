@@ -23,7 +23,7 @@ class Test(tests.IrisGribTest):
             "hoursAfterDataCutoff": _MDI,
             "minutesAfterDataCutoff": _MDI,
             "constituentType": 1,
-            "indicatorOfUnitOfTimeRange": 0,  # minutes
+            "indicatorOfUnitForForecastTime": 0,  # minutes
             "startStep": 360,
             "NV": 0,
             "typeOfFirstFixedSurface": 103,

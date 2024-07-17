@@ -84,3 +84,13 @@ class GdtTestMixin:
             self.assertEqual(0, 1, msg_fmt.format(name, value, "((UNSET))"))
         else:
             self.assertArrayEqual(found, value, msg_fmt.format(name, value, found))
+
+    def _check_scanmode(self, x_direction, y_direction):
+        expected = 0
+        if x_direction < 0:
+            # "bit 1" set if x scans negatively
+            expected |= 0x80
+        if y_direction >= 0:
+            # "bit 2" set if y does *not* scan negatively
+            expected |= 0x40
+        self._check_key("scanningMode", expected)

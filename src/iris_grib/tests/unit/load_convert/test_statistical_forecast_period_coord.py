@@ -39,7 +39,7 @@ class Test(tests.IrisGribTest):
         self.section["minuteOfEndOfOverallTimeInterval"] = 0
         self.section["secondOfEndOfOverallTimeInterval"] = 0
         self.section["forecastTime"] = mock.Mock()
-        self.section["indicatorOfUnitOfTimeRange"] = mock.Mock()
+        self.section["indicatorOfUnitForForecastTime"] = mock.Mock()
 
     def test_basic(self):
         coord = statistical_forecast_period_coord(self.section, self.frt_coord)
