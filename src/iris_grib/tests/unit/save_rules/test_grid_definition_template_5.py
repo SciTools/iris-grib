@@ -78,14 +78,12 @@ class Test(tests.IrisGribTest, GdtTestMixin):
 
     def test__scanmode(self):
         grid_definition_template_5(self.test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 1)
-        self._check_key("jScansPositively", 1)
+        self._check_scanmode(+1, +1)
 
     def test__scanmode_reverse(self):
         test_cube = self._make_test_cube(y_points=[5.0, 2.0])
         grid_definition_template_5(test_cube, self.mock_grib)
-        self._check_key("iScansPositively", 1)
-        self._check_key("jScansPositively", 0)
+        self._check_scanmode(+1, -1)
 
     def test__rotated_pole(self):
         cs = RotatedGeogCS(
