@@ -30,6 +30,7 @@ Features
   grid definition template 20 - polar stereographic.
   `(PR#405) <https://github.com/SciTools/iris-grib/pull/405>`_
 
+
 Documentation
 ^^^^^^^^^^^^^
 * `@pp-mo <https://github.com/pp-mo>`_ reworked the main docs page to :
@@ -42,6 +43,15 @@ Dependencies
 ^^^^^^^^^^^^
 * `@bjlittle <https://github.com/bjlittle>`_ migrated to ``pytest``.
   `(PR#420) <https://github.com/SciTools/iris-grib/pull/420>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ enabled support for
+  `eccodes v2.36 <https://confluence.ecmwf.int/display/ECC/ecCodes+version+2.36.0+released>`_.
+  Eccodes v2.36 has implemented some backwards incompatible changes :
+  The ``indicatorOfUnitOfTimeRange`` key was removed, to be replaced with
+  ``indicatorOfUnitForForecastTime`` (but only in GRIB v2 messages only, not GRIB 1);
+  and the ``iScansPositively`` and ``jScansPositively`` keys became read-only.
+  The resulting changes mean **we now only support eccodes >=2.33**.
+  `(PR#504) <https://github.com/SciTools/iris-grib/issues/504>`_
 
 
 What's new in iris-grib v0.19.1

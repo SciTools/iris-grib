@@ -25,6 +25,8 @@ KEY_ALIAS = {
     "longitude": "longitudes",
     "latitudes": "latitude",
     "longitudes": "longitude",
+    # Support older form of key which used to exist before eccodes 2v36
+    "indicatorOfUnitForForecastTime": "indicatorOfUnitOfTimeRange",
 }
 
 
