@@ -259,14 +259,14 @@ class GribWrapper:
                 res = np.int32(eccodes.codes_get_long(self.grib_message, key))
             else:
                 key_type = eccodes.codes_get_native_type(self.grib_message, key)
-                if key_type == int:
+                if key_type is int:
                     res = np.int32(eccodes.codes_get_long(self.grib_message, key))
-                elif key_type == float:
+                elif key_type is float:
                     # Because some computer keys are floats, like
                     # longitudeOfFirstGridPointInDegrees, a float32
                     # is not always enough...
                     res = np.float64(eccodes.codes_get_double(self.grib_message, key))
-                elif key_type == str:
+                elif key_type is str:
                     res = eccodes.codes_get_string(self.grib_message, key)
                 else:
                     emsg = "Unknown type for {} : {}"
