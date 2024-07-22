@@ -51,7 +51,7 @@ repos:
     -   id: trailing-whitespace
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.5.2"
+    rev: "v0.5.4"
     hooks:
     -   id: ruff
         types: [file, python]
@@ -79,7 +79,7 @@ repos:
         types: [file, python]
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.10.1'
+    rev: 'v1.11.0'
     hooks:
     -   id: mypy
         exclude: 'noxfile\.py|docs/conf\.py'
