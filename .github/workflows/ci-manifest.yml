@@ -20,4 +20,4 @@ concurrency:
 jobs:
   manifest:
     name: "check-manifest"
-    uses: scitools/workflows/.github/workflows/ci-manifest.yml@2024.08.2
+    uses: scitools/workflows/.github/workflows/ci-manifest.yml@2024.08.3
