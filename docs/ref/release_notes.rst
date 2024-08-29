@@ -16,7 +16,7 @@ Features
 ^^^^^^^^
 * `@abooton <https://github.com/abooton>`_ added support for saving data on a
   Lambert Azimuthal Equal Area (LAEA) projection, as grid definition template 3.140.
-  `(PR#343 <https://github.com/SciTools/iris-grib/pull/343>`_
+  `(PR#343) <https://github.com/SciTools/iris-grib/pull/343>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_,
   `@mo-marqh <https://github.com/mo-marqh>`_  and
@@ -25,7 +25,7 @@ Features
   `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
 
 * `@pp-mo <https://github.com/pp-mo>`_ expanded the use of the "GRIB_PARAM"
-  attributes to GRIB1 loading, and document it more thoroughly.
+  attributes to GRIB1 loading, and documented it more thoroughly.
   `(ISSUE#330) <https://github.com/SciTools/iris-grib/issues/330>`_,
   `(PR#402) <https://github.com/SciTools/iris-grib/pull/402>`_
 
@@ -45,7 +45,8 @@ Documentation
   headline basic load + save with Iris, rather than lower-level functions;
   better explain load-pairs and save-pairs usage; make all usage examples into
   doctests.
-  `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_
+  `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_,
+  `(PR#402) <https://github.com/SciTools/iris-grib/issues/402>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ added the logo to README.md .
   `(PR#447) <https://github.com/SciTools/iris-grib/pull/447>`_
@@ -61,7 +62,7 @@ Dependencies
   `eccodes v2.36 <https://confluence.ecmwf.int/display/ECC/ecCodes+version+2.36.0+released>`_.
   Eccodes v2.36 has implemented some backwards incompatible changes :
   The ``indicatorOfUnitOfTimeRange`` key was removed, to be replaced with
-  ``indicatorOfUnitForForecastTime`` (but only in GRIB v2 messages only, not GRIB 1);
+  ``indicatorOfUnitForForecastTime`` (but only in GRIB v2 messages, not GRIB 1);
   and the ``iScansPositively`` and ``jScansPositively`` keys became read-only.
   The resulting changes mean **we now only support eccodes >=2.33**.
   `(PR#504) <https://github.com/SciTools/iris-grib/issues/504>`_
@@ -156,6 +157,7 @@ Internal
 New Contributors
 ^^^^^^^^^^^^^^^^
 Welcome to
+
 * `@abooton <https://github.com/abooton>`_
 * `@githubalexliu <https://github.com/githubalexliu>`_
 * `@stephenworsley <https://github.com/stephenworsley>`_
@@ -241,6 +243,7 @@ Dependencies
 New Contributors
 ^^^^^^^^^^^^^^^^
 Welcome to
+
 * `@s-boardman <https://github.com/s-boardman>`_
 * `@david-bentley <https://github.com/david-bentley>`_
 * `@valeriupredoi <https://github.com/valeriupredoi>`_
