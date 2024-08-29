@@ -46,7 +46,7 @@ Documentation
   better explain load-pairs and save-pairs usage; make all usage examples into
   doctests.
   `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_,
-  `(PR#402) <https://github.com/SciTools/iris-grib/issues/402>`_
+  `(PR#402) <https://github.com/SciTools/iris-grib/pull/402>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ added the logo to README.md .
   `(PR#447) <https://github.com/SciTools/iris-grib/pull/447>`_
