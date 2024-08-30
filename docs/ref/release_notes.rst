@@ -77,7 +77,7 @@ Dependencies
 
 Internal
 ^^^^^^^^
-* `@ESadek-MO <https://github.com/ESadek-MO>`_ updated CONTRIBUTING.md in line with the
+* `@trexfeathers <https://github.com/trexfeathers>`_ updated CONTRIBUTING.md in line with the
   newer v5 SciTools CLA. `(PR#371) <https://github.com/SciTools/iris-grib/issues/371>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ added a pre-commit configuration.
