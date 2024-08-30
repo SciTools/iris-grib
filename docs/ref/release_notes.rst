@@ -86,7 +86,7 @@ Internal
 * `@HGWright <https://github.com/HGWright>`_ replaced setup.py with pyproject.toml.
   `(PR#408) <https://github.com/SciTools/iris-grib/pull/408>`_
 
-* `@ESadek-MO <https://github.com/ESadek-MO>`_ configured for MyPy checking via
+* `@stephenworsley <https://github.com/stephenworsley>`_ configured for MyPy checking via
   pre-commit. `(PR#407) <https://github.com/SciTools/iris-grib/issues/407>`_
 
 * `@ESadek-MO <https://github.com/ESadek-MO>`_ migrated CI testing from Cirrus to
