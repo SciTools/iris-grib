@@ -16,13 +16,16 @@ Features
 ^^^^^^^^
 * `@abooton <https://github.com/abooton>`_ added support for saving data on a
   Lambert Azimuthal Equal Area (LAEA) projection, as grid definition template 3.140.
+  `(ISSUE#344) <https://github.com/SciTools/iris-grib/issues/344>`_,
   `(PR#343) <https://github.com/SciTools/iris-grib/pull/343>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_,
   `@mo-marqh <https://github.com/mo-marqh>`_  and
   `@pp-mo <https://github.com/pp-mo>`_ added support for production definition template
   4.6, i.e. percentile forecasts.
-  `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_
+  `(PR#401) <https://github.com/SciTools/iris-grib/pull/401>`_,
+  `(PR#295) <https://github.com/SciTools/iris-grib/pull/295>`_,
+  `(PR#271) <https://github.com/SciTools/iris-grib/pull/271>`_
 
 * `@pp-mo <https://github.com/pp-mo>`_ expanded the use of the "GRIB_PARAM"
   attributes to GRIB1 loading, and documented it more thoroughly.
@@ -32,15 +35,20 @@ Features
 * `@DPeterK <https://github.com/DPeterK>`_ and
   `@trexfeathers <https://github.com/trexfeathers>`_ added saving support for
   grid definition template 20 - polar stereographic.
+  `(ISSUE#122) <https://github.com/SciTools/iris-grib/issues/122>`_,
   `(PR#405) <https://github.com/SciTools/iris-grib/pull/405>`_
-
-* `@pp-mo <https://github.com/pp-mo>`_ made essential changes for compatibility with
-  Iris >= 3.10.
-  `(PR#463) <https://github.com/SciTools/iris-grib/pull/463>`_
 
 
 Documentation
 ^^^^^^^^^^^^^
+* `@tkknight <https://github.com/tkknight>`_ fixed docs building on ReadTheDocs, and
+  enabled a test docs-build for each individual PR.
+  `(ISSUE#365) <https://github.com/SciTools/iris-grib/issues/365>`_,
+  `(PR#366) <https://github.com/SciTools/iris-grib/pull/366>`_
+
+* `@tkknight <https://github.com/tkknight>`_ made docs builds treat warnings as errors.
+  `(PR#471) <https://github.com/SciTools/iris-grib/pull/471>`_
+
 * `@pp-mo <https://github.com/pp-mo>`_ reworked the main docs page to :
   headline basic load + save with Iris, rather than lower-level functions;
   better explain load-pairs and save-pairs usage; make all usage examples into
@@ -48,7 +56,9 @@ Documentation
   `(ISSUE#398) <https://github.com/SciTools/iris-grib/issues/398>`_,
   `(PR#402) <https://github.com/SciTools/iris-grib/pull/402>`_
 
-* `@bjlittle <https://github.com/bjlittle>`_ added the logo to README.md .
+* `@bjlittle <https://github.com/bjlittle>`_ updated the readme, replacing README.rst
+  with README.md and adding a logo .
+  `(PR#440) <https://github.com/SciTools/iris-grib/pull/440>`_,
   `(PR#447) <https://github.com/SciTools/iris-grib/pull/447>`_
 
 * `@tkknight <https://github.com/tkknight>`_ fixed the display formatting of linux
@@ -71,59 +81,107 @@ Dependencies
   as required for doctests.
   `(PR#413) <https://github.com/SciTools/iris-grib/pull/413>`_
 
-* `@pp-mo <https://github.com/pp-mo>`_ made compatible with Iris >= 3.10 .
+* `@pp-mo <https://github.com/pp-mo>`_ made essential changes for compatibility with
+  Iris >= 3.10.
   `(PR#463) <https://github.com/SciTools/iris-grib/pull/463>`_
 
 
 Internal
 ^^^^^^^^
 * `@trexfeathers <https://github.com/trexfeathers>`_ updated CONTRIBUTING.md in line with the
-  newer v5 SciTools CLA. `(PR#371) <https://github.com/SciTools/iris-grib/issues/371>`_
+  newer v5 SciTools CLA. `(PR#371) <https://github.com/SciTools/iris-grib/pull/371>`_
 
-* `@trexfeathers <https://github.com/trexfeathers>`_ added a pre-commit configuration.
-  `(PR#400) <https://github.com/SciTools/iris-grib/issues/400>`_
+* `@pp-mo <https://github.com/pp-mo>`_ updated an obsolete license header in one test.
+  `(PR#374) <https://github.com/SciTools/iris-grib/pull/374>`_
 
-* `@HGWright <https://github.com/HGWright>`_ replaced setup.py with pyproject.toml.
-  `(PR#408) <https://github.com/SciTools/iris-grib/pull/408>`_
+* `@trexfeathers <https://github.com/trexfeathers>`_ and
+  `@pp-mo <https://github.com/pp-mo>`_  added a pre-commit configuration and got all
+  checks passing.
+  `(ISSUE#388) <https://github.com/SciTools/iris-grib/issues/388>`_,
+  `(PR#400) <https://github.com/SciTools/iris-grib/pull/400>`_,
+  `(PR#406) <https://github.com/SciTools/iris-grib/pull/406>`_
+
+* `@HGWright <https://github.com/HGWright>`_ and
+  `@trexfeathers <https://github.com/trexfeathers>`_ replaced setup.py with
+  pyproject.toml.
+  `(ISSUE#387) <https://github.com/SciTools/iris-grib/issues/387>`_,
+  `(PR#408) <https://github.com/SciTools/iris-grib/pull/408>`_,
+  `(PR#429) <https://github.com/SciTools/iris-grib/pull/429>`_
 
 * `@stephenworsley <https://github.com/stephenworsley>`_ configured for MyPy checking via
-  pre-commit. `(PR#407) <https://github.com/SciTools/iris-grib/issues/407>`_
+  pre-commit.
+  `(ISSUE#386) <https://github.com/SciTools/iris-grib/issues/386>`_,
+  `(PR#407) <https://github.com/SciTools/iris-grib/pull/407>`_
 
-* `@ESadek-MO <https://github.com/ESadek-MO>`_ migrated CI testing from Cirrus to
+* `@ESadek-MO <https://github.com/ESadek-MO>`_ and
+  `@bjlittle <https://github.com/bjlittle>`_ migrated CI testing from Cirrus to
   GitHub Actions.
-  `(PR#415) <https://github.com/SciTools/iris-grib/issues/415>`_
+  `(ISSUE#340) <https://github.com/SciTools/iris-grib/issues/340>`_,
+  `(PR#415) <https://github.com/SciTools/iris-grib/pull/415>`_,
+  `(PR#425) <https://github.com/SciTools/iris-grib/pull/425>`_,
+  `(PR#432) <https://github.com/SciTools/iris-grib/pull/432>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ and
   `@HGWright <https://github.com/HGWright>`_ adopted Ruff for code style checking.
-  `(PR#430) <https://github.com/SciTools/iris-grib/issues/430>`_,
-  `(PR#419) <https://github.com/SciTools/iris-grib/issues/419>`_
+  `(ISSUE#384) <https://github.com/SciTools/iris-grib/issues/384>`_,
+  `(PR#430) <https://github.com/SciTools/iris-grib/pull/430>`_,
+  `(PR#419) <https://github.com/SciTools/iris-grib/pull/419>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ migrated the test runs from
   nose to pytest.
-  `(PR#420) <https://github.com/SciTools/iris-grib/issues/420>`_
+  `(ISSUE#253) <https://github.com/SciTools/iris-grib/issues/253>`_,
+  `(ISSUE#412) <https://github.com/SciTools/iris-grib/issues/412>`_,
+  `(PR#420) <https://github.com/SciTools/iris-grib/pull/420>`_,
+  `(PR#424) <https://github.com/SciTools/iris-grib/pull/424>`_
 
 * `@stephenworsley <https://github.com/stephenworsley>`_ removed the now-redundant
   _iris_mercator_support.py.
-  `(PR#433) <https://github.com/SciTools/iris-grib/issues/433>`_
+  `(ISSUE#431) <https://github.com/SciTools/iris-grib/issues/431>`_,
+  `(PR#433) <https://github.com/SciTools/iris-grib/pull/433>`_,
+  `(PR#435) <https://github.com/SciTools/iris-grib/pull/435>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ added build manifest checking in GHA.
-  `(PR#427) <https://github.com/SciTools/iris-grib/pull/427>`_
+  `(PR#427) <https://github.com/SciTools/iris-grib/pull/427>`_,
+  `(PR#436) <https://github.com/SciTools/iris-grib/pull/436>`_,
+  `(PR#441) <https://github.com/SciTools/iris-grib/pull/441>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ added dependabot checking.
   `(PR#426) <https://github.com/SciTools/iris-grib/pull/426>`_
 
+* `@bjlittle <https://github.com/bjlittle>`_ removed 'wheel' dependency from build
+  system, as-per
+  `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_.
+  `(PR#437) <https://github.com/SciTools/iris-grib/pull/437>`_
+
+* `@bjlittle <https://github.com/bjlittle>`_ fixed blacken-docs url in pre-commit,
+  as per
+  `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_.
+  `(PR#438) <https://github.com/SciTools/iris-grib/pull/438>`_
+
+* `@bjlittle <https://github.com/bjlittle>`_ provided a custom per-commit.ci message,
+  as per
+  `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_.
+  `(PR#439) <https://github.com/SciTools/iris-grib/pull/439>`_
+
 * `@pp-mo <https://github.com/pp-mo>`_ removed obsolete workaround routines relating to
   older eccodes versions.
+  `(ISSUE#239) <https://github.com/SciTools/iris-grib/issues/239>`_,
   `(PR#410) <https://github.com/SciTools/iris-grib/pull/410>`_
 
 * `@HGWright <https://github.com/HGWright>`_ implemented version handling with
   setuptools.scm .
+  `(ISSUE#418) <https://github.com/SciTools/iris-grib/issues/418>`_,
   `(PR#444) <https://github.com/SciTools/iris-grib/pull/444>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ moved the top-level ``./iris_grib`` folder
   to ``./src/iris_grib``, in line with modern practice, as per
   `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_.
+  `(ISSUE#421) <https://github.com/SciTools/iris-grib/issues/421>`_,
   `(PR#450) <https://github.com/SciTools/iris-grib/pull/450>`_
+
+* `@bjlittle <https://github.com/bjlittle>`_ adopted .git-blame-ignore-revs to exclude
+  some very noisy PRs from file "blame" views
+  `(PR#452) <https://github.com/SciTools/iris-grib/pull/452>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ dropped Python 3.9 support and added 3.12,
   in accordance with `nep29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
@@ -137,21 +195,28 @@ Internal
 * `@bjlittle <https://github.com/bjlittle>`_ added repository health checking with
   `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_
   via pre-commit.
+  `(ISSUE#392) <https://github.com/SciTools/iris-grib/issues/392>`_,
   `(PR#456) <https://github.com/SciTools/iris-grib/pull/456>`_
 
 * `@bjlittle <https://github.com/bjlittle>`_ added a CODE_OF_CONDUCT.md .
   `(PR#460) <https://github.com/SciTools/iris-grib/pull/460>`_
 
-* `@tkknight <https://github.com/tkknight>`_ made docs builds treat warnings as errors.
-  `(PR#471) <https://github.com/SciTools/iris-grib/pull/471>`_
+* `@bjlittle <https://github.com/bjlittle>`_ aligned .gitignore with a suggested
+  standard form
+  `(PR#461) <https://github.com/SciTools/iris-grib/pull/461>`_
+
+* `@bjlittle <https://github.com/bjlittle>`_ fixed some spelling errors to satisfy
+  codespell
+  `(PR#479) <https://github.com/SciTools/iris-grib/pull/479>`_
 
 * `@githubalexliu <https://github.com/githubalexliu>`_ fixed a problem with the MyPy
   checking.
+  `(ISSUE#496) <https://github.com/SciTools/iris-grib/issues/496>`_,
   `(PR#497) <https://github.com/SciTools/iris-grib/pull/497>`_
 
 * `@trexfeathers <https://github.com/trexfeathers>`_ aligned the pre-commit-config with
   the SciTools "reference" version.
-  `(PR#464) <https://github.com/SciTools/iris-grib/issues/464>`_,
+  `(PR#464) <https://github.com/SciTools/iris-grib/pull/464>`_,
 
 
 New Contributors
