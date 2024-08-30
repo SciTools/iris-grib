@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Iris-grib v0.20 (unreleased)
-============================
+Iris-grib v0.20
+===============
 
 The library ``iris-grib`` provides functionality for converting between weather and
 climate datasets that are stored as GRIB files and Iris :class:`~iris.cube.Cube`\s.
