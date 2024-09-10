@@ -4,7 +4,7 @@
 # Defined by PEP 518
 requires = [
     "setuptools>=64",
-    "wheel",
+    "setuptools_scm>=8.0",
 ]
 # Defined by PEP 517
 build-backend = "setuptools.build_meta"
@@ -23,20 +23,21 @@ classifiers = [
     "Operating System :: Unix",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
 dynamic = [
     "dependencies",
+    "optional-dependencies",
     "readme",
     "version",
 ]
-description = "Functionality for converting between weather/climate datasets stored as GRIB files and SciTools-Iris Cubes"
 keywords = [
     "iris",
     "GRIB",
@@ -46,7 +47,7 @@ keywords = [
 ]
 license = {text = "BSD-3-Clause"}
 name = "iris-grib"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 Code = "https://github.com/SciTools/iris-grib"
@@ -58,14 +59,21 @@ Issues = "https://github.com/SciTools/iris-grib/issues"
 license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
-dependencies = {file = "requirements/core.txt"}
-readme = {file = "README.rst", content-type = "text/x-rst"}
-version = {attr = "iris_grib.__version__"}
-optional-dependencies.all = {file = "requirements/all.txt"}
-optional-dependencies.test = {file = "requirements/test.txt"}
+dependencies = {file = "requirements/pypi-core.txt"}
+readme = {file = "README.md", content-type = "text/markdown"}
+
+[tool.setuptools.dynamic.optional-dependencies]
+dev = {file = "requirements/pypi-optional-dev.txt"}
+test = {file = "requirements/pypi-optional-test.txt"}
 
 [tool.setuptools.packages.find]
 include = ["iris_grib*"]
+where = ["src"]
+
+[tool.setuptools_scm]
+write_to = "src/iris_grib/_version.py"
+local_scheme = "dirty-tag"
+version_scheme = "release-branch-semver"
 
 #------------------------------------------------------------------------------
 
@@ -73,10 +81,10 @@ include = ["iris_grib*"]
 # See https://coverage.readthedocs.io/en/latest/config.html
 branch = true
 source = [
-    "iris_grib",
+    "src/iris_grib",
 ]
 omit = [
-    "iris_grib/tests/*",
+    "src/iris_grib/tests/*",
 ]
 
 [tool.coverage.report]
@@ -88,14 +96,20 @@ exclude_lines = [
 
 [tool.codespell]
 # See https://github.com/codespell-project/codespell/tree/master?tab=readme-ov-file#using-a-config-file
-ignore-words-list = "alpha-numeric,degreee,discontiguities,lazyness,meaned,nin"
-skip = "_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
+ignore-words-list = "alpha-numeric,assertIn,degreee,discontiguities,lazyness,meaned,nin"
+skip = "./CODE_OF_CONDUCT.md,_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
+
+[tool.check-manifest]
+ignore = [
+    "src/iris_grib/_version.py",
+]
 
 [tool.mypy]
 # See https://mypy.readthedocs.io/en/stable/config_file.html
 ignore_missing_imports = true
 warn_unused_configs = true
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "truthy-bool"]
 exclude = [
     'noxfile\.py',
     'docs/conf\.py'
@@ -117,15 +131,29 @@ doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
 log_cli = "True"
 log_cli_level = "INFO"
 minversion = "6.0"
-testpaths = "iris_grib"
+testpaths = "src/iris_grib"
 xfail_strict = "True"
+
+[tool.repo-review]
+ignore = [
+    # https://learn.scientific-python.org/development/guides/style/#MY102
+    "MY102",  # MyPy show_error_codes deprecated
+    # https://learn.scientific-python.org/development/guides/style/#MY105
+    "MY105",  # MyPy redundant-expr deprecated
+    # https://learn.scientific-python.org/development/guides/style/#PC170
+    "PC170",  # Uses PyGrep hooks
+    # https://learn.scientific-python.org/development/guides/style/#PC180
+    "PC180",  # Uses prettier
+    # https://learn.scientific-python.org/development/guides/pytest/#PP309
+    "PP309",  # Filter warnings specified
+]
 
 [tool.ruff]
 # Exclude the following, in addition to the standard set of exclusions.
 # https://docs.astral.sh/ruff/settings/#exclude
 line-length = 88
 src = [
-    "iris_grib",
+    "src",
     "docs",
 ]
 

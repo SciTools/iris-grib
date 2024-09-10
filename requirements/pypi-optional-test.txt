@@ -1,0 +1,8 @@
+codecov
+filelock
+nox
+requests
+iris-sample-data
+pytest
+pytest-cov
+pytest-mock

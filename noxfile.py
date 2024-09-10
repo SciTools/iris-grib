@@ -24,7 +24,7 @@ nox.options.reuse_existing_virtualenvs = True
 PACKAGE = str("iris_grib")
 
 #: Cirrus-CI environment variable hook.
-PY_VER = os.environ.get("PY_VER", ["3.9", "3.10", "3.11"])
+PY_VER = os.environ.get("PY_VER", ["3.10", "3.11", "3.12"])
 IRIS_SOURCE = os.environ.get("IRIS_SOURCE", ["source", "conda-forge"])
 
 #: Default cartopy cache directory.
@@ -270,11 +270,15 @@ def tests(session: nox.sessions.Session, iris_source: str):
 
     session.run("python", "-m", "eccodes", "selfcheck")
 
-    session.run(
+    run_args = [
         "pytest",
         "--pyargs",
         "iris_grib",
-    )
+    ]
+
+    if "-c" in session.posargs or "--coverage" in session.posargs:
+        run_args.extend(["--cov=iris_grib", "--cov-report=xml"])
+    session.run(*run_args)
 
 
 @nox.session(python=PY_VER, venv_backend="conda")

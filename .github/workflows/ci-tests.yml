@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   tests:
-    name: "${{ matrix.session }} (py${{ matrix.python-version }} ${{ matrix.os }}) [${{ matrix.iris-source }}]"
+    name: "${{ matrix.session }} py${{ matrix.python-version }} [${{ matrix.iris-source }}]"
 
     runs-on: ${{ matrix.os }}
 
@@ -35,25 +35,25 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         session: ["doctest", "linkcheck"]
         iris-source : ["conda-forge"]
         include:
           - os: "ubuntu-latest"
-            python-version: "3.11"
+            python-version: "3.12"
             session: "tests"
             iris-source: "conda-forge"
             coverage: "--coverage"
           - os: "ubuntu-latest"
-            python-version: "3.11"
+            python-version: "3.12"
             session: "tests"
             iris-source: "source"
           - os: "ubuntu-latest"
-            python-version: "3.10"
+            python-version: "3.11"
             session: "tests"
             iris-source: "conda-forge"
           - os: "ubuntu-latest"
-            python-version: "3.9"
+            python-version: "3.10"
             session: "tests"
             iris-source: "conda-forge"
 
@@ -123,14 +123,16 @@ jobs:
           env_name: ${{ env.ENV_NAME }}
           lock_file: ${{ env.LOCK_FILE }}
 
-      - name: "iris ${{ matrix.session }}"
+      - name: "iris-grib ${{ matrix.session }}"
         env:
           IRIS_SOURCE: ${{ matrix.iris-source }}
           PY_COLORS: 1
           PY_VER: ${{ matrix.python-version }}
         run: |
-          nox --session ${{ matrix.session }} -- --test-data-dir ${HOME}/iris-test-data/test_data
+          nox --session ${{ matrix.session }} -- ${{ matrix.coverage }} --test-data-dir ${HOME}/iris-test-data/test_data
 
-      - name: "Upload coverage report"
-        uses: codecov/codecov-action@v4
+      - name: "upload coverage report"
         if: ${{ matrix.coverage }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -7,22 +7,29 @@ dependencies:
   - python=3.10
 
 # Setup dependencies.
-  - setuptools
+  - setuptools>=64
+  - setuptools_scm>=8
 
 # Core dependencies.
   - iris>=3.0.2
   - python-eccodes>=1.6.1
-  - eccodes>=2.32.1
+  - eccodes>=2.33
 
 # Optional dependencies.
   - mo_pack
   - pip
+  - pre-commit
 
 # Test dependencies.
+  - codecov
   - filelock
+  - nox
   - requests
   - iris-sample-data
   - pytest
+  - pytest-cov
   - pytest-mock
 
-
+# Documentation dependencies.
+  - sphinx
+  - sphinx_rtd_theme

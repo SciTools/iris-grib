@@ -1,4 +1,0 @@
-# Core dependencies.
-
-scitools-iris>=3.0.2
-eccodes>=1.6.1
