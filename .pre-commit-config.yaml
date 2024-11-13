@@ -13,6 +13,7 @@ files: |
     (?x)(
         benchmarks\/.+\.py|
         docs\/.+\.py|
+        docs\/.+\.rst|
         lib\/.+\.py|
         noxfile\.py|
         pyproject\.toml|
