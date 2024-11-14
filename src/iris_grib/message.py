@@ -32,7 +32,9 @@ KEY_ALIAS = {
 
 class _OpenFileRef:
     """
-    A reference to an open file that ensures that the file is closed
+    A reference to an open file.
+
+    This object ensures that the file is closed
     when the object is garbage collected.
     """
 
@@ -46,8 +48,9 @@ class _OpenFileRef:
 
 class GribMessage:
     """
-    An in-memory representation of a GribMessage, providing
-    access to the :meth:`~GribMessage.data` payload and the metadata
+    An in-memory representation of a GribMessage.
+
+    Provides access to the :meth:`~GribMessage.data` payload and the metadata
     elements by section via the :meth:`~GribMessage.sections` property.
 
     """
@@ -55,6 +58,8 @@ class GribMessage:
     @staticmethod
     def messages_from_filename(filename):
         """
+        Return the messages in a file.
+
         Return a generator of :class:`GribMessage` instances; one for
         each message in the supplied GRIB file.
 
@@ -62,6 +67,7 @@ class GribMessage:
 
         * filename (string):
             Name of the file to generate fields from.
+
 
         """
         grib_fh = open(filename, "rb")
@@ -79,7 +85,9 @@ class GribMessage:
 
     def __init__(self, raw_message, recreate_raw, file_ref=None):
         """
-        It is recommended to obtain GribMessage instance from the static method
+        Create a GribMessage.
+
+        It is recommended to obtain GribMessage instances from the static method
         :meth:`~GribMessage.messages_from_filename`, rather than creating
         them directly.
 
@@ -97,8 +105,9 @@ class GribMessage:
     @property
     def sections(self):
         """
-        Return the key-value pairs of the message keys, grouped by containing
-        section.
+        Return the key-value pairs of the message keys.
+
+        The key-value pairs are grouped by containing section.
 
         Sections in a message are indexed by GRIB section-number,
         and values in a section are indexed by key strings.
@@ -222,8 +231,9 @@ class _DataProxy:
 
     def _bitmap(self, bitmap_section):
         """
-        Get the bitmap for the data from the message. The GRIB spec defines
-        that the bitmap is composed of values 0 or 1, where:
+        Get the bitmap for the data from the message.
+
+        The GRIB spec defines that the bitmap is composed of values 0 or 1, where:
 
             * 0: no data value at corresponding data point (data point masked).
             * 1: data value at corresponding data point (data point unmasked).
@@ -323,8 +333,10 @@ class _DataProxy:
 
 class _RawGribMessage:
     """
-    Lightweight GRIB message wrapper, containing **only** the coded keys
-    of the input GRIB message.
+    Lightweight GRIB message wrapper.
+
+    This contains **only** the coded keys of the input GRIB message.
+    I.E. excluding any "computed" keys.
 
     """
 
@@ -342,7 +354,9 @@ class _RawGribMessage:
 
     def __init__(self, message_id):
         """
-        A _RawGribMessage object contains the **coded** keys from a
+        Create a _RawGribMessage object.
+
+        This contains the **coded** keys from a
         GRIB message that is identified by the input message id.
 
         Args:
@@ -365,8 +379,9 @@ class _RawGribMessage:
     @property
     def sections(self):
         """
-        Return the key-value pairs of the message keys, grouped by containing
-        section.
+        Return the key-value pairs of the message keys.
+
+        The key-value pairs are grouped by containing section.
 
         Key-value pairs are collected into a dictionary of
         :class:`Section` objects. One such object is made for
@@ -380,7 +395,7 @@ class _RawGribMessage:
         return self._sections
 
     def _get_message_keys(self):
-        """Creates a generator of all the keys in the message."""
+        """Create a generator of all the keys in the message."""
 
         keys_itr = eccodes.codes_keys_iterator_new(self._message_id)
         eccodes.codes_skip_computed(keys_itr)
@@ -424,8 +439,9 @@ class _RawGribMessage:
 
 class Section:
     """
-    A Section of a GRIB message, supporting dictionary like access to
-    attributes using gribapi key strings.
+    A Section of a GRIB message.
+
+    This supports dictionary-like access to key values, using gribapi key strings.
 
     Values for keys may be changed using assignment but this does not
     write to the file.
@@ -518,8 +534,9 @@ class Section:
 
     def get_computed_key(self, key):
         """
-        Get the computed value associated with the given key in the GRIB
-        message.
+        Get the computed value for a given key.
+
+        Returns the value associated with the given key in the GRIB message.
 
         Args:
 
@@ -544,6 +561,7 @@ class Section:
     def _get_value_or_missing(self, key, use_int=False):
         """
         Return value of header element, or None if value is encoded as missing.
+
         Implementation of Regulations 92.1.4 and 92.1.5 via ECCodes.
 
         """

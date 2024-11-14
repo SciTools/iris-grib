@@ -225,14 +225,9 @@ checks = [
 
     # Record temporarily ignored checks below; will be reviewed at a later date:
     # TODO: work to remove these at a later date.
-    "GL08",  # The object does not have a docstrings not have a docstring
-    "PR01",  # Parameters ... not documented
-    "PR02",  # Unknown parameters {....}
-    "RT01",  # No Returns section found
-    "PR10",  # Parameter requires a space before the colon separating parameter name and type
-    "SS03",  # Summary does not end with a period
-    "SS05",  # Summary must start with infinitive verb
-    "SS06",  # Summary should fit in a single line
+    "GL08",  # *975    The object does not have a docstring
+    "PR01",  # *149    Parameters ... not documented
+    "RT01",  # *9      No Returns section found
 ]
 exclude = [
     '\.__eq__$',

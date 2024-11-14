@@ -3,8 +3,9 @@
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
 """
-Module to support the loading and conversion of a GRIB2 message into
-cube metadata.
+Module to support loading of GRIB2 data.
+
+Code to convert a GRIB2 message into cube metadata.
 
 """
 
@@ -143,7 +144,7 @@ _XYGRIDLENGTH_GDT_NUMBERS = (20, 30, 31, 110, 140)
 # Regulation 92.1.12
 def unscale(value, factor):
     """
-    Implements Regulation 92.1.12.
+    Implement Regulation 92.1.12.
 
     Args:
 
@@ -364,8 +365,9 @@ def resolution_flags(resolutionAndComponentFlags):
 
 def ellipsoid(shapeOfTheEarth, major, minor, radius):
     """
-    Translate the shape of the earth to an appropriate coordinate
-    reference system.
+    Translate the shape of the earth code.
+
+    Convert the code to an appropriate Iris coordinate system.
 
     For MDI set either major and minor or radius to :data:`numpy.ma.masked`
 
@@ -472,7 +474,9 @@ def ellipsoid_geometry(section):
 
 def _calculate_increment(first_point, last_point, n_increments, mod=math.inf):
     """
-    Calculates the directional increment from the difference between the grid
+    Calculate a directional increment.
+
+    Calculate the directional increment from the difference between the grid
     point values divided by the total number of increments. Required by
     template 0 & 40 when no increment values are provided.
     """
@@ -481,7 +485,10 @@ def _calculate_increment(first_point, last_point, n_increments, mod=math.inf):
 
 def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
     """
-    Translate templates representing regularly spaced latitude/longitude
+    Translate grid definition templates 0 and 1.
+
+    Translate elements common to templates 0 and 1.
+    These templates represent regularly spaced latitude/longitude
     on either a standard or rotated grid.
 
     Updates the metadata in-place with the translations.
@@ -576,8 +583,9 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
 
 def grid_definition_template_0(section, metadata):
     """
-    Translate template representing regular latitude/longitude
-    grid (regular_ll).
+    Translate grid definition template 0.
+
+    Template representing regular latitude/longitude grid (regular_ll).
 
     Updates the metadata in-place with the translations.
 
@@ -598,7 +606,9 @@ def grid_definition_template_0(section, metadata):
 
 def grid_definition_template_1(section, metadata):
     """
-    Translate template representing rotated latitude/longitude grid.
+    Translate grid definition template 1.
+
+    Template representing rotated latitude/longitude grid.
 
     Updates the metadata in-place with the translations.
 
@@ -628,8 +638,11 @@ def grid_definition_template_1(section, metadata):
 
 def grid_definition_template_4_and_5(section, metadata, y_name, x_name, cs):
     """
-    Translate template representing variable resolution latitude/longitude
-    and common variable resolution rotated latitude/longitude.
+    Translate grid definition templates 4 and 5.
+
+    Translate elements common to templates 4 and 5.
+    These templates represent variable-resolution latitude/longitude
+    and common forms of variable-resolution rotated latitude/longitude.
 
     Updates the metadata in-place with the translations.
 
@@ -704,7 +717,9 @@ def grid_definition_template_4_and_5(section, metadata, y_name, x_name, cs):
 
 def grid_definition_template_4(section, metadata):
     """
-    Translate template representing variable resolution latitude/longitude.
+    Translate grid definition template 4.
+
+    This template represents variable resolution latitude/longitude.
 
     Updates the metadata in-place with the translations.
 
@@ -725,7 +740,9 @@ def grid_definition_template_4(section, metadata):
 
 def grid_definition_template_5(section, metadata):
     """
-    Translate template representing variable resolution rotated
+    Translate grid definition template 5.
+
+    This template represents variable resolution rotated
     latitude/longitude.
 
     Updates the metadata in-place with the translations.
@@ -756,7 +773,9 @@ def grid_definition_template_5(section, metadata):
 
 def grid_definition_template_10(section, metadata):
     """
-    Translate template representing a Mercator grid.
+    Translate grid definition template 10.
+
+    This template represents a Mercator grid.
 
     Updates the metadata in-place with the translations.
 
@@ -793,7 +812,9 @@ def grid_definition_template_10(section, metadata):
 
 def grid_definition_template_12(section, metadata):
     """
-    Translate template representing transverse Mercator.
+    Translate grid definition template 12.
+
+    This template represents transverse Mercator.
 
     Updates the metadata in-place with the translations.
 
@@ -883,7 +904,9 @@ def grid_definition_template_12(section, metadata):
 
 def grid_definition_template_20(section, metadata):
     """
-    Translate template representing a Polar Stereographic grid.
+    Translate grid definition template 20.
+
+    This template represents a Polar Stereographic grid.
 
     Updates the metadata in-place with the translations.
 
@@ -983,7 +1006,9 @@ def _calculate_proj_coords_from_grid_lengths(section, cs):
 
 def grid_definition_template_30(section, metadata):
     """
-    Translate template representing a Lambert Conformal grid.
+    Translate grid definition template 30.
+
+    This template represents a Lambert Conformal grid.
 
     Updates the metadata in-place with the translations.
 
@@ -1049,7 +1074,9 @@ def grid_definition_template_30(section, metadata):
 
 def grid_definition_template_40(section, metadata):
     """
-    Translate template representing a Gaussian grid.
+    Translate an "irregular form" grid definition template 40.
+
+    This template represents a Gaussian grid.
 
     Updates the metadata in-place with the translations.
 
@@ -1076,7 +1103,9 @@ def grid_definition_template_40(section, metadata):
 
 def grid_definition_template_40_regular(section, metadata, cs):
     """
-    Translate template representing a regular Gaussian grid.
+    Translate a "regular form" grid definition template 40.
+
+    This template represents a regular Gaussian grid.
 
     """
     scan = scanning_mode(section["scanningMode"])
@@ -1163,7 +1192,9 @@ def grid_definition_template_40_regular(section, metadata, cs):
 
 def grid_definition_template_40_reduced(section, metadata, cs):
     """
-    Translate template representing a reduced Gaussian grid.
+    Translate a "reduced form" grid definition template 40.
+
+    This template represents a reduced Gaussian grid.
 
     """
     # Get the latitude and longitude points.
@@ -1194,7 +1225,9 @@ def grid_definition_template_40_reduced(section, metadata, cs):
 
 def grid_definition_template_90(section, metadata):
     """
-    Translate template representing space view.
+    Translate grid definition template 90.
+
+    This template represents a space view.
 
     Updates the metadata in-place with the translations.
 
@@ -1309,7 +1342,9 @@ def grid_definition_template_90(section, metadata):
 
 def grid_definition_template_140(section, metadata):
     """
-    Translate template representing Lambert Azimuthal Equal Area.
+    Translate grid definition template 140.
+
+    This template represents Lambert Azimuthal Equal Area.
 
     Updates the metadata in-place with the translations.
 
@@ -1532,6 +1567,8 @@ def ensure_surface_air_pressure_name(cube):
 
 def time_range_unit(indicatorOfUnitForForecastTime):
     """
+    Translate the time range indicator.
+
     Translate the time range indicator to an equivalent
     :class:`cf_units.Unit`.
 
@@ -1845,6 +1882,8 @@ def statistical_forecast_period_coord(section, frt_coord):
 
 def other_time_coord(rt_coord, fp_coord):
     """
+    Make the "other" scalar time DimCoord.
+
     Return the counterpart to the given scalar 'time' or
     'forecast_reference_time' coordinate, by combining it with the
     given forecast_period coordinate.
@@ -2108,7 +2147,9 @@ def ensemble_identifier(section):
 
 def product_definition_template_0(section, metadata, rt_coord):
     """
-    Translate template representing an analysis or forecast at a horizontal
+    Translate product definition template 0.
+
+    This template represents an analysis or forecast at a horizontal
     level or in a horizontal layer at a point in time.
 
     Updates the metadata in-place with the translations.
@@ -2140,7 +2181,9 @@ def product_definition_template_0(section, metadata, rt_coord):
 
 def product_definition_template_1(section, metadata, frt_coord):
     """
-    Translate template representing individual ensemble forecast, control
+    Translate product definition template 1.
+
+    This template represents individual ensemble forecast, control
     and perturbed, at a horizontal level or in a horizontal layer at a
     point in time.
 
@@ -2169,7 +2212,9 @@ def product_definition_template_1(section, metadata, frt_coord):
 
 def product_definition_template_6(section, metadata, frt_coord):
     """
-    Translate template representing percentile forecast,
+    Translate product definition template 6.
+
+    This template represents a percentile forecast,
     at a horizontal level or in a horizontal layer at a
     point in time.
 
@@ -2198,7 +2243,9 @@ def product_definition_template_6(section, metadata, frt_coord):
 
 def product_definition_template_8(section, metadata, frt_coord):
     """
-    Translate template representing average, accumulation and/or extreme values
+    Translate product definition template 8.
+
+    This template represents average, accumulation and/or extreme values
     or other statistically processed values at a horizontal level or in a
     horizontal layer in a continuous or non-continuous time interval.
 
@@ -2248,7 +2295,9 @@ def product_definition_template_8(section, metadata, frt_coord):
 
 def product_definition_template_9(section, metadata, frt_coord):
     """
-    Translate template representing probability forecasts at a
+    Translate product definition template 9.
+
+    This template represents probability forecasts at a
     horizontal level or in a horizontal layer in a continuous or
     non-continuous time interval.
 
@@ -2314,7 +2363,9 @@ def product_definition_template_9(section, metadata, frt_coord):
 
 def product_definition_template_10(section, metadata, frt_coord):
     """
-    Translate template representing percentile forecasts at a horizontal level
+    Translate product definition template 10.
+
+    This template represents percentile forecasts at a horizontal level
     or in a horizontal layer in a continuous or non-continuous time interval.
 
     Updates the metadata in-place with the translations.
@@ -2343,7 +2394,9 @@ def product_definition_template_10(section, metadata, frt_coord):
 
 def product_definition_template_11(section, metadata, frt_coord):
     """
-    Translate template representing individual ensemble forecast, control
+    Translate product definition template 11.
+
+    This template represents individual ensemble forecast, control
     or perturbed; average, accumulation and/or extreme values
     or other statistically processed values at a horizontal level or in a
     horizontal layer in a continuous or non-continuous time interval.
@@ -2372,7 +2425,9 @@ def product_definition_template_11(section, metadata, frt_coord):
 
 def product_definition_template_15(section, metadata, frt_coord):
     """
-    Translate template representing : "average, accumulation, extreme values,
+    Translate product definition template 15.
+
+    This template represents : "average, accumulation, extreme values,
     or other statistically processed values over a spatial area at a
     horizontal level or in a horizontal layer at a point in time".
 
@@ -2456,7 +2511,9 @@ def satellite_common(section, metadata):
 
 def product_definition_template_31(section, metadata, rt_coord):
     """
-    Translate template representing a satellite product.
+    Translate product definition template 31.
+
+    This template represents a satellite product.
 
     Updates the metadata in-place with the translations.
 
@@ -2482,7 +2539,9 @@ def product_definition_template_31(section, metadata, rt_coord):
 
 def product_definition_template_32(section, metadata, rt_coord):
     """
-    Translate template representing an analysis or forecast at a horizontal
+    Translate product definition template 32.
+
+    This template represents an analysis or forecast at a horizontal
     level or in a horizontal layer at a point in time for simulated (synthetic)
     satellite data.
 
@@ -2512,7 +2571,9 @@ def product_definition_template_32(section, metadata, rt_coord):
 
 def product_definition_template_40(section, metadata, frt_coord):
     """
-    Translate template representing an analysis or forecast at a horizontal
+    Translate product definition template 40.
+
+    This template represents an analysis or forecast at a horizontal
     level or in a horizontal layer at a point in time for atmospheric chemical
     constituents.
 
@@ -2642,6 +2703,7 @@ def product_definition_section(section, metadata, discipline, tablesVersion, rt_
 def data_representation_section(section):
     """
     Translate section 5 from the GRIB2 message.
+
     Grid point template decoding is fully provided by the ECMWF GRIB API,
     all grid point and spectral templates are supported, the data payload
     is returned from the GRIB API already unpacked.

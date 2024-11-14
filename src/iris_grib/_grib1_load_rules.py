@@ -17,7 +17,7 @@ from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 
 def grib1_convert(grib):
     """
-    Converts a GRIB1 message into the corresponding items of Cube metadata.
+    Convert a GRIB1 message into the corresponding items of Cube metadata.
 
     Args:
 
