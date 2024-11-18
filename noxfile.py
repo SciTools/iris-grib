@@ -293,7 +293,7 @@ def doctest(session: nox.sessions.Session):
 
     """
     prepare_venv(session)
-    session.cd("docs")
+    session.cd("formerly_docs")
     session.run(
         "make",
         "clean",
@@ -319,7 +319,7 @@ def linkcheck(session: nox.sessions.Session):
 
     """
     prepare_venv(session)
-    session.cd("docs")
+    session.cd("formerly_docs")
     session.run(
         "make",
         "clean",

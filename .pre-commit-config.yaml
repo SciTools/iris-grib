@@ -102,5 +102,5 @@ repos:
     rev: v1.8.0
     hooks:
       - id: numpydoc-validation
-        exclude: "src/iris_grib/tests/|noxfile.py"
+        exclude: "src/iris_grib/formerly_tests/|noxfile.py"
         types: [file, python]

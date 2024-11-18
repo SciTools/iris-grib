@@ -154,7 +154,7 @@ ignore = [
 line-length = 88
 src = [
     "src",
-    "docs",
+    "formerly_docs",
 ]
 
 [tool.ruff.format]
