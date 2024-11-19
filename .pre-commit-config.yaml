@@ -51,6 +51,32 @@ repos:
         # Duplicates Ruff W291 but also works on non-Python files.
     -   id: trailing-whitespace
 
+-   repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.19.1
+    hooks:
+    -   id: blacken-docs
+        types: [file, rst]
+
+-   repo: https://github.com/codespell-project/codespell
+    rev: "v2.3.0"
+    hooks:
+    -   id: codespell
+        types_or: [asciidoc, python, markdown, rst]
+        additional_dependencies: [tomli]
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.13.0'
+    hooks:
+    -   id: mypy
+        exclude: 'noxfile\.py|docs/conf\.py'
+
+-   repo: https://github.com/numpy/numpydoc
+    rev: v1.8.0
+    hooks:
+      - id: numpydoc-validation
+        exclude: "src/iris_grib/tests/|noxfile.py"
+        types: [file, python]
+
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.7.3"
     hooks:
@@ -60,36 +86,11 @@ repos:
     -   id: ruff-format
         types: [file, python]
 
--   repo: https://github.com/codespell-project/codespell
-    rev: "v2.3.0"
-    hooks:
-    -   id: codespell
-        types_or: [asciidoc, python, markdown, rst]
-        additional_dependencies: [tomli]
-
--   repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.19.1
-    hooks:
-    -   id: blacken-docs
-        types: [file, rst]
-
 -   repo: https://github.com/aio-libs/sort-all
     rev: v1.3.0
     hooks:
     -   id: sort-all
         types: [file, python]
-
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.13.0'
-    hooks:
-    -   id: mypy
-        exclude: 'noxfile\.py|docs/conf\.py'
-
--   repo: https://github.com/abravalheri/validate-pyproject
-    # More exhaustive than Ruff RUF200.
-    rev: "v0.23"
-    hooks:
-    - id: validate-pyproject
 
 -   repo: https://github.com/scientific-python/cookie
     rev: 2024.08.19
@@ -98,9 +99,8 @@ repos:
       additional_dependencies: ["repo-review[cli]"]
       args: ["--show=errskip"]
 
--   repo: https://github.com/numpy/numpydoc
-    rev: v1.8.0
+-   repo: https://github.com/abravalheri/validate-pyproject
+    # More exhaustive than Ruff RUF200.
+    rev: "v0.23"
     hooks:
-      - id: numpydoc-validation
-        exclude: "src/iris_grib/tests/|noxfile.py"
-        types: [file, python]
+    - id: validate-pyproject
