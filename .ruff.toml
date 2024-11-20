@@ -42,7 +42,6 @@ lint.ignore = [
     "ANN202",
     "ANN204",
     "ANN205",
-    "ANN206",
 
     # flake8-unused-arguments (ARG)
     # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
@@ -111,7 +110,6 @@ lint.ignore = [
     "PLR0913",
     "PLR0915",
     "PLR1714",
-    "PLR1722",
     "PLR2004",
     "PLR5501",
 
@@ -198,7 +196,6 @@ lint.ignore = [
 
     # pyupgrade (UP)
     # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "UP008",
     "UP009",
     "UP018",
     "UP027",
