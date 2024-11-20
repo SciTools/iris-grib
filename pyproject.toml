@@ -106,15 +106,31 @@ ignore = [
 
 [tool.mypy]
 # See https://mypy.readthedocs.io/en/stable/config_file.html
-ignore_missing_imports = true
+
+# Extra checks we have chosen to enable.
 warn_unused_configs = true
 warn_unreachable = true
 enable_error_code = ["ignore-without-code", "truthy-bool"]
+
+# Checks we have temporarily *disabled*
+# NOTE:
+#   * Some of these settings are also disabled by "strict = false"
+#   * See "$ mypy --help" for which
+#   * Given these settings, "strict = true" generates no errors
+# TODO: all of these should eventually be removed
+disallow_any_generics = false  # 5 errors
+disallow_subclassing_any = false  # 14 errors
+disallow_untyped_calls = false  # 8 errors
+disallow_untyped_defs = false  # 964 errors
+disallow_incomplete_defs = false  # 3 errors
+check_untyped_defs = false  # 100 errors
+no_implicit_reexport = false  # 134 errors
+
 exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
-strict = false  # Default value, make true when introducing type hinting.
+strict = true  # Default value, make true when introducing type hinting.
 
 [tool.pytest.ini_options]
 # See https://docs.pytest.org/en/stable/reference/customize.html
