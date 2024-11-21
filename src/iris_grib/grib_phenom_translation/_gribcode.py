@@ -3,7 +3,7 @@
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
 """
-Provide object to represent grib phenomena
+Provide object to represent grib phenomena.
 
 For use as cube attributes, freely convertible to+from strings
 """
@@ -120,7 +120,7 @@ def GRIBCode(edition, *args, **kwargs):
 @dataclass
 class GenericConcreteGRIBCode:
     """
-    Common behaviour for GRIBCode1 and GRIBCode2
+    Common behaviour for GRIBCode1 and GRIBCode2.
 
     GRIBCode1 and GRIBCode2 inherit this, making both dataclasses.
     They contain different data properties.

@@ -26,9 +26,10 @@ and ``iris-grib`` installed in your Python environment.
    import iris
    import iris_grib
    import warnings
-   warnings.simplefilter('ignore')
+
+   warnings.simplefilter("ignore")
    cube = iris.load_cube(iris.sample_data_path("rotated_pole.nc"))
-   iris.save(cube, 'testfile.grib', saver='grib2')
+   iris.save(cube, "testfile.grib", saver="grib2")
 
 For example, to load GRIB data :
 
@@ -185,6 +186,7 @@ You can convert Iris cubes to eccodes messages, and modify or filter them before
 
    from iris.coords import DimCoord
    import eccodes
+
    cube_height_2m5 = iris.load_cube(iris.sample_data_path("rotated_pole.nc"))
    cube_height_2m5.add_aux_coord(DimCoord([2.5], standard_name="height", units="m"), ())
 
@@ -255,4 +257,3 @@ See also:
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

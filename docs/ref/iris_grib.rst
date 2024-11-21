@@ -22,4 +22,3 @@ In this module:
 .. autofunction:: iris_grib.save_pairs_from_cube
 
 .. autofunction:: iris_grib.save_messages
-

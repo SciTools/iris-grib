@@ -15,4 +15,3 @@ In this module:
 
 .. autoclass:: iris_grib.message.Section
     :members:
-

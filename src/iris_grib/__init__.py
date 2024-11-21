@@ -692,8 +692,9 @@ class GribWrapper:
 
     def phenomenon_points(self, time_unit):
         """
-        Return the phenomenon time point offset from the epoch time reference
-        measured in the appropriate time units.
+        Return the phenomenon time points.
+
+        As offsets from the epoch time reference, measured in appropriate time units.
 
         """
         time_reference = "%s since epoch" % time_unit
@@ -705,8 +706,9 @@ class GribWrapper:
 
     def phenomenon_bounds(self, time_unit):
         """
-        Return the phenomenon time bound offsets from the epoch time reference
-        measured in the appropriate time units.
+        Return the phenomenon time bounds.
+
+        As offsets from the epoch time reference, measured in appropriate time units.
 
         """
         # TODO #576 Investigate when it's valid to get phenomenon_bounds
@@ -762,7 +764,7 @@ def _load_generate(filename):
 
 def load_cubes(filenames, callback=None):
     """
-    Returns an iterator over cubes from the given list of filenames.
+    Return an iterator over cubes from the given list of filenames.
 
     Args:
 
@@ -786,9 +788,21 @@ def load_cubes(filenames, callback=None):
 
 def load_pairs_from_fields(grib_messages):
     """
-    Convert an iterable of GRIB messages into an iterable of
-    (Cube, Grib message) tuples.
+    Convert an GRIB messages into (Cube, Grib message) tuples.
 
+    Parameters
+    ----------
+    grib_messages : iterable on (cube, message)
+        An iterable of :class:`GribMessage`.
+
+    Returns
+    -------
+    iterable of (cube, message)
+        An iterable of (:class:`~iris.Cube`, :class:`GribMessage`),
+        pairing each message with a corresponding generated cube.
+
+    Notes
+    -----
     This capability can be used to filter out fields before they are passed to
     the load pipeline, and amend the cubes once they are created, using
     GRIB metadata conditions.  Where the filtering
@@ -894,6 +908,7 @@ def save_pairs_from_cube(cube):
 def save_messages(messages, target, append=False):
     """
     Save messages to a GRIB2 file.
+
     The messages will be released as part of the save.
 
     Args:

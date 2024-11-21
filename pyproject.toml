@@ -106,15 +106,31 @@ ignore = [
 
 [tool.mypy]
 # See https://mypy.readthedocs.io/en/stable/config_file.html
-ignore_missing_imports = true
+
+# Extra checks we have chosen to enable.
 warn_unused_configs = true
 warn_unreachable = true
 enable_error_code = ["ignore-without-code", "truthy-bool"]
+
+# Checks we have temporarily *disabled*
+# NOTE:
+#   * Some of these settings are also disabled by "strict = false"
+#   * See "$ mypy --help" for which
+#   * Given these settings, "strict = true" generates no errors
+# TODO: all of these should eventually be removed
+disallow_any_generics = false  # 5 errors
+disallow_subclassing_any = false  # 14 errors
+disallow_untyped_calls = false  # 8 errors
+disallow_untyped_defs = false  # 964 errors
+disallow_incomplete_defs = false  # 3 errors
+check_untyped_defs = false  # 100 errors
+no_implicit_reexport = false  # 134 errors
+
 exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
-strict = false  # Default value, make true when introducing type hinting.
+strict = true  # Default value, make true when introducing type hinting.
 
 [tool.pytest.ini_options]
 # See https://docs.pytest.org/en/stable/reference/customize.html
@@ -190,3 +206,47 @@ known-first-party = ["iris_grib"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.numpydoc_validation]
+checks = [
+    "all",  # Enable all numpydoc validation rules, apart from the following:
+
+    # -> Docstring text (summary) should start in the line immediately
+    #    after the opening quotes (not in the same line, or leaving a
+    #    blank line in between)
+    "GL01",  # Permit summary line on same line as docstring opening quotes.
+
+    # -> Closing quotes should be placed in the line after the last text
+    #    in the docstring (do not close the quotes in the same line as
+    #    the text, or leave a blank line between the last text and the
+    #    quotes)
+    "GL02",  # Permit a blank line before docstring closing quotes.
+
+    # -> Double line break found; please use only one blank line to
+    #    separate sections or paragraphs, and do not leave blank lines
+    #    at the end of docstrings
+    "GL03",  # Ignoring.
+
+    # -> See Also section not found
+    "SA01",  # Not all docstrings require a "See Also" section.
+
+    # -> No extended summary found
+    "ES01",  # Not all docstrings require an "Extended Summary" section.
+
+    # -> No examples section found
+    "EX01",  # Not all docstrings require an "Examples" section.
+
+    # -> No Yields section found
+    "YD01",  # Not all docstrings require a "Yields" section.
+
+    # Record temporarily ignored checks below; will be reviewed at a later date:
+    # TODO: work to remove these at a later date.
+    "GL08",  # *975    The object does not have a docstring
+    "PR01",  # *149    Parameters ... not documented
+    "RT01",  # *9      No Returns section found
+]
+exclude = [
+    '\.__eq__$',
+    '\.__ne__$',
+    '\.__repr__$',
+]

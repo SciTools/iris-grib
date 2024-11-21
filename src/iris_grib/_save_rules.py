@@ -328,6 +328,8 @@ def step(points, atol):
 
 def grid_definition_template_0(cube, grib):
     """
+    Write grid definition template 0.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.0.
 
@@ -344,6 +346,8 @@ def grid_definition_template_0(cube, grib):
 
 def grid_definition_template_1(cube, grib):
     """
+    Write grid definition template 1.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.1.
 
@@ -365,6 +369,8 @@ def grid_definition_template_1(cube, grib):
 
 def grid_definition_template_4(cube, grib):
     """
+    Write grid definition template 4.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.4.
 
@@ -380,6 +386,8 @@ def grid_definition_template_4(cube, grib):
 
 def grid_definition_template_5(cube, grib):
     """
+    Write grid definition template 5.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.5.
 
@@ -408,6 +416,8 @@ def grid_definition_template_5(cube, grib):
 
 def grid_definition_template_10(cube, grib):
     """
+    Write grid definition template 10.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.10.
 
@@ -486,6 +496,8 @@ def grid_definition_template_10(cube, grib):
 
 def grid_definition_template_12(cube, grib):
     """
+    Write grid definition template 12.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.12.
 
@@ -549,6 +561,8 @@ def grid_definition_template_12(cube, grib):
 
 def _perspective_projection_common(cube, grib):
     """
+    Write grid definition templates 20 and 30.
+
     Common functionality for setting grid keys for the perspective projection
     grid definition templates (20 and 30; Polar Stereographic and Lambert
     Conformal.
@@ -619,6 +633,8 @@ def _perspective_projection_common(cube, grib):
 
 def grid_definition_template_20(cube, grib):
     """
+    Write grid definition template 20.
+
     Set keys within the provided GRIB message based on
     Grid Definition Template 3.20.
 
@@ -668,6 +684,8 @@ def grid_definition_template_20(cube, grib):
 
 def grid_definition_template_30(cube, grib):
     """
+    Write grid definition template 30.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.30.
 
@@ -700,6 +718,8 @@ def grid_definition_template_30(cube, grib):
 
 def grid_definition_template_140(cube, grib):
     """
+    Write grid definition template 140.
+
     Set keys within the provided grib message based on
     Grid Definition Template 3.140.
 
@@ -778,6 +798,8 @@ def grid_definition_template_140(cube, grib):
 
 def grid_definition_section(cube, grib):
     """
+    Write the grid definition template.
+
     Set keys within the grid definition section of the provided grib message,
     based on the properties of the cube.
 
@@ -878,7 +900,11 @@ def set_discipline_and_parameter(cube, grib):
 
 
 def _non_missing_forecast_period(cube):
-    # Calculate "model start time" to use as the reference time.
+    """
+    Calculate "model start time" to use as the reference time.
+
+    In the case that a forecast-period coord already exists.
+    """
     fp_coord = cube.coord("forecast_period")
 
     # Convert fp and t to hours so we can subtract to calculate R.
@@ -921,6 +947,8 @@ def _non_missing_forecast_period(cube):
 
 def _missing_forecast_period(cube):
     """
+    Create time coords when there is no forecast-period coordinate.
+
     Returns a reference time and significance code together with a forecast
     period and corresponding units type code.
 
@@ -964,7 +992,9 @@ def _missing_forecast_period(cube):
 
 def set_forecast_time(cube, grib):
     """
-    Set the forecast time keys based on the forecast_period coordinate. In
+    Write the forecast time.
+
+    Set message keys based on the forecast_period coordinate. In
     the absence of a forecast_period and forecast_reference_time,
     the forecast time is set to zero.
 
@@ -1165,6 +1195,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
 
 def set_time_range(time_coord, grib):
     """
+    Write the time range.
+
     Set the time range keys in the specified message
     based on the bounds of the provided time coordinate.
 
@@ -1201,6 +1233,8 @@ def set_time_range(time_coord, grib):
 
 def set_time_increment(cell_method, grib):
     """
+    Write the time increment.
+
     Set the time increment keys in the specified message
     based on the provided cell method.
 
@@ -1340,6 +1374,8 @@ def get_spatial_process_code(spatial_processing_type):
 
 def set_ensemble(cube, grib):
     """
+    Write the ensemble number.
+
     Set keys in the provided grib based message relating to ensemble
     information.
 
@@ -1359,6 +1395,8 @@ def set_ensemble(cube, grib):
 
 def product_definition_template_common(cube, grib, full3d_cube=None):
     """
+    Write common parts of the product definition template.
+
     Set keys within the provided grib message that are common across
     all of the supported product definition templates.
 
@@ -1379,6 +1417,8 @@ def product_definition_template_common(cube, grib, full3d_cube=None):
 
 def product_definition_template_0(cube, grib, full3d_cube=None):
     """
+    Write product definition template 0.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.0.
 
@@ -1392,6 +1432,8 @@ def product_definition_template_0(cube, grib, full3d_cube=None):
 
 def product_definition_template_1(cube, grib, full3d_cube=None):
     """
+    Write product definition template 1.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.1.
 
@@ -1407,6 +1449,8 @@ def product_definition_template_1(cube, grib, full3d_cube=None):
 
 def product_definition_template_6(cube, grib, full3d_cube=None):
     """
+    Write product definition template 6.
+
     Set keys within the provided grib message based on Product Definition
     Template 4.6.
 
@@ -1426,6 +1470,8 @@ def product_definition_template_6(cube, grib, full3d_cube=None):
 
 def product_definition_template_8(cube, grib, full3d_cube=None):
     """
+    Write product definition template 8.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.8.
 
@@ -1439,6 +1485,8 @@ def product_definition_template_8(cube, grib, full3d_cube=None):
 
 def product_definition_template_10(cube, grib, full3d_cube=None):
     """
+    Write product definition template 10.
+
     Set keys within the provided grib message based on Product Definition
     Template 4.10.
 
@@ -1463,6 +1511,8 @@ def product_definition_template_10(cube, grib, full3d_cube=None):
 
 def product_definition_template_11(cube, grib, full3d_cube=None):
     """
+    Write product definition template 11.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.11.
 
@@ -1477,6 +1527,8 @@ def product_definition_template_11(cube, grib, full3d_cube=None):
 
 def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
     """
+    Write product definition template 8, 10 and 11.
+
     Set keys within the provided grib message based on common aspects of
     Product Definition Templates 4.8 and 4.11.
 
@@ -1552,6 +1604,8 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
 
 def product_definition_template_15(cube, grib, full3d_cube=None):
     """
+    Write product definition template 15.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.15.
 
@@ -1601,6 +1655,8 @@ def product_definition_template_15(cube, grib, full3d_cube=None):
 
 def product_definition_template_40(cube, grib, full3d_cube=None):
     """
+    Write product definition template 40.
+
     Set keys within the provided grib message based on Product
     Definition Template 4.40.
 
@@ -1617,6 +1673,8 @@ def product_definition_template_40(cube, grib, full3d_cube=None):
 
 def product_definition_section(cube, grib, full3d_cube=None):
     """
+    Write the product definition template.
+
     Set keys within the product definition section of the provided
     grib message based on the properties of the cube.
 
