@@ -2,8 +2,7 @@
 #
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
-"""
-Conversion of cubes to/from GRIB.
+"""Conversion of cubes to/from GRIB.
 
 See: `ECMWF GRIB API <https://confluence.ecmwf.int/display/MTG2US/Migration+to+Grib+2+-+User+Space+Home>`_.
 
@@ -155,8 +154,7 @@ class GribDataProxy:
 
 # Utility routines for the use of dask 'meta' in wrapping proxies
 def _aslazydata_has_meta():
-    """
-    Work out whether 'iris._lazy_data.as_lazy_data' takes a "meta" kwarg.
+    """Work out whether 'iris._lazy_data.as_lazy_data' takes a "meta" kwarg.
 
     Up to Iris 3.8.0, "as_lazy_data" did not have a 'meta' keyword, but
     since https://github.com/SciTools/iris/pull/5801, it now *requires* one,
@@ -174,8 +172,7 @@ _ASLAZYDATA_NEEDS_META = _aslazydata_has_meta()
 
 
 def _make_dask_meta(shape, dtype, is_masked=True):
-    """
-    Construct a dask 'meta' object for use in 'dask.array.from_array'.
+    """Construct a dask 'meta' object for use in 'dask.array.from_array'.
 
     A "meta" array is made from the dtype and shape of the array-like to be
     wrapped, plus whether it will return masked or unmasked data.
@@ -187,8 +184,7 @@ def _make_dask_meta(shape, dtype, is_masked=True):
 
 
 class GribWrapper:
-    """
-    Contains a pygrib object plus some extra keys of our own.
+    """Contains a pygrib object plus some extra keys of our own.
 
     The class :class:`iris_grib.message.GribMessage`
     provides alternative means of working with GRIB message instances.
@@ -691,8 +687,7 @@ class GribWrapper:
         return data
 
     def phenomenon_points(self, time_unit):
-        """
-        Return the phenomenon time points.
+        """Return the phenomenon time points.
 
         As offsets from the epoch time reference, measured in appropriate time units.
 
@@ -705,8 +700,7 @@ class GribWrapper:
         )
 
     def phenomenon_bounds(self, time_unit):
-        """
-        Return the phenomenon time bounds.
+        """Return the phenomenon time bounds.
 
         As offsets from the epoch time reference, measured in appropriate time units.
 
@@ -763,8 +757,7 @@ def _load_generate(filename):
 
 
 def load_cubes(filenames, callback=None):
-    """
-    Return an iterator over cubes from the given list of filenames.
+    """Return an iterator over cubes from the given list of filenames.
 
     Args:
 
@@ -787,8 +780,7 @@ def load_cubes(filenames, callback=None):
 
 
 def load_pairs_from_fields(grib_messages):
-    """
-    Convert an GRIB messages into (Cube, Grib message) tuples.
+    """Convert an GRIB messages into (Cube, Grib message) tuples.
 
     Parameters
     ----------
@@ -851,8 +843,7 @@ def load_pairs_from_fields(grib_messages):
 
 
 def save_grib2(cube, target, append=False):
-    """
-    Save a cube or iterable of cubes to a GRIB2 file.
+    """Save a cube or iterable of cubes to a GRIB2 file.
 
     Args:
 
@@ -876,8 +867,7 @@ def save_grib2(cube, target, append=False):
 
 
 def save_pairs_from_cube(cube):
-    """
-    Convert one or more cubes to (2D cube, GRIB-message-id) pairs.
+    """Convert one or more cubes to (2D cube, GRIB-message-id) pairs.
 
     Produces pairs of 2D cubes and GRIB messages, the result of the 2D cube
     being processed by the GRIB save rules.
@@ -906,8 +896,7 @@ def save_pairs_from_cube(cube):
 
 
 def save_messages(messages, target, append=False):
-    """
-    Save messages to a GRIB2 file.
+    """Save messages to a GRIB2 file.
 
     The messages will be released as part of the save.
 
