@@ -1,32 +1,6 @@
 extend = "pyproject.toml"
 
 lint.ignore = [
-    # pydocstyle (D)
-    # https://docs.astral.sh/ruff/rules/#pydocstyle-d
-    "D100",  # Missing docstring in public module
-    "D101",  # Missing docstring in public class
-    "D102",  # Missing docstring in public method
-    "D103",  # Missing docstring in public function
-    "D105",  # Missing docstring in magic method
-    "D200",  # One-line docstring should fit on one line
-    "D202",  # No blank lines allowed after function docstring
-    "D205",  # 1 blank line required between summary line and description
-    "D212",  # Multi-line docstring summary should start at the second line
-    "D300",  # Use triple double quotes """
-    "D301",  # Use r""" if any backslashes in a docstring
-    "D400",  # First line should end with a period
-    "D401",  # First line of docstring should be in imperative mood
-    "D406",  # Section name should end with a newline
-    "D407",  # Missing dashed underline after section
-
-    # isort (I)
-    # https://docs.astral.sh/ruff/rules/#isort-i
-    "I001",  # Import block is un-sorted or un-formatted
-
-    # Numpy-specific rules (NPY)
-    # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
-    "NPY002",
-
     # flake8-builtins (A)
     # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
     "A001",
@@ -65,6 +39,24 @@ lint.ignore = [
     "C408",
     "C901",
 
+    # pydocstyle (D)
+    # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D105", # Missing docstring in magic method
+    "D200", # One-line docstring should fit on one line
+    "D202", # No blank lines allowed after function docstring
+    "D205", # 1 blank line required between summary line and description
+    "D212", # Multi-line docstring summary should start at the second line
+    "D300", # Use triple double quotes """
+    "D301", # Use r""" if any backslashes in a docstring
+    "D400", # First line should end with a period
+    "D401", # First line of docstring should be in imperative mood
+    "D406", # Section name should end with a newline
+    "D407", # Missing dashed underline after section
+
     # flake8-datetimez (DTZ)
     # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
     "DTZ001",
@@ -90,6 +82,10 @@ lint.ignore = [
     "FIX002",
     "FIX003",
 
+    # isort (I)
+    # https://docs.astral.sh/ruff/rules/#isort-i
+    "I001", # Import block is un-sorted or un-formatted
+
     # pep8-naming (N)
     # https://docs.astral.sh/ruff/rules/#pep8-naming-n
     "N801",
@@ -97,6 +93,10 @@ lint.ignore = [
     "N803",
     "N806",
     "N999",
+
+    # Numpy-specific rules (NPY)
+    # https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+    "NPY002",
 
     # Perflint (PERF)
     # https://docs.astral.sh/ruff/rules/#perflint-perf
