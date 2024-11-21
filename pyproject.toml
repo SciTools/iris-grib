@@ -1,4 +1,5 @@
 # See https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# See https://github.com/SciTools/.github/wiki/Linting for common linter rules
 
 [build-system]
 # Defined by PEP 518
@@ -404,9 +405,9 @@ preview = false
 select = [
     "ALL",
 
-    # pydocstyle (D)
-    # https://docs.astral.sh/ruff/rules/multi-line-summary-first-line/
-    "D212",  # Multi-line docstring summary should start at the first line
+    # Note: the above "all" disables conflicting rules, if you want that
+    # rule it needs to be explicitly enabled below:
+    "D212",  # conflicts with D213 : this one is our choice, so enforce it
 ]
 
 [tool.ruff.lint.isort]
