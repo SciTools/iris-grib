@@ -4,7 +4,7 @@
 # See https://github.com/scientific-python/cookie#sp-repo-review
 
 ci:
-  autofix_prs: false
+  autofix_prs: true
   autoupdate_commit_msg: "chore: update pre-commit hooks"
 
 
