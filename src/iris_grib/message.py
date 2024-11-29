@@ -218,7 +218,7 @@ class _MessageLocation(namedtuple("_MessageLocation", "filename offset")):
 class _DataProxy:
     """A reference to the data payload of a single GRIB message."""
 
-    __slots__ = ("shape", "dtype", "recreate_raw")
+    __slots__ = ("dtype", "recreate_raw", "shape")
 
     def __init__(self, shape, dtype, recreate_raw):
         self.shape = shape

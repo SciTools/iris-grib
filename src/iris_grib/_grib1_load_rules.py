@@ -153,11 +153,8 @@ def grib1_convert(grib):
     # identity.
     attributes["GRIB_PARAM"] = grib._grib_code
 
-    if (
-        (grib.table2Version >= 128)
-        and (grib._cf_data is None)
-        or (grib.table2Version == 1)
-        and (grib.indicatorOfParameter >= 128)
+    if ((grib.table2Version >= 128) and (grib._cf_data is None)) or (
+        (grib.table2Version == 1) and (grib.indicatorOfParameter >= 128)
     ):
         long_name = (
             f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}" f".{grib.table2Version}"

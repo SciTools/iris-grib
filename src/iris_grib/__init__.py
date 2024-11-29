@@ -111,7 +111,7 @@ unknown_string = "???"
 class GribDataProxy:
     """A reference to the data payload of a single Grib message."""
 
-    __slots__ = ("shape", "dtype", "path", "offset")
+    __slots__ = ("dtype", "offset", "path", "shape")
 
     def __init__(self, shape, dtype, path, offset):
         self.shape = shape
