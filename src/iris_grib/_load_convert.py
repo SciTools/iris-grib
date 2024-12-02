@@ -213,7 +213,7 @@ class HindcastOverflowWarning(Warning):
 # Non-standardised usage for negative forecast times.
 def _hindcast_fix(forecast_time):
     """Return a forecast time interpreted as a possibly negative value."""
-    uft = np.array(forecast_time).astype(np.uint32)
+    uft = np.array(forecast_time).astype(np.int64)
     HIGHBIT = 2**30
 
     # Workaround grib api's assumption that forecast time is positive.
