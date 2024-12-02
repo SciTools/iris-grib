@@ -7,53 +7,51 @@ Tests for function :func:`iris_grib._load_convert._hindcast_fix`.
 
 """
 
-# import iris_grib.tests first so that some things can be initialised
-# before importing anything else.
-import iris_grib.tests as tests
-
 from collections import namedtuple
+from unittest import mock
+import warnings
+
+import pytest
 
 from iris_grib._load_convert import _hindcast_fix as hindcast_fix
+from iris_grib._load_convert import HindcastOverflowWarning
 
 
-class TestHindcastFix(tests.IrisGribTest):
-    # setup tests : provided value, fix-applies, expected-fixed
-    FixTest = namedtuple("FixTest", ("given", "fixable", "fixed"))
-    test_values = [
-        FixTest(0, False, None),
-        FixTest(100, False, None),
-        FixTest(2 * 2**30 - 1, False, None),
-        FixTest(2 * 2**30, False, None),
-        FixTest(2 * 2**30 + 1, True, -1),
-        FixTest(2 * 2**30 + 2, True, -2),
-        FixTest(3 * 2**30 - 1, True, -(2**30 - 1)),
-        FixTest(3 * 2**30, False, None),
-    ]
+FixTest = namedtuple("FixTest", ("given", "fixable", "fixed"))
+HINDCAST_TESTCASES = {
+    "zero_x": FixTest(0, False, None),
+    "n100_x": FixTest(100, False, None),
+    "n2^31m1_x": FixTest(2 * 2**30 - 1, False, None),
+    "n2^31_x": FixTest(2 * 2**30, False, None),
+    "n2^31p1_m1": FixTest(2 * 2**30 + 1, True, -1),
+    "n2^31p2_m2": FixTest(2 * 2**30 + 2, True, -2),
+    "n3x2^30m1_m2^30m1": FixTest(3 * 2**30 - 1, True, -(2**30 - 1)),
+    "n3x2^30^30_x": FixTest(3 * 2**30, False, None),
+}
 
-    def setUp(self):
-        self.patch_warn = self.patch("warnings.warn")
 
-    def test_fix(self):
+class TestHindcastFix:
+    @pytest.mark.parametrize(
+        "testval",
+        list(HINDCAST_TESTCASES.values()),
+        ids=list(HINDCAST_TESTCASES.keys()),
+    )
+    def test_fix(self, testval):
         # Check hindcast fixing.
-        for given, fixable, fixed in self.test_values:
-            result = hindcast_fix(given)
-            expected = fixed if fixable else given
-            self.assertEqual(result, expected)
+        given, fixable, fixed = testval
+        result = hindcast_fix(given)
+        expected = fixed if fixable else given
+        assert result == expected
 
-    def test_fix_warning(self):
+    def test_fix_warning(self, mocker):
         # Check warning appears when enabled.
-        self.patch("iris_grib._load_convert.options.warn_on_unsupported", True)
-        hindcast_fix(2 * 2**30 + 5)
-        self.assertEqual(self.patch_warn.call_count, 1)
-        self.assertIn(
-            "Re-interpreting large grib forecastTime", self.patch_warn.call_args[0][0]
-        )
+        with mock.patch("iris_grib._load_convert.options.warn_on_unsupported", True):
+            msg = "Re-interpreting large grib forecastTime"
+            with pytest.warns(HindcastOverflowWarning, match=msg):
+                hindcast_fix(2 * 2**30 + 5)
 
     def test_fix_warning_disabled(self):
         # Default is no warning.
-        hindcast_fix(2 * 2**30 + 5)
-        self.assertEqual(self.patch_warn.call_count, 0)
-
-
-if __name__ == "__main__":
-    tests.main()
+        with warnings.catch_warnings():
+            warnings.simplefilter(category=HindcastOverflowWarning, action="error")
+            hindcast_fix(2 * 2**30 + 5)

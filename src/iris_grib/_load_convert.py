@@ -206,6 +206,10 @@ def unscale(value, factor):
 _MDI = None
 
 
+class HindcastOverflowWarning(Warning):
+    pass
+
+
 # Non-standardised usage for negative forecast times.
 def _hindcast_fix(forecast_time):
     """Return a forecast time interpreted as a possibly negative value."""
@@ -221,7 +225,7 @@ def _hindcast_fix(forecast_time):
             msg = "Re-interpreting large grib forecastTime " "from {} to {}.".format(
                 original_forecast_time, forecast_time
             )
-            warnings.warn(msg)
+            warnings.warn(msg, HindcastOverflowWarning)
 
     return forecast_time
 
