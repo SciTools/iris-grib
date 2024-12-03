@@ -8,7 +8,6 @@ Tests for function :func:`iris_grib._load_convert._hindcast_fix`.
 """
 
 from collections import namedtuple
-from unittest import mock
 import warnings
 
 import pytest
@@ -45,10 +44,10 @@ class TestHindcastFix:
 
     def test_fix_warning(self, mocker):
         # Check warning appears when enabled.
-        with mock.patch("iris_grib._load_convert.options.warn_on_unsupported", True):
-            msg = "Re-interpreting large grib forecastTime"
-            with pytest.warns(HindcastOverflowWarning, match=msg):
-                hindcast_fix(2 * 2**30 + 5)
+        mocker.patch("iris_grib._load_convert.options.warn_on_unsupported", True)
+        msg = "Re-interpreting large grib forecastTime"
+        with pytest.warns(HindcastOverflowWarning, match=msg):
+            hindcast_fix(2 * 2**30 + 5)
 
     def test_fix_warning_disabled(self):
         # Default is no warning.
