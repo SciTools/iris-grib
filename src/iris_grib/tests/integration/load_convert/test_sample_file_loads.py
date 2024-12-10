@@ -117,6 +117,21 @@ class TestBasicLoad(tests.IrisGribTest):
         )
         self.assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib2.cml",))
 
+    def test_second_order_packing(self):
+        cube = iris.load_cube(
+            tests.get_data_path(
+                ("GRIB", "grib1_second_order_packing", "GRIB_00008_FRANX01")
+            )
+        )
+        self.assertCML(cube, _RESULTDIR_PREFIX + ("second_order_packing.cml",))
+
+    def test_bulletin_headers(self):
+        for byte_len in (40, 41):
+            cube = iris.load_cube(
+                tests.get_data_path(("GRIB", "bulletin", f"{byte_len}bytes.grib"))
+            )
+            self.assertCML(cube, _RESULTDIR_PREFIX + (f"bulletin_{byte_len}bytes.cml",))
+
 
 @tests.skip_data
 class TestIjDirections(tests.IrisGribTest):
