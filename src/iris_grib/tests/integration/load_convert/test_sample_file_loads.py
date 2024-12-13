@@ -258,12 +258,12 @@ class TestTimesGrib1:
 
 
 @pytest.fixture
-def polar_stereo_south_grib1():
+def polar_stereo_south_grib1(tmp_path):
     path_original = Path(
         tests.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
     )
     name_modified = path_original.name.replace("ST4", "ST4_south")
-    path_modified = path_original.parent / name_modified
+    path_modified = tmp_path / name_modified
     with path_original.open("rb") as file_original:
         gid = eccodes.codes_grib_new_from_file(file_original)
         eccodes.codes_set(gid, "projectionCentreFlag", 1)
@@ -278,6 +278,12 @@ def test_polar_stereo_grib1_south(polar_stereo_south_grib1):
     tests.IrisGribTest().assertCML(
         cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1_south.cml",)
     )
+
+
+def test_reduced_gg_grib1():
+    file_path = Path(eccodes.codes_samples_path()) / "reduced_gg_sfc_grib1.tmpl"
+    cube = iris.load_cube(file_path)
+    tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib1.cml",))
 
 
 if __name__ == "__main__":
