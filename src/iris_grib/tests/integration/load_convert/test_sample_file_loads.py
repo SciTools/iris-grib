@@ -263,67 +263,56 @@ class TestTimesGrib1:
         )
 
 
-@pytest.fixture
-def polar_stereo_south_grib1(tmp_path):
-    path_original = Path(
-        tests.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
+class TestFullCoverageGrib1:
+    # We do not have a full set of GRIB1 files that exercise our entire GRIB1
+    #  loading code. This class generates files to cover those gaps. We use CML
+    #  testing since, in the absence of bug reports after years of use (time
+    #  of writing: 2024), we must assume that current functionality is
+    #  satisfactory. Integration tests of this sort will allow us to fully
+    #  refactor GRIB1 loading without any change in user experience.
+
+    id_path_codes = [
+        (
+            "polar_stereo_south",
+            tests.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h")),
+            [("projectionCentreFlag", 1)],
+        ),
+        (
+            "y_wind",
+            tests.get_data_path(("GRIB", "gaussian", "regular_gg.grib1")),
+            [("indicatorOfParameter", 34)],
+        ),
+        (
+            "mapped_cf_data",
+            Path(eccodes.codes_samples_path()) / "GRIB1.tmpl",
+            [("table2Version", 128), ("centre", 98), ("indicatorOfParameter", 34)],
+        ),
+    ]
+
+    @pytest.fixture(
+        params=id_path_codes,
+        ids=[id for id, path, codes in id_path_codes],
+        autouse=True,
     )
-    name_modified = path_original.name.replace("ST4", "ST4_south")
-    path_modified = tmp_path / name_modified
-    with path_original.open("rb") as file_original:
-        gid = eccodes.codes_grib_new_from_file(file_original)
-        eccodes.codes_set(gid, "projectionCentreFlag", 1)
-        with path_modified.open("wb") as file_modified:
-            eccodes.codes_write(gid, file_modified)
-        eccodes.codes_release(gid)
-    return path_modified
+    def _get_grib1_file(self, request, tmp_path):
+        id_, path, codes = request.param
+        path_original = Path(path)
+        path_modified = tmp_path / "tmp_file.grib1"
+        with path_original.open("rb") as file_original:
+            gid = eccodes.codes_grib_new_from_file(file_original)
+            for key, value in codes:
+                eccodes.codes_set(gid, key, value)
+            with path_modified.open("wb") as file_modified:
+                eccodes.codes_write(gid, file_modified)
+            eccodes.codes_release(gid)
+        self.id_ = id_
+        self.file_path = path_modified
 
-
-def test_polar_stereo_grib1_south(polar_stereo_south_grib1):
-    cube = iris.load_cube(polar_stereo_south_grib1)
-    tests.IrisGribTest().assertCML(
-        cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1_south.cml",)
-    )
-
-
-@pytest.fixture
-def y_wind_grib1(tmp_path):
-    path_original = Path(tests.get_data_path(("GRIB", "gaussian", "regular_gg.grib1")))
-    path_modified = tmp_path / "y_wind.grib1"
-    with path_original.open("rb") as file_original:
-        gid = eccodes.codes_grib_new_from_file(file_original)
-        eccodes.codes_set(gid, "indicatorOfParameter", 34)
-        with path_modified.open("wb") as file_modified:
-            eccodes.codes_write(gid, file_modified)
-        eccodes.codes_release(gid)
-    return path_modified
-
-
-def test_y_wind_grib1(y_wind_grib1):
-    cube = iris.load_cube(y_wind_grib1)
-    tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("y_wind_grib1.cml",))
-
-
-@pytest.fixture
-def mapped_cf_data_grib1(tmp_path):
-    path_original = Path(eccodes.codes_samples_path()) / "GRIB1.tmpl"
-    path_modified = tmp_path / "mapped_cf_data.grib1"
-    with path_original.open("rb") as file_original:
-        gid = eccodes.codes_grib_new_from_file(file_original)
-        eccodes.codes_set(gid, "table2Version", 128)
-        eccodes.codes_set(gid, "centre", 98)
-        eccodes.codes_set(gid, "indicatorOfParameter", 34)
-        with path_modified.open("wb") as file_modified:
-            eccodes.codes_write(gid, file_modified)
-        eccodes.codes_release(gid)
-    return path_modified
-
-
-def test_mapped_cf_data_grib1(mapped_cf_data_grib1):
-    cube = iris.load_cube(mapped_cf_data_grib1)
-    tests.IrisGribTest().assertCML(
-        cube, _RESULTDIR_PREFIX + ("mapped_cf_data_grib1.cml",)
-    )
+    def test_grib1(self):
+        cube = iris.load_cube(self.file_path)
+        tests.IrisGribTest().assertCML(
+            cube, _RESULTDIR_PREFIX + (f"{self.id_}_grib1.cml",)
+        )
 
 
 if __name__ == "__main__":
