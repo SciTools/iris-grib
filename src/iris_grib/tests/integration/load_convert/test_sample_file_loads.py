@@ -118,7 +118,13 @@ class TestBasicLoad(tests.IrisGribTest):
         )
         self.assertCML(cube, _RESULTDIR_PREFIX + ("reduced_ll_grib1.cml",))
 
-    def test_reduced_gg(self):
+    def test_reduced_gg_grib1(self):
+        cube = iris.load_cube(
+            Path(eccodes.codes_samples_path()) / "reduced_gg_ml_grib1.tmpl"
+        )
+        self.assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib1.cml",))
+
+    def test_reduced_gg_grib2(self):
         cube = iris.load_cube(
             tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
         )
@@ -278,12 +284,6 @@ def test_polar_stereo_grib1_south(polar_stereo_south_grib1):
     tests.IrisGribTest().assertCML(
         cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1_south.cml",)
     )
-
-
-def test_reduced_gg_grib1():
-    file_path = Path(eccodes.codes_samples_path()) / "reduced_gg_ml_grib1.tmpl"
-    cube = iris.load_cube(file_path)
-    tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib1.cml",))
 
 
 @pytest.fixture
