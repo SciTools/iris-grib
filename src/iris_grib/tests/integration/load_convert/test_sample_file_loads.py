@@ -16,10 +16,11 @@ from __future__ import annotations
 # before importing anything else.
 import iris_grib.tests as tests
 
-import pytest
+from pathlib import Path
 
 import eccodes
 import iris
+import pytest
 
 
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
@@ -254,6 +255,29 @@ class TestTimesGrib1:
         tests.IrisGribTest().assertCML(
             cube, _RESULTDIR_PREFIX + (f"time_range_{self.time_range_indicator}.cml",)
         )
+
+
+@pytest.fixture
+def polar_stereo_south_grib1():
+    path_original = Path(
+        tests.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
+    )
+    name_modified = path_original.name.replace("ST4", "ST4_south")
+    path_modified = path_original.parent / name_modified
+    with path_original.open("rb") as file_original:
+        gid = eccodes.codes_grib_new_from_file(file_original)
+        eccodes.codes_set(gid, "projectionCentreFlag", 1)
+        with path_modified.open("wb") as file_modified:
+            eccodes.codes_write(gid, file_modified)
+        eccodes.codes_release(gid)
+    return path_modified
+
+
+def test_polar_stereo_grib1_south(polar_stereo_south_grib1):
+    cube = iris.load_cube(polar_stereo_south_grib1)
+    tests.IrisGribTest().assertCML(
+        cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1_south.cml",)
+    )
 
 
 if __name__ == "__main__":
