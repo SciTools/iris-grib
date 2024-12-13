@@ -286,5 +286,23 @@ def test_reduced_gg_grib1():
     tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib1.cml",))
 
 
+@pytest.fixture
+def y_wind_grib1(tmp_path):
+    path_original = Path(tests.get_data_path(("GRIB", "gaussian", "regular_gg.grib1")))
+    path_modified = tmp_path / "y_wind.grib1"
+    with path_original.open("rb") as file_original:
+        gid = eccodes.codes_grib_new_from_file(file_original)
+        eccodes.codes_set(gid, "indicatorOfParameter", 34)
+        with path_modified.open("wb") as file_modified:
+            eccodes.codes_write(gid, file_modified)
+        eccodes.codes_release(gid)
+    return path_modified
+
+
+def test_y_wind_grib1(y_wind_grib1):
+    cube = iris.load_cube(y_wind_grib1)
+    tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("y_wind_grib1.cml",))
+
+
 if __name__ == "__main__":
     tests.main()
