@@ -281,7 +281,7 @@ def test_polar_stereo_grib1_south(polar_stereo_south_grib1):
 
 
 def test_reduced_gg_grib1():
-    file_path = Path(eccodes.codes_samples_path()) / "reduced_gg_sfc_grib1.tmpl"
+    file_path = Path(eccodes.codes_samples_path()) / "reduced_gg_ml_grib1.tmpl"
     cube = iris.load_cube(file_path)
     tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib1.cml",))
 
