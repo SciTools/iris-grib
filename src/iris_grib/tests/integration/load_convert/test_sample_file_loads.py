@@ -10,11 +10,17 @@ reference CML file, to catch any unexpected changes over time.
 
 """
 
+from __future__ import annotations
+
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
 
+import pytest
+
+import eccodes
 import iris
+
 
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
 
@@ -210,6 +216,44 @@ class TestShapeOfEarth(tests.IrisGribTest):
         # grib1 - same as grib2 shape 6, above
         cube = self._old_compat_load("global.grib1")
         self.assertCML(cube, _RESULTDIR_PREFIX + ("earth_shape_grib1.cml",))
+
+
+class TestTimesGrib1:
+    # Our codebase has support for many timeRangeIndicator values in GRIB1
+    #  files, but we do not have files demonstrating these. This class
+    #  generates appropriate GRIB1 files so that we can fully refactor the
+    #  loading code while ensuring continued support for all possible
+    #  scenarios.
+
+    @pytest.fixture(params=[1, 2, 3, 4, 5, 10, 113, 118, 123, 124], autouse=True)
+    # Note that the following values are not supported by Eccodes - it can
+    #  not provide a startStep value unless the timeRangeIndicator is present
+    #  in eccodes/definitions/grib1/localConcepts/edzw/stepType.def:
+    #  [51, 114, 115, 116, 117, 125].
+    def _get_time_range_file(self, request, tmp_path):
+        save_file = tmp_path / "TestTimes.grib1"
+        time_range_indicator = request.param
+
+        # Make a file with 10 ascending time steps.
+        with save_file.open("wb") as open_file:
+            for time_step in range(10):
+                grib_message = eccodes.codes_grib_new_from_samples("GRIB1")
+                eccodes.codes_set_long(grib_message, "P1", time_step)
+                eccodes.codes_set_long(grib_message, "P2", time_step + 1)
+                eccodes.codes_set_long(
+                    grib_message, "timeRangeIndicator", time_range_indicator
+                )
+                eccodes.codes_write(grib_message, open_file)
+                eccodes.codes_release(grib_message)
+
+        self.time_range_indicator = time_range_indicator
+        self.save_file = save_file
+
+    def test_time_range(self):
+        cube = iris.load_cube(self.save_file)
+        tests.IrisGribTest().assertCML(
+            cube, _RESULTDIR_PREFIX + (f"time_range_{self.time_range_indicator}.cml",)
+        )
 
 
 if __name__ == "__main__":
