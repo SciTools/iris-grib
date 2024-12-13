@@ -304,5 +304,27 @@ def test_y_wind_grib1(y_wind_grib1):
     tests.IrisGribTest().assertCML(cube, _RESULTDIR_PREFIX + ("y_wind_grib1.cml",))
 
 
+@pytest.fixture
+def mapped_cf_data_grib1(tmp_path):
+    path_original = Path(eccodes.codes_samples_path()) / "GRIB1.tmpl"
+    path_modified = tmp_path / "mapped_cf_data.grib1"
+    with path_original.open("rb") as file_original:
+        gid = eccodes.codes_grib_new_from_file(file_original)
+        eccodes.codes_set(gid, "table2Version", 128)
+        eccodes.codes_set(gid, "centre", 98)
+        eccodes.codes_set(gid, "indicatorOfParameter", 34)
+        with path_modified.open("wb") as file_modified:
+            eccodes.codes_write(gid, file_modified)
+        eccodes.codes_release(gid)
+    return path_modified
+
+
+def test_mapped_cf_data_grib1(mapped_cf_data_grib1):
+    cube = iris.load_cube(mapped_cf_data_grib1)
+    tests.IrisGribTest().assertCML(
+        cube, _RESULTDIR_PREFIX + ("mapped_cf_data_grib1.cml",)
+    )
+
+
 if __name__ == "__main__":
     tests.main()
