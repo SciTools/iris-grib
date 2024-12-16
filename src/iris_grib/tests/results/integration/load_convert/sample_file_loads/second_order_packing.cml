@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" units="unknown">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB1:t001c085n008"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord id="1d45e087" points="[0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord id="98bcd589" points="[57. , 56.9, 56.8, ..., 35.2, 35.1, 35. ]" shape="(221,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6367470.0"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord id="160a738f" points="[-11. , -10.9, -10.8, ...,  16.8,  16.9,  17. ]" shape="(281,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6367470.0"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <auxCoord id="61bde96d" long_name="originating_centre" points="['unknown centre lfpw']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+      </coord>
+      <coord>
+        <dimCoord id="cb784457" points="[-17259552.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods/>
+    <data checksum="0x7c584569" dtype="float64" shape="(221, 281)"/>
+  </cube>
+</cubes>
