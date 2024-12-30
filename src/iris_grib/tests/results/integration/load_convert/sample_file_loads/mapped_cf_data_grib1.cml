@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" long_name="sea_surface_temperature" standard_name="sea_surface_temperature" units="K">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB1:t128c098n034"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord id="1d45e087" points="[0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord id="98bcd589" points="[ 90.,  89.,  88., ..., -88., -89., -90.]" shape="(181,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6367470.0"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord circular="True" id="160a738f" points="[  0.,   1.,   2., ..., 357., 358., 359.]" shape="(360,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+          <geogCS earth_radius="6367470.0"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <auxCoord id="61bde96d" long_name="originating_centre" points="['European Centre for Medium Range Weather Forecasts']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+      </coord>
+      <coord>
+        <dimCoord id="6eef7051" long_name="pressure" points="[500]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
+      </coord>
+      <coord>
+        <dimCoord id="cb784457" points="[317364.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods/>
+    <data checksum="0xaf017271" dtype="float64" shape="(181, 360)"/>
+  </cube>
+</cubes>
