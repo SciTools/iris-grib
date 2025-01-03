@@ -14,6 +14,7 @@ import iris_grib.tests as tests
 
 from unittest import mock
 
+from iris import FUTURE as IRIS_FUTURE
 import iris.coords
 
 import iris_grib
@@ -81,8 +82,14 @@ class Test(LoadConvertTest):
         emit_warnings = convert_options.warn_on_unsupported
         try:
             convert_options.warn_on_unsupported = True
-            with mock.patch("warnings.warn") as warn:
-                product_definition_template_0(section_4(), metadata, rt_coord)
+            future_kwargs = {}
+            if hasattr(IRIS_FUTURE, "date_microseconds"):
+                # Avoid an additional awkward warning
+                # TODO: convert regime to pytest + tidy, but that is a lot of work !
+                future_kwargs["date_microseconds"] = True
+            with IRIS_FUTURE.context(**future_kwargs):
+                with mock.patch("warnings.warn") as warn:
+                    product_definition_template_0(section_4(), metadata, rt_coord)
             warn_msgs = [call[1][0] for call in warn.mock_calls]
             expected = [
                 "Unable to translate type of generating process.",
