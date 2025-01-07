@@ -25,8 +25,8 @@ Internal
   code coverage of GRIB1 loading code, to enable future refactoring.
   `(ISSUE#488) <https://github.com/SciTools/iris-grib/issues/488>`_,
   `(PR#583) <https://github.com/SciTools/iris-grib/pull/583>`_
-* `@pp-mo <https://github.com/pp-mo>`_ updated repository automation to current SciTools
-  code quality reccommendations : see https://github.com/orgs/SciTools/projects/43/views/3
+* `@pp-mo <https://github.com/pp-mo>`_ updated repository automation to meet current
+  SciTools code quality recommendations
   `(PR#568) <https://github.com/SciTools/iris-grib/pull/568>`_,
   `(PR#572) <https://github.com/SciTools/iris-grib/pull/572>`_
 
