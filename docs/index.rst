@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Iris-grib v0.20
+Iris-grib v0.21
 ===============
 
 The library ``iris-grib`` provides functionality for converting between weather and
