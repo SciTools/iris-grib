@@ -6,6 +6,31 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.21.0
+-------------------------------
+
+:Release: 0.21.0
+:Date: 07 January 2025
+
+Dependencies
+^^^^^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ added a fix to support ecCodes versions >= 2.38
+  `(PR#578) <https://github.com/SciTools/iris-grib/pull/578>`_
+* `@pp-mo <https://github.com/pp-mo>`_ fixed tests to work with numpy versions >= 2.0
+  `(PR#580) <https://github.com/SciTools/iris-grib/pull/580>`_
+
+Internal
+^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_ added integration tests to ensure
+  code coverage of GRIB1 loading code, to enable future refactoring.
+  `(ISSUE#488) <https://github.com/SciTools/iris-grib/issues/488>`_,
+  `(PR#583) <https://github.com/SciTools/iris-grib/pull/583>`_
+* `@pp-mo <https://github.com/pp-mo>`_ updated repository automation to meet current
+  SciTools code quality recommendations
+  `(PR#568) <https://github.com/SciTools/iris-grib/pull/568>`_,
+  `(PR#572) <https://github.com/SciTools/iris-grib/pull/572>`_
+
+
 What's new in iris-grib v0.20.0
 -------------------------------
 
