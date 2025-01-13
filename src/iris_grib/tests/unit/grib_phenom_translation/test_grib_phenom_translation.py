@@ -345,10 +345,10 @@ class TestGRIBcode(tests.IrisTest):
         result = repr(GRIBCode(edition, 17, 3, 123))
         if edition == 1:
             expected = (
-                "GRIBCode(edition=1, table_version=17, " "centre_number=3, number=123)"
+                "GRIBCode(edition=1, table_version=17, centre_number=3, number=123)"
             )
         elif edition == 2:
-            expected = "GRIBCode(edition=2, discipline=17, " "category=3, number=123)"
+            expected = "GRIBCode(edition=2, discipline=17, category=3, number=123)"
         self.assertEqual(result, expected)
 
     def test__repr__grib1(self):

@@ -296,7 +296,7 @@ class TestGribTimecodes(tests.IrisTest):
             with self.assertRaises(iris.exceptions.TranslationError) as t_err:
                 _ = next(cube_generator)
             self.assertEqual(
-                "Product definition template [5]" " is not supported",
+                "Product definition template [5] is not supported",
                 str(t_err.exception),
             )
 

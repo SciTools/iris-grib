@@ -157,7 +157,7 @@ class GribMessage:
         template = grid_section["gridDefinitionTemplateNumber"]
         if reduced and template not in (40,):
             raise TranslationError(
-                "Grid definition Section 3 contains " "unsupported quasi-regular grid."
+                "Grid definition Section 3 contains unsupported quasi-regular grid."
             )
 
         if template in _SUPPORTED_GRID_DEFINITIONS:
@@ -265,10 +265,8 @@ class _DataProxy:
         elif bitMapIndicator == 255:
             bitmap = None
         else:
-            msg = (
-                "Bitmap Section 6 contains unsupported " "bitmap indicator [{}]".format(
-                    bitMapIndicator
-                )
+            msg = "Bitmap Section 6 contains unsupported bitmap indicator [{}]".format(
+                bitMapIndicator
             )
             raise TranslationError(msg)
         return bitmap
@@ -490,7 +488,7 @@ class Section:
             self._cache[key] = value
         else:
             raise KeyError(
-                "{!r} cannot be redefined in " "section {}".format(key, self._number)
+                "{!r} cannot be redefined in section {}".format(key, self._number)
             )
 
     def _get_key_value(self, key):

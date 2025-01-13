@@ -100,9 +100,7 @@ class TestLicenseHeaders(unittest.TestCase):
             last_change_by_fname = self.last_change_by_fname()
         except ValueError:
             # Caught the case where this is not a git repo.
-            return self.skipTest(
-                "Iris-grib installation did not look like a " "git repo."
-            )
+            return self.skipTest("Iris-grib installation did not look like a git repo.")
 
         failed = False
         for fname, last_change in sorted(last_change_by_fname.items()):

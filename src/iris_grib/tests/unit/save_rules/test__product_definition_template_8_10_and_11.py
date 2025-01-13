@@ -70,7 +70,7 @@ class TestTypeOfStatisticalProcessing(tests.IrisGribTest):
         cell_method = CellMethod(method="mean", coords=["season"])
         cube.add_cell_method(cell_method)
         with self.assertRaisesRegex(
-            ValueError, "Expected a cell method with a coordinate " "name of 'time'"
+            ValueError, "Expected a cell method with a coordinate name of 'time'"
         ):
             _product_definition_template_8_10_and_11(cube, mock.sentinel.grib)
 
@@ -102,7 +102,7 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         )
         self.cube.add_aux_coord(coord)
         with self.assertRaisesRegex(
-            ValueError, "Expected time coordinate with two bounds, " "got 0 bounds"
+            ValueError, "Expected time coordinate with two bounds, got 0 bounds"
         ):
             _product_definition_template_8_10_and_11(self.cube, mock.sentinel.grib)
 
@@ -117,7 +117,7 @@ class TestTimeCoordPrerequisites(tests.IrisGribTest):
         )
         self.cube.add_aux_coord(coord)
         with self.assertRaisesRegex(
-            ValueError, "Expected time coordinate with two bounds, " "got 3 bounds"
+            ValueError, "Expected time coordinate with two bounds, got 3 bounds"
         ):
             _product_definition_template_8_10_and_11(self.cube, mock.sentinel.grib)
 

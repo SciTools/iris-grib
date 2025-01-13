@@ -107,7 +107,7 @@ class TestGDT5(tests.TestGribMessage):
                 self.assertEqual(
                     co_load.shape,
                     co_orig.shape,
-                    'Shape of re-loaded "{}" coord is {} ' "instead of {}".format(
+                    'Shape of re-loaded "{}" coord is {} instead of {}'.format(
                         coord_name, co_load.shape, co_orig.shape
                     ),
                 )

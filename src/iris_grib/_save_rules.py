@@ -219,13 +219,13 @@ def dx_dy(x_coord, y_coord, grib):
         eccodes.codes_set(grib, "iDirectionIncrement", round(1e6 * float(abs(x_step))))
     else:
         raise ValueError(
-            "X coordinate must be in degrees, not {}" ".".format(x_coord.units)
+            "X coordinate must be in degrees, not {}.".format(x_coord.units)
         )
     if y_coord.units == "degrees":
         eccodes.codes_set(grib, "jDirectionIncrement", round(1e6 * float(abs(y_step))))
     else:
         raise ValueError(
-            "Y coordinate must be in degrees, not {}" ".".format(y_coord.units)
+            "Y coordinate must be in degrees, not {}.".format(y_coord.units)
         )
 
 
@@ -525,7 +525,7 @@ def grid_definition_template_12(cube, grib):
         x_step = step(x_cm, atol=1)
         y_step = step(y_cm, atol=1)
     except ValueError:
-        msg = "Irregular coordinates not supported for Transverse " "Mercator."
+        msg = "Irregular coordinates not supported for Transverse Mercator."
         raise TranslationError(msg)
     eccodes.codes_set(grib, "Di", abs(x_step))
     eccodes.codes_set(grib, "Dj", abs(y_step))
@@ -747,7 +747,7 @@ def grid_definition_template_140(cube, grib):
         x_step = step(x_mm, atol=1)
         y_step = step(y_mm, atol=1)
     except ValueError:
-        msg = "Irregular coordinates not supported for Lambert " "Azimuthal Equal Area."
+        msg = "Irregular coordinates not supported for Lambert Azimuthal Equal Area."
         raise TranslationError(msg)
     eccodes.codes_set(grib, "Dx", abs(x_step))
     eccodes.codes_set(grib, "Dy", abs(y_step))
@@ -934,12 +934,12 @@ def _non_missing_forecast_period(cube):
     else:
         if not fp_coord.has_bounds():
             raise TranslationError(
-                "bounds on 'time' coordinate requires bounds on" " 'forecast_period'."
+                "bounds on 'time' coordinate requires bounds on 'forecast_period'."
             )
         fp = fp_coord.bounds[0][0]
 
     if fp - int(fp):
-        warnings.warn("forecast_period encoding problem: " "scaling required.")
+        warnings.warn("forecast_period encoding problem: scaling required.")
     fp = int(fp)
 
     return rt, rt_meaning, fp, grib_time_code
@@ -973,7 +973,7 @@ def _missing_forecast_period(cube):
         fp = t - frt
         integer_fp = int(fp)
         if integer_fp != fp:
-            msg = "Truncating floating point forecast period {} to " "integer value {}"
+            msg = "Truncating floating point forecast period {} to integer value {}"
             warnings.warn(msg.format(fp, integer_fp))
         fp = integer_fp
         fp_meaning = 1  # Hours
@@ -1168,7 +1168,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         n_levels = np.max(model_levels)
         max_valid_nlevels = 9999
         if n_levels > max_valid_nlevels:
-            msg = "model_level_number values are > {} : " "maximum value = {}."
+            msg = "model_level_number values are > {} : maximum value = {}."
             raise ValueError(msg.format(max_valid_nlevels, n_levels))
         # In sample data we have seen, there seems to be an extra missing data
         # value *before* each set of n-levels coefficients.
@@ -1226,7 +1226,7 @@ def set_time_range(time_coord, grib):
     time_range_in_hours = end_hours - start_hours
     integer_hours = int(time_range_in_hours)
     if integer_hours != time_range_in_hours:
-        msg = "Truncating floating point lengthOfTimeRange {} to " "integer value {}"
+        msg = "Truncating floating point lengthOfTimeRange {} to integer value {}"
         warnings.warn(msg.format(time_range_in_hours, integer_hours))
     eccodes.codes_set(grib, "lengthOfTimeRange", integer_hours)
 
@@ -1580,9 +1580,7 @@ def _product_definition_template_8_10_and_11(cube, grib, full3d_cube=None):
             if "time" in cell_method.coord_names
         ]
         if not time_cell_methods:
-            raise ValueError(
-                "Expected a cell method with a coordinate name " "of 'time'"
-            )
+            raise ValueError("Expected a cell method with a coordinate name of 'time'")
         if len(time_cell_methods) > 1:
             raise ValueError("Cannot handle multiple 'time' cell methods")
         (cell_method,) = time_cell_methods
