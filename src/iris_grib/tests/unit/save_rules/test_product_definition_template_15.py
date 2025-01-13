@@ -56,7 +56,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(eccodes, "codes_set")
     def test_bilinear_interpolation(self, mock_set):
         cube_1 = self.cube
-        cube_1.attributes = dict(spatial_processing_type="Bilinear " "interpolation")
+        cube_1.attributes = dict(spatial_processing_type="Bilinear interpolation")
 
         # If the cube has a bilinear interpolation attribute, spatial
         # processing code should be 1 and number of points used should be 4.
@@ -70,7 +70,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(eccodes, "codes_set")
     def test_bicubic_interpolation(self, mock_set):
         cube_2 = self.cube
-        cube_2.attributes = dict(spatial_processing_type="Bicubic " "interpolation")
+        cube_2.attributes = dict(spatial_processing_type="Bicubic interpolation")
 
         # If the cube has a bicubic interpolation attribute, spatial
         # processing code should be 2 and number of points used should be 4.
@@ -85,7 +85,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     def test_nearest_neighbour_interpolation(self, mock_set):
         cube_3 = self.cube
         cube_3.attributes = dict(
-            spatial_processing_type="Nearest neighbour " "interpolation"
+            spatial_processing_type="Nearest neighbour interpolation"
         )
 
         # If the cube has a nearest neighbour interpolation attribute, spatial
@@ -100,7 +100,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(eccodes, "codes_set")
     def test_budget_interpolation(self, mock_set):
         cube_4 = self.cube
-        cube_4.attributes = dict(spatial_processing_type="Budget " "interpolation")
+        cube_4.attributes = dict(spatial_processing_type="Budget interpolation")
 
         # If the cube has a budget interpolation attribute, spatial
         # processing code should be 4 and number of points used should be 4.
@@ -114,7 +114,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     @mock.patch.object(eccodes, "codes_set")
     def test_spectral_interpolation(self, mock_set):
         cube_5 = self.cube
-        cube_5.attributes = dict(spatial_processing_type="Spectral " "interpolation")
+        cube_5.attributes = dict(spatial_processing_type="Spectral interpolation")
 
         # If the cube has a spectral interpolation attribute, spatial
         # processing code should be 5 and number of points used should be 4.
@@ -129,7 +129,7 @@ class TestSpatialProcessingIdentifiers(tests.IrisGribTest):
     def test_neighbour_budget_interpolation(self, mock_set):
         cube_6 = self.cube
         cube_6.attributes = dict(
-            spatial_processing_type="Neighbour-budget " "interpolation"
+            spatial_processing_type="Neighbour-budget interpolation"
         )
 
         # If the cube has a neighbour-budget interpolation attribute, spatial

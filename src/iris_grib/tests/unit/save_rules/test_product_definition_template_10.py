@@ -52,9 +52,7 @@ class TestPercentileValueIdentifier(tests.IrisGribTest):
         cube = self.cube
         percentile_coord = DimCoord([5, 10, 15], long_name="percentile_over_time")
         cube.add_aux_coord(percentile_coord, 0)
-        err_msg = (
-            "A cube 'percentile_over_time' coordinate with one point " "is required"
-        )
+        err_msg = "A cube 'percentile_over_time' coordinate with one point is required"
         with self.assertRaisesRegex(ValueError, err_msg):
             product_definition_template_10(cube, mock.sentinel.grib)
 

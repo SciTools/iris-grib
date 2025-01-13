@@ -56,8 +56,9 @@ class _LookupTable(dict):
     def __setitem__(self, key, value):
         if key in self and self[key] is not value:
             raise KeyError(
-                "Attempted to set dict[{}] = {}, "
-                "but this is already set to {}.".format(key, value, self[key])
+                "Attempted to set dict[{}] = {}, but this is already set to {}.".format(
+                    key, value, self[key]
+                )
             )
         self._super.__setitem__(key, value)
 
@@ -106,7 +107,7 @@ def _make_grib1_cf_table():
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
                 warnings.warn(
-                    "{} is not a recognised CF standard name " "(skipping).".format(
+                    "{} is not a recognised CF standard name (skipping).".format(
                         standard_name
                     )
                 )
@@ -156,8 +157,9 @@ def _make_grib1_cf_table():
             )
         if len(extra_dimcoord.points) != 1:
             raise ValueError(
-                "Implied dimension has {} points, "
-                "currently can only handle 1.".format(len(extra_dimcoord.points))
+                "Implied dimension has {} points, currently can only handle 1.".format(
+                    len(extra_dimcoord.points)
+                )
             )
         association_entry = _make_grib1_cf_entry(
             table2_version=int(grib1data.t2version),
@@ -211,7 +213,7 @@ def _make_grib2_to_cf_table():
         if standard_name is not None:
             if standard_name not in iris.std_names.STD_NAMES:
                 warnings.warn(
-                    "{} is not a recognised CF standard name " "(skipping).".format(
+                    "{} is not a recognised CF standard name (skipping).".format(
                         standard_name
                     )
                 )
@@ -273,7 +275,7 @@ def _make_cf_to_grib2_table():
             long_name = None
             if standard_name not in iris.std_names.STD_NAMES:
                 warnings.warn(
-                    "{} is not a recognised CF standard name " "(skipping).".format(
+                    "{} is not a recognised CF standard name (skipping).".format(
                         standard_name
                     )
                 )

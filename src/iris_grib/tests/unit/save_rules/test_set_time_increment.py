@@ -81,7 +81,7 @@ class Test(tests.IrisGribTest):
         with mock.patch("warnings.warn") as warn:
             set_time_increment(cell_method, mock.sentinel.grib)
         warn.assert_called_once_with(
-            "Truncating floating point timeIncrement " "25.9 to integer value 25"
+            "Truncating floating point timeIncrement 25.9 to integer value 25"
         )
         mock_set.assert_any_call(
             mock.sentinel.grib, "indicatorOfUnitForTimeIncrement", 1

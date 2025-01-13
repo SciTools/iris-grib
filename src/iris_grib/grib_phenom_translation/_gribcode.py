@@ -14,7 +14,7 @@ import re
 
 
 def _invalid_edition(edition):
-    msg = f"Invalid grib edition, {edition!r}, for GRIBcode : " "can only be 1 or 2."
+    msg = f"Invalid grib edition, {edition!r}, for GRIBcode : can only be 1 or 2."
     raise ValueError(msg)
 
 
@@ -135,9 +135,7 @@ class GenericConcreteGRIBCode:
             setattr(self, key, value)
 
     def _broken_repr(self):
-        result = (
-            f"<{self.__class__.__name__} with invalid content: " f"{self.__dict__}>"
-        )
+        result = f"<{self.__class__.__name__} with invalid content: {self.__dict__}>"
         return result
 
     def __str__(self):

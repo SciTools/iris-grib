@@ -49,7 +49,7 @@ CENTRE_TITLES = {
     "rjtd": "Tokyo, Japan Meteorological Agency",
     "55": "San Francisco",
     "kwbc": (
-        "US National Weather Service, National Centres for " "Environmental Prediction"
+        "US National Weather Service, National Centres for Environmental Prediction"
     ),
 }
 
@@ -612,7 +612,7 @@ class GribWrapper:
             # for all the days included in the P2 period. The units of P2
             # are given by the contents of octet 18 and Table 4.
             raise TranslationError(
-                "unhandled grib1 timeRangeIndicator " "= 51 (avg of avgs)"
+                "unhandled grib1 timeRangeIndicator = 51 (avg of avgs)"
             )
         elif time_range_indicator == 113:
             # Average of N forecasts (or initialized analyses); each
@@ -661,7 +661,7 @@ class GribWrapper:
             time_diff = P1
         else:
             raise TranslationError(
-                "unhandled grib1 timeRangeIndicator " "= %i" % time_range_indicator
+                "unhandled grib1 timeRangeIndicator = %i" % time_range_indicator
             )
 
         # Get the timeunit interval.

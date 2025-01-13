@@ -30,14 +30,14 @@ class Test(tests.IrisGribTest):
 
     def test_no_bounds(self):
         with self.assertRaisesRegex(
-            ValueError, "Expected time coordinate " "with two bounds, got 0 bounds"
+            ValueError, "Expected time coordinate with two bounds, got 0 bounds"
         ):
             set_time_range(self.coord, mock.sentinel.grib)
 
     def test_three_bounds(self):
         self.coord.bounds = [0, 1, 2]
         with self.assertRaisesRegex(
-            ValueError, "Expected time coordinate " "with two bounds, got 3 bounds"
+            ValueError, "Expected time coordinate with two bounds, got 3 bounds"
         ):
             set_time_range(self.coord, mock.sentinel.grib)
 
@@ -49,7 +49,7 @@ class Test(tests.IrisGribTest):
             units=Unit("hours since epoch", calendar="standard"),
         )
         with self.assertRaisesRegex(
-            ValueError, "Expected length one time " "coordinate, got 2 points"
+            ValueError, "Expected length one time coordinate, got 2 points"
         ):
             set_time_range(coord, mock.sentinel.grib)
 

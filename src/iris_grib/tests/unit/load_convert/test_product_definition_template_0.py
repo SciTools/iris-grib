@@ -93,8 +93,8 @@ class Test(LoadConvertTest):
             warn_msgs = [call[1][0] for call in warn.mock_calls]
             expected = [
                 "Unable to translate type of generating process.",
-                "Unable to translate background generating process " "identifier.",
-                "Unable to translate forecast generating process " "identifier.",
+                "Unable to translate background generating process identifier.",
+                "Unable to translate forecast generating process identifier.",
             ]
             self.assertEqual(warn_msgs, expected)
         finally:

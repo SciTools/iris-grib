@@ -81,9 +81,7 @@ def _write_iris_config(session: nox.sessions.Session) -> None:
 [Resources]
 test_data_dir = {test_data_dir}
 [System]
-udunits2_path = {
-    os.path.join(session.virtualenv.location,'lib', 'libudunits2.so')
-}
+udunits2_path = {os.path.join(session.virtualenv.location, "lib", "libudunits2.so")}
 """
 
     print("Iris config\n-----------")

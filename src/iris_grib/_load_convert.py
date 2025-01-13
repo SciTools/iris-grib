@@ -222,7 +222,7 @@ def _hindcast_fix(forecast_time):
         original_forecast_time = forecast_time
         forecast_time = -(uft - 2 * HIGHBIT)
         if options.warn_on_unsupported:
-            msg = "Re-interpreting large grib forecastTime " "from {} to {}.".format(
+            msg = "Re-interpreting large grib forecastTime from {} to {}.".format(
                 original_forecast_time, forecast_time
             )
             warnings.warn(msg, HindcastOverflowWarning)
@@ -521,7 +521,7 @@ def grid_definition_template_0_and_1(section, metadata, y_name, x_name, cs):
         section["numberOfOctectsForNumberOfPoints"] != 0
         or section["interpretationOfNumberOfPoints"] != 0
     ):
-        msg = "Grid definition section 3 contains unsupported " "quasi-regular grid"
+        msg = "Grid definition section 3 contains unsupported quasi-regular grid"
         raise TranslationError(msg)
 
     scan = scanning_mode(section["scanningMode"])
@@ -1259,7 +1259,7 @@ def grid_definition_template_90(section, metadata):
     # diameters rely on the satellite being over the equator.
     if sub_satellite_lat != 0:
         raise TranslationError(
-            "Unsupported non-zero latitude for " "space-view perspective."
+            "Unsupported non-zero latitude for space-view perspective."
         )
     sub_satellite_lon = (
         section["longitudeOfSubSatellitePoint"] * _GRID_ACCURACY_IN_DEGREES
@@ -2018,13 +2018,9 @@ def generating_process(section, include_forecast_process=True):
     if options.warn_on_unsupported:
         # Reference Code Table 4.3.
         warnings.warn("Unable to translate type of generating process.")
-        warnings.warn(
-            "Unable to translate background generating " "process identifier."
-        )
+        warnings.warn("Unable to translate background generating process identifier.")
         if include_forecast_process:
-            warnings.warn(
-                "Unable to translate forecast generating " "process identifier."
-            )
+            warnings.warn("Unable to translate forecast generating process identifier.")
 
 
 def data_cutoff(hoursAfterDataCutoff, minutesAfterDataCutoff):
@@ -2043,7 +2039,7 @@ def data_cutoff(hoursAfterDataCutoff, minutesAfterDataCutoff):
     if hoursAfterDataCutoff != _MDI or minutesAfterDataCutoff != _MDI:
         if options.warn_on_unsupported:
             warnings.warn(
-                'Unable to translate "hours and/or minutes ' 'after data cutoff".'
+                'Unable to translate "hours and/or minutes after data cutoff".'
             )
 
 
@@ -2060,8 +2056,7 @@ def statistical_method_name(section):
     else:
         # This should *never* happen, as only called by pdt 8 and 15.
         msg = (
-            "Internal error: can't get statistical method for unsupported "
-            "pdt : 4.{:d}."
+            "Internal error: can't get statistical method for unsupported pdt : 4.{:d}."
         )
         raise ValueError(msg.format(section_number))
     statistic_code = section[stat_keyname]
@@ -2117,7 +2112,7 @@ def statistical_cell_method(section):
         # is all we currently support.
         # The exact interpretation of this is still unclear so we also accept
         # a missing value.
-        msg = "grib statistic time-increment type [{}] " "is not supported.".format(
+        msg = "grib statistic time-increment type [{}] is not supported.".format(
             increment_typecode
         )
         raise TranslationError(msg)
@@ -2337,17 +2332,11 @@ def product_definition_template_9(section, metadata, frt_coord):
         # Type is "above upper level".
         threshold_value = section["scaledValueOfUpperLimit"]
         if threshold_value == _MDI:
-            msg = (
-                "Product definition section 4 has missing "
-                "scaled value of upper limit"
-            )
+            msg = "Product definition section 4 has missing scaled value of upper limit"
             raise TranslationError(msg)
         threshold_scaling = section["scaleFactorOfUpperLimit"]
         if threshold_scaling == _MDI:
-            msg = (
-                "Product definition section 4 has missing "
-                "scale factor of upper limit"
-            )
+            msg = "Product definition section 4 has missing scale factor of upper limit"
             raise TranslationError(msg)
         # Encode threshold information.
         threshold = unscale(threshold_value, threshold_scaling)
@@ -2668,7 +2657,7 @@ def product_definition_section(section, metadata, discipline, tablesVersion, rt_
     elif template == 40:
         product_definition_template_40(section, metadata, rt_coord)
     else:
-        msg = "Product definition template [{}] is not " "supported".format(template)
+        msg = "Product definition template [{}] is not supported".format(template)
         raise TranslationError(msg)
 
     # Translate GRIB2 phenomenon to CF phenomenon.
@@ -2722,7 +2711,7 @@ def data_representation_section(section):
     supported_templates = grid_point_templates + spectral_templates
 
     if template not in supported_templates:
-        msg = "Data Representation Section Template [{}] is not " "supported".format(
+        msg = "Data Representation Section Template [{}] is not supported".format(
             template
         )
         raise TranslationError(msg)
@@ -2757,7 +2746,7 @@ def bitmap_section(section):
     bitMapIndicator = section["bitMapIndicator"]
 
     if bitMapIndicator not in [_BITMAP_CODE_NONE, _BITMAP_CODE_PRESENT]:
-        msg = "Bitmap Section 6 contains unsupported " "bitmap indicator [{}]".format(
+        msg = "Bitmap Section 6 contains unsupported bitmap indicator [{}]".format(
             bitMapIndicator
         )
         raise TranslationError(msg)

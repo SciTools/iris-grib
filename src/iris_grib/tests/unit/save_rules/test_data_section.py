@@ -51,7 +51,7 @@ class TestMDI(tests.IrisGribTest):
         self.assertEqual(key, "missingValue")
         self.assertTrue(
             fill_value < min_data or fill_value > max_data,
-            "Fill value {} is not outside data range " "{} to {}.".format(
+            "Fill value {} is not outside data range {} to {}.".format(
                 fill_value, min_data, max_data
             ),
         )
