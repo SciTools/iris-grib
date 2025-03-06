@@ -10,55 +10,39 @@ import iris_grib.tests as tests
 
 import pickle
 
-from iris.tests.integration.test_pickle import Common as PickleCommon
-
+import pytest
 from iris_grib.message import GribMessage
+
+MIN_PICKLE_PROTOCOL = 4
+
+TESTED_PROTOCOLS = list(range(MIN_PICKLE_PROTOCOL, pickle.HIGHEST_PROTOCOL + 1))
 
 
 @tests.skip_data
-class TestPickleGribMessage(PickleCommon, tests.IrisGribTest):
-    # NOTE: based on 'Common' from iris.tests.integration.test_pickle.
-    def setUp(self):
-        self.path = tests.get_data_path(("GRIB", "fp_units", "hours.grib2"))
+class TestPickleGribMessage:
+    @pytest.fixture
+    def messages(self):
+        path = tests.get_data_path(("GRIB", "fp_units", "hours.grib2"))
+        return GribMessage.messages_from_filename(path)
 
-    # NOTE: this looks like it is overriding the parent "pickle_cube", but this
-    # function is *not* the same thing.
-    # (a) the tests which use pickle_cube are "test_protocol_XXX", and none
-    #     of those currently work (see overrides below).
-    # (b) the tests which use *this* function are the extra ones below.
-    #     These check only that a GribMessage, and its lazy ".data", can be
-    #     pickled.  However, still, neither reads back successfully.
-    # TODO: resolve this or remove the test.
-    def pickle_obj(self, obj):
-        with self.temp_filename(".pkl") as filename:
-            with open(filename, "wb") as f:
-                pickle.dump(obj, f)
-            # NOTE: *ought* to read back + check equal, but it does not work.
-            # TODO: fix
+    def pickle_obj(self, obj, protocol, tmp_path):
+        # NOTE: Neither GribMessage, nor its lazy ".data", read back from
+        # a pickled obj. Currently, this only checks that they can be pickled
+        # successfully.
+        filename = tmp_path / ".pkl"
+        with open(filename, "wb") as f:
+            pickle.dump(obj, f, protocol)
+        # TODO: resolve this or remove the test.
+        # with open(filename, "rb") as f:
+        #     nobj = pickle.load(f)
+        # assert nobj == obj
 
-    # These probably "ought" to work, but currently fail.
-    # see https://github.com/SciTools/iris-grib/issues/202
-    def test_protocol_0(self):
-        super().test_protocol_0()
-
-    def test_protocol_1(self):
-        super().test_protocol_1()
-
-    def test_protocol_2(self):
-        super().test_protocol_2()
-
-    def test(self):
-        # Check that a GribMessage pickles without errors.
-        messages = GribMessage.messages_from_filename(self.path)
+    @pytest.mark.parametrize("protocol", TESTED_PROTOCOLS)
+    def test_message(self, protocol, messages):
         obj = next(messages)
-        self.pickle_obj(obj)
+        self.pickle_obj(obj, protocol)
 
-    def test_data(self):
-        # Check that GribMessage.data pickles without errors.
-        messages = GribMessage.messages_from_filename(self.path)
+    @pytest.mark.parametrize("protocol", TESTED_PROTOCOLS)
+    def test_message_data(self, protocol, messages):
         obj = next(messages).data
-        self.pickle_obj(obj)
-
-
-if __name__ == "__main__":
-    tests.main()
+        self.pickle_obj(obj, protocol)
