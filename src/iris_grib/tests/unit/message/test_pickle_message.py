@@ -33,16 +33,16 @@ class TestPickleGribMessage:
         with open(filename, "wb") as f:
             pickle.dump(obj, f, protocol)
         # TODO: resolve this or remove the test.
-        # with open(filename, "rb") as f:
-        #     nobj = pickle.load(f)
-        # assert nobj == obj
+        #  with open(filename, "rb") as f:
+        #      nobj = pickle.load(f)
+        #  assert nobj == obj
 
     @pytest.mark.parametrize("protocol", TESTED_PROTOCOLS)
-    def test_message(self, protocol, messages):
+    def test_message(self, protocol, messages, tmp_path):
         obj = next(messages)
-        self.pickle_obj(obj, protocol)
+        self.pickle_obj(obj, protocol, tmp_path)
 
     @pytest.mark.parametrize("protocol", TESTED_PROTOCOLS)
-    def test_message_data(self, protocol, messages):
+    def test_message_data(self, protocol, messages, tmp_path):
         obj = next(messages).data
-        self.pickle_obj(obj, protocol)
+        self.pickle_obj(obj, protocol, tmp_path)
