@@ -307,8 +307,8 @@ def rotated_pole(cube, grib):
     # WORKAROUND
     latitude = cs.grid_north_pole_latitude / _DEFAULT_DEGREES_UNITS
     longitude = ((cs.grid_north_pole_longitude + 180) % 360) / _DEFAULT_DEGREES_UNITS
-    eccodes.codes_set(grib, "latitudeOfSouthernPole", -int(round(latitude)))
-    eccodes.codes_set(grib, "longitudeOfSouthernPole", int(round(longitude)))
+    eccodes.codes_set(grib, "latitudeOfSouthernPole", -round(latitude))
+    eccodes.codes_set(grib, "longitudeOfSouthernPole", round(longitude))
     eccodes.codes_set(grib, "angleOfRotation", 0)
 
 
@@ -550,7 +550,7 @@ def grid_definition_template_12(cube, grib):
     # Convert a value in metres into the closest integer number of
     # centimetres.
     def m_to_cm(value):
-        return int(round(value * 100))
+        return round(value * 100)
 
     # False easting and false northing are measured in units of (10^-2)m.
     eccodes.codes_set(grib, "XR", m_to_cm(cs.false_easting))
@@ -1126,7 +1126,7 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
             output_v = v_coord.units.convert(output_v, output_unit)
         if output_v - abs(output_v):
             warnings.warn("Vertical level encoding problem: scaling required.")
-        output_v = int(round(output_v))
+        output_v = round(output_v)
 
         eccodes.codes_set(grib, "typeOfFirstFixedSurface", grib_v_code)
         eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
@@ -1146,10 +1146,10 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 0)
         eccodes.codes_set(
-            grib, "scaledValueOfFirstFixedSurface", int(round(output_v[0]))
+            grib, "scaledValueOfFirstFixedSurface", round(output_v[0])
         )
         eccodes.codes_set(
-            grib, "scaledValueOfSecondFixedSurface", int(round(output_v[1]))
+            grib, "scaledValueOfSecondFixedSurface", round(output_v[1])
         )
 
     if hybrid_factory is not None:
