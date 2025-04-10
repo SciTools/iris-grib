@@ -1145,12 +1145,8 @@ def set_fixed_surfaces(cube, grib, full3d_cube=None):
         eccodes.codes_set(grib, "typeOfSecondFixedSurface", grib_v_code)
         eccodes.codes_set(grib, "scaleFactorOfFirstFixedSurface", 0)
         eccodes.codes_set(grib, "scaleFactorOfSecondFixedSurface", 0)
-        eccodes.codes_set(
-            grib, "scaledValueOfFirstFixedSurface", round(output_v[0])
-        )
-        eccodes.codes_set(
-            grib, "scaledValueOfSecondFixedSurface", round(output_v[1])
-        )
+        eccodes.codes_set(grib, "scaledValueOfFirstFixedSurface", round(output_v[0]))
+        eccodes.codes_set(grib, "scaledValueOfSecondFixedSurface", round(output_v[1]))
 
     if hybrid_factory is not None:
         # Need to record ALL the level coefficients in a 'PV' vector.
