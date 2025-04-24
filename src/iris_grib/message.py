@@ -521,8 +521,8 @@ class Section:
             res = eccodes.codes_get_array(self._message_id, key)
         elif key == "bitmap":
             # The bitmap is stored as contiguous boolean bits, one bit for each
-            # data point. ecCodes returns these as strings, so it must be
-            # type-cast to return an array of ints (0, 1).
+            # data point. ecCodes returns these as strings, so it must be type-cast
+            # to return an array of ints (0, 1).
             res = eccodes.codes_get_array(self._message_id, key, int)
         elif key in ("typeOfFirstFixedSurface", "typeOfSecondFixedSurface"):
             # By default these values are returned as unhelpful strings but
