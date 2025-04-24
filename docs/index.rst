@@ -1,7 +1,7 @@
 .. iris-grib documentation master file, created by
    sphinx-quickstart on Fri May 13 11:48:28 2016.
    You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+   contain the root ``toctree`` directive.
 
 Iris-grib v0.20
 ===============
