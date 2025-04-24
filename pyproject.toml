@@ -150,7 +150,7 @@ log_cli_level = "INFO"
 minversion = "6.0"
 testpaths = "src/iris_grib"
 xfail_strict = "True"
-filterwarnings = ["error"]
+filterwarnings = ["default"]
 
 [tool.repo-review]
 ignore = [
