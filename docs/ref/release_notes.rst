@@ -6,6 +6,53 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.21.0
+-------------------------------
+
+:Release: 0.21.0
+:Date: [unreleased]
+
+Features
+^^^^^^^^
+
+* `@trexfeathers <https://github.com/trexfeathers>`_ added checks for invalid
+  values in the following keys when loading grid definition template 3.10
+  (mercator grids): ``orientationOfTheGrid``, ``longitudeOfLastGridPoint``,
+  ``latitudeOfLastGridPoint``.
+  `(ISSUE#118) <https://github.com/SciTools/iris-grib/issues/118>`_,
+  `(PR#446) <https://github.com/SciTools/iris-grib/pull/446>`_
+
+
+Bugs Fixed
+^^^^^^^^^^
+
+* N/A
+
+
+Documentation
+^^^^^^^^^^^^^
+
+* N/A
+
+
+Dependencies
+^^^^^^^^^^^^
+
+* N/A
+
+
+Internal
+^^^^^^^^
+
+* N/A
+
+
+New Contributors
+^^^^^^^^^^^^^^^^
+
+* N/A
+
+
 What's new in iris-grib v0.20.0
 -------------------------------
 
