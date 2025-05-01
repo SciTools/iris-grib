@@ -7,7 +7,7 @@ dependencies:
   - python=3.10
 
 # Setup dependencies.
-  - setuptools>=64
+  - setuptools>=77.0.3
   - setuptools_scm>=8
 
 # Core dependencies.

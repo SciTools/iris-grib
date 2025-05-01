@@ -4,7 +4,7 @@
 [build-system]
 # Defined by PEP 518
 requires = [
-    "setuptools>=64",
+    "setuptools>=77.0.3",
     "setuptools_scm>=8.0",
 ]
 # Defined by PEP 517
@@ -17,7 +17,6 @@ authors = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: MacOS",
     "Operating System :: POSIX",
     "Operating System :: POSIX :: Linux",
@@ -46,7 +45,8 @@ keywords = [
     "earth-science",
     "meteorology",
 ]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 name = "iris-grib"
 requires-python = ">=3.10"
 
@@ -55,9 +55,6 @@ Code = "https://github.com/SciTools/iris-grib"
 Discussions = "https://github.com/SciTools/iris-grib/discussions"
 Documentation = "https://iris-grib.readthedocs.io/en/stable/"
 Issues = "https://github.com/SciTools/iris-grib/issues"
-
-[tool.setuptools]
-license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = "requirements/pypi-core.txt"}
