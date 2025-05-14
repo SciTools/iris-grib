@@ -12,6 +12,8 @@ Unit tests for
 # before importing anything else.
 import iris_grib.tests as tests
 
+import warnings
+
 import numpy as np
 
 import iris.coord_systems
@@ -37,10 +39,10 @@ class Test(tests.IrisGribTest):
             "Ni": 181,
             "Nj": 213,
             "latitudeOfFirstGridPoint": 2351555,
-            "latitudeOfLastGridPoint": 25088204,
+            "latitudeOfLastGridPoint": 2797793.1090371446,
             "LaD": 14000000,
             "longitudeOfFirstGridPoint": 114990304,
-            "longitudeOfLastGridPoint": 135009712,
+            "longitudeOfLastGridPoint": 14566918.990644248,
             "resolutionAndComponentFlags": 56,
             "scanningMode": 64,
             "Di": 12000000,
@@ -82,6 +84,34 @@ class Test(tests.IrisGribTest):
         grid_definition_template_10(section, metadata)
         expected = self.expected(y_dim=0, x_dim=1)
         self.assertEqual(metadata, expected)
+
+    def test_last_point_warning(self):
+        section = self.section_3()
+        metadata = empty_metadata()
+
+        # No warnings expected with the standard values.
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            grid_definition_template_10(section, metadata)
+
+        # Warning expected if specified last point does not agree with the
+        #  generated one.
+        section["longitudeOfLastGridPoint"] = 0
+        expected_message = (
+            "File grid definition inconsistent. Grid specification produces "
+            "final_x_point="
+        )
+        with self.assertWarnsRegex(UserWarning, expected_message):
+            grid_definition_template_10(section, metadata)
+
+    def test_orientation_error(self):
+        section = self.section_3()
+        section["orientationOfTheGrid"] = 1
+        metadata = empty_metadata()
+        with self.assertRaisesRegex(
+            iris.exceptions.TranslationError, "iris-grib only supports 0.0 orientation"
+        ):
+            grid_definition_template_10(section, metadata)
 
 
 if __name__ == "__main__":
