@@ -56,7 +56,9 @@ ResolutionFlags = namedtuple(
     "ResolutionFlags", ["i_increments_given", "j_increments_given", "uv_resolved"]
 )
 
-FixedSurface = namedtuple("FixedSurface", ["standard_name", "long_name", "units", "point"])
+FixedSurface = namedtuple(
+    "FixedSurface", ["standard_name", "long_name", "units", "point"]
+)
 
 InterpolationParameters = namedtuple(
     "InterpolationParameters",
@@ -92,8 +94,8 @@ _TIME_RANGE_MISSING = 2**32 - 1
 
 # Reference Code Table 4.5.
 _FIXED_SURFACE = {
-    1: FixedSurface(None, "height", "m", 0.),  # Ground or water surface
-    4: FixedSurface(None, "air_temperature", "Celsius", 0.),  # Level of 0C isotherm
+    1: FixedSurface(None, "height", "m", 0.0),  # Ground or water surface
+    4: FixedSurface(None, "air_temperature", "Celsius", 0.0),  # Level of 0C isotherm
     100: FixedSurface(None, "pressure", "Pa", None),  # Isobaric surface
     103: FixedSurface(None, "height", "m", None),  # Height level above ground
 }
@@ -1731,8 +1733,10 @@ def vertical_coords(section, metadata):
 
         # We treat fixed surface level type=1 as having no vertical coordinate.
         # See https://github.com/SciTools/iris/issues/519
-        if (typeOfFirstFixedSurface in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]
-                and typeOfSecondFixedSurface in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]):
+        if typeOfFirstFixedSurface in [
+            _TYPE_OF_FIXED_SURFACE_MISSING,
+            1,
+        ] and typeOfSecondFixedSurface in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
             return
         fixed_surface_missing = FixedSurface(None, None, None, None)
         fixed_surface_first = _FIXED_SURFACE.get(
@@ -1798,9 +1802,7 @@ def vertical_coords(section, metadata):
             # Add the vertical coordinate to metadata aux coords.
             metadata["aux_coords_and_dims"].append((coord, None))
         if fixed_surface_first == fixed_surface_missing:
-            coord.attributes["GRIB_fixed_surface_type"] = (
-                typeOfFirstFixedSurface
-            )
+            coord.attributes["GRIB_fixed_surface_type"] = typeOfFirstFixedSurface
 
 
 def _get_surface_value(section, sub_item):
