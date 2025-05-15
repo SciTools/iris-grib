@@ -1728,12 +1728,15 @@ def vertical_coords(section, metadata):
         hybrid_factories(section, metadata)
     else:
         # Generate vertical coordinate.
-        typeOfFirstFixedSurface = section.get(
-            "typeOfFirstFixedSurface", _TYPE_OF_FIXED_SURFACE_MISSING
-        )
-        typeOfSecondFixedSurface = section.get(
-            "typeOfSecondFixedSurface", _TYPE_OF_FIXED_SURFACE_MISSING
-        )
+        # section is not a true dict and does not support the get method.
+        try:
+            typeOfFirstFixedSurface = section["typeOfFirstFixedSurface"]
+        except KeyError:
+            typeOfFirstFixedSurface = _TYPE_OF_FIXED_SURFACE_MISSING
+        try:
+            typeOfSecondFixedSurface = section["typeOfSecondFixedSurface"]
+        except KeyError:
+            typeOfSecondFixedSurface = _TYPE_OF_FIXED_SURFACE_MISSING
 
         # We treat fixed surface level type=1 as having no vertical coordinate.
         # See https://github.com/SciTools/iris/issues/519
