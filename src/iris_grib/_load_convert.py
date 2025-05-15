@@ -1728,8 +1728,12 @@ def vertical_coords(section, metadata):
         hybrid_factories(section, metadata)
     else:
         # Generate vertical coordinate.
-        typeOfFirstFixedSurface = section["typeOfFirstFixedSurface"]
-        typeOfSecondFixedSurface = section["typeOfSecondFixedSurface"]
+        typeOfFirstFixedSurface = section.get(
+            "typeOfFirstFixedSurface", _TYPE_OF_FIXED_SURFACE_MISSING
+        )
+        typeOfSecondFixedSurface = section.get(
+            "typeOfSecondFixedSurface", _TYPE_OF_FIXED_SURFACE_MISSING
+        )
 
         # We treat fixed surface level type=1 as having no vertical coordinate.
         # See https://github.com/SciTools/iris/issues/519
@@ -1746,23 +1750,25 @@ def vertical_coords(section, metadata):
             # We have a surface type that includes the point in its definition
             first = fixed_surface_first.point
         else:
-            first = _get_surface_value(section, "First")
+            first = _get_surface_value(section, "First", warn_only=True)
             point = first
 
-        typeOfSecondFixedSurface = section["typeOfSecondFixedSurface"]
         if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
             fixed_surface_second = _FIXED_SURFACE.get(
                 typeOfSecondFixedSurface, fixed_surface_missing
             )
-            if fixed_surface_second.point:
+            if fixed_surface_second.point is not None:
                 # We have a surface type that includes the point in its definition
                 second = fixed_surface_second.point
             else:
                 second = _get_surface_value(section, "Second")
-            point = 0.5 * (first + second)
-            bounds = [first, second]
+            if second is not None:
+                point = 0.5 * (first + second)
+                bounds = [first, second]
         else:
             bounds = None
+        if point is None:
+            return
         if bounds and (
             fixed_surface_first.standard_name != fixed_surface_second.standard_name
             or fixed_surface_first.long_name != fixed_surface_second.long_name
@@ -1770,7 +1776,7 @@ def vertical_coords(section, metadata):
         ):
             # Create two coords, one for each bound. we aren't allowed None as a bound
             # so rely solely on the point value
-            first_bounds = [bounds[0], None]
+            # first_bounds = [bounds[0], None]
             coord = DimCoord(
                 first,
                 standard_name=fixed_surface_first.standard_name,
@@ -1781,7 +1787,7 @@ def vertical_coords(section, metadata):
             # Add the vertical coordinate to metadata aux coords.
             metadata["aux_coords_and_dims"].append((coord, None))
 
-            second_bounds = [None, bounds[1]]
+            # second_bounds = [None, bounds[1]]
             coord = DimCoord(
                 second,
                 standard_name=fixed_surface_second.standard_name,
@@ -1805,16 +1811,20 @@ def vertical_coords(section, metadata):
             coord.attributes["GRIB_fixed_surface_type"] = typeOfFirstFixedSurface
 
 
-def _get_surface_value(section, sub_item):
+def _get_surface_value(section, sub_item, warn_only=False):
     key = f"scaledValueOf{sub_item}FixedSurface"
     scaledValueOfFixedSurface = section[key]
     if scaledValueOfFixedSurface == _MDI:
-        if options.warn_on_unsupported:
-            msg = (
-                f"Unable to translate type of {sub_item} fixed "
-                "surface with missing scaled value."
-            )
-            warnings.warn(msg)
+        msg = (
+            f"Unable to translate type of {sub_item} fixed "
+            "surface with missing scaled value."
+        )
+        if warn_only:
+            if options.warn_on_unsupported:
+                warnings.warn(msg)
+        else:
+            raise TranslationError(msg)
+        first = None
     else:
         key = f"scaleFactorOf{sub_item}FixedSurface"
         scaleFactorOfFixedSurface = section[key]
