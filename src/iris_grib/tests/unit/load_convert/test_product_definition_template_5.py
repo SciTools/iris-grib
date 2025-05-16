@@ -54,6 +54,39 @@ class Test(tests.IrisGribTest):
         # Check result.
         self.assertEqual(result, Probability("above_threshold", 5.3))
 
+    def test_below_upper_threshold(self):
+        self.section["probabilityType"] = 4
+        result = product_definition_template_5(
+            self.section, self.metadata, self.frt_coord
+        )
+        # Check result.
+        self.assertEqual(result, Probability("below_threshold", 5.3))
+
+    def test_above_lower_threshold(self):
+        self.section["probabilityType"] = 3
+        self.section["scaledValueOfUpperLimit"] = None
+        self.section["scaleFactorOfUpperLimit"] = None
+        self.section["scaledValueOfLowerLimit"] = 53
+        self.section["scaleFactorOfLowerLimit"] = 1
+        result = product_definition_template_5(
+            self.section, self.metadata, self.frt_coord
+        )
+        # Check result.
+        self.assertEqual(result, Probability("above_threshold", 5.3))
+
+    def test_below_lower_threshold(self):
+        self.section["probabilityType"] = 0
+        self.section["scaledValueOfUpperLimit"] = None
+        self.section["scaleFactorOfUpperLimit"] = None
+        self.section["scaledValueOfLowerLimit"] = 53
+        self.section["scaleFactorOfLowerLimit"] = 1
+
+        result = product_definition_template_5(
+            self.section, self.metadata, self.frt_coord
+        )
+        # Check result.
+        self.assertEqual(result, Probability("below_threshold", 5.3))
+
     def test_fail_bad_probability_type(self):
         self.section["probabilityType"] = 17
         with self.assertRaisesRegex(TranslationError, "unsupported probability type"):
