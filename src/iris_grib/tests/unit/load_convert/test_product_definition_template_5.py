@@ -4,7 +4,7 @@
 # See LICENSE in the root of the repository for full licensing details.
 """
 Tests for function
-:func:`iris_grib._load_convert.product_definition_template_9`.
+:func:`iris_grib._load_convert.product_definition_template_5`.
 
 """
 
@@ -26,7 +26,7 @@ class Test(tests.IrisGribTest):
     def setUp(self):
         # Create patches for called routines
         module = "iris_grib._load_convert"
-        self.patch_pdt5_call = self.patch(module + ".product_definition_template_5")
+        self.patch_pdt0_call = self.patch(module + ".product_definition_template_0")
         # Construct dummy call arguments
         self.section = section_4()
         self.section["probabilityType"] = 1
@@ -36,7 +36,7 @@ class Test(tests.IrisGribTest):
             24, "forecast_reference_time", units="hours since epoch"
         )
         self.metadata = {
-            "cell_methods": [mock.sentinel.cell_method],
+            "cell_methods": [],
             "aux_coords_and_dims": [],
         }
 
@@ -44,9 +44,9 @@ class Test(tests.IrisGribTest):
         result = product_definition_template_5(
             self.section, self.metadata, self.frt_coord
         )
-        # Check expected function was called.
+        # Check expected functions were called.
         self.assertEqual(
-            self.patch_pdt5_call.call_args_list,
+            self.patch_pdt0_call.call_args_list,
             [mock.call(self.section, self.metadata, self.frt_coord)],
         )
         # Check metadata content (N.B. cell_method has been removed!).
