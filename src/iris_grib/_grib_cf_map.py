@@ -76,6 +76,7 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 1, 2): CFName("humidity_mixing_ratio", None, "kg kg-1"),
     G2Param(2, 0, 1, 3): CFName(None, "precipitable_water", "kg m-2"),
     G2Param(2, 0, 1, 7): CFName("precipitation_flux", None, "kg m-2 s-1"),
+    G2Param(2, 0, 1, 8): CFName("precipitation", None, "kg m-2"),
     G2Param(2, 0, 1, 9): CFName(
         "stratiform_rainfall_amount",
         "Large-scale precipitation (non-convective)",
@@ -115,6 +116,7 @@ GRIB2_TO_CF = {
         "mass_fraction_of_cloud_liquid_water_in_air", None, "kg kg-1"
     ),
     G2Param(2, 0, 1, 84): CFName("mass_fraction_of_cloud_ice_in_air", None, "kg kg-1"),
+    G2Param(2, 0, 1, 230): CFName("sleetfall_amout", None, "kg m-2"),
     G2Param(2, 0, 2, 0): CFName("wind_from_direction", None, "degrees"),
     G2Param(2, 0, 2, 1): CFName("wind_speed", None, "m s-1"),
     G2Param(2, 0, 2, 2): CFName("x_wind", None, "m s-1"),
@@ -157,6 +159,7 @@ GRIB2_TO_CF = {
         "atmosphere_mass_content_of_cloud_liquid_water", None, "kg m-2"
     ),
     G2Param(2, 0, 6, 7): CFName("cloud_area_fraction_in_atmosphere_layer", None, "%"),
+    G2Param(2, 0, 6, 11): CFName("height_of_cloud_base", None, "m"),
     G2Param(2, 0, 6, 25): CFName(None, "WAFC_CB_horizontal_extent", "1"),
     G2Param(2, 0, 6, 26): CFName(None, "WAFC_ICAO_height_at_cloud_base", "m"),
     G2Param(2, 0, 6, 27): CFName(None, "WAFC_ICAO_height_at_cloud_top", "m"),
@@ -166,6 +169,7 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 7, 7): CFName(None, "convective_inhibition", "J kg-1"),
     G2Param(2, 0, 7, 8): CFName(None, "storm_relative_helicity", "J kg-1"),
     G2Param(2, 0, 14, 0): CFName("atmosphere_mole_content_of_ozone", None, "Dobson"),
+    G2Param(2, 0, 19, 0): CFName(None, "visibility_in_air", "m"),
     G2Param(2, 0, 19, 1): CFName(None, "grib_physical_atmosphere_albedo", "%"),
     G2Param(2, 0, 19, 20): CFName(None, "WAFC_icing_potential", "1"),
     G2Param(2, 0, 19, 21): CFName(None, "WAFC_in-cloud_turb_potential", "1"),
