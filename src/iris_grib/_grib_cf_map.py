@@ -169,7 +169,7 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 7, 7): CFName(None, "convective_inhibition", "J kg-1"),
     G2Param(2, 0, 7, 8): CFName(None, "storm_relative_helicity", "J kg-1"),
     G2Param(2, 0, 14, 0): CFName("atmosphere_mole_content_of_ozone", None, "Dobson"),
-    G2Param(2, 0, 19, 0): CFName(None, "visibility_in_air", "m"),
+    G2Param(2, 0, 19, 0): CFName("visibility_in_air", None, "m"),
     G2Param(2, 0, 19, 1): CFName(None, "grib_physical_atmosphere_albedo", "%"),
     G2Param(2, 0, 19, 20): CFName(None, "WAFC_icing_potential", "1"),
     G2Param(2, 0, 19, 21): CFName(None, "WAFC_in-cloud_turb_potential", "1"),
