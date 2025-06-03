@@ -1751,10 +1751,10 @@ def vertical_coords(section, metadata):
         )
         if fixed_surface_first.point:
             # We have a surface type that includes the point in its definition
-            first = fixed_surface_first.point
+            lower_bound = fixed_surface_first.point
         else:
-            first = _get_surface_value(section, "First", warn_only=True)
-            point = first
+            lower_bound = _get_surface_value(section, "First", warn_only=True)
+            point = lower_bound
 
         if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
             fixed_surface_second = _FIXED_SURFACE.get(
@@ -1762,56 +1762,99 @@ def vertical_coords(section, metadata):
             )
             if fixed_surface_second.point is not None:
                 # We have a surface type that includes the point in its definition
-                second = fixed_surface_second.point
+                upper_bound = fixed_surface_second.point
             else:
-                second = _get_surface_value(section, "Second")
-            if second is not None:
-                point = 0.5 * (first + second)
-                bounds = [first, second]
+                upper_bound = _get_surface_value(section, "Second")
+            if upper_bound is not None:
+                point = 0.5 * (lower_bound + upper_bound)
+                bounds = [lower_bound, upper_bound]
         else:
             bounds = None
         if point is None:
             return
-        if bounds and (
-            fixed_surface_first.standard_name != fixed_surface_second.standard_name
-            or fixed_surface_first.long_name != fixed_surface_second.long_name
-            or fixed_surface_first.units != fixed_surface_second.units
-        ):
-            # Create two coords, one for each bound. we aren't allowed None as a bound
-            # so rely solely on the point value
-            # first_bounds = [bounds[0], None]
-            coord = DimCoord(
-                first,
-                standard_name=fixed_surface_first.standard_name,
-                long_name=fixed_surface_first.long_name,
-                units=fixed_surface_first.units,
-                # bounds=first_bounds,
-            )
-            # Add the vertical coordinate to metadata aux coords.
+        coords = _build_vertical_coords(
+            bounds,
+            fixed_surface_first,
+            fixed_surface_second,
+            lower_bound,
+            point,
+            upper_bound,
+        )
+        for coord in coords:
+            # Add the vertical coordinate(s) to metadata aux coords.
+            if fixed_surface_first == fixed_surface_missing:
+                coord.attributes["GRIB_fixed_surface_type"] = typeOfFirstFixedSurface
             metadata["aux_coords_and_dims"].append((coord, None))
 
-            # second_bounds = [None, bounds[1]]
-            coord = DimCoord(
-                second,
-                standard_name=fixed_surface_second.standard_name,
-                long_name=fixed_surface_second.long_name,
-                units=fixed_surface_second.units,
-                # bounds=second_bounds,
-            )
-            # Add the vertical coordinate to metadata aux coords.
-            metadata["aux_coords_and_dims"].append((coord, None))
-        else:
-            coord = DimCoord(
-                point,
-                standard_name=fixed_surface_first.standard_name,
-                long_name=fixed_surface_first.long_name,
-                units=fixed_surface_first.units,
-                bounds=bounds,
-            )
-            # Add the vertical coordinate to metadata aux coords.
-            metadata["aux_coords_and_dims"].append((coord, None))
-        if fixed_surface_first == fixed_surface_missing:
-            coord.attributes["GRIB_fixed_surface_type"] = typeOfFirstFixedSurface
+
+def _build_vertical_coords(
+    bounds: list[float] | None,
+    fixed_surface_first: FixedSurface,
+    fixed_surface_second: FixedSurface,
+    lower_bound: float,
+    point: float,
+    upper_bound: float,
+) -> list[DimCoord]:
+    """
+    Build the vertical coordinates based on the bounds and fixed surface types.
+
+    If the bounds are not None and the first and second fixed surfaces represent
+    the same quantity, create two coordinates, one for each bound.
+    Otherwise, create a single coordinate with the point value.
+
+    Args:
+        bounds:
+            List of two floats representing the lower and upper bounds, or None.
+        fixed_surface_first:
+            FixedSurface object for the first surface type (lower bound).
+        fixed_surface_second:
+            FixedSurface object for the second surface type (upper bound).
+        lower_bound:
+            The lower bound value.
+        point:
+            The point value to use if bounds are None.
+        upper_bound:
+            The upper bound value.
+
+    Returns:
+        List of DimCoord objects representing the vertical coordinates.
+    """
+    coords = []
+    if bounds and (
+        fixed_surface_first.standard_name != fixed_surface_second.standard_name
+        or fixed_surface_first.long_name != fixed_surface_second.long_name
+        or fixed_surface_first.units != fixed_surface_second.units
+    ):
+        # Create two coords, one for each bound. Iris doesn't allow None as a bound
+        # so rely solely on the point value
+        # first_bounds = [bounds[0], None]
+        coord = DimCoord(
+            lower_bound,
+            standard_name=fixed_surface_first.standard_name,
+            long_name=fixed_surface_first.long_name,
+            units=fixed_surface_first.units,
+            # bounds=first_bounds,
+        )
+        coords.append(coord)
+
+        # second_bounds = [None, bounds[1]]
+        coord = DimCoord(
+            upper_bound,
+            standard_name=fixed_surface_second.standard_name,
+            long_name=fixed_surface_second.long_name,
+            units=fixed_surface_second.units,
+            # bounds=second_bounds,
+        )
+        coords.append(coord)
+    else:
+        coord = DimCoord(
+            point,
+            standard_name=fixed_surface_first.standard_name,
+            long_name=fixed_surface_first.long_name,
+            units=fixed_surface_first.units,
+        )
+        coords.append(coord)
+    return coords
 
 
 def _get_surface_value(section, sub_item, warn_only=False):
