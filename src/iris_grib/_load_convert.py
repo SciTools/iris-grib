@@ -1770,6 +1770,8 @@ def vertical_coords(section, metadata):
                 bounds = [lower_bound, upper_bound]
         else:
             bounds = None
+            fixed_surface_second = None
+            upper_bound = None
         if point is None:
             return
         coords = _build_vertical_coords(
@@ -1852,6 +1854,7 @@ def _build_vertical_coords(
             standard_name=fixed_surface_first.standard_name,
             long_name=fixed_surface_first.long_name,
             units=fixed_surface_first.units,
+            bounds=bounds,
         )
         coords.append(coord)
     return coords
