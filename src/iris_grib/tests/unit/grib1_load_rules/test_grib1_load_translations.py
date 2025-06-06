@@ -287,7 +287,7 @@ class TestGribTimecodes(tests.IrisTest):
                 grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
                 # Set the PDT to something unexpected.
                 eccodes.codes_set_long(
-                    grib_message, "productDefinitionTemplateNumber", 5
+                    grib_message, "productDefinitionTemplateNumber", 99
                 )
                 eccodes.codes_write(grib_message, temp_gribfile)
 
@@ -296,7 +296,7 @@ class TestGribTimecodes(tests.IrisTest):
             with self.assertRaises(iris.exceptions.TranslationError) as t_err:
                 _ = next(cube_generator)
             self.assertEqual(
-                "Product definition template [5] is not supported",
+                "Product definition template [99] is not supported",
                 str(t_err.exception),
             )
 
