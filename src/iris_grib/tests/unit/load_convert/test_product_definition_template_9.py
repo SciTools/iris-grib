@@ -57,12 +57,33 @@ class Test(tests.IrisGribTest):
 
     def test_fail_bad_threshold_value(self):
         self.section["scaledValueOfUpperLimit"] = _MDI
-        with self.assertRaisesRegex(TranslationError, "missing scaled value"):
+        with self.assertRaisesRegex(
+            TranslationError, "missing scaled value of upper limit"
+        ):
             product_definition_template_9(self.section, self.metadata, self.frt_coord)
 
     def test_fail_bad_threshold_scalefactor(self):
         self.section["scaleFactorOfUpperLimit"] = _MDI
-        with self.assertRaisesRegex(TranslationError, "missing scale factor"):
+        with self.assertRaisesRegex(
+            TranslationError, "missing scale factor of upper limit"
+        ):
+            product_definition_template_9(self.section, self.metadata, self.frt_coord)
+
+    def test_fail_bad_lower_threshold_value(self):
+        self.section["probabilityType"] = 0
+        self.section["scaledValueOfLowerLimit"] = _MDI
+        with self.assertRaisesRegex(
+            TranslationError, "missing scaled value of lower limit"
+        ):
+            product_definition_template_9(self.section, self.metadata, self.frt_coord)
+
+    def test_fail_bad_lower_threshold_scalefactor(self):
+        self.section["probabilityType"] = 0
+        self.section["scaledValueOfLowerLimit"] = 1
+        self.section["scaleFactorOfLowerLimit"] = _MDI
+        with self.assertRaisesRegex(
+            TranslationError, "missing scale factor of lower limit"
+        ):
             product_definition_template_9(self.section, self.metadata, self.frt_coord)
 
 

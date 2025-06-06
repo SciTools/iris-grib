@@ -1792,7 +1792,7 @@ def vertical_coords(section, metadata):
 def _build_vertical_coords(
     bounds: list[float] | None,
     fixed_surface_first: FixedSurface,
-    fixed_surface_second: FixedSurface,
+    fixed_surface_second: FixedSurface | None,
     lower_bound: float,
     point: float,
     upper_bound: float,
@@ -1801,8 +1801,8 @@ def _build_vertical_coords(
     Build the vertical coordinates based on the bounds and fixed surface types.
 
     If the bounds are not None and the first and second fixed surfaces represent
-    the same quantity, create two coordinates, one for each bound.
-    Otherwise, create a single coordinate with the point value.
+    different quantities, create two coordinates, one for each bound.
+    Otherwise, create a single coordinate with the point and bounds values.
 
     Args:
         bounds:
@@ -1821,41 +1821,22 @@ def _build_vertical_coords(
     Returns:
         List of DimCoord objects representing the vertical coordinates.
     """
+    first_coord_kwargs = fixed_surface_first._asdict()
+    first_coord_kwargs.pop("point", None)
+    second_coord_kwargs = fixed_surface_second._asdict() if fixed_surface_second else {}
+    second_coord_kwargs.pop("point", None)
     coords = []
-    if bounds and (
-        fixed_surface_first.standard_name != fixed_surface_second.standard_name
-        or fixed_surface_first.long_name != fixed_surface_second.long_name
-        or fixed_surface_first.units != fixed_surface_second.units
-    ):
-        # Create two coords, one for each bound. Iris doesn't allow None as a bound
-        # so rely solely on the point value
-        # first_bounds = [bounds[0], None]
-        coord = DimCoord(
-            lower_bound,
-            standard_name=fixed_surface_first.standard_name,
-            long_name=fixed_surface_first.long_name,
-            units=fixed_surface_first.units,
-            # bounds=first_bounds,
-        )
+    if bounds and first_coord_kwargs != second_coord_kwargs:
+        # Create two coords, one for each bound.
+        first_bounds = np.ma.masked_array(bounds, [False, True])
+        coord = AuxCoord(lower_bound, bounds=first_bounds, **first_coord_kwargs)
         coords.append(coord)
 
-        # second_bounds = [None, bounds[1]]
-        coord = DimCoord(
-            upper_bound,
-            standard_name=fixed_surface_second.standard_name,
-            long_name=fixed_surface_second.long_name,
-            units=fixed_surface_second.units,
-            # bounds=second_bounds,
-        )
+        second_bounds = np.ma.masked_array(bounds, [True, False])
+        coord = AuxCoord(upper_bound, bounds=second_bounds, **second_coord_kwargs)
         coords.append(coord)
     else:
-        coord = DimCoord(
-            point,
-            standard_name=fixed_surface_first.standard_name,
-            long_name=fixed_surface_first.long_name,
-            units=fixed_surface_first.units,
-            bounds=bounds,
-        )
+        coord = DimCoord(point, bounds=bounds, **first_coord_kwargs)
         coords.append(coord)
     return coords
 
@@ -2454,55 +2435,44 @@ def _probability_type(section):
     # Note that GRIB provides separate "above lower threshold" and "above
     # upper threshold" probability types.  This naming style doesn't
     # recognise that distinction.  For now, assume this is not important.
-    if probability_typecode == 0:
-        # Type is "below lower level".
-        threshold = _probability_lower_threshold(section)
-        probability_type = Probability("below_threshold", threshold)
-    elif probability_typecode == 1:
-        # Type is "above upper level".
-        threshold = _probability_upper_threshold(section)
-        probability_type = Probability("above_threshold", threshold)
-    elif probability_typecode == 3:
-        # Type is "above lower level".
-        threshold = _probability_lower_threshold(section)
-        probability_type = Probability("above_threshold", threshold)
-    elif probability_typecode == 4:
-        # Type is "below upper level".
-        threshold = _probability_upper_threshold(section)
-        probability_type = Probability("below_threshold", threshold)
-    else:
-        msg = (
-            "Product definition section 4 contains an unsupported "
-            "probability type [{}]".format(probability_typecode)
-        )
-        raise TranslationError(msg)
+    match probability_typecode:
+        case 0:
+            # Type is "below lower level".
+            threshold = _probability_threshold(section, "lower")
+            probability_type = Probability("below_threshold", threshold)
+        case 1:
+            # Type is "above upper level".
+            threshold = _probability_threshold(section, "upper")
+            probability_type = Probability("above_threshold", threshold)
+        case 3:
+            # Type is "above lower level".
+            threshold = _probability_threshold(section, "lower")
+            probability_type = Probability("above_threshold", threshold)
+        case 4:
+            # Type is "below upper level".
+            threshold = _probability_threshold(section, "upper")
+            probability_type = Probability("below_threshold", threshold)
+        case _:
+            msg = (
+                "Product definition section 4 contains an unsupported "
+                "probability type [{}]".format(probability_typecode)
+            )
+            raise TranslationError(msg)
     return probability_type
 
 
-def _probability_upper_threshold(section):
-    threshold_value = section["scaledValueOfUpperLimit"]
-    if threshold_value == _MDI:
-        msg = "Product definition section 4 has missing scaled value of upper limit"
-        raise TranslationError(msg)
-    threshold_scaling = section["scaleFactorOfUpperLimit"]
-    if threshold_scaling == _MDI:
-        msg = "Product definition section 4 has missing scale factor of upper limit"
-        raise TranslationError(msg)
-    # Encode threshold information.
-    threshold = unscale(threshold_value, threshold_scaling)
-    return threshold
+def _probability_threshold(section, limit_type):
+    """Get the unscaled probability threshold value for the given limit type."""
+    value_key = f"scaledValueOf{limit_type.capitalize()}Limit"
+    scale_key = f"scaleFactorOf{limit_type.capitalize()}Limit"
+    msg = f"Product definition section 4 has missing {{item}} of {limit_type} limit"
 
-
-def _probability_lower_threshold(section):
-    threshold_value = section["scaledValueOfLowerLimit"]
+    threshold_value = section[value_key]
     if threshold_value == _MDI:
-        msg = "Product definition section 4 has missing scaled value of lower limit"
-        raise TranslationError(msg)
-    threshold_scaling = section["scaleFactorOfLowerLimit"]
+        raise TranslationError(msg.format(item="scaled value"))
+    threshold_scaling = section[scale_key]
     if threshold_scaling == _MDI:
-        msg = "Product definition section 4 has missing scale factor of lower limit"
-        raise TranslationError(msg)
-    # Encode threshold information.
+        raise TranslationError(msg.format(item="scale factor"))
     threshold = unscale(threshold_value, threshold_scaling)
     return threshold
 

@@ -76,7 +76,7 @@ GRIB2_TO_CF = {
     G2Param(2, 0, 1, 2): CFName("humidity_mixing_ratio", None, "kg kg-1"),
     G2Param(2, 0, 1, 3): CFName(None, "precipitable_water", "kg m-2"),
     G2Param(2, 0, 1, 7): CFName("precipitation_flux", None, "kg m-2 s-1"),
-    G2Param(2, 0, 1, 8): CFName("thickness_of_precipitation_amount", None, "kg m-2"),
+    G2Param(2, 0, 1, 8): CFName("lwe_thickness_of_precipitation_amount", None, "m"),
     G2Param(2, 0, 1, 9): CFName(
         "stratiform_rainfall_amount",
         "Large-scale precipitation (non-convective)",
