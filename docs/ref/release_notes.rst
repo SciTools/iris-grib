@@ -6,6 +6,26 @@ Release Notes
 =============
 
 
+What's new in iris-grib v0.22.0
+-------------------------------
+
+:Release: 0.22.0
+:Date: TBC
+
+Features
+^^^^^^^^
+* `@MoseleyS <https://github.com/MoseleyS>`_ added support for loading GRIB2 data
+  found in the Met Office wholesale Weather Data Hub and CEDA archive.
+  `(PR#647) <https://github.com/SciTools/iris-grib/pull/647>`_
+
+
+New Contributors
+^^^^^^^^^^^^^^^^
+Welcome to
+
+* `@MoseleyS <https://github.com/MoseleyS>`_
+
+
 What's new in iris-grib v0.20.0
 -------------------------------
 

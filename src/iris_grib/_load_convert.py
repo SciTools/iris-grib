@@ -56,7 +56,9 @@ ResolutionFlags = namedtuple(
     "ResolutionFlags", ["i_increments_given", "j_increments_given", "uv_resolved"]
 )
 
-FixedSurface = namedtuple("FixedSurface", ["standard_name", "long_name", "units"])
+FixedSurface = namedtuple(
+    "FixedSurface", ["standard_name", "long_name", "units", "point"]
+)
 
 InterpolationParameters = namedtuple(
     "InterpolationParameters",
@@ -90,10 +92,14 @@ _TIME_RANGE_UNITS = {
 # Regulation 92.1.4
 _TIME_RANGE_MISSING = 2**32 - 1
 
-# Reference Code Table 4.5.
+# Reference Code Table 4.5. Point values are included where these are part of the fixed
+# surface definition. None indicates this comes from the GRIB metadata,
+# eg. "scaledValueOfFirstFixedSurface".
 _FIXED_SURFACE = {
-    100: FixedSurface(None, "pressure", "Pa"),  # Isobaric surface
-    103: FixedSurface(None, "height", "m"),  # Height level above ground
+    1: FixedSurface(None, "height", "m", 0.0),  # Ground or water surface
+    4: FixedSurface(None, "air_temperature", "Celsius", 0.0),  # Level of 0C isotherm
+    100: FixedSurface(None, "pressure", "Pa", None),  # Isobaric surface
+    103: FixedSurface(None, "height", "m", None),  # Height level above ground
 }
 _TYPE_OF_FIXED_SURFACE_MISSING = 255
 
@@ -1724,76 +1730,141 @@ def vertical_coords(section, metadata):
         hybrid_factories(section, metadata)
     else:
         # Generate vertical coordinate.
-        typeOfFirstFixedSurface = section["typeOfFirstFixedSurface"]
+        # section is not a true dict and does not support the get method.
+        try:
+            typeOfFirstFixedSurface = section["typeOfFirstFixedSurface"]
+        except KeyError:
+            typeOfFirstFixedSurface = _TYPE_OF_FIXED_SURFACE_MISSING
+        try:
+            typeOfSecondFixedSurface = section["typeOfSecondFixedSurface"]
+        except KeyError:
+            typeOfSecondFixedSurface = _TYPE_OF_FIXED_SURFACE_MISSING
 
         # We treat fixed surface level type=1 as having no vertical coordinate.
         # See https://github.com/SciTools/iris/issues/519
-        if typeOfFirstFixedSurface not in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
-            key = "scaledValueOfFirstFixedSurface"
-            scaledValueOfFirstFixedSurface = section[key]
-            if scaledValueOfFirstFixedSurface == _MDI:
-                if options.warn_on_unsupported:
-                    msg = (
-                        "Unable to translate type of first fixed "
-                        "surface with missing scaled value."
-                    )
-                    warnings.warn(msg)
+        if typeOfFirstFixedSurface in [
+            _TYPE_OF_FIXED_SURFACE_MISSING,
+            1,
+        ] and typeOfSecondFixedSurface in [_TYPE_OF_FIXED_SURFACE_MISSING, 1]:
+            return
+        fixed_surface_missing = FixedSurface(None, None, None, None)
+        fixed_surface_first = _FIXED_SURFACE.get(
+            typeOfFirstFixedSurface, fixed_surface_missing
+        )
+        if fixed_surface_first.point is not None:
+            # We have a surface type that includes the point in its definition
+            lower_bound = fixed_surface_first.point
+        else:
+            lower_bound = _get_surface_value(section, "First", warn_only=True)
+        point = lower_bound
+
+        if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
+            fixed_surface_second = _FIXED_SURFACE.get(
+                typeOfSecondFixedSurface, fixed_surface_missing
+            )
+            if fixed_surface_second.point is not None:
+                # We have a surface type that includes the point in its definition
+                upper_bound = fixed_surface_second.point
             else:
-                fixed_surface_missing = FixedSurface(None, None, None)
-                fixed_surface = _FIXED_SURFACE.get(
-                    typeOfFirstFixedSurface, fixed_surface_missing
-                )
-                key = "scaleFactorOfFirstFixedSurface"
-                scaleFactorOfFirstFixedSurface = section[key]
-                typeOfSecondFixedSurface = section["typeOfSecondFixedSurface"]
-                if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
-                    if typeOfFirstFixedSurface != typeOfSecondFixedSurface:
-                        msg = (
-                            "Product definition section 4 has different "
-                            "types of first and second fixed surface"
-                        )
-                        raise TranslationError(msg)
-                    key = "scaledValueOfSecondFixedSurface"
-                    scaledValueOfSecondFixedSurface = section[key]
+                upper_bound = _get_surface_value(section, "Second")
+            if upper_bound is not None:
+                point = 0.5 * (lower_bound + upper_bound)
+                bounds = [lower_bound, upper_bound]
+        else:
+            bounds = None
+            fixed_surface_second = None
+            upper_bound = None
+        if point is None:
+            return
+        coords = _build_vertical_coords(
+            bounds,
+            fixed_surface_first,
+            fixed_surface_second,
+            lower_bound,
+            point,
+            upper_bound,
+        )
+        for coord in coords:
+            # Add the vertical coordinate(s) to metadata aux coords.
+            if fixed_surface_first == fixed_surface_missing:
+                coord.attributes["GRIB_fixed_surface_type"] = typeOfFirstFixedSurface
+            metadata["aux_coords_and_dims"].append((coord, None))
 
-                    if scaledValueOfSecondFixedSurface == _MDI:
-                        msg = (
-                            "Product definition section 4 has missing "
-                            "scaled value of second fixed surface"
-                        )
-                        raise TranslationError(msg)
-                    else:
-                        key = "scaleFactorOfSecondFixedSurface"
-                        scaleFactorOfSecondFixedSurface = section[key]
-                        first = unscale(
-                            scaledValueOfFirstFixedSurface,
-                            scaleFactorOfFirstFixedSurface,
-                        )
-                        second = unscale(
-                            scaledValueOfSecondFixedSurface,
-                            scaleFactorOfSecondFixedSurface,
-                        )
-                        point = 0.5 * (first + second)
-                        bounds = [first, second]
-                else:
-                    point = unscale(
-                        scaledValueOfFirstFixedSurface, scaleFactorOfFirstFixedSurface
-                    )
-                    bounds = None
-                coord = DimCoord(
-                    point,
-                    standard_name=fixed_surface.standard_name,
-                    long_name=fixed_surface.long_name,
-                    units=fixed_surface.units,
-                    bounds=bounds,
-                )
-                if fixed_surface == fixed_surface_missing:
-                    coord.attributes["GRIB_fixed_surface_type"] = (
-                        typeOfFirstFixedSurface
-                    )
 
-                # Add the vertical coordinate to metadata aux coords.
-                metadata["aux_coords_and_dims"].append((coord, None))
+def _build_vertical_coords(
+    bounds: list[float] | None,
+    fixed_surface_first: FixedSurface,
+    fixed_surface_second: FixedSurface | None,
+    lower_bound: float,
+    point: float,
+    upper_bound: float,
+) -> list[DimCoord]:
+    """
+    Build the vertical coordinates based on the bounds and fixed surface types.
+
+    If the bounds are not None and the first and second fixed surfaces represent
+    different quantities, create two coordinates, one for each bound.
+    Otherwise, create a single coordinate with the point and bounds values.
+
+    Args:
+        bounds:
+            List of two floats representing the lower and upper bounds, or None.
+        fixed_surface_first:
+            FixedSurface object for the first surface type (lower bound).
+        fixed_surface_second:
+            FixedSurface object for the second surface type (upper bound).
+        lower_bound:
+            The lower bound value.
+        point:
+            The point value to use if bounds are None.
+        upper_bound:
+            The upper bound value.
+
+    Returns:
+        List of Coord objects representing the vertical coordinates.
+    """
+    first_coord_kwargs = fixed_surface_first._asdict()
+    first_coord_kwargs.pop("point", None)
+    second_coord_kwargs = fixed_surface_second._asdict() if fixed_surface_second else {}
+    second_coord_kwargs.pop("point", None)
+    coords = []
+    if bounds and first_coord_kwargs != second_coord_kwargs:
+        # Create two coords, one for each bound.
+        first_bounds = np.ma.masked_array(bounds, [False, True])
+        coord = AuxCoord(lower_bound, bounds=first_bounds, **first_coord_kwargs)
+        coords.append(coord)
+
+        second_bounds = np.ma.masked_array(bounds, [True, False])
+        coord = AuxCoord(upper_bound, bounds=second_bounds, **second_coord_kwargs)
+        coords.append(coord)
+    else:
+        coord = DimCoord(point, bounds=bounds, **first_coord_kwargs)
+        coords.append(coord)
+    return coords
+
+
+def _get_surface_value(section, sub_item, warn_only=False):
+    key = f"scaledValueOf{sub_item}FixedSurface"
+    scaledValueOfFixedSurface = section[key]
+    if scaledValueOfFixedSurface == _MDI:
+        msg = (
+            f"Unable to translate type of {sub_item} fixed "
+            "surface with missing scaled value."
+        )
+        if warn_only:
+            if options.warn_on_unsupported:
+                warnings.warn(msg)
+        else:
+            raise TranslationError(msg)
+        first = None
+    else:
+        key = f"scaleFactorOf{sub_item}FixedSurface"
+        scaleFactorOfFixedSurface = section[key]
+        first = unscale(
+            scaledValueOfFixedSurface,
+            scaleFactorOfFixedSurface,
+        )
+    return first
 
 
 def forecast_period_coord(indicatorOfUnitForForecastTime, forecastTime):
@@ -2209,6 +2280,35 @@ def product_definition_template_1(section, metadata, frt_coord):
     metadata["aux_coords_and_dims"].append((realization, None))
 
 
+def product_definition_template_5(section, metadata, frt_coord):
+    """
+    Translate product definition template 5.
+
+    This template represents a probability forecast,
+    at a horizontal level or in a horizontal layer at a
+    point in time.
+
+    Updates the metadata in-place with the translations.
+
+    Args:
+
+    * section:
+        Dictionary of coded key/value pairs from section 4 of the message.
+
+    * metadata:
+        :class:`collections.OrderedDict` of metadata.
+
+    * frt_coord:
+        The scalar forecast reference time :class:`iris.coords.DimCoord`.
+
+    """
+    # Perform identical message processing.
+    product_definition_template_0(section, metadata, frt_coord)
+
+    probability_type = _probability_type(section)
+    return probability_type
+
+
 def product_definition_template_6(section, metadata, frt_coord):
     """
     Translate product definition template 6.
@@ -2324,34 +2424,59 @@ def product_definition_template_9(section, metadata, frt_coord):
     # NOTE: we currently don't record the nature of the underlying statistic,
     # as we don't have an agreed way of representing that in CF.
 
+    probability_type = _probability_type(section)
+
+    return probability_type
+
+
+def _probability_type(section):
     # Return a probability object to control the production of a probability
     # result.  This is done once the underlying phenomenon type is determined,
     # in 'translate_phenomenon'.
     probability_typecode = section["probabilityType"]
-    if probability_typecode == 1:
-        # Type is "above upper level".
-        threshold_value = section["scaledValueOfUpperLimit"]
-        if threshold_value == _MDI:
-            msg = "Product definition section 4 has missing scaled value of upper limit"
+    # Note that GRIB provides separate "above lower threshold" and "above
+    # upper threshold" probability types.  This naming style doesn't
+    # recognise that distinction.  For now, assume this is not important.
+    match probability_typecode:
+        case 0:
+            # Type is "below lower level".
+            threshold = _probability_threshold(section, "lower")
+            probability_type = Probability("below_threshold", threshold)
+        case 1:
+            # Type is "above upper level".
+            threshold = _probability_threshold(section, "upper")
+            probability_type = Probability("above_threshold", threshold)
+        case 3:
+            # Type is "above lower level".
+            threshold = _probability_threshold(section, "lower")
+            probability_type = Probability("above_threshold", threshold)
+        case 4:
+            # Type is "below upper level".
+            threshold = _probability_threshold(section, "upper")
+            probability_type = Probability("below_threshold", threshold)
+        case _:
+            msg = (
+                "Product definition section 4 contains an unsupported "
+                "probability type [{}]".format(probability_typecode)
+            )
             raise TranslationError(msg)
-        threshold_scaling = section["scaleFactorOfUpperLimit"]
-        if threshold_scaling == _MDI:
-            msg = "Product definition section 4 has missing scale factor of upper limit"
-            raise TranslationError(msg)
-        # Encode threshold information.
-        threshold = unscale(threshold_value, threshold_scaling)
-        probability_type = Probability("above_threshold", threshold)
-        # Note that GRIB provides separate "above lower threshold" and "above
-        # upper threshold" probability types.  This naming style doesn't
-        # recognise that distinction.  For now, assume this is not important.
-    else:
-        msg = (
-            "Product definition section 4 contains an unsupported "
-            "probability type [{}]".format(probability_typecode)
-        )
-        raise TranslationError(msg)
-
     return probability_type
+
+
+def _probability_threshold(section, limit_type):
+    """Get the unscaled probability threshold value for the given limit type."""
+    value_key = f"scaledValueOf{limit_type.capitalize()}Limit"
+    scale_key = f"scaleFactorOf{limit_type.capitalize()}Limit"
+    msg = f"Product definition section 4 has missing {{item}} of {limit_type} limit"
+
+    threshold_value = section[value_key]
+    if threshold_value == _MDI:
+        raise TranslationError(msg.format(item="scaled value"))
+    threshold_scaling = section[scale_key]
+    if threshold_scaling == _MDI:
+        raise TranslationError(msg.format(item="scale factor"))
+    threshold = unscale(threshold_value, threshold_scaling)
+    return threshold
 
 
 def product_definition_template_10(section, metadata, frt_coord):
@@ -2631,6 +2756,10 @@ def product_definition_section(section, metadata, discipline, tablesVersion, rt_
         # Process individual ensemble forecast, control and perturbed, at
         # a horizontal level or in a horizontal layer at a point in time.
         product_definition_template_1(section, metadata, rt_coord)
+    elif template == 5:
+        # Process percentile forecast, at a horizontal level or in a horizontal
+        # layer at a point in time.
+        probability = product_definition_template_5(section, metadata, rt_coord)
     elif template == 6:
         # Process percentile forecast, at a horizontal level or in a horizontal
         # layer at a point in time.

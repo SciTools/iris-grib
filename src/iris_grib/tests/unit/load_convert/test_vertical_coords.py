@@ -10,11 +10,12 @@ Test function :func:`iris_grib._load_convert.vertical_coords`.
 # import iris_grib.tests first so that some things can be initialised
 # before importing anything else.
 import iris_grib.tests as tests
+import numpy as np
 
 from copy import deepcopy
 from unittest import mock
 
-from iris.coords import DimCoord
+from iris.coords import AuxCoord, DimCoord
 from iris.exceptions import TranslationError
 
 from iris_grib._load_convert import vertical_coords
@@ -74,6 +75,71 @@ class Test(tests.IrisGribTest):
         # No metadata change, as surfaceType=1 translates to "no vertical
         # coord" without error or warning.
         self.assertEqual(metadata, self.metadata)
+
+    def test_fixed_surface_type_1_missing_scaled_value(self):
+        """The missing scaled value is correctly ignored for ground level which
+        produces no coord
+        """
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfFirstFixedSurface": 1,
+            "scaledValueOfFirstFixedSurface": MISSING_LEVEL,
+            "scaleFactorOfFirstFixedSurface": 0,
+            "typeOfSecondFixedSurface": 255,
+        }
+        vertical_coords(section, metadata)
+        # No metadata change, as surfaceType=1 translates to "no vertical
+        # coord" without error or warning.
+        self.assertEqual(metadata, self.metadata)
+
+    def test_fixed_lower_surface_type_4_missing_scaled_value(self):
+        """The missing scaled value is correctly ignored for a lower fixed surface that
+        produces a coord
+        """
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfFirstFixedSurface": 4,
+            "scaledValueOfFirstFixedSurface": MISSING_LEVEL,
+            "scaleFactorOfFirstFixedSurface": 0,
+            "typeOfSecondFixedSurface": 255,
+        }
+        vertical_coords(section, metadata)
+        coord = DimCoord(0.0, long_name="air_temperature", units="Celsius")
+        expected = deepcopy(self.metadata)
+        expected["aux_coords_and_dims"].append((coord, None))
+        self.assertEqual(metadata, expected)
+
+    def test_fixed_upper_surface_type_4_missing_scaled_value(self):
+        """The missing scaled value is correctly ignored for an upper fixed surface that
+        produces a coord
+        """
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfSecondFixedSurface": 4,
+            "scaledValueOfSecondFixedSurface": MISSING_LEVEL,
+            "scaleFactorOfSecondFixedSurface": 0,
+            "typeOfFirstFixedSurface": 1,  # ground level
+        }
+        vertical_coords(section, metadata)
+        expected = deepcopy(self.metadata)
+        coord = AuxCoord(
+            0.0,
+            long_name="height",
+            units="m",
+            bounds=np.ma.masked_array([0.0, 0.0], [False, True]),
+        )
+        expected["aux_coords_and_dims"].append((coord, None))
+        coord = AuxCoord(
+            0.0,
+            long_name="air_temperature",
+            units="Celsius",
+            bounds=np.ma.masked_array([0.0, 0.0], [True, False]),
+        )
+        expected["aux_coords_and_dims"].append((coord, None))
+        self.assertEqual(metadata, expected)
 
     def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
         this = "iris_grib._load_convert.options"
@@ -163,17 +229,48 @@ class Test(tests.IrisGribTest):
         expected["aux_coords_and_dims"].append((coord, None))
         self.assertEqual(metadata, expected)
 
-    def test_different_fixed_surfaces(self):
+    def test_different_fixed_surfaces_same_parameter(self):
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfFirstFixedSurface": 103,
+            "scaledValueOfFirstFixedSurface": 10,
+            "scaleFactorOfFirstFixedSurface": 1,
+            "typeOfSecondFixedSurface": 1,
+        }
+        vertical_coords(section, metadata)
+        coord = DimCoord(0.5, long_name="height", units="m", bounds=[1.0, 0.0])
+        expected = deepcopy(self.metadata)
+        expected["aux_coords_and_dims"].append((coord, None))
+        self.assertEqual(metadata, expected)
+
+    def test_different_fixed_surfaces_different_parameter(self):
+        metadata = deepcopy(self.metadata)
         section = {
             "NV": 0,
             "typeOfFirstFixedSurface": 100,
             "scaledValueOfFirstFixedSurface": 10,
             "scaleFactorOfFirstFixedSurface": 1,
-            "typeOfSecondFixedSurface": 0,
+            "typeOfSecondFixedSurface": 1,
         }
-        emsg = "different types of first and second fixed surface"
-        with self.assertRaisesRegex(TranslationError, emsg):
-            vertical_coords(section, None)
+        vertical_coords(section, metadata)
+        coords = [
+            AuxCoord(
+                1.0,
+                long_name="pressure",
+                units="Pa",
+                bounds=np.ma.masked_array([1.0, 0.0], [False, True]),
+            ),
+            AuxCoord(
+                0.0,
+                long_name="height",
+                units="m",
+                bounds=np.ma.masked_array([1.0, 0.0], [True, False]),
+            ),
+        ]
+        expected = deepcopy(self.metadata)
+        [expected["aux_coords_and_dims"].append((coord, None)) for coord in coords]
+        self.assertEqual(metadata, expected)
 
     def test_same_fixed_surfaces_missing_second_scaled_value(self):
         section = {
@@ -184,7 +281,10 @@ class Test(tests.IrisGribTest):
             "typeOfSecondFixedSurface": 100,
             "scaledValueOfSecondFixedSurface": MISSING_LEVEL,
         }
-        emsg = "missing scaled value of second fixed surface"
+        emsg = (
+            "Unable to translate type of Second fixed surface with missing scaled "
+            "value."
+        )
         with self.assertRaisesRegex(TranslationError, emsg):
             vertical_coords(section, None)
 
