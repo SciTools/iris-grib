@@ -92,7 +92,9 @@ _TIME_RANGE_UNITS = {
 # Regulation 92.1.4
 _TIME_RANGE_MISSING = 2**32 - 1
 
-# Reference Code Table 4.5.
+# Reference Code Table 4.5. Point values are included where these are part of the fixed
+# surface definition. None indicates this comes from the GRIB metadata,
+# eg. "scaledValueOfFirstFixedSurface".
 _FIXED_SURFACE = {
     1: FixedSurface(None, "height", "m", 0.0),  # Ground or water surface
     4: FixedSurface(None, "air_temperature", "Celsius", 0.0),  # Level of 0C isotherm
@@ -1749,12 +1751,12 @@ def vertical_coords(section, metadata):
         fixed_surface_first = _FIXED_SURFACE.get(
             typeOfFirstFixedSurface, fixed_surface_missing
         )
-        if fixed_surface_first.point:
+        if fixed_surface_first.point is not None:
             # We have a surface type that includes the point in its definition
             lower_bound = fixed_surface_first.point
         else:
             lower_bound = _get_surface_value(section, "First", warn_only=True)
-            point = lower_bound
+        point = lower_bound
 
         if typeOfSecondFixedSurface != _TYPE_OF_FIXED_SURFACE_MISSING:
             fixed_surface_second = _FIXED_SURFACE.get(
@@ -1819,7 +1821,7 @@ def _build_vertical_coords(
             The upper bound value.
 
     Returns:
-        List of DimCoord objects representing the vertical coordinates.
+        List of Coord objects representing the vertical coordinates.
     """
     first_coord_kwargs = fixed_surface_first._asdict()
     first_coord_kwargs.pop("point", None)

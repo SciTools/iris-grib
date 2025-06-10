@@ -77,7 +77,9 @@ class Test(tests.IrisGribTest):
         self.assertEqual(metadata, self.metadata)
 
     def test_fixed_surface_type_1_missing_scaled_value(self):
-        """The missing scaled value is correctly ignored for a fixed surface"""
+        """The missing scaled value is correctly ignored for ground level which
+        produces no coord
+        """
         metadata = deepcopy(self.metadata)
         section = {
             "NV": 0,
@@ -90,6 +92,54 @@ class Test(tests.IrisGribTest):
         # No metadata change, as surfaceType=1 translates to "no vertical
         # coord" without error or warning.
         self.assertEqual(metadata, self.metadata)
+
+    def test_fixed_lower_surface_type_4_missing_scaled_value(self):
+        """The missing scaled value is correctly ignored for a lower fixed surface that
+        produces a coord
+        """
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfFirstFixedSurface": 4,
+            "scaledValueOfFirstFixedSurface": MISSING_LEVEL,
+            "scaleFactorOfFirstFixedSurface": 0,
+            "typeOfSecondFixedSurface": 255,
+        }
+        vertical_coords(section, metadata)
+        coord = DimCoord(0.0, long_name="air_temperature", units="Celsius")
+        expected = deepcopy(self.metadata)
+        expected["aux_coords_and_dims"].append((coord, None))
+        self.assertEqual(metadata, expected)
+
+    def test_fixed_upper_surface_type_4_missing_scaled_value(self):
+        """The missing scaled value is correctly ignored for an upper fixed surface that
+        produces a coord
+        """
+        metadata = deepcopy(self.metadata)
+        section = {
+            "NV": 0,
+            "typeOfSecondFixedSurface": 4,
+            "scaledValueOfSecondFixedSurface": MISSING_LEVEL,
+            "scaleFactorOfSecondFixedSurface": 0,
+            "typeOfFirstFixedSurface": 1,  # ground level
+        }
+        vertical_coords(section, metadata)
+        expected = deepcopy(self.metadata)
+        coord = AuxCoord(
+            0.0,
+            long_name="height",
+            units="m",
+            bounds=np.ma.masked_array([0.0, 0.0], [False, True]),
+        )
+        expected["aux_coords_and_dims"].append((coord, None))
+        coord = AuxCoord(
+            0.0,
+            long_name="air_temperature",
+            units="Celsius",
+            bounds=np.ma.masked_array([0.0, 0.0], [True, False]),
+        )
+        expected["aux_coords_and_dims"].append((coord, None))
+        self.assertEqual(metadata, expected)
 
     def test_unknown_first_fixed_surface_with_missing_scaled_value(self):
         this = "iris_grib._load_convert.options"
