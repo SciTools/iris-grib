@@ -116,7 +116,6 @@ GRIB2_TO_CF = {
         "mass_fraction_of_cloud_liquid_water_in_air", None, "kg kg-1"
     ),
     G2Param(2, 0, 1, 84): CFName("mass_fraction_of_cloud_ice_in_air", None, "kg kg-1"),
-    G2Param(2, 0, 1, 230): CFName(None, "sleetfall_amount", "kg m-2"),
     G2Param(2, 0, 2, 0): CFName("wind_from_direction", None, "degrees"),
     G2Param(2, 0, 2, 1): CFName("wind_speed", None, "m s-1"),
     G2Param(2, 0, 2, 2): CFName("x_wind", None, "m s-1"),
