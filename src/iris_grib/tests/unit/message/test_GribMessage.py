@@ -199,7 +199,7 @@ class Mixin_data__grid_template(metaclass=ABCMeta):
         data = message.data
         self.assertTrue(is_lazy_data(data))
         self.assertEqual(data.shape, (3, 4))
-        self.assertEqual(data.dtype, np.floating)
+        self.assertEqual(data.dtype, np.float64)
         self.assertArrayEqual(as_concrete_data(data), np.arange(12).reshape(3, 4))
 
     def test_regular_mode_0(self):
