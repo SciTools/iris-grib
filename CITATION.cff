@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If iris-grib played an important role in your research then please add us to your reference list by using the references below."
+title: "iris-grib"
+authors:
+    - name: "iris-grib repository contributors"
+abstract: "GRIB (GRIdded Binary) interface for Iris."
+license: "BSD-3-Clause"
+license-url: "https://spdx.org/licenses/BSD-3-Clause.html"
+url: "http://www.scitools.org.uk/"
+repository-code: "https://github.com/SciTools/iris-grib"
+type: "software"
