@@ -16,27 +16,30 @@ So, we import + run the relevant tests here instead.
 """
 
 from iris.tests.integration.netcdf.test_load_managed_attributes import (
-    TestGribParam as LoadGribParamTests
+    TestGribParam as LoadGribParamTests,
 )
 
 from iris.tests.integration.netcdf.test_save_managed_attributes import (
-    TestGribParam as SaveGribParamTests
+    TestGribParam as SaveGribParamTests,
 )
 
-from iris.tests.unit.fileformats.netcdf.attribute_handlers.test_GribParamHandler \
-    import (
-        TestEncodeObject as GribParamHandler_EncodeTests,
-        TestDecodeAttribute as GribParamHandler_DecodeTests
-    )
+from iris.tests.unit.fileformats.netcdf.attribute_handlers.test_GribParamHandler import (
+    TestEncodeObject as GribParamHandler_EncodeTests,
+    TestDecodeAttribute as GribParamHandler_DecodeTests,
+)
+
 
 class TestLoadGribParam_actual(LoadGribParamTests):
     pass
 
+
 class TestSaveGribParam_actual(SaveGribParamTests):
     pass
 
+
 class TestGribParamHandler_Encode(GribParamHandler_EncodeTests):
     pass
+
 
 class TestGribParamHandler_Decode(GribParamHandler_DecodeTests):
     pass
