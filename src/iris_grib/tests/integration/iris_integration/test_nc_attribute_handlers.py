@@ -15,6 +15,16 @@ So, we import + run the relevant tests here instead.
 
 """
 
+import pytest
+
+# Start by attempting the key imports from Iris, and skipping all tests if any fail.
+# Needed to run with older Iris (releases) prior to the tests being added.
+# Unfortunately we can't actually use the returned items, as dynamic typing upsets MyPy.
+pytest.importorskip("iris.tests.integration.netcdf.test_load_managed_attributes")
+pytest.importorskip("iris.tests.integration.netcdf.test_save_managed_attributes")
+pytest.importorskip("iris.tests.unit.fileformats.netcdf.attribute_handlers")
+
+
 from iris.tests.integration.netcdf.test_load_managed_attributes import (
     TestGribParam as LoadGribParamTests,
 )
@@ -23,9 +33,8 @@ from iris.tests.integration.netcdf.test_save_managed_attributes import (
     TestGribParam as SaveGribParamTests,
 )
 
-from iris.tests.unit.fileformats.netcdf.attribute_handlers.test_GribParamHandler import (
-    TestEncodeObject as GribParamHandler_EncodeTests,
-    TestDecodeAttribute as GribParamHandler_DecodeTests,
+from iris.tests.unit.fileformats.netcdf.attribute_handlers import (
+    test_GribParamHandler as tgp,
 )
 
 
@@ -37,9 +46,9 @@ class TestSaveGribParam_actual(SaveGribParamTests):
     pass
 
 
-class TestGribParamHandler_Encode(GribParamHandler_EncodeTests):
+class TestGribParamHandler_Encode(tgp.TestEncodeObject):
     pass
 
 
-class TestGribParamHandler_Decode(GribParamHandler_DecodeTests):
+class TestGribParamHandler_Decode(tgp.TestDecodeAttribute):
     pass
