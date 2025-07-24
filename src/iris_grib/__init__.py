@@ -4,7 +4,7 @@
 # See LICENSE in the root of the repository for full licensing details.
 """Conversion of cubes to/from GRIB.
 
-See: `ECMWF GRIB API <https://confluence.ecmwf.int/display/MTG2US/Migration+to+Grib+2+-+User+Space+Home>`_.
+See: `ECMWF ecCodes grib interface <https://confluence.ecmwf.int/display/ECC>`_.
 
 """
 
