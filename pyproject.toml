@@ -199,8 +199,6 @@ ignore = [
     "ANN001",
     "ANN002",
     "ANN003",
-    "ANN101",
-    "ANN102",
     "ANN201",
     "ANN202",
     "ANN204",
@@ -387,7 +385,6 @@ ignore = [
     # https://docs.astral.sh/ruff/rules/#pyupgrade-up
     "UP009",
     "UP018",
-    "UP027",
     "UP031",
     "UP032",
     ]
