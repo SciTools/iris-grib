@@ -29,7 +29,7 @@ class Test(tests.IrisGribTest):
         self.time_coords_patch = self.patch("iris_grib._load_convert.time_coords")
         self.data_cutoff_patch = self.patch("iris_grib._load_convert.data_cutoff")
 
-    def test(self, value=10, factor=1):
+    def test(self):
         # Prepare the arguments.
         series = mock.sentinel.satelliteSeries
         number = mock.sentinel.satelliteNumber

@@ -160,8 +160,8 @@ def _aslazydata_has_meta():
     since https://github.com/SciTools/iris/pull/5801, it now *requires* one,
     if the wrapped object is anything other than a numpy or dask array.
     """
-    from inspect import signature
-    from iris._lazy_data import as_lazy_data
+    from inspect import signature  # noqa: PLC0415
+    from iris._lazy_data import as_lazy_data  # noqa: PLC0415
 
     sig = signature(as_lazy_data)
     return "meta" in sig.parameters
@@ -773,7 +773,7 @@ def load_cubes(filenames, callback=None):
         An iterator returning Iris cubes loaded from the GRIB files.
 
     """
-    import iris.fileformats.rules as iris_rules
+    import iris.fileformats.rules as iris_rules  # noqa: PLC0415
 
     grib_loader = iris_rules.Loader(_load_generate, {}, load_convert)
     return iris_rules.load_cubes(filenames, callback, grib_loader)
@@ -837,7 +837,7 @@ def load_pairs_from_fields(grib_messages):
         :class:`iris_grib.message.GribMessage`).
 
     """
-    import iris.fileformats.rules as iris_rules
+    import iris.fileformats.rules as iris_rules  # noqa: PLC0415
 
     return iris_rules.load_pairs_from_fields(grib_messages, load_convert)
 

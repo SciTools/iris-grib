@@ -184,7 +184,7 @@ class GribMessage:
             proxy = _DataProxy(shape, dtype, self._recreate_raw)
 
             as_lazy_kwargs = {}
-            from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta
+            from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
 
             if _ASLAZYDATA_NEEDS_META:
                 has_bitmap = 6 in sections
