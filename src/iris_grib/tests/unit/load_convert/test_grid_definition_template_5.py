@@ -69,19 +69,24 @@ class Test(tests.IrisGribTest):
             "angleOfRotation": angleOfRotation,
             "shapeOfTheEarth": shapeOfTheEarth,
         }
+
         # The called being tested.
         grid_definition_template_5(section, metadata)
-        from iris_grib._load_convert import (
+
+        # Note: import certain functions *dynamically*, so that we pickup the patched
+        #  versions established by the setUp fixture.
+        from iris_grib._load_convert import (  # noqa: PLC0415
             ellipsoid_geometry,
             ellipsoid,
             grid_definition_template_4_and_5 as gdt_4_5,
         )
 
+        from iris.coord_systems import RotatedGeogCS  # noqa: PLC0415
+
         self.assertEqual(ellipsoid_geometry.call_count, 1)
         ellipsoid.assert_called_once_with(
             shapeOfTheEarth, self.major, self.minor, self.radius
         )
-        from iris.coord_systems import RotatedGeogCS
 
         RotatedGeogCS.assert_called_once_with(
             -45.0, 270.0, angleOfRotation, self.ellipsoid

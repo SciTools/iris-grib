@@ -38,7 +38,7 @@ class Test_messages_from_filename(tests.IrisGribTest):
         filename = tests.get_data_path(("GRIB", "3_layer_viz", "3_layer.grib2"))
         my_file = open(filename)
 
-        import builtins  # noqa: F401
+        import builtins  # noqa: F401, PLC0415
 
         self.patch("builtins.open", mock.Mock(return_value=my_file))
 
