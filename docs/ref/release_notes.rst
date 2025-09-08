@@ -473,7 +473,7 @@ Bugs Fixed
   assigned the "new-style" Iris
   `VerticalPerspective <https://scitools-iris.readthedocs.io/en/stable/generated/api/iris.coord_systems.html#iris.coord_systems.VerticalPerspective>`_
   coordinate system, equivalent to the Cartopy
-  `NearsidePerspective <https://scitools.org.uk/cartopy/docs/latest/reference/projections.html#nearsideperspective>`_
+  `NearsidePerspective <https://cartopy.readthedocs.io/stable/reference/projections.html#cartopy.crs.NearsidePerspective>`_
   and Proj
   `"nsper" <https://proj.org/operations/projections/nsper.html>`_ .
   The plotting behaviour of this is now **the same again as before Iris 2.3** :
