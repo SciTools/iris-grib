@@ -2419,7 +2419,7 @@ def product_definition_template_9(section, metadata, frt_coord):
 
     # Remove the cell_method encoding the underlying statistic, as CF does not
     # currently support this type of representation.
-    (cell_method,) = metadata["cell_methods"]
+    (_cell_method,) = metadata["cell_methods"]  # ERROR here if there is more than one.
     metadata["cell_methods"] = []
     # NOTE: we currently don't record the nature of the underlying statistic,
     # as we don't have an agreed way of representing that in CF.

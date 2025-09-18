@@ -154,13 +154,13 @@ class TestField(tests.IrisGribTest):
         self, field, convert, coord_predicate, expected_points, expected_bounds
     ):
         (
-            factories,
-            references,
-            standard_name,
-            long_name,
-            units,
-            attributes,
-            cell_methods,
+            _factories,
+            _references,
+            _standard_name,
+            _long_name,
+            _units,
+            _attributes,
+            _cell_methods,
             dim_coords_and_dims,
             aux_coords_and_dims,
         ) = convert(field)

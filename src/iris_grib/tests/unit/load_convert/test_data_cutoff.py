@@ -29,7 +29,7 @@ class TestDataCutoff(tests.IrisGribTest):
         # Check the result.
         if expect_warning:
             self.assertEqual(len(warn.mock_calls), 1)
-            args, kwargs = warn.call_args
+            args, _kwargs = warn.call_args
             self.assertIn("data cutoff", args[0])
         else:
             self.assertEqual(len(warn.mock_calls), 0)

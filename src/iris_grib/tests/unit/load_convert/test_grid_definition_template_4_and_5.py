@@ -69,7 +69,7 @@ class Test(tests.IrisGribTest):
             self.assertEqual(metadata, expected)
             if expect_warning:
                 self.assertEqual(len(warnings.warn.mock_calls), 1)
-                args, kwargs = warnings.warn.call_args
+                args, _kwargs = warnings.warn.call_args
                 self.assertIn("resolution and component flags", args[0])
             else:
                 self.assertEqual(len(warnings.warn.mock_calls), 0)

@@ -46,7 +46,7 @@ class TestMDI(tests.IrisGribTest):
         # and that a suitable fill value has been chosen.
         grib_api.codes_set.assert_called_once_with(GRIB_MESSAGE, "bitmapPresent", 1)
         (args,) = grib_api.codes_set_double.call_args_list
-        (message, key, fill_value), kwargs = args
+        (message, key, fill_value), _kwargs = args
         self.assertIs(message, GRIB_MESSAGE)
         self.assertEqual(key, "missingValue")
         self.assertTrue(
