@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright iris-grib contributors
 #
 # This file is part of iris-grib and is released under the BSD license.
@@ -16,6 +17,14 @@ from pathlib import Path
 
 import nox
 from nox.logger import logger
+
+
+# Adopt sp-repo-review recommendations.
+nox.needs_version = ">=2022.1.7"
+nox.options.default_venv_backend = "conda"
+# /// script
+# dependencies = ["nox"]
+# ///
 
 #: Default to reusing any pre-existing nox environments.
 nox.options.reuse_existing_virtualenvs = True
@@ -335,3 +344,7 @@ def linkcheck(session: nox.sessions.Session):
         "linkcheck",
         external=True,
     )
+
+
+if __name__ == "__main__":
+    nox.main()
