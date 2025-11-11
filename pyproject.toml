@@ -151,8 +151,10 @@ filterwarnings = ["default"]
 
 [tool.repo-review]
 ignore = [
-    # https://learn.scientific-python.org/development/guides/style/#PC180
-    "PC180",  # Uses prettier
+    # Not possible to run on the hardware used by the majority of our developers. Might change in future!
+    "PC180", # Uses prettier.
+    # https://learn.scientific-python.org/development/guides/packaging-simple#PP006
+    "PP006",  # Uses dev dependency group
 ]
 
 [tool.ruff]
