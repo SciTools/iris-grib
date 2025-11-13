@@ -153,7 +153,7 @@ def shape_of_the_earth(cube, grib):
             raise TranslationError(msg)
 
     # Spherical earth.
-    if ellipsoid.inverse_flattening == 0.0:
+    if ellipsoid.inverse_flattening == 0.0 and ellipsoid.semi_major_axis != 6371229.0:
         eccodes.codes_set_long(grib, "shapeOfTheEarth", 1)
         eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
         eccodes.codes_set_long(
