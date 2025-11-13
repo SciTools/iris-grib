@@ -177,27 +177,29 @@ def shape_of_the_earth(cube, grib):
             raise TranslationError(msg)
 
     # Spherical earth.
-    if ellipsoid.inverse_flattening == 0.0 and ellipsoid.semi_major_axis != 6371229.0:
-        _set_octets(
-            earth_shape=1,
-            radius_scale_factor=0,
-            radius_scaled_value=ellipsoid.semi_major_axis,
-            major_scale_factor=0,
-            major_scaled_value=0,
-            minor_scale_factor=0,
-            minor_scaled_value=0,
-        )
-    # Spherical earth.
-    elif (ellipsoid.semi_major_axis ==  6371229.0) and (ellipsoid.semi_minor_axis ==  6371229.0):
-        _set_octets(
-            earth_shape=6,
-            radius_scale_factor=0,
-            radius_scaled_value=0,
-            major_scale_factor=0,
-            major_scaled_value=0,
-            minor_scale_factor=0,
-            minor_scaled_value=0,
-        )
+    if ellipsoid.inverse_flattening == 0.0:
+        if ellipsoid.semi_major_axis == 6371229.0:
+            # Fixed defined radius.
+            _set_octets(
+                earth_shape=6,
+                radius_scale_factor=0,
+                radius_scaled_value=0,
+                major_scale_factor=0,
+                major_scaled_value=0,
+                minor_scale_factor=0,
+                minor_scaled_value=0,
+            )
+        else:
+            # Specified radius.
+            _set_octets(
+                earth_shape=1,
+                radius_scale_factor=0,
+                radius_scaled_value=ellipsoid.semi_major_axis,
+                major_scale_factor=0,
+                major_scaled_value=0,
+                minor_scale_factor=0,
+                minor_scaled_value=0,
+            )
     # Oblate spheroid earth.
     else:
         _set_octets(
