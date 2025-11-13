@@ -167,8 +167,7 @@ def shape_of_the_earth(cube, grib):
     elif (ellipsoid.semi_major_axis ==  6371229.0) and (ellipsoid.semi_minor_axis ==  6371229.0):
         eccodes.codes_set_long(grib, "shapeOfTheEarth", 6)
         eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
-        eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth",
-                               ellipsoid.semi_major_axis)
+        eccodes.codes_set_long(grib, "scaledValueOfRadiusOfSphericalEarth", 0)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
         eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
         eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
