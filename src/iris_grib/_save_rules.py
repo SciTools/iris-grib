@@ -131,15 +131,38 @@ def shape_of_the_earth(cube, grib):
     # assume latlon
     cs = cube.coord(dimensions=[0]).coord_system
 
+    def _set_octets(
+        earth_shape: int | None = None,
+        radius_scale_factor: int | None = None,
+        radius_scaled_value: int | None = None,
+        major_scale_factor: int | None = None,
+        major_scaled_value: int | None = None,
+        minor_scale_factor: int | None = None,
+        minor_scaled_value: int | None = None,
+    ):
+        key_map = {
+            "shapeOfTheEarth": earth_shape,
+            "scaleFactorOfRadiusOfSphericalEarth": radius_scale_factor,
+            "scaledValueOfRadiusOfSphericalEarth": radius_scaled_value,
+            "scaleFactorOfEarthMajorAxis": major_scale_factor,
+            "scaledValueOfEarthMajorAxis": major_scaled_value,
+            "scaleFactorOfEarthMinorAxis": minor_scale_factor,
+            "scaledValueOfEarthMinorAxis": minor_scaled_value,
+        }
+        for key, value in key_map.items():
+            if value is not None:
+                eccodes.codes_set_long(grib, key, value)
+
     # Initially set shape_of_earth keys to missing (255 for byte).
-    eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 255)
-    eccodes.codes_set_long(
-        grib, "scaledValueOfRadiusOfSphericalEarth", GRIB_MISSING_LONG
+    _set_octets(
+        earth_shape=None,
+        radius_scale_factor=255,
+        radius_scaled_value=GRIB_MISSING_LONG,
+        major_scale_factor=255,
+        major_scaled_value=GRIB_MISSING_LONG,
+        minor_scale_factor=255,
+        minor_scaled_value=GRIB_MISSING_LONG,
     )
-    eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 255)
-    eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis", GRIB_MISSING_LONG)
-    eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 255)
-    eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis", GRIB_MISSING_LONG)
 
     if isinstance(cs, GeogCS):
         ellipsoid = cs
@@ -154,25 +177,36 @@ def shape_of_the_earth(cube, grib):
 
     # Spherical earth.
     if ellipsoid.inverse_flattening == 0.0:
-        eccodes.codes_set_long(grib, "shapeOfTheEarth", 1)
-        eccodes.codes_set_long(grib, "scaleFactorOfRadiusOfSphericalEarth", 0)
-        eccodes.codes_set_long(
-            grib, "scaledValueOfRadiusOfSphericalEarth", ellipsoid.semi_major_axis
-        )
-        eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
-        eccodes.codes_set_long(grib, "scaledValueOfEarthMajorAxis", 0)
-        eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
-        eccodes.codes_set_long(grib, "scaledValueOfEarthMinorAxis", 0)
+        if ellipsoid.semi_major_axis == 6371229.0:
+            # Fixed defined radius.
+            _set_octets(
+                earth_shape=6,
+                radius_scale_factor=0,
+                radius_scaled_value=0,
+                major_scale_factor=0,
+                major_scaled_value=0,
+                minor_scale_factor=0,
+                minor_scaled_value=0,
+            )
+        else:
+            # Specified radius.
+            _set_octets(
+                earth_shape=1,
+                radius_scale_factor=0,
+                radius_scaled_value=ellipsoid.semi_major_axis,
+                major_scale_factor=0,
+                major_scaled_value=0,
+                minor_scale_factor=0,
+                minor_scaled_value=0,
+            )
     # Oblate spheroid earth.
     else:
-        eccodes.codes_set_long(grib, "shapeOfTheEarth", 7)
-        eccodes.codes_set_long(grib, "scaleFactorOfEarthMajorAxis", 0)
-        eccodes.codes_set_long(
-            grib, "scaledValueOfEarthMajorAxis", ellipsoid.semi_major_axis
-        )
-        eccodes.codes_set_long(grib, "scaleFactorOfEarthMinorAxis", 0)
-        eccodes.codes_set_long(
-            grib, "scaledValueOfEarthMinorAxis", ellipsoid.semi_minor_axis
+        _set_octets(
+            earth_shape=7,
+            major_scale_factor=0,
+            major_scaled_value=ellipsoid.semi_major_axis,
+            minor_scale_factor=0,
+            minor_scaled_value=ellipsoid.semi_minor_axis,
         )
 
 
