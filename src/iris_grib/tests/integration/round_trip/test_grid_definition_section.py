@@ -52,7 +52,7 @@ class TestGDT5(tests.TestGribMessage):
                 (3, "gridDefinitionTemplateNumber", 5),
                 (3, "Ni", cube.shape[-1]),
                 (3, "Nj", cube.shape[-2]),
-                (3, "shapeOfTheEarth", 1),
+                (3, "shapeOfTheEarth", 6),
                 (
                     3,
                     "scaledValueOfRadiusOfSphericalEarth",
