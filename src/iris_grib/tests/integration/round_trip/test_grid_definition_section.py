@@ -19,7 +19,6 @@ from iris import load_cube, save
 from iris.coord_systems import GeogCS, PolarStereographic, RotatedGeogCS, Stereographic
 from iris.coords import DimCoord
 from iris.cube import Cube
-from iris.fileformats.pp import EARTH_RADIUS as UM_DEFAULT_EARTH_RADIUS
 from iris.util import is_regular
 
 from iris_grib.grib_phenom_translation import GRIBCode
@@ -53,11 +52,7 @@ class TestGDT5(tests.TestGribMessage):
                 (3, "Ni", cube.shape[-1]),
                 (3, "Nj", cube.shape[-2]),
                 (3, "shapeOfTheEarth", 6),
-                (
-                    3,
-                    "scaledValueOfRadiusOfSphericalEarth",
-                    int(UM_DEFAULT_EARTH_RADIUS),
-                ),
+                (3, "scaledValueOfRadiusOfSphericalEarth", 0),
                 (3, "resolutionAndComponentFlags", 0),
                 (3, "latitudeOfSouthernPole", -37500000),
                 (3, "longitudeOfSouthernPole", 357500000),
