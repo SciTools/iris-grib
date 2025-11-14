@@ -10,7 +10,6 @@ It is invoked from :meth:`iris_grib.save_grib2`.
 
 """
 
-from typing import Optional
 import warnings
 
 import cf_units
@@ -133,13 +132,13 @@ def shape_of_the_earth(cube, grib):
     cs = cube.coord(dimensions=[0]).coord_system
 
     def _set_octets(
-        earth_shape: Optional[int] = None,
-        radius_scale_factor: Optional[int] = None,
-        radius_scaled_value: Optional[int] = None,
-        major_scale_factor: Optional[int] = None,
-        major_scaled_value: Optional[int] = None,
-        minor_scale_factor: Optional[int] = None,
-        minor_scaled_value: Optional[int] = None,
+        earth_shape: int | None = None,
+        radius_scale_factor: int | None = None,
+        radius_scaled_value: int | None = None,
+        major_scale_factor: int | None = None,
+        major_scaled_value: int | None = None,
+        minor_scale_factor: int | None = None,
+        minor_scaled_value: int | None = None,
     ):
         key_map = {
             "shapeOfTheEarth": earth_shape,
