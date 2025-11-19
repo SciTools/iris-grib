@@ -49,6 +49,17 @@ class Test(tests.IrisGribTest, GdtTestMixin):
         self._check_key("scaleFactorOfEarthMinorAxis", 0)
         self._check_key("scaledValueOfEarthMinorAxis", 0)
 
+    def test__shape_of_earth_fixed_6(self):
+        cs = self._default_coord_system()
+        cs.ellipsoid = GeogCS(semi_major_axis=6371229)
+        test_cube = self._make_test_cube(cs=cs, coord_units="m")
+        grid_definition_template_20(test_cube, self.mock_grib)
+        self._check_key("shapeOfTheEarth", 6)
+        self._check_key("scaleFactorOfEarthMajorAxis", 0)
+        self._check_key("scaledValueOfEarthMajorAxis", 0)
+        self._check_key("scaleFactorOfEarthMinorAxis", 0)
+        self._check_key("scaledValueOfEarthMinorAxis", 0)
+
     def test__grid_shape(self):
         stereo_test_cube = self._make_test_cube(
             x_points=np.arange(13), y_points=np.arange(6), coord_units="m"
