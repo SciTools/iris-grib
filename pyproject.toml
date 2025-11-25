@@ -148,6 +148,7 @@ minversion = "6.0"
 testpaths = "src/iris_grib"
 xfail_strict = "True"
 filterwarnings = ["default"]
+log_level = "INFO"
 
 [tool.repo-review]
 ignore = [
