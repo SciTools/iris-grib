@@ -26,6 +26,8 @@ import eccodes
 import iris.fileformats
 import iris_grib
 
+from iris_grib._grib1_legacy.grib_wrapper import GribWrapper
+
 
 def _mock_eccodes_fetch(message, key):
     """
@@ -168,7 +170,7 @@ class TestGribTimecodes(tests.IrisTest):
         # Operates on lists of cases for various time-units and grib-editions.
         # Format: (edition, code, expected-exception,
         #          equivalent-seconds, description-string)
-        with mock.patch("iris_grib.eccodes", _mock_eccodes):
+        with mock.patch("iris_grib._grib1_legacy.grib_wrapper.eccodes", _mock_eccodes):
             for test_controls in test_set:
                 (
                     grib_edition,
@@ -186,14 +188,14 @@ class TestGribTimecodes(tests.IrisTest):
                 if expected_error:
                     # Expect GribWrapper construction to fail.
                     with self.assertRaises(type(expected_error)) as ar_context:
-                        _ = iris_grib.GribWrapper(message)
+                        _ = GribWrapper(message)
                     self.assertEqual(ar_context.exception.args, expected_error.args)
                     continue
 
                 # 'ELSE'...
                 # Expect the wrapper construction to work.
                 # Make a GribWrapper object and test it.
-                wrapped_msg = iris_grib.GribWrapper(message)
+                wrapped_msg = GribWrapper(message)
 
                 # Check the units string.
                 forecast_timeunit = wrapped_msg._forecastTimeUnit
@@ -319,11 +321,11 @@ class TestGrib1LoadPhenomenon(tests.IrisTest):
     def cube_from_message(self, grib):
         # Parameter translation now uses the GribWrapper, so we must convert
         # the Mock-based fake message to a FakeGribMessage.
-        with mock.patch("iris_grib.eccodes", _mock_eccodes):
+        with mock.patch("iris_grib._grib1_legacy.grib_wrapper.eccodes", _mock_eccodes):
             grib_message = FakeGribMessage(**grib.__dict__)
-            wrapped_msg = iris_grib.GribWrapper(grib_message)
+            wrapped_msg = GribWrapper(grib_message)
             cube, _, _ = iris.fileformats.rules._make_cube(
-                wrapped_msg, iris_grib._grib1_load_rules.grib1_convert
+                wrapped_msg, iris_grib._grib1_legacy.grib1_load_rules.grib1_convert
             )
         return cube
 

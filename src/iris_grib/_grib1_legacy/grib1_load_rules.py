@@ -2,10 +2,11 @@
 #
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
+"""
+Rules for grib1 loading.
 
-# Historically this was auto-generated from
-# SciTools/iris-code-generators:tools/gen_rules.py
-
+Used exclusively by the 'legacy' GRIB loader in `_grib1_legacy.grib_wrapper`.
+"""
 
 from cf_units import CALENDAR_GREGORIAN, Unit
 
@@ -41,6 +42,9 @@ def grib1_convert(grib):
     cell_methods = []
     dim_coords_and_dims = []
     aux_coords_and_dims = []
+
+    ##################################################
+    # decode GRID -> dim_coords / aux_coords
 
     if grib.gridType == "reduced_gg":
         aux_coords_and_dims.append(
@@ -119,6 +123,9 @@ def grib1_convert(grib):
             )
         )
 
+    ##################################################
+    # decode PHENOMENON -> std_name / long_name / units
+
     if (
         (grib.table2Version < 128)
         and (grib.indicatorOfParameter == 11)
@@ -160,6 +167,9 @@ def grib1_convert(grib):
             f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}.{grib.table2Version}"
         )
         units = "???"
+
+    ##################################################
+    ##### decode TIME -> aux_coords (=always scalar)
 
     if grib._phenomenonDateTime != -1.0:
         aux_coords_and_dims.append(
@@ -263,6 +273,9 @@ def grib1_convert(grib):
     if grib.timeRangeIndicator == 125:
         add_bounded_time_coords(aux_coords_and_dims, grib)
         cell_methods.append(CellMethod("standard_deviation", coords="time"))
+
+    ##################################################
+    # decode VERTICAL -> aux_coords / factories
 
     if grib.levelType == "pl":
         aux_coords_and_dims.append(
