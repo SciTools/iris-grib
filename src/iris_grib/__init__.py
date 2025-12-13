@@ -82,6 +82,13 @@ class GribLoadingMode(threading.local):
 
         Example:
 
+        .. testsetup::
+
+            >>> import iris_grib
+            >>> from iris.tests._shared_utils import get_data_path
+            >> # this is a temporary cheat, as doesn't include GRIB1 data
+            >>> path = tests.get_data_path(("GRIB", "global_t", "global.grib2"))
+
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=False)
             >>> cubes = iris_grib.load_cubes(path)
 
