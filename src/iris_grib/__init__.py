@@ -8,10 +8,11 @@ See: `ECMWF ecCodes grib interface <https://confluence.ecmwf.int/display/ECC>`_.
 
 """
 
-import numpy as np
-import threading
+import contextlib
 
 import eccodes
+import numpy as np
+import threading
 
 # NOTE: careful here, to avoid circular imports (as iris imports grib)
 import iris  # noqa: F401
@@ -82,8 +83,21 @@ class GribLoadingMode(threading.local):
 
         Example:
 
+        .. testsetup::
+
+            >>> import iris_grib
+            >>> from iris.tests._shared_utils import get_data_path
+            >>> # this is a bit of a cheat, as it doesn't include any GRIB1 data
+            >>> path = get_data_path(("GRIB", "global_t", "global.grib2"))
+            >>> old_legacy = iris_grib.GRIB1_LOADING_MODE.use_legacy_grib1_loading
+
+        .. doctest::
+
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=False)
             >>> cubes = iris_grib.load_cubes(path)
+
+        .. testcleanup::
+            >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=old_legacy)
 
         ..note::
 
@@ -103,6 +117,7 @@ class GribLoadingMode(threading.local):
         """
         self._use_legacy_grib1_loading = legacy
 
+    @contextlib.contextmanager
     def context(self, *, legacy):
         """
         Set the GRIB1 loading mode which applies during a context block.
@@ -116,7 +131,16 @@ class GribLoadingMode(threading.local):
 
         Example:
 
-            >>> with iris_grib.GRIB1_LOADING_MODE(legacy=False):
+        .. testsetup::
+
+            >>> import iris_grib
+            >>> from iris.tests._shared_utils import get_data_path
+            >>> # this is a bit of a cheat, as it doesn't include any GRIB1 data
+            >>> path = get_data_path(("GRIB", "global_t", "global.grib2"))
+
+        .. doctest::
+
+            >>> with iris_grib.GRIB1_LOADING_MODE.context(legacy=False):
             ...     cubes = iris_grib.load_cubes(path)
 
         """
