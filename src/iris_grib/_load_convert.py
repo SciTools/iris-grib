@@ -35,7 +35,7 @@ from iris.fileformats.rules import (
 )
 from iris.util import _is_circular
 
-from ._grib1_load_rules import grib1_convert
+from ._grib1_legacy.grib1_load_rules import grib1_convert
 
 
 # Restrict the names imported from this namespace.

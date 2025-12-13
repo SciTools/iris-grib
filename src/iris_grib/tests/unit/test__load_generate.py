@@ -10,7 +10,7 @@ from unittest import mock
 
 from iris.exceptions import TranslationError
 
-from iris_grib import GribWrapper
+from iris_grib._grib1_legacy.grib_wrapper import GribWrapper
 from iris_grib import _load_generate
 from iris_grib.message import GribMessage
 
@@ -30,7 +30,7 @@ class Test(tests.IrisGribTest):
         sections = [{"editionNumber": 1}]
         message = self._make_test_message(sections)
         mfunc = "iris_grib.GribMessage.messages_from_filename"
-        mclass = "iris_grib.GribWrapper"
+        mclass = "iris_grib._grib1_legacy.grib_wrapper.GribWrapper"
         with mock.patch(mfunc, return_value=[message]) as mock_func:
             with mock.patch(mclass, spec=GribWrapper) as mock_wrapper:
                 field = next(_load_generate(self.fname))

@@ -15,8 +15,8 @@ from iris.aux_factory import HybridPressureFactory
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import Reference
 
-from iris_grib import GribWrapper
-from iris_grib._grib1_load_rules import grib1_convert
+from iris_grib._grib1_legacy.grib_wrapper import GribWrapper
+from iris_grib._grib1_legacy.grib1_load_rules import grib1_convert
 from iris_grib.tests.unit import TestField
 
 
