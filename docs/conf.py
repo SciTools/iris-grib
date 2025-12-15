@@ -13,13 +13,8 @@
 # serve to show the default.
 
 from importlib.metadata import version as get_version
-import sys
-import os
+from pathlib import Path
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.append(os.path.abspath(".."))
 
 # -- General configuration ------------------------------------------------
 
@@ -30,6 +25,7 @@ sys.path.append(os.path.abspath(".."))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.apidoc",  # included AS WELL AS autodoc : adds api in main build
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
@@ -41,7 +37,7 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = {".rst": "restructuredtext"}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -306,3 +302,19 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "iris": ("https://scitools-iris.readthedocs.io/en/stable/", None),
 }
+
+# -- apidoc extension ---------------------------------------------------------
+# See https://www.sphinx-doc.org/en/master/usage/extensions/apidoc.html
+docs_path = Path(__file__).parent.absolute()
+main_module_rootpath = (docs_path.parent / "src" / "iris_grib").absolute()
+moduledir_str = str(main_module_rootpath)
+destpath_str = str(docs_path / "api")
+moduletestdir_str = str(main_module_rootpath / "tests")
+apidoc_modules = [
+    {
+        "path": moduledir_str,
+        "destination": "./api",
+        "exclude_patterns": [moduletestdir_str],
+        "module_first": True,
+    },
+]

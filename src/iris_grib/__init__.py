@@ -33,7 +33,6 @@ __all__ = [
     "Grib1LoadingMode",
     "load_cubes",
     "load_pairs_from_fields",
-    "odd_new_func",
     "save_grib2",
     "save_messages",
     "save_pairs_from_cube",
@@ -89,6 +88,7 @@ class Grib1LoadingMode(threading.local):
         Example:
 
         .. testsetup::
+
             >>> import iris_grib
             >>> try:
             ...     from iris.tests._shared_utils import get_data_path
@@ -99,10 +99,12 @@ class Grib1LoadingMode(threading.local):
             >>> old_legacy = iris_grib.GRIB1_LOADING_MODE.use_legacy_grib1_loading
 
         .. doctest::
+
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=False)
             >>> cubes = iris_grib.load_cubes(path)
 
         .. testcleanup::
+
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=old_legacy)
 
         .. note::
@@ -138,6 +140,7 @@ class Grib1LoadingMode(threading.local):
         Example:
 
         .. testsetup::
+
             >>> import iris_grib
             >>> try:
             ...     from iris.tests._shared_utils import get_data_path
@@ -147,6 +150,7 @@ class Grib1LoadingMode(threading.local):
             >>> path = get_data_path(("GRIB", "global_t", "global.grib2"))
 
         .. doctest::
+
             >>> with iris_grib.GRIB1_LOADING_MODE.context(legacy=False):
             ...     cubes = iris_grib.load_cubes(path)
 
