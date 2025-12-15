@@ -89,15 +89,16 @@ class Grib1LoadingMode(threading.local):
         Example:
 
         .. testsetup::
-
             >>> import iris_grib
-            >>> from iris.tests._shared_utils import get_data_path
+            >>> try:
+            ...     from iris.tests._shared_utils import get_data_path
+            ... except ImportError:
+            ...     from iris.tests import get_data_path
             >>> # this is a bit of a cheat, as it doesn't include any GRIB1 data
             >>> path = get_data_path(("GRIB", "global_t", "global.grib2"))
             >>> old_legacy = iris_grib.GRIB1_LOADING_MODE.use_legacy_grib1_loading
 
         .. doctest::
-
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=False)
             >>> cubes = iris_grib.load_cubes(path)
 
@@ -137,14 +138,15 @@ class Grib1LoadingMode(threading.local):
         Example:
 
         .. testsetup::
-
             >>> import iris_grib
-            >>> from iris.tests._shared_utils import get_data_path
+            >>> try:
+            ...     from iris.tests._shared_utils import get_data_path
+            ... except ImportError:
+            ...     from iris.tests import get_data_path
             >>> # this is a bit of a cheat, as it doesn't include any GRIB1 data
             >>> path = get_data_path(("GRIB", "global_t", "global.grib2"))
 
         .. doctest::
-
             >>> with iris_grib.GRIB1_LOADING_MODE.context(legacy=False):
             ...     cubes = iris_grib.load_cubes(path)
 
