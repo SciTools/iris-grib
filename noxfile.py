@@ -285,8 +285,7 @@ def tests(session: nox.sessions.Session, iris_source: str):
 
     run_args = [
         "pytest",
-        "--pyargs",
-        "iris_grib",
+        "src/iris_grib/tests",  # NB *don't* trigger doctests: they are done separately
     ]
 
     if "-c" in session.posargs or "--coverage" in session.posargs:
