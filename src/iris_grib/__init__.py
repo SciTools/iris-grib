@@ -30,15 +30,17 @@ except ModuleNotFoundError:
 
 __all__ = [
     "GRIB1_LOADING_MODE",
+    "Grib1LoadingMode",
     "load_cubes",
     "load_pairs_from_fields",
+    "odd_new_func",
     "save_grib2",
     "save_messages",
     "save_pairs_from_cube",
 ]
 
 
-class GribLoadingMode(threading.local):
+class Grib1LoadingMode(threading.local):
     """
     A control object selecting between "legacy" and "future" GRIB1 loading methods.
 
@@ -55,8 +57,11 @@ class GribLoadingMode(threading.local):
     any unsupported or unrecognised metadata elements : this aligns it with the code
     which has long since been used to load GRIB2 data.
 
-    The legacy implementation is now deprecated and will be removed in due course.
-    However, for full backwwards compatibility, 'legacy' mode is still the default.
+    .. warning::
+
+        The legacy implementation is now deprecated and will be removed in due course.
+        However, for full backwards compatibility, the 'legacy' mode is
+        **still the default**.
     """
 
     def __init__(self, legacy=True):
@@ -99,20 +104,20 @@ class GribLoadingMode(threading.local):
         .. testcleanup::
             >>> iris_grib.GRIB1_LOADING_MODE.set(legacy=old_legacy)
 
-        ..note::
+        .. note::
 
             The legacy implementation is now deprecated and will be removed in due
             course. However, for full backwwards compatibility, 'legacy' mode is still
             the default.
 
-            You are advised to use `iris_grib.GRIB1_LOADING_MODE.set(legacy=False)` at
-            the top of a script.
+            You are advised to use ``iris_grib.GRIB1_LOADING_MODE.set(legacy=False)``
+            at the top of the main script.
 
-        ..warning::
+        .. warning::
 
             Do not set/unset this dynamically to control loading mode for the duration
             of some lines of code : this can cause incorrect operation in threaded
-            loading operations.  You are recommended to use :meth:`context` instead.
+            loading operations.  For dynamic control, use :meth:`context` instead.
 
         """
         self._use_legacy_grib1_loading = legacy
@@ -151,9 +156,12 @@ class GribLoadingMode(threading.local):
         finally:
             self._use_legacy_grib1_loading = old_mode
 
+    def __repr__(self):
+        return f"GRIB1_LOADING_MODE(legacy={self.use_legacy_grib1_loading})"
 
-# : a global singleton object controlling the way in which GRIB1 data is loaded.
-GRIB1_LOADING_MODE = GribLoadingMode()
+
+#: a global singleton object controlling the way in which GRIB1 data is loaded.
+GRIB1_LOADING_MODE = Grib1LoadingMode()
 
 
 # Utility routines for the use of dask 'meta' in wrapping proxies
