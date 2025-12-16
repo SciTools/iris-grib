@@ -37,9 +37,14 @@ class TestLegacyProperty:
         assert mode_obj.use_legacy_grib1_loading
 
     def test_set_legacy_fail(self, mode_obj):
-        msg = "'use_legacy_grib1_loading' of 'Grib1LoadingMode' object has no setter"
-        with pytest.raises(AttributeError, match=msg):
+        msg1 = "'use_legacy_grib1_loading' of 'Grib1LoadingMode' object has no setter"
+        # NOTE: message was different in Python <= 3.10
+        msg2 = "can't set attribute 'use_legacy_grib1_loading'"
+        try:
             mode_obj.use_legacy_grib1_loading = False
+        except AttributeError as err:
+            result = str(err)
+        assert msg1 in result or msg2 in result
 
 
 class TestSet:
