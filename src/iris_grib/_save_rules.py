@@ -33,7 +33,7 @@ from iris.exceptions import TranslationError
 
 
 from . import grib_phenom_translation as gptx
-from ._load_convert import (
+from ._grib2_convert import (
     _STATISTIC_TYPE_NAMES,
     _TIME_RANGE_UNITS,
     _SPATIAL_PROCESSING_TYPES,
