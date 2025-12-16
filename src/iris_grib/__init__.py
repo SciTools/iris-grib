@@ -63,7 +63,7 @@ class Grib1LoadingMode(threading.local):
         **still the default**.
     """
 
-    def __init__(self, legacy=True):
+    def __init__(self, *, legacy=True):
         self.set(legacy=legacy)
 
     @property
@@ -123,7 +123,7 @@ class Grib1LoadingMode(threading.local):
             loading operations.  For dynamic control, use :meth:`context` instead.
 
         """
-        self._use_legacy_grib1_loading = legacy
+        self._use_legacy_grib1_loading = bool(legacy)
 
     @contextlib.contextmanager
     def context(self, *, legacy):
