@@ -20,12 +20,21 @@ import pytest
 
 from iris.tests import _shared_utils as iris_testutils
 
+import iris_grib
+
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
+
+
+@pytest.fixture(params=["grib1_old", "grib1_new"])
+def grib1_mode(request):
+    use_oldgrib1 = request.param == "grib1_old"
+    with iris_grib.GRIB1_LOADING_MODE.context(legacy=use_oldgrib1):
+        yield
 
 
 @iris_testutils.skip_data
 class TestBasicLoad:
-    def test_load_rotated(self, assert_CML):
+    def test_load_rotated(self, assert_CML, grib1_mode):
         cubes = iris.load(
             iris_testutils.get_data_path(("GRIB", "time_processed", "time_bound.grib1"))
         )

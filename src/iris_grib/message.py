@@ -142,60 +142,93 @@ class GribMessage:
 
         """
         sections = self.sections
-        grid_section = sections[3]
-        if grid_section["sourceOfGridDefinition"] != 0:
-            raise TranslationError(
-                "Unsupported source of grid definition: {}".format(
-                    grid_section["sourceOfGridDefinition"]
-                )
-            )
+        grib_edition = sections[0]["editionNumber"]
+        if grib_edition == 1:
+            grid_type = self.sections[1]["gridDefinition"]
+            section2 = self.sections[2]
+            grid_type = section2["dataRepresentationType"]
+            match grid_type:
+                case 10:
+                    # TODO: probably more to check here.
+                    #  - certainly more to support.
+                    shape = (section2["Nj"], section2["Ni"])
+                    dtype = np.dtype("f8")
+                    proxy = _DataProxy(shape, dtype, self._recreate_raw)
+                    as_lazy_kwargs = {}
+                    from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
 
-        reduced = (
-            grid_section["numberOfOctectsForNumberOfPoints"] != 0
-            or grid_section["interpretationOfNumberOfPoints"] != 0
-        )
-        template = grid_section["gridDefinitionTemplateNumber"]
-        if reduced and template not in (40,):
-            raise TranslationError(
-                "Grid definition Section 3 contains unsupported quasi-regular grid."
-            )
+                    if _ASLAZYDATA_NEEDS_META:
+                        # has_bitmap = 6 in sections
+                        has_bitmap = False
+                        meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                        as_lazy_kwargs["meta"] = meta
+                    data = as_lazy_data(proxy, **as_lazy_kwargs)
+                case _:
+                    msg = (
+                        "Unsupported grid type in grib message: "
+                        f"dataRepresentationType={grid_type}"
+                    )
+                    raise TranslationError(msg)
 
-        if template in _SUPPORTED_GRID_DEFINITIONS:
-            # We can ignore the first two bits (i-neg, j-pos) because
-            # that is already captured in the coordinate values.
-            if grid_section["scanningMode"] & 0x3F:
-                msg = "Unsupported scanning mode: {}".format(
-                    grid_section["scanningMode"]
+        elif grib_edition == 2:
+            grid_section = sections[3]
+            if grid_section["sourceOfGridDefinition"] != 0:
+                raise TranslationError(
+                    "Unsupported source of grid definition: {}".format(
+                        grid_section["sourceOfGridDefinition"]
+                    )
                 )
-                raise TranslationError(msg)
-            if template in (20, 30, 90):
-                shape = (grid_section["Ny"], grid_section["Nx"])
-            elif template == 140:
-                shape = (
-                    grid_section["numberOfPointsAlongYAxis"],
-                    grid_section["numberOfPointsAlongXAxis"],
+
+            reduced = (
+                grid_section["numberOfOctectsForNumberOfPoints"] != 0
+                or grid_section["interpretationOfNumberOfPoints"] != 0
+            )
+            template = grid_section["gridDefinitionTemplateNumber"]
+            if reduced and template not in (40,):
+                raise TranslationError(
+                    "Grid definition Section 3 contains unsupported quasi-regular grid."
                 )
-            elif template == 40 and reduced:
-                shape = (grid_section["numberOfDataPoints"],)
+
+            if template in _SUPPORTED_GRID_DEFINITIONS:
+                # We can ignore the first two bits (i-neg, j-pos) because
+                # that is already captured in the coordinate values.
+                if grid_section["scanningMode"] & 0x3F:
+                    msg = "Unsupported scanning mode: {}".format(
+                        grid_section["scanningMode"]
+                    )
+                    raise TranslationError(msg)
+                if template in (20, 30, 90):
+                    shape = (grid_section["Ny"], grid_section["Nx"])
+                elif template == 140:
+                    shape = (
+                        grid_section["numberOfPointsAlongYAxis"],
+                        grid_section["numberOfPointsAlongXAxis"],
+                    )
+                elif template == 40 and reduced:
+                    shape = (grid_section["numberOfDataPoints"],)
+                else:
+                    shape = (grid_section["Nj"], grid_section["Ni"])
+
+                dtype = np.dtype("f8")
+                proxy = _DataProxy(shape, dtype, self._recreate_raw)
+
+                as_lazy_kwargs = {}
+                from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
+
+                if _ASLAZYDATA_NEEDS_META:
+                    has_bitmap = 6 in sections
+                    meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                    as_lazy_kwargs["meta"] = meta
+
+                data = as_lazy_data(proxy, **as_lazy_kwargs)
+
             else:
-                shape = (grid_section["Nj"], grid_section["Ni"])
-
-            dtype = np.dtype("f8")
-            proxy = _DataProxy(shape, dtype, self._recreate_raw)
-
-            as_lazy_kwargs = {}
-            from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
-
-            if _ASLAZYDATA_NEEDS_META:
-                has_bitmap = 6 in sections
-                meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
-                as_lazy_kwargs["meta"] = meta
-
-            data = as_lazy_data(proxy, **as_lazy_kwargs)
-
+                fmt = "Grid definition template {} is not supported"
+                raise TranslationError(fmt.format(template))
         else:
-            fmt = "Grid definition template {} is not supported"
-            raise TranslationError(fmt.format(template))
+            msg = f"Unknown grib edition in message: edition={grib_edition}"
+            raise TranslationError(msg)
+
         return data
 
     def __getstate__(self):
@@ -278,41 +311,57 @@ class _DataProxy:
         message = self.recreate_raw()
         sections = message.sections
         data = None
+        grib_edition = sections[0]["editionNumber"]
+        if grib_edition == 1:
+            msg_handle = message._message_id
+            eccodes.codes_set_double(msg_handle, "missingValue", np.nan)
+            data = eccodes.codes_get_double_array(msg_handle, "values")
+            data = data.reshape(self.shape)
 
-        if 5 in sections:
-            # Data Representation Section.
-            if sections[5]["bitsPerValue"] == 0:
-                # Auto-generate zero data of the expected shape and dtype, as
-                # there is no data stored within the Data Section of this GRIB
-                # message. Also flatten the result to 1-D for potential bitmap
-                # post-processing.
-                data = np.ravel(np.zeros(self.shape, dtype=self.dtype))
+            # Handle missing values in a sensible way.
+            mask = np.isnan(data)
+            if mask.any():
+                data = ma.array(data, mask=mask, fill_value=np.nan)
+            result = data.__getitem__(keys)
 
-        if data is None:
-            # Data Section.
-            data = sections[7]["codedValues"]
+        elif grib_edition == 2:
+            if 5 in sections:
+                # Data Representation Section.
+                if sections[5]["bitsPerValue"] == 0:
+                    # Auto-generate zero data of the expected shape and dtype, as
+                    # there is no data stored within the Data Section of this GRIB
+                    # message. Also flatten the result to 1-D for potential bitmap
+                    # post-processing.
+                    data = np.ravel(np.zeros(self.shape, dtype=self.dtype))
 
-        # Bit-map Section.
-        bitmap_section = sections[6]
-        bitmap = self._bitmap(bitmap_section)
+            if data is None:
+                # Data Section.
+                data = sections[7]["codedValues"]
 
-        if bitmap is not None:
-            # Note that bitmap and data are both 1D arrays at this point.
-            if np.count_nonzero(bitmap) == data.shape[0]:
-                # Only the non-masked values are included in codedValues.
-                _data = np.empty(shape=bitmap.shape)
-                _data[bitmap.astype(bool)] = data
-                # `ma.masked_array` masks where input = 1, the opposite of
-                # the behaviour specified by the GRIB spec.
-                data = ma.masked_array(
-                    _data, mask=np.logical_not(bitmap), fill_value=np.nan
-                )
-            else:
-                msg = "Shapes of data and bitmap do not match."
-                raise TranslationError(msg)
+            # Bit-map Section.
+            bitmap_section = sections[6]
+            bitmap = self._bitmap(bitmap_section)
 
-        data = data.reshape(self.shape)
-        result = data.__getitem__(keys)
+            if bitmap is not None:
+                # Note that bitmap and data are both 1D arrays at this point.
+                if np.count_nonzero(bitmap) == data.shape[0]:
+                    # Only the non-masked values are included in codedValues.
+                    _data = np.empty(shape=bitmap.shape)
+                    _data[bitmap.astype(bool)] = data
+                    # `ma.masked_array` masks where input = 1, the opposite of
+                    # the behaviour specified by the GRIB spec.
+                    data = ma.masked_array(
+                        _data, mask=np.logical_not(bitmap), fill_value=np.nan
+                    )
+                else:
+                    msg = "Shapes of data and bitmap do not match."
+                    raise TranslationError(msg)
+
+            data = data.reshape(self.shape)
+            result = data.__getitem__(keys)
+        else:
+            msg = f"Unknown grib edition in message: edition={grib_edition}"
+            raise TranslationError(msg)
 
         return result
 
