@@ -17,7 +17,8 @@ from unittest import mock
 from iris._lazy_data import is_lazy_data
 from iris.exceptions import TranslationError
 
-from iris_grib import GribWrapper, _load_generate
+from iris_grib._grib1_legacy.grib_wrapper import GribWrapper
+from iris_grib import _load_generate
 
 
 _offset = 0
@@ -56,10 +57,14 @@ def _mock_codes_get_message_offset(grib_message):
     return _offset
 
 
+_TGT_GRIBWRAPPER_CLASS = "iris_grib._grib1_legacy.grib_wrapper.GribWrapper"
+_TGT_GRIBDATAPROXY_CLASS = "iris_grib._grib1_legacy.grib_wrapper.GribDataProxy"
+
+
 class Test_edition(tests.IrisGribTest):
     def setUp(self):
-        self.patch("iris_grib.GribWrapper._confirm_in_scope")
-        self.patch("iris_grib.GribWrapper._compute_extra_keys")
+        self.patch(_TGT_GRIBWRAPPER_CLASS + "._confirm_in_scope")
+        self.patch(_TGT_GRIBWRAPPER_CLASS + "._compute_extra_keys")
         self.patch("eccodes.codes_get_long", _mock_codes_get_long)
         self.patch("eccodes.codes_get_string", _mock_codes_get_string)
         self.patch("eccodes.codes_get_native_type", _mock_codes_get_native_type)
@@ -96,8 +101,8 @@ class Test_deferred_data(tests.IrisTest):
 
 class Test_deferred_proxy_args(tests.IrisTest):
     def setUp(self):
-        self.patch("iris_grib.GribWrapper._confirm_in_scope")
-        self.patch("iris_grib.GribWrapper._compute_extra_keys")
+        self.patch(_TGT_GRIBWRAPPER_CLASS + "._confirm_in_scope")
+        self.patch(_TGT_GRIBWRAPPER_CLASS + "._compute_extra_keys")
         self.patch("eccodes.codes_get_long", _mock_codes_get_long)
         self.patch("eccodes.codes_get_string", _mock_codes_get_string)
         self.patch("eccodes.codes_get_native_type", _mock_codes_get_native_type)
@@ -112,7 +117,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
         grib_message = "regular_ll"
         shape = (self.lookup(grib_message, "Nj"), self.lookup(grib_message, "Ni"))
         for offset in self.expected:
-            with mock.patch("iris_grib.GribDataProxy") as mock_gdp:
+            with mock.patch(_TGT_GRIBDATAPROXY_CLASS) as mock_gdp:
                 _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with(shape, self.dtype, self.path, offset)
 
@@ -120,7 +125,7 @@ class Test_deferred_proxy_args(tests.IrisTest):
         grib_message = "reduced_gg"
         shape = self.lookup(grib_message, "numberOfValues")
         for offset in self.expected:
-            with mock.patch("iris_grib.GribDataProxy") as mock_gdp:
+            with mock.patch(_TGT_GRIBDATAPROXY_CLASS) as mock_gdp:
                 _ = GribWrapper(grib_message, self.grib_fh)
             mock_gdp.assert_called_once_with((shape,), self.dtype, self.path, offset)
 

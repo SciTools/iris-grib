@@ -26,7 +26,7 @@ import iris.exceptions
 import iris.util
 
 import eccodes
-from iris_grib._load_convert import _MDI as MDI
+from iris_grib._grib2_convert import _MDI as MDI
 
 
 class TestLoadSave(tests.TestGribMessage):

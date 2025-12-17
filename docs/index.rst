@@ -239,20 +239,17 @@ Releases
 For recent changes, see :ref:`release_notes` .
 
 
-Indices and tables
+API Documentation
 ==================
 
-Contents:
-
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
-   ref/iris_grib
-   ref/message/message
-   ref/grib_phenom_translation/grib_phenom_translation
+   api/modules
 
 
 See also:
+---------
 
 * :ref:`genindex`
 * :ref:`modindex`
