@@ -34,13 +34,10 @@ def convert(field):
     """
     from ._grib1_legacy.grib1_load_rules import grib1_convert as old_grib1_convert  # noqa: PLC0415
     from ._grib2_convert import grib2_convert  # noqa: PLC0415
+    from ._grib1_convert import grib1_convert as new_grib1_convert  # noqa: PLC0415
 
     if hasattr(field, "sections"):
         editionNumber = field.sections[0]["editionNumber"]
-
-        if editionNumber != 2:
-            emsg = "GRIB edition {} is not supported by {!r}."
-            raise TranslationError(emsg.format(editionNumber, type(field).__name__))
 
         # Initialise the cube metadata.
         metadata = OrderedDict()
@@ -55,7 +52,13 @@ def convert(field):
         metadata["aux_coords_and_dims"] = []
 
         # Convert GRIB2 message to cube metadata.
-        grib2_convert(field, metadata)
+        if editionNumber == 2:
+            grib2_convert(field, metadata)
+        elif editionNumber == 1:
+            new_grib1_convert(field, metadata)
+        else:
+            emsg = "GRIB edition {} is not supported by {!r}."
+            raise TranslationError(emsg.format(editionNumber, type(field).__name__))
 
         result = ConversionMetadata._make(metadata.values())
     else:
