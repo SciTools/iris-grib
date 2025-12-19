@@ -50,8 +50,10 @@ def assert_CML(request):
                 raise ValueError(msg)
             return result
 
-        if len(args) >= 3:
-            args[2] = fix_path(args[2])
+        if len(args) >= 2:
+            args = list(args)
+            args[1] = fix_path(args[1])
+            args = tuple(args)
         if "reference_path" in kwargs:
             kwargs["reference_path"] = fix_path(kwargs["reference_path"])
         return iris_testutils.assert_CML(request, *args, **kwargs)
