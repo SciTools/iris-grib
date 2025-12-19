@@ -62,6 +62,7 @@ def convert(field):
 
         result = ConversionMetadata._make(metadata.values())
     else:
+        # "legacy" GRIB1 loading code (takes a GribWrapper instead of GribMessage)
         editionNumber = field.edition
 
         if editionNumber != 1:

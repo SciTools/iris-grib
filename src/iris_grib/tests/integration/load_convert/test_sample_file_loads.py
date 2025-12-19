@@ -34,17 +34,31 @@ def grib1_mode(request):
 
 @iris_testutils.skip_data
 class TestBasicLoad:
-    def test_load_rotated(self, assert_CML, grib1_mode):
+    def test_load_timebound_grib1(self, assert_CML):
         cubes = iris.load(
             iris_testutils.get_data_path(("GRIB", "time_processed", "time_bound.grib1"))
         )
         assert_CML(cubes, _RESULTDIR_PREFIX + ("time_bound_grib1.cml",))
 
-    def test_load_time_processed(self, assert_CML):
+    def test_load_timebound_grib2(self, assert_CML):
         cubes = iris.load(
             iris_testutils.get_data_path(("GRIB", "time_processed", "time_bound.grib2"))
         )
         assert_CML(cubes, _RESULTDIR_PREFIX + ("time_bound_grib2.cml",))
+
+    def test_load_rotated_grib1(self, assert_CML):
+        cubes = iris.load(
+            iris_testutils.get_data_path(("GRIB", "rotated_uk", "uk_wrongparam.grib1"))
+        )
+        assert_CML(cubes, _RESULTDIR_PREFIX + ("rotated_grib1.cml",))
+
+    def test_load_rotated_grib2(self, assert_CML):
+        cubes = iris.load(
+            iris_testutils.get_data_path(
+                ("GRIB", "rotated_nae_t", "sensible_pole.grib2")
+            )
+        )
+        assert_CML(cubes, _RESULTDIR_PREFIX + ("rotated_grib2.cml",))
 
     def test_load_3_layer(self, assert_CML):
         cubes = iris.load(

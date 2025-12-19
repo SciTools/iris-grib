@@ -12,7 +12,11 @@ This is a re-implementation of '._grib1_legacy.grib1_load_rules', but now using 
 :class:`iris_grib._grib1_legacy.grib_wrapper.GribWrapper`.
 """
 
+import dataclasses
+import eccodes
+
 import numpy as np
+from iris.coord_systems import CoordSystem
 
 from iris.coords import DimCoord
 from iris import coord_systems
@@ -21,13 +25,13 @@ from iris.fileformats.rules import (
     ConversionMetadata,
 )
 
-from iris_grib.message import GribMessage
+from iris_grib.message import GribMessage, Section
 from iris_grib import grib_phenom_translation as gptx
 
-_CENTRE_NAME_NUMBERS_BACKREFS = {
-    "egrr": 74,
-    "ecmwf": 98,
-}
+# _CENTRE_NAME_NUMBERS_BACKREFS = {
+#     "egrr": 74,
+#     "ecmwf": 98,
+# }
 
 
 def phenomenon(field: GribMessage, metadata: ConversionMetadata):
@@ -36,9 +40,14 @@ def phenomenon(field: GribMessage, metadata: ConversionMetadata):
     tables_version = section1["table2Version"]
     centre_name = section1["centre"]
     # It seems that, for GRIB1, we have no access to the original number here.
-    centre_number = _CENTRE_NAME_NUMBERS_BACKREFS.get(centre_name, 0)
-    param_number = section1["indicatorOfParameter"]
+    # centre_number = _CENTRE_NAME_NUMBERS_BACKREFS.get(centre_name, 0)
 
+    # Reading "centre" from the section gives a short-code string interpretation, since
+    #  this is the "native type" given by eccodes.
+    # To get the actual number code recorded in the file, we must bypass the GribMessage
+    # sections structure + use eccodes directly.
+    centre_number = eccodes.codes_get_long(field._raw_message._message_id, "centre")
+    param_number = section1["indicatorOfParameter"]
     grib_code = gptx.GRIBCode(
         edition=1,
         table_version=tables_version,
@@ -81,9 +90,84 @@ def phenomenon(field: GribMessage, metadata: ConversionMetadata):
     metadata["units"] = units
 
 
-def grid(field: GribMessage, metadata: ConversionMetadata):
-    grid_type = field.sections[1]["gridDefinition"]
-    section2 = field.sections[2]
+_SUPPORTED_GRID_TYPES = {
+    0: "latlon",
+    3: "lambert_conformal",
+    4: "gaussian",
+    5: "polar_stereo",
+    10: "rotated_latlon",
+}
+
+
+def decode_coords(section2: Section) -> (np.ndarray, np.ndarray):
+    scanning_mode = section2["scanningMode"]
+    # Extract the only bit which we understand (for now)
+    y_negative = (scanning_mode & 64) != 0
+    if (scanning_mode & ~64) != 0:
+        msg = f"Unsupported scanning mode: scanningMode=0b{scanning_mode:0b8}"
+        raise TranslationError(msg)
+    # Now get the X and Y points arrays.
+    # Note that we need to support 'reduced' grids, which are not totally irregular, but
+    #  have numbers of points in a row differing at different
+
+    if Ni == "missing":
+        row_lengths = section2["pl"]
+        xvals = np.array([], dtype=np.float64)
+
+    # NOTE: gaussian grids -- it's really complex
+    #  see: https://github.com/ecmwf/eccodes/blob/2.44.2/src/eccodes/geo/grib_geography.cc#L97
+    # ALSO
+    # in these cases, we have a 'iDirectionIncrement' but NO 'jDirectionIncrement'
+    #  - that's a bit hint!
+
+
+@dataclasses.dataclass
+class _CoordInfo:
+    coord_system: CoordSystem
+    xvals: np.ndarray
+    yvals: np.ndarray
+
+
+def decode_coord_system(section2: Section) -> _CoordInfo:
+    grid_name = _SUPPORTED_GRID_TYPES[section2["dataRepresentationType"]]
+    # shape of the Earth
+    resolutionAndComponentFlags = section2["resolutionAndComponentFlags"]
+    oblate_Earth = resolutionAndComponentFlags & 0b0100000
+    if oblate_Earth:
+        # Earth assumed oblate spheroidal with size as determined by IAU in
+        # 1965 (6378.160 km, 6356.775 km, f = 1/297.0)
+        msg = (
+            "Oblate Spheroidal Earth not supported: "
+            f"resolutionAndComponentFlags=0b{resolutionAndComponentFlags:08b}."
+        )
+        raise TranslationError(msg)
+    else:
+        # Earth assumed spherical with radius 6367.47 km
+        coord_system = coord_systems.GeogCS(semi_major_axis=6367470)
+
+    if grid_name == "rotated_latlon":
+        spole_lon = 0.001 * section2["longitudeOfSouthernPole"]
+        spole_lat = 0.001 * section2["latitudeOfSouthernPole"]
+        rot_ang = section2["angleOfRotationInDegrees"]
+        geoid = coord_systems.GeogCS(semi_major_axis=6367470)
+        coord_system = coord_systems.RotatedGeogCS(
+            -spole_lat,
+            (spole_lon + 180.0) % 360.0,
+            ellipsoid=coord_system,
+        )
+
+    xvals, yvals = decode_coords(section2)
+    if grid_name == "latlon":
+        xname, yname = "longitude", "latitude"
+    elif grid_name == "rotated_latlon":
+        xname, yname = "grid_longitude", "grid_latitude"
+    else:
+        xname, yname = "projection_x_coordinate", "projection_y_coordinate"
+
+    return result
+
+
+def horizontal(section2: Section, metadata: ConversionMetadata):
     grid_type = section2["dataRepresentationType"]
     dim_coords_and_dims = metadata["dim_coords_and_dims"]
     match grid_type:
@@ -92,23 +176,23 @@ def grid(field: GribMessage, metadata: ConversionMetadata):
 
             # just pin this aspect for now
             scanning_code = section2["scanningMode"]
-            scanning_code &= 7  # only 3 bits significant??
+            # scanning_code &= 7  # only 3 bits significant??
             # TODO: don't understand why we can get value=64
             #  only 3 bits : bits 3-7 seem to be unspecified (upto 2015?)
 
-            if scanning_code != 0:
+            if scanning_code != 128:
                 raise TranslationError(
-                    f"bad scanning code: scanningMode={scanning_code}"
+                    f"Unsupported scanning mode: scanningMode={scanning_code}"
                 )
 
             res_comp_flags = section2["resolutionAndComponentFlags"]
-            res_comp_flags &= 1 | 2 | 16
+            # res_comp_flags &= 1 | 2 | 16
             # TODO: AGAIN don't understand why we can get value=64
             #  only 4 bits : bits 3-4 and 6-7 unspecified (upto 2015?)
 
-            if res_comp_flags != 0:
+            if res_comp_flags != 128:
                 raise TranslationError(
-                    f"bad grid scanning: resolutionAndComponentFlags={scanning_code}"
+                    f"Unsupported grid format: resolutionAndComponentFlags={scanning_code}"
                 )
 
             spole_lon = 0.001 * section2["longitudeOfSouthernPole"]
@@ -168,4 +252,4 @@ def grib1_convert(field: GribMessage, metadata: ConversionMetadata):
 
     # Section 1 == product definitions
     phenomenon(field, metadata)
-    grid(field, metadata)
+    horizontal(field.sections[2], metadata)

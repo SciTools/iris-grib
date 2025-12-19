@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<cubes xmlns="urn:x-iris:cubeml-0.2">
+  <cube dtype="float64" standard_name="air_temperature" units="kelvin">
+    <attributes>
+      <attribute name="GRIB_PARAM" value="GRIB1:t003c074n011"/>
+    </attributes>
+    <coords>
+      <coord>
+        <dimCoord checksum="0x8b4d1797" id="1d45e087" points="[2]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
+      </coord>
+      <coord datadims="[0]">
+        <dimCoord checksum="0x512cfa25" id="de2b553a" points="[-4.452, -4.416, -4.38, ..., 8.4, 8.436, 8.472]" shape="(360,)" standard_name="grid_latitude" units="Unit('degrees')" value_type="float64">
+          <rotatedGeogCS ellipsoid="GeogCS(6367470.0)" grid_north_pole_latitude="37.5" grid_north_pole_longitude="177.5"/>
+        </dimCoord>
+      </coord>
+      <coord datadims="[1]">
+        <dimCoord checksum="0xcbb379d6" id="fce7021b" points="[-5.7, -5.664, -5.628, ..., 4.56, 4.596, 4.632]" shape="(288,)" standard_name="grid_longitude" units="Unit('degrees')" value_type="float64">
+          <rotatedGeogCS ellipsoid="GeogCS(6367470.0)" grid_north_pole_latitude="37.5" grid_north_pole_longitude="177.5"/>
+        </dimCoord>
+      </coord>
+      <coord>
+        <auxCoord checksum="0xd114015c" id="61bde96d" long_name="originating_centre" points="['U.K. Met Office - Exeter']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+      </coord>
+      <coord>
+        <dimCoord checksum="0x2c792c3f" id="6eef7051" long_name="pressure" points="[600]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
+      </coord>
+      <coord>
+        <dimCoord checksum="0x2a086fb3" id="cb784457" points="[329126.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+      </coord>
+    </coords>
+    <cellMethods/>
+    <data checksum="0xefca9897" dtype="float64" shape="(360, 288)"/>
+  </cube>
+</cubes>
