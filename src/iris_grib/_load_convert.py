@@ -56,6 +56,7 @@ def convert(field):
             grib2_convert(field, metadata)
         elif editionNumber == 1:
             new_grib1_convert(field, metadata)
+
         else:
             emsg = "GRIB edition {} is not supported by {!r}."
             raise TranslationError(emsg.format(editionNumber, type(field).__name__))

@@ -75,9 +75,10 @@ class TestBasicLoad:
         assert_CML(cubes, _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
 
     def test_polar_stereo_grib1(self, assert_CML):
-        cube = iris.load_cube(
-            iris_testutils.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
-        )
+        with iris_grib.GRIB1_LOADING_MODE.context(legacy=False):
+            cube = iris.load_cube(
+                iris_testutils.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
+            )
         assert_CML(cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1.cml",))
 
     def test_polar_stereo_grib2_grid_definition(self):
@@ -163,10 +164,14 @@ class TestBasicLoad:
 
     @pytest.mark.parametrize("byte_len", [40, 41])
     def test_bulletin_headers(self, assert_CML, byte_len):
+        ed = {40:2, 41:1}[byte_len]
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "bulletin", f"{byte_len}bytes.grib"))
         )
-        assert_CML(cube, _RESULTDIR_PREFIX + (f"bulletin_{byte_len}bytes.cml",))
+        assert_CML(
+            cube,
+            _RESULTDIR_PREFIX + (f"bulletin_{byte_len}bytes_grib{ed}.cml",)
+        )
 
 
 @iris_testutils.skip_data
