@@ -34,7 +34,7 @@ def grib1_mode(request):
 
 @iris_testutils.skip_data
 class TestBasicLoad:
-    def test_load_timebound_grib1(self, assert_CML):
+    def test_load_timebound_grib1(self, assert_CML, grib1_mode):
         cubes = iris.load(
             iris_testutils.get_data_path(("GRIB", "time_processed", "time_bound.grib1"))
         )
@@ -75,10 +75,9 @@ class TestBasicLoad:
         assert_CML(cubes, _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
 
     def test_polar_stereo_grib1(self, assert_CML):
-        with iris_grib.GRIB1_LOADING_MODE.context(legacy=False):
-            cube = iris.load_cube(
-                iris_testutils.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
-            )
+        cube = iris.load_cube(
+            iris_testutils.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
+        )
         assert_CML(cube, _RESULTDIR_PREFIX + ("polar_stereo_grib1.cml",))
 
     def test_polar_stereo_grib2_grid_definition(self):

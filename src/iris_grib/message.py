@@ -147,28 +147,31 @@ class GribMessage:
             grid_type = self.sections[1]["gridDefinition"]
             section2 = self.sections[2]
             grid_type = section2["dataRepresentationType"]
-            match grid_type:
-                case 10:
-                    # TODO: probably more to check here.
-                    #  - certainly more to support.
-                    shape = (section2["Nj"], section2["Ni"])
-                    dtype = np.dtype("f8")
-                    proxy = _DataProxy(shape, dtype, self._recreate_raw)
-                    as_lazy_kwargs = {}
-                    from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
+            from iris_grib._grib1_convert import _SUPPORTED_GRID_TYPES
+            if grid_type not in _SUPPORTED_GRID_TYPES:
+                msg = (
+                    "Unsupported grid type in grib message: "
+                    f"dataRepresentationType={grid_type}"
+                )
+                raise TranslationError(msg)
 
-                    if _ASLAZYDATA_NEEDS_META:
-                        # has_bitmap = 6 in sections
-                        has_bitmap = False
-                        meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
-                        as_lazy_kwargs["meta"] = meta
-                    data = as_lazy_data(proxy, **as_lazy_kwargs)
-                case _:
-                    msg = (
-                        "Unsupported grid type in grib message: "
-                        f"dataRepresentationType={grid_type}"
-                    )
-                    raise TranslationError(msg)
+            from iris_grib._grib1_convert import XyDetail
+            xy_detail = XyDetail.from_field(self)
+            if xy_detail.nx is not None:
+                shape = (xy_detail.ny, xy_detail.nx)
+            else:
+                shape = (xy_detail.ny,)
+            dtype = np.dtype("f8")
+            proxy = _DataProxy(shape, dtype, self._recreate_raw)
+            as_lazy_kwargs = {}
+            from . import _ASLAZYDATA_NEEDS_META, _make_dask_meta  # noqa: PLC0415
+
+            if _ASLAZYDATA_NEEDS_META:
+                # has_bitmap = 6 in sections
+                has_bitmap = False
+                meta = _make_dask_meta(shape, dtype, is_masked=has_bitmap)
+                as_lazy_kwargs["meta"] = meta
+            data = as_lazy_data(proxy, **as_lazy_kwargs)
 
         elif grib_edition == 2:
             grid_section = sections[3]
@@ -530,6 +533,18 @@ class Section:
             self._cache[key] = value
 
         return self._cache[key]
+
+    def get(self, key, default=None):
+        """Fetch key, or 'None' if absent.
+
+        Convenience replicating dict behaviour
+        """
+        try:
+            result = self.__getitem__(key)
+        except KeyError:
+            result = default
+        return result
+
 
     def __setitem__(self, key, value):
         # Allow the overwriting of any entry already in the _cache.
