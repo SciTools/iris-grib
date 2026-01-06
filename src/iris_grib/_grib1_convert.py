@@ -23,21 +23,19 @@ import eccodes
 import numpy as np
 from iris.coord_systems import CoordSystem
 
+from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris import coord_systems
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import (
     ConversionMetadata,
+    Factory,
+    Reference
 )
 
 from iris_grib._load_convert import options
 from iris_grib.message import GribMessage, Section
 from iris_grib import grib_phenom_translation as gptx
-
-# _CENTRE_NAME_NUMBERS_BACKREFS = {
-#     "egrr": 74,
-#     "ecmwf": 98,
-# }
 
 
 def _problem_msg(
@@ -581,6 +579,105 @@ def validate(field: GribMessage):
         )
 
 
+def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
+    # vertical layer definition :  mostly section 2
+    section1 = field.sections[1]
+    aux_coords = metadata["aux_coords_and_dims"]
+    # leveltype_code = section1["indicatorOfTypeOfLevel"]
+    # Once again the "default fetch type" returns a coded string, and we'd rather have
+    #  the original number code, but this requires looking inside the box..
+    leveltype_code = eccodes.codes_get_long(field._raw_message._message_id, "indicatorOfTypeOfLevel")
+    if leveltype_code == 1:
+        # Surface level : nothing to do
+        pass
+    elif leveltype_code == 100:
+        # pressure level
+        level_value = section1["level"]
+        level_points = np.array([level_value], dtype=np.int32)
+        aux_coords.append(
+            (
+                DimCoord(points=level_points, long_name="pressure", units="hPa"),
+                None
+            )
+        )
+    elif leveltype_code == 102:
+        # bounded pressure levels
+        level_values = [section1["bottomOfLevel"], section1["topOfLevel"]]
+        level_bounds = np.array(level_values, dtype=np.int32)
+        level_points = level_bounds.mean()
+        aux_coords.append(
+            (
+                DimCoord(
+                    points=level_points, bounds=level_bounds,
+                    standard_name="pressure", units="hPa"
+                ),
+                None
+            )
+        )
+    elif leveltype_code == 105:
+        # single height above ground
+        level_value = section1["level"]
+        level_points = np.array([level_value], dtype=np.int32)
+        aux_coords.append(
+            (
+                DimCoord(points=level_points, long_name="height", units="m"),
+                None
+            )
+        )
+    elif leveltype_code == 109:
+        # "hybrid levels" == ECMWF-style hybrid pressure
+        level_value = section1["level"]
+        pv = field.sections[2].get("pv")
+        if pv is None:
+            raise translation_error(
+                base_msg="Missing 'pv' coefficients for hybrid levels.",
+                n_section=1,
+                key="pv",
+                value=None,
+            )
+        aux_coords.extend([
+            (
+                AuxCoord(
+                    level_value,
+                    standard_name="model_level_number",
+                    units=1,
+                    attributes={"positive": "up"},
+                ),
+                None,
+            ),
+            (
+                DimCoord(pv[level_value], long_name="level_pressure", units="Pa"),
+                None,
+            ),
+            (
+                AuxCoord(
+                    pv[len(pv) // 2 + level_value],
+                    long_name="sigma",
+                    units=1,
+                ),
+                None,
+            )
+        ])
+
+        metadata['factories'].append(
+            Factory(
+                HybridPressureFactory,
+                [
+                    {"long_name": "level_pressure"},
+                    {"long_name": "sigma"},
+                    Reference("surface_pressure"),
+                ],
+            )
+        )
+
+    else:
+        raise translation_error(
+            base_msg="Unsupported/unknown vertical level type",
+            n_section=1,
+            key="indicatorOfTypeOfLevel",
+            value=leveltype_code,
+        )
+
 
 def grib1_convert(field: GribMessage, metadata: ConversionMetadata):
     assert hasattr(field, "sections")
@@ -595,8 +692,8 @@ def grib1_convert(field: GribMessage, metadata: ConversionMetadata):
     # time coords and cell-methods :  mostly section 1
     convert_time(field, metadata)
 
-    # vertical layer definition :  mostly section 2
-    # convert_vertical(field, metadata)
+    # vertical layer definition :  mostly section 1, but hybrid levels in section 2
+    convert_vertical(field, metadata)
 
     # horizontal grid :  mostly section 2
     # N.B. this one **has** to take "field", so we can still use computed keys (yuck!)

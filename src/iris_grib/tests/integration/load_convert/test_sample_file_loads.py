@@ -25,9 +25,16 @@ import iris_grib
 _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
 
 
+_SKIP_ALL_GRIB2 = False
+
 @pytest.fixture(params=["grib1_old", "grib1_new"])
 def grib1_mode(request):
     use_oldgrib1 = request.param == "grib1_old"
+
+    if _SKIP_ALL_GRIB2:
+        if not use_oldgrib1:
+            pytest.skip()
+
     with iris_grib.GRIB1_LOADING_MODE.context(legacy=use_oldgrib1):
         yield request.param
 
@@ -46,7 +53,7 @@ class TestBasicLoad:
         )
         assert_CML(cubes, _RESULTDIR_PREFIX + ("time_bound_grib2.cml",))
 
-    def test_load_rotated_grib1(self, assert_CML):
+    def test_load_rotated_grib1(self, assert_CML, grib1_mode):
         cubes = iris.load(
             iris_testutils.get_data_path(("GRIB", "rotated_uk", "uk_wrongparam.grib1"))
         )
@@ -74,7 +81,7 @@ class TestBasicLoad:
         cubes = iris.load(gribfile)
         assert_CML(cubes, _RESULTDIR_PREFIX + ("missing_values_grib2.cml",))
 
-    def test_polar_stereo_grib1(self, assert_CML):
+    def test_polar_stereo_grib1(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "polar_stereo", "ST4.2013052210.01h"))
         )
@@ -111,7 +118,7 @@ class TestBasicLoad:
         assert pyc.coord_system.true_scale_lat == 60.0
         assert pyc.coord_system.false_northing == 0.0
 
-    def test_lambert_grib1(self, assert_CML):
+    def test_lambert_grib1(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "lambert", "lambert.grib1"))
         )
@@ -123,7 +130,7 @@ class TestBasicLoad:
         )
         assert_CML(cube, _RESULTDIR_PREFIX + ("lambert_grib2.cml",))
 
-    def test_regular_gg_grib1(self, assert_CML):
+    def test_regular_gg_grib1(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "gaussian", "regular_gg.grib1"))
         )
@@ -135,13 +142,13 @@ class TestBasicLoad:
         )
         assert_CML(cube, _RESULTDIR_PREFIX + ("regular_gg_grib2.cml",))
 
-    def test_reduced_ll(self, assert_CML):
+    def test_reduced_ll(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "reduced", "reduced_ll.grib1"))
         )
         assert_CML(cube, _RESULTDIR_PREFIX + ("reduced_ll_grib1.cml",))
 
-    def test_reduced_gg_grib1(self, assert_CML):
+    def test_reduced_gg_grib1(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             Path(eccodes.codes_samples_path()) / "reduced_gg_ml_grib1.tmpl"
         )
@@ -153,7 +160,7 @@ class TestBasicLoad:
         )
         assert_CML(cube, _RESULTDIR_PREFIX + ("reduced_gg_grib2.cml",))
 
-    def test_second_order_packing(self, assert_CML):
+    def test_second_order_packing(self, assert_CML, grib1_mode):
         cube = iris.load_cube(
             iris_testutils.get_data_path(
                 ("GRIB", "grib1_second_order_packing", "GRIB_00008_FRANX01")
@@ -162,7 +169,7 @@ class TestBasicLoad:
         assert_CML(cube, _RESULTDIR_PREFIX + ("second_order_packing.cml",))
 
     @pytest.mark.parametrize("byte_len", [40, 41])
-    def test_bulletin_headers(self, assert_CML, byte_len):
+    def test_bulletin_headers(self, assert_CML, byte_len, grib1_mode):
         ed = {40:2, 41:1}[byte_len]
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "bulletin", f"{byte_len}bytes.grib"))
@@ -246,7 +253,7 @@ class TestShapeOfEarth:
         cube = self._old_compat_load("7.grib2")
         assert_CML(cube, _RESULTDIR_PREFIX + ("earth_shape_7.cml",))
 
-    def test_shape_of_earth_grib1(self, assert_CML):
+    def test_shape_of_earth_grib1(self, assert_CML, grib1_mode):
         # grib1 - same as grib2 shape 6, above
         cube = self._old_compat_load("global.grib1")
         assert_CML(cube, _RESULTDIR_PREFIX + ("earth_shape_grib1.cml",))
