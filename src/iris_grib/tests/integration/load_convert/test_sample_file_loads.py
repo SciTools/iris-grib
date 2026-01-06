@@ -29,7 +29,7 @@ _RESULTDIR_PREFIX = ("integration", "load_convert", "sample_file_loads")
 def grib1_mode(request):
     use_oldgrib1 = request.param == "grib1_old"
     with iris_grib.GRIB1_LOADING_MODE.context(legacy=use_oldgrib1):
-        yield
+        yield request.param
 
 
 @iris_testutils.skip_data
@@ -283,7 +283,7 @@ class TestTimesGrib1:
         self.time_range_indicator = time_range_indicator
         self.save_file = save_file
 
-    def test_time_range(self, assert_CML):
+    def test_time_range(self, assert_CML, grib1_mode):
         cube = iris.load_cube(self.save_file)
         assert_CML(
             cube, _RESULTDIR_PREFIX + (f"time_range_{self.time_range_indicator}.cml",)
@@ -337,6 +337,6 @@ class TestFullCoverageGrib1:
         self.id_ = id_
         self.file_path = path_modified
 
-    def test_grib1(self, assert_CML):
+    def test_grib1(self, assert_CML, grib1_mode):
         cube = iris.load_cube(self.file_path)
         assert_CML(cube, _RESULTDIR_PREFIX + (f"{self.id_}_grib1.cml",))

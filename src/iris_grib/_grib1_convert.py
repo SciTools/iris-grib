@@ -23,7 +23,7 @@ import eccodes
 import numpy as np
 from iris.coord_systems import CoordSystem
 
-from iris.coords import AuxCoord, DimCoord
+from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris import coord_systems
 from iris.exceptions import TranslationError
 from iris.fileformats.rules import (
@@ -69,9 +69,9 @@ def convert_phenomenon(field: GribMessage, metadata: ConversionMetadata):
     section1 = field.sections[1]
 
     tables_version = section1["table2Version"]
-    centre_name = section1["centre"]
-    # It seems that, for GRIB1, we have no access to the original number here.
-    # centre_number = _CENTRE_NAME_NUMBERS_BACKREFS.get(centre_name, 0)
+    # centre_name = section1["centre"]
+    # # It seems that, for GRIB1, we have no access to the original number here.
+    # # centre_number = _CENTRE_NAME_NUMBERS_BACKREFS.get(centre_name, 0)
 
     # Reading "centre" from the section gives a short-code string interpretation, since
     #  this is the "native type" given by eccodes.
@@ -86,6 +86,24 @@ def convert_phenomenon(field: GribMessage, metadata: ConversionMetadata):
         number=param_number,
     )
     metadata["attributes"]["GRIB_PARAM"] = grib_code
+
+    # For some odd reason the old code creates an auxcoord from the centre code,
+    #  so replicate that for backwards compatibility
+    if centre_number != 0:
+        centre_title = KNOWN_CENTRE_TITLES.get(
+            centre_number,
+            f"unknown centre {centre_number!s}"
+        )
+        metadata['aux_coords_and_dims'].append(
+            (
+                AuxCoord(
+                    points=centre_title,
+                    long_name="originating_centre",
+                    units="no_unit",
+                ),
+                None,
+            )
+        )
 
     cf_data = gptx.grib1_phenom_to_cf_info(
         table2_version=tables_version,
@@ -112,7 +130,7 @@ def convert_phenomenon(field: GribMessage, metadata: ConversionMetadata):
                 standard_name = "y_wind"
                 units = "m s-1"
 
-    if tables_version >= 128 or (tables_version == 1 and param_number >= 128):
+    if (tables_version >= 128 and cf_data is None) or (tables_version == 1 and param_number >= 128):
         long_name = f"UNKNOWN LOCAL PARAM {param_number}.{tables_version}"
         units = "???"
 
@@ -375,12 +393,29 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
     else:
         coord_class = AuxCoord
         coords = metadata["aux_coords_and_dims"]
+
+    def _is_circular_lons(points, name):
+        # Work out whether to set "circular" on the coord we are about to make.
+        # N.B. explicitly restricted to *longitude* coords
+        cyclic = False
+        if "longitude" in name.lower() and points.shape[0] > 1:
+            max_step = np.abs(np.diff(points)).max()
+            wrapping_gap = 360. - abs(points[-1] - points[0])
+            if wrapping_gap <= max_step:
+                # Always consider circular if the gap is actually *smaller* than the step
+                cyclic = True
+            else:
+                # If the gap is bigger, allow a 0.1% tolerance
+                cyclic = abs(wrapping_gap / max_step - 1) < 0.001
+        return cyclic
+
     x_coord, y_coord = [
         coord_class(
             covals,
             coname,
             units=xyunits,
             coord_system=coord_system,
+            circular=_is_circular_lons(covals, coname)
         )
         for coname, covals in zip([xname, yname], [xvals, yvals])
     ]
@@ -389,26 +424,26 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
         (x_coord, 1 if is_regular else 0)
     ])
 
-
-_SUPPORTED_TIMERANGE_TYPES = {
-    # values are names for creating a period cell method
-    0: None,
-    # 2: None,
-    3: "mean",
-    4: "sum",
-    10: None,  # extended-range reference time
-    # 5: "_difference",
-    # 118: "_covariance",
-    # 125: "standard_deviation",
-}
+# partial decoding of 'timeRangeIndicator' ==> code table 5
 # N.B. there are ***multiple*** duplicates.
-# Don't distinguish (for now).
+# We don't distinguish these (for now).
 # TODO: are these all actually valid ?
-for n_code in (51, 113, 117, 123):
-    _SUPPORTED_TIMERANGE_TYPES[n_code] = "mean"
-for n_code in (114, 124):
-    _SUPPORTED_TIMERANGE_TYPES[n_code] = "sum"
+_SUPPORTED_TIMERANGE_TYPES = {
+    # values are ("name for period cell method", "is_bounded")
+    0: (None, False),  # single timepoint
+    1: (None, False),  # single timepoint, "initialised analysis" instead (?) of forecast
+    2: (None, True),  # bounded timepoint -- no statistic
+    3: ("mean", True),
+    4: ("sum", True),
+    5: ("_difference", True),
+    10: (None, False),  # as 0, but with extended-range reference time
+    113: ("mean", True),
+    118: ("_covariance", True),
+    123: ("mean", True),
+    124: ("sum", True),
+}
 
+# partial decoding of 'timeRangeIndicator' ==> code table 4
 _SUPPORTED_TIME_UNITS = {
     0: ("minutes", 60),
     1: ("hours", 60 * 60),
@@ -428,6 +463,14 @@ _SUPPORTED_TIME_UNITS = {
     254: ("seconds", 1)
 }
 
+KNOWN_CENTRE_TITLES = {
+    7: "US National Weather Service, National Centres for Environmental Prediction",
+    34: "Tokyo, Japan Meteorological Agency",
+    55: "San Francisco",
+    74: "U.K. Met Office - Exeter",
+    98: "European Centre for Medium Range Weather Forecasts",
+}
+
 
 def convert_time(field: GribMessage, metadata: ConversionMetadata):
     section1 = field.sections[1]
@@ -444,56 +487,81 @@ def convert_time(field: GribMessage, metadata: ConversionMetadata):
     assert all(part is not None for part in time_parts + [century])
 
     # There is at least enough valid information to create time coordinate(s)
-    time_parts[0] += 100 * century
-    ref_timedate = datetime.datetime(*time_parts)
-    reftime_units = Unit("hours since epoch", "gregorian")
+    time_parts[0] += 100 * (century - 1)
+    reftime_dt = datetime.datetime(*time_parts)
+
+    # N.B. our times are always output with a standard epoch-relative unit.
+    # Not so obvious, as messages do mostly have ref time + forecast_period, but this
+    #  form is required for backwards compatibility.
+    time_output_units = Unit("hours since epoch", calendar="gregorian")
 
     timerange_code = section1["timeRangeIndicator"]
     if timerange_code not in _SUPPORTED_TIMERANGE_TYPES:
-        raise translation_error("unsupported timerange type.", 1, "indicatorOfUnitOfTimeRange", timerange_code)
+        raise translation_error("unsupported timerange type.", 1, "timeRangeIndicator", timerange_code)
 
-    timerange_name, timerange_seconds = _SUPPORTED_TIME_UNITS[timerange_code]
+    timeunits_code = section1["unitOfTimeRange"]
+    timeunits_name, timeunits_seconds = _SUPPORTED_TIME_UNITS[timeunits_code]
+    timeunit_delta = datetime.timedelta(seconds=timeunits_seconds)
+
+    epoch_datetime = time_output_units.num2date(0.)
+
+    def convert_timepoint_from_reftime_to_epoch(t_from_ref: float | int, epoch_units_delta=timeunit_delta):
+        timepoint_ref_delta = t_from_ref * timeunit_delta
+        timepoint_datetime = reftime_dt + timepoint_ref_delta
+        timepoint_epoch_delta = timepoint_datetime - epoch_datetime
+        t_from_epoch = timepoint_epoch_delta.total_seconds() / timeunits_seconds
+        return t_from_epoch
+
     p1, p2 = [section1[name] for name in ("P1", "P2")]
 
-    period_statistic = _SUPPORTED_TIMERANGE_TYPES[timerange_code]
-    if period_statistic is None:
-        aux_coords.extend([
-            (
-                DimCoord(
-                    points=[p1],
-                    standard_name="forecast_period",
-                    units=timerange_name,
-                ),
-                0
-            ),
-            (
-                DimCoord(
-                    points=p1,
-                    standard_name="time",
-                    units=f"hours since epoch",
-                ),
-                0
-            ),
-        ])
+    period_stat_name, is_bounded = _SUPPORTED_TIMERANGE_TYPES[timerange_code]
+    if not is_bounded:
+        fp_dtype = np.int32
+        fp_points = [p1]
+        fp_bounds = None
+        # For backward compatibility, the output time values must be given in
+        #  "hours since epoch", not relative to the reference time
+        #  (and we don't provide a reference_time coord, either).
+        # So we add difference between ref time and epoch start to the time values.
+        time_points = [convert_timepoint_from_reftime_to_epoch(p1)]
+        time_bounds = None
     else:
-        aux_coords.extend([
-            (
-                DimCoord(
-                    points=[p1],
-                    standard_name="forecast_period",
-                    units=timerange_name,
-                ),
-                0
+        fp_dtype = np.float64
+        fp_points = [0.5 * (p1 + p2)]
+        fp_bounds = [p1, p2]
+        p1_epoch, p2_epoch = [
+            convert_timepoint_from_reftime_to_epoch(timeval)
+            for timeval in (p1, p2)
+        ]
+        time_points = [0.5 * (p1_epoch + p2_epoch)]
+        time_bounds = [p1_epoch, p2_epoch]
+
+    aux_coords.extend([
+        (
+            DimCoord(
+                points=np.array(fp_points, dtype=fp_dtype),
+                bounds=np.array(fp_bounds, dtype=fp_dtype) if fp_bounds else None,
+                standard_name="forecast_period",
+                units=timeunits_name,
             ),
-            (
-                DimCoord(
-                    points=[p1],
-                    standard_name="time",
-                    units=f"{timerange_name} since epoch",
-                ),
-                0
+            None
+        ),
+        (
+            DimCoord(
+                points=np.array(time_points),
+                bounds=np.array(time_bounds) if time_bounds else None,
+                standard_name="time",
+                units=time_output_units,
             ),
-        ])
+            None
+        ),
+    ])
+
+    # For stats, also add a cell method
+    if period_stat_name:
+        metadata['cell_methods'].append(
+            CellMethod(period_stat_name, coords="time")
+        )
 
 
 def validate(field: GribMessage):
