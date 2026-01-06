@@ -6,26 +6,26 @@
     </attributes>
     <coords>
       <coord>
-        <dimCoord checksum="0x2144df1c" id="1d45e087" points="[0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
+        <dimCoord id="1d45e087" points="[0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
       </coord>
       <coord datadims="[0]">
-        <dimCoord checksum="0x2e1519fe" id="98bcd589" points="[-90., -89.625, -89.25, ..., 89.25, 89.625, 90.]" shape="(481,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord id="98bcd589" points="[-90., -89.625, -89.25, ..., 89.25, 89.625, 90.]" shape="(481,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
       <coord datadims="[1]">
-        <dimCoord checksum="0xe51c0a68" circular="True" id="160a738f" points="[0., 0.56250078, 1.12500156, ..., 358.31299844, 358.87549922, 359.438]" shape="(640,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord circular="True" id="160a738f" points="[0., 0.56250078, 1.12500156, ..., 358.31299844, 358.87549922, 359.438]" shape="(640,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
       <coord>
-        <auxCoord checksum="0xd114015c" id="61bde96d" long_name="originating_centre" points="['U.K. Met Office - Exeter']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+        <auxCoord id="61bde96d" long_name="originating_centre" points="['U.K. Met Office - Exeter']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
       </coord>
       <coord>
-        <dimCoord checksum="0x30c90892" id="6eef7051" long_name="pressure" points="[1000]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
+        <dimCoord id="6eef7051" long_name="pressure" points="[1000]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
       </coord>
       <coord>
-        <dimCoord checksum="0xf875c7bb" id="cb784457" points="[341400.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+        <dimCoord id="cb784457" points="[341400.]" shape="(1,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
       </coord>
     </coords>
     <cellMethods/>

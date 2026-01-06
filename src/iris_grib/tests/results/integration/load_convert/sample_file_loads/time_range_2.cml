@@ -6,26 +6,26 @@
     </attributes>
     <coords>
       <coord datadims="[0]">
-        <dimCoord bounds="[0., 1., 1., ..., 9., 9., 10.]" checksum="0x0ce269f9" id="1d45e087" points="[0.5, 1.5, 2.5, ..., 7.5, 8.5, 9.5]" shape="(10,)" standard_name="forecast_period" units="Unit('hours')" value_type="float64"/>
+        <dimCoord bounds="[0., 1., 1., ..., 9., 9., 10.]" id="1d45e087" points="[0.5, 1.5, 2.5, ..., 7.5, 8.5, 9.5]" shape="(10,)" standard_name="forecast_period" units="Unit('hours')" value_type="float64"/>
       </coord>
       <coord datadims="[1]">
-        <dimCoord checksum="0x62443394" id="98bcd589" points="[90., 89., 88., ..., -88., -89., -90.]" shape="(181,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord id="98bcd589" points="[90., 89., 88., ..., -88., -89., -90.]" shape="(181,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
       <coord datadims="[2]">
-        <dimCoord checksum="0x0343e03c" circular="True" id="160a738f" points="[0., 1., 2., ..., 357., 358., 359.]" shape="(360,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord circular="True" id="160a738f" points="[0., 1., 2., ..., 357., 358., 359.]" shape="(360,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
       <coord>
-        <auxCoord checksum="0x29d5e689" id="61bde96d" long_name="originating_centre" points="['European Centre for Medium Range Weather Forecasts']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
+        <auxCoord id="61bde96d" long_name="originating_centre" points="['European Centre for Medium Range Weather Forecasts']" shape="(1,)" units="Unit('no_unit')" value_type="string"/>
       </coord>
       <coord>
-        <dimCoord checksum="0x298234db" id="6eef7051" long_name="pressure" points="[500]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
+        <dimCoord id="6eef7051" long_name="pressure" points="[500]" shape="(1,)" units="Unit('hPa')" value_type="int32"/>
       </coord>
       <coord datadims="[0]">
-        <dimCoord bounds="[317364., 317365., 317365., ..., 317373., 317373., 317374.]" checksum="0x75119527" id="cb784457" points="[317364.5, 317365.5, 317366.5, ..., 317371.5, 317372.5, 317373.5]" shape="(10,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
+        <dimCoord bounds="[317364., 317365., 317365., ..., 317373., 317373., 317374.]" id="cb784457" points="[317364.5, 317365.5, 317366.5, ..., 317371.5, 317372.5, 317373.5]" shape="(10,)" standard_name="time" units="Unit('hours since 1970-01-01 00:00:00', calendar='standard')" value_type="float64"/>
       </coord>
     </coords>
     <cellMethods/>
