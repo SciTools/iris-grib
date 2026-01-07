@@ -148,6 +148,7 @@ class GribMessage:
             section2 = self.sections[2]
             grid_type = section2["dataRepresentationType"]
             from iris_grib._grib1_convert import _SUPPORTED_GRID_TYPES
+
             if grid_type not in _SUPPORTED_GRID_TYPES:
                 msg = (
                     "Unsupported grid type in grib message: "
@@ -156,6 +157,7 @@ class GribMessage:
                 raise TranslationError(msg)
 
             from iris_grib._grib1_convert import XyDetail
+
             xy_detail = XyDetail.from_field(self)
             if xy_detail.nx is not None:
                 shape = (xy_detail.ny, xy_detail.nx)
@@ -544,7 +546,6 @@ class Section:
         except KeyError:
             result = default
         return result
-
 
     def __setitem__(self, key, value):
         # Allow the overwriting of any entry already in the _cache.

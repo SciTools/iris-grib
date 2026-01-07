@@ -14,7 +14,7 @@ This is a re-implementation of '._grib1_legacy.grib1_load_rules', but now using 
 
 import dataclasses
 import datetime
-from typing import Any, Tuple
+from typing import Any
 import warnings
 
 from cf_units import Unit
@@ -27,11 +27,7 @@ from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris import coord_systems
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import (
-    ConversionMetadata,
-    Factory,
-    Reference
-)
+from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 
 from iris_grib._load_convert import options
 from iris_grib.message import GribMessage, Section
@@ -39,8 +35,8 @@ from iris_grib import grib_phenom_translation as gptx
 
 
 def _problem_msg(
-        base_msg: str, n_section: int, key: str | None = None, value: Any = None
-    ):
+    base_msg: str, n_section: int, key: str | None = None, value: Any = None
+):
     msg = f"{base_msg} : section {n_section}"
     if key is not None:
         msg += f", '{key!s}'={value!r}."
@@ -48,16 +44,16 @@ def _problem_msg(
 
 
 def translation_error(
-        base_msg: str, n_section: int, key: str | None = None, value: Any = None
-    ):
+    base_msg: str, n_section: int, key: str | None = None, value: Any = None
+):
     msg = "GRIB1 translation error, unsupported metadata. " + base_msg
     msg = _problem_msg(msg, n_section, key, value)
     return TranslationError(msg)
 
 
 def warn_unsupported(
-        base_msg: str, n_section: int, key: str | None = None, value: Any =None
-    ):
+    base_msg: str, n_section: int, key: str | None = None, value: Any = None
+):
     if options.warn_on_unsupported:
         msg = _problem_msg(base_msg, n_section, key, value)
         warnings.warn(msg)
@@ -89,10 +85,9 @@ def convert_phenomenon(field: GribMessage, metadata: ConversionMetadata):
     #  so replicate that for backwards compatibility
     if centre_number != 0:
         centre_title = KNOWN_CENTRE_TITLES.get(
-            centre_number,
-            f"unknown centre {centre_number!s}"
+            centre_number, f"unknown centre {centre_number!s}"
         )
-        metadata['aux_coords_and_dims'].append(
+        metadata["aux_coords_and_dims"].append(
             (
                 AuxCoord(
                     points=centre_title,
@@ -128,7 +123,9 @@ def convert_phenomenon(field: GribMessage, metadata: ConversionMetadata):
                 standard_name = "y_wind"
                 units = "m s-1"
 
-    if (tables_version >= 128 and cf_data is None) or (tables_version == 1 and param_number >= 128):
+    if (tables_version >= 128 and cf_data is None) or (
+        tables_version == 1 and param_number >= 128
+    ):
         long_name = f"UNKNOWN LOCAL PARAM {param_number}.{tables_version}"
         units = "???"
 
@@ -145,6 +142,7 @@ _SUPPORTED_GRID_TYPES = {
     10: "rotated_latlon",
 }
 
+
 @dataclasses.dataclass
 class XyDetail:
     x0: float | None = None
@@ -155,8 +153,8 @@ class XyDetail:
     ny: int | None = None
     dx: float | None = None
     dy: float | None = None
-    nxy_names: Tuple[str, str] | None = None
-    dxy_names: Tuple[str, str] | None = None
+    nxy_names: tuple[str, str] | None = None
+    dxy_names: tuple[str, str] | None = None
 
     @classmethod
     def from_field(cls, field: GribMessage):
@@ -179,9 +177,16 @@ class XyDetail:
         nx, ny = [section2.get(nxy_name, None) for nxy_name in nxy_names]
         dx, dy = [section2.get(dxy_name, None) for dxy_name in dxy_names]
         result = cls(
-            x0=x0, y0=y0, x1=x1, y1=y1,
-            nx=nx, ny=ny, dx=dx, dy=dy,
-            nxy_names=nxy_names, dxy_names=dxy_names,
+            x0=x0,
+            y0=y0,
+            x1=x1,
+            y1=y1,
+            nx=nx,
+            ny=ny,
+            dx=dx,
+            dy=dy,
+            nxy_names=nxy_names,
+            dxy_names=dxy_names,
         )
         return result
 
@@ -202,8 +207,7 @@ def _decode_xy_values(field: GribMessage) -> (np.ndarray, np.ndarray, bool):
     y_negative = (scanning_mode & 64) != 0
     if (scanning_mode & ~64) != 0:
         raise translation_error(
-            "unsupported grid scanning mode",
-            2, "scanningMode", scanning_mode
+            "unsupported grid scanning mode", 2, "scanningMode", scanning_mode
         )
 
     # Now get the X and Y points arrays.
@@ -223,12 +227,10 @@ def _decode_xy_values(field: GribMessage) -> (np.ndarray, np.ndarray, bool):
             # raise translation_error(msg, 2, dxy_name, dxy)
             warn_unsupported(msg, 2, dxy_name, dxy)
 
-
     mdeg = 0.001
     if nx is None:
         raise translation_error(
-            "irregular x points not supported",
-            2, nxy_names[0], None
+            "irregular x points not supported", 2, nxy_names[0], None
         )
     else:
         x_values = np.linspace(x0 * mdeg, x1 * mdeg, nx, endpoint=True)
@@ -249,7 +251,9 @@ def _decode_xy_values(field: GribMessage) -> (np.ndarray, np.ndarray, bool):
                     f"unsupported grid type ('dataRepresentationType'={grid_code}) "
                     "for irregular y values"
                 ),
-                2, "Nj", None
+                2,
+                "Nj",
+                None,
             )
         if grid_name == "gaussian":
             # this is rather horrible
@@ -257,12 +261,10 @@ def _decode_xy_values(field: GribMessage) -> (np.ndarray, np.ndarray, bool):
             #  see: https://github.com/ecmwf/eccodes/blob/2.44.2/src/eccodes/geo/grib_geography.cc#L97
             # I'm giving up here + using the implementation built into eccodes
             x_values = eccodes.codes_get_double_array(
-                field._raw_message._message_id,
-                "longitudes"
+                field._raw_message._message_id, "longitudes"
             )
             y_values = eccodes.codes_get_double_array(
-                field._raw_message._message_id,
-                "latitudes"
+                field._raw_message._message_id, "latitudes"
             )
         else:
             # Not *quite* so nasty : the x values in each row are regular, and we can
@@ -292,7 +294,9 @@ def _ellipsoid(section2: Section) -> CoordSystem:
         )
         raise translation_error(
             "Oblate Spheroidal Earth not supported",
-            2, "resolutionAndComponentFlags", resolutionAndComponentFlags
+            2,
+            "resolutionAndComponentFlags",
+            resolutionAndComponentFlags,
         )
     else:
         # Earth assumed spherical with radius 6367.47 km
@@ -317,13 +321,12 @@ def _coord_system(section2: Section) -> CoordSystem:
         truescale_lat = 60.0  # this is FIXED for grib1
         match pcf:
             case 0:
-                pole_lat = 90.
+                pole_lat = 90.0
             case 128:
-                pole_lat = -90.
+                pole_lat = -90.0
             case _:
                 raise translation_error(
-                    "unexpected projection centre flags",
-                    2, "projectionCentreFlag", pcf
+                    "unexpected projection centre flags", 2, "projectionCentreFlag", pcf
                 )
 
     if grid_name in ("gaussian", "latlon"):
@@ -343,7 +346,7 @@ def _coord_system(section2: Section) -> CoordSystem:
             central_lat=pole_lat,
             central_lon=grid_orientation_degrees,
             true_scale_lat=truescale_lat,  # this is a CONSTANT for grib1
-            ellipsoid=ellipsoid
+            ellipsoid=ellipsoid,
         )
     elif grid_name == "lambert_conformal":
         secant_lats = (section2["Latin1"] * 0.001, section2["Latin1"] * 0.001)
@@ -369,8 +372,7 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
     grid_type = section2["dataRepresentationType"]
     if grid_type not in _SUPPORTED_GRID_TYPES:
         raise translation_error(
-            "unrecognised/unsupported grid type",
-            2, "dataRepresentationType", grid_type
+            "unrecognised/unsupported grid type", 2, "dataRepresentationType", grid_type
         )
 
     grid_name = _SUPPORTED_GRID_TYPES[section2["dataRepresentationType"]]
@@ -380,10 +382,7 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
     elif grid_name == "rotated_latlon":
         xname, yname = "grid_longitude", "grid_latitude"
         xyunits = "degrees"
-    elif grid_name == "polar_stereo":
-        xname, yname = "projection_x_coordinate", "projection_y_coordinate"
-        xyunits = "m"
-    elif grid_name == "lambert_conformal":
+    elif grid_name == "polar_stereo" or grid_name == "lambert_conformal":
         xname, yname = "projection_x_coordinate", "projection_y_coordinate"
         xyunits = "m"
 
@@ -403,7 +402,7 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
         cyclic = False
         if "longitude" in name.lower() and points.shape[0] > 1:
             max_step = np.abs(np.diff(points)).max()
-            wrapping_gap = 360. - abs(points[-1] - points[0])
+            wrapping_gap = 360.0 - abs(points[-1] - points[0])
             if wrapping_gap <= max_step:
                 # Always consider circular if the gap is actually *smaller* than the step
                 cyclic = True
@@ -418,14 +417,20 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
             coname,
             units=xyunits,
             coord_system=coord_system,
-            circular=_is_circular_lons(covals, coname)
+            circular=_is_circular_lons(covals, coname),
         )
         for coname, covals in zip([xname, yname], [xvals, yvals])
     ]
-    coords.extend([
-        (y_coord, 0,),
-        (x_coord, 1 if is_regular else 0)
-    ])
+    coords.extend(
+        [
+            (
+                y_coord,
+                0,
+            ),
+            (x_coord, 1 if is_regular else 0),
+        ]
+    )
+
 
 # partial decoding of 'timeRangeIndicator' ==> code table 5
 # N.B. there are ***multiple*** duplicates.
@@ -434,7 +439,10 @@ def convert_horizontal(field: GribMessage, metadata: ConversionMetadata):
 _SUPPORTED_TIMERANGE_TYPES = {
     # values are ("name for period cell method", "is_bounded")
     0: (None, False),  # single timepoint
-    1: (None, False),  # single timepoint, "initialised analysis" instead (?) of forecast
+    1: (
+        None,
+        False,
+    ),  # single timepoint, "initialised analysis" instead (?) of forecast
     2: (None, True),  # bounded timepoint -- no statistic
     3: ("mean", True),
     4: ("sum", True),
@@ -463,7 +471,7 @@ _SUPPORTED_TIME_UNITS = {
     12: ("12 hours", 12 * 60 * 60),
     13: ("15 minutes", 15 * 60),
     14: ("30 minutes", 30 * 60),
-    254: ("seconds", 1)
+    254: ("seconds", 1),
 }
 
 KNOWN_CENTRE_TITLES = {
@@ -481,8 +489,7 @@ def convert_time(field: GribMessage, metadata: ConversionMetadata):
     basetime_unit = Unit("hours since epoch", "gregorian")
 
     time_parts = [
-        section1[key]
-        for key in ["yearOfCentury", "month", "day", "hour", "minute"]
+        section1[key] for key in ["yearOfCentury", "month", "day", "hour", "minute"]
     ]
     century = section1["centuryOfReferenceTimeOfData"]
 
@@ -500,15 +507,19 @@ def convert_time(field: GribMessage, metadata: ConversionMetadata):
 
     timerange_code = section1["timeRangeIndicator"]
     if timerange_code not in _SUPPORTED_TIMERANGE_TYPES:
-        raise translation_error("unsupported timerange type.", 1, "timeRangeIndicator", timerange_code)
+        raise translation_error(
+            "unsupported timerange type.", 1, "timeRangeIndicator", timerange_code
+        )
 
     timeunits_code = section1["unitOfTimeRange"]
     timeunits_name, timeunits_seconds = _SUPPORTED_TIME_UNITS[timeunits_code]
     timeunit_delta = datetime.timedelta(seconds=timeunits_seconds)
 
-    epoch_datetime = time_output_units.num2date(0.)
+    epoch_datetime = time_output_units.num2date(0.0)
 
-    def convert_timepoint_from_reftime_to_epoch(t_from_ref: float | int, epoch_units_delta=timeunit_delta):
+    def convert_timepoint_from_reftime_to_epoch(
+        t_from_ref: float, epoch_units_delta=timeunit_delta
+    ):
         timepoint_ref_delta = t_from_ref * timeunit_delta
         timepoint_datetime = reftime_dt + timepoint_ref_delta
         timepoint_epoch_delta = timepoint_datetime - epoch_datetime
@@ -533,44 +544,43 @@ def convert_time(field: GribMessage, metadata: ConversionMetadata):
         fp_points = [0.5 * (p1 + p2)]
         fp_bounds = [p1, p2]
         p1_epoch, p2_epoch = [
-            convert_timepoint_from_reftime_to_epoch(timeval)
-            for timeval in (p1, p2)
+            convert_timepoint_from_reftime_to_epoch(timeval) for timeval in (p1, p2)
         ]
         time_points = [0.5 * (p1_epoch + p2_epoch)]
         time_bounds = [p1_epoch, p2_epoch]
 
-    aux_coords.extend([
-        (
-            DimCoord(
-                points=np.array(fp_points, dtype=fp_dtype),
-                bounds=np.array(fp_bounds, dtype=fp_dtype) if fp_bounds else None,
-                standard_name="forecast_period",
-                units=timeunits_name,
+    aux_coords.extend(
+        [
+            (
+                DimCoord(
+                    points=np.array(fp_points, dtype=fp_dtype),
+                    bounds=np.array(fp_bounds, dtype=fp_dtype) if fp_bounds else None,
+                    standard_name="forecast_period",
+                    units=timeunits_name,
+                ),
+                None,
             ),
-            None
-        ),
-        (
-            DimCoord(
-                points=np.array(time_points),
-                bounds=np.array(time_bounds) if time_bounds else None,
-                standard_name="time",
-                units=time_output_units,
+            (
+                DimCoord(
+                    points=np.array(time_points),
+                    bounds=np.array(time_bounds) if time_bounds else None,
+                    standard_name="time",
+                    units=time_output_units,
+                ),
+                None,
             ),
-            None
-        ),
-    ])
+        ]
+    )
 
     # For stats, also add a cell method
     if period_stat_name:
-        metadata['cell_methods'].append(
-            CellMethod(period_stat_name, coords="time")
-        )
+        metadata["cell_methods"].append(CellMethod(period_stat_name, coords="time"))
 
 
 def validate(field: GribMessage):
     # Raise problems with construction which the translation code can't accept.
-    if not 2 in field.sections:
-        raise translation_error(f"message with no section 2 (grid)")
+    if 2 not in field.sections:
+        raise translation_error("message with no section 2 (grid)")
 
     user_grid = field.sections[1]["gridDefinition"]
     if user_grid != 255:
@@ -579,8 +589,10 @@ def validate(field: GribMessage):
     process_id = field.sections[1]["generatingProcessIdentifier"]
     if process_id != 255:
         warn_unsupported(
-            "originator-defined process code", 1,
-            "generatingProcessIdentifier", process_id
+            "originator-defined process code",
+            1,
+            "generatingProcessIdentifier",
+            process_id,
         )
 
 
@@ -591,7 +603,9 @@ def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
     # leveltype_code = section1["indicatorOfTypeOfLevel"]
     # Once again the "default fetch type" returns a coded string, and we'd rather have
     #  the original number code, but this requires looking inside the box..
-    leveltype_code = eccodes.codes_get_long(field._raw_message._message_id, "indicatorOfTypeOfLevel")
+    leveltype_code = eccodes.codes_get_long(
+        field._raw_message._message_id, "indicatorOfTypeOfLevel"
+    )
     if leveltype_code == 1:
         # Surface level : nothing to do
         pass
@@ -600,10 +614,7 @@ def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
         level_value = section1["level"]
         level_points = np.array([level_value], dtype=np.int32)
         aux_coords.append(
-            (
-                DimCoord(points=level_points, long_name="pressure", units="hPa"),
-                None
-            )
+            (DimCoord(points=level_points, long_name="pressure", units="hPa"), None)
         )
     elif leveltype_code == 102:
         # bounded pressure levels
@@ -613,10 +624,12 @@ def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
         aux_coords.append(
             (
                 DimCoord(
-                    points=level_points, bounds=level_bounds,
-                    standard_name="pressure", units="hPa"
+                    points=level_points,
+                    bounds=level_bounds,
+                    standard_name="pressure",
+                    units="hPa",
                 ),
-                None
+                None,
             )
         )
     elif leveltype_code == 105:
@@ -624,10 +637,7 @@ def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
         level_value = section1["level"]
         level_points = np.array([level_value], dtype=np.int32)
         aux_coords.append(
-            (
-                DimCoord(points=level_points, long_name="height", units="m"),
-                None
-            )
+            (DimCoord(points=level_points, long_name="height", units="m"), None)
         )
     elif leveltype_code == 109:
         # "hybrid levels" == ECMWF-style hybrid pressure
@@ -640,31 +650,33 @@ def convert_vertical(field: GribMessage, metadata: ConversionMetadata):
                 key="pv",
                 value=None,
             )
-        aux_coords.extend([
-            (
-                AuxCoord(
-                    level_value,
-                    standard_name="model_level_number",
-                    units=1,
-                    attributes={"positive": "up"},
+        aux_coords.extend(
+            [
+                (
+                    AuxCoord(
+                        level_value,
+                        standard_name="model_level_number",
+                        units=1,
+                        attributes={"positive": "up"},
+                    ),
+                    None,
                 ),
-                None,
-            ),
-            (
-                DimCoord(pv[level_value], long_name="level_pressure", units="Pa"),
-                None,
-            ),
-            (
-                AuxCoord(
-                    pv[len(pv) // 2 + level_value],
-                    long_name="sigma",
-                    units=1,
+                (
+                    DimCoord(pv[level_value], long_name="level_pressure", units="Pa"),
+                    None,
                 ),
-                None,
-            )
-        ])
+                (
+                    AuxCoord(
+                        pv[len(pv) // 2 + level_value],
+                        long_name="sigma",
+                        units=1,
+                    ),
+                    None,
+                ),
+            ]
+        )
 
-        metadata['factories'].append(
+        metadata["factories"].append(
             Factory(
                 HybridPressureFactory,
                 [

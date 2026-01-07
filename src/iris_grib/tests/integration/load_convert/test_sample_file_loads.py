@@ -33,7 +33,7 @@ def grib1_mode(request):
         yield request.param
 
 
-@pytest.fixture()
+@pytest.fixture
 def local_assertCML(request, assert_CML):
     def own_inner_assert_routine(*args, **kwargs):
         # FOR NOW: leave data checksums, only mod the coord representations.
@@ -43,6 +43,7 @@ def local_assertCML(request, assert_CML):
         return assert_CML(*args, **kwargs)
 
     return own_inner_assert_routine
+
 
 @iris_testutils.skip_data
 class TestBasicLoad:
@@ -175,13 +176,12 @@ class TestBasicLoad:
 
     @pytest.mark.parametrize("byte_len", [40, 41])
     def test_bulletin_headers(self, local_assertCML, byte_len, grib1_mode):
-        ed = {40:2, 41:1}[byte_len]
+        ed = {40: 2, 41: 1}[byte_len]
         cube = iris.load_cube(
             iris_testutils.get_data_path(("GRIB", "bulletin", f"{byte_len}bytes.grib"))
         )
         local_assertCML(
-            cube,
-            _RESULTDIR_PREFIX + (f"bulletin_{byte_len}bytes_grib{ed}.cml",)
+            cube, _RESULTDIR_PREFIX + (f"bulletin_{byte_len}bytes_grib{ed}.cml",)
         )
 
 
