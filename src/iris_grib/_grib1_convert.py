@@ -308,7 +308,12 @@ def _coord_system(section2: Section) -> CoordSystem:
 
     if grid_name in ("polar_stereo", "lambert_conformal"):
         pcf = section2["projectionCentreFlag"]
-        grid_orientation_degrees = section2["LoV"]
+        if grid_name == "polar_stereo":
+            orientation_keyname = "orientationOfTheGrid"
+        else:
+            # different for lambert (!yuck!)
+            orientation_keyname = "LoV"
+        grid_orientation_degrees = section2[orientation_keyname]
         truescale_lat = 60.0  # this is FIXED for grib1
         match pcf:
             case 0:
@@ -335,7 +340,7 @@ def _coord_system(section2: Section) -> CoordSystem:
         )
     elif grid_name == "polar_stereo":
         coord_system = coord_systems.PolarStereographic(
-            pole_lat_lat=0,
+            central_lat=pole_lat,
             central_lon=grid_orientation_degrees,
             true_scale_lat=truescale_lat,  # this is a CONSTANT for grib1
             ellipsoid=ellipsoid
