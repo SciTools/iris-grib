@@ -9,14 +9,12 @@
         <dimCoord id="1d45e087" points="[2]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="de2b553a" points="[-4.452, -4.416, -4.38 , ...,  8.4  ,  8.436,
-  8.472]" shape="(360,)" standard_name="grid_latitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord id="de2b553a" points="[-4.452, -4.416, -4.38, ..., 8.4, 8.436, 8.472]" shape="(360,)" standard_name="grid_latitude" units="Unit('degrees')" value_type="float64">
           <rotatedGeogCS ellipsoid="GeogCS(6367470.0)" grid_north_pole_latitude="37.5" grid_north_pole_longitude="177.5"/>
         </dimCoord>
       </coord>
       <coord datadims="[1]">
-        <dimCoord id="fce7021b" points="[-5.7  , -5.664, -5.628, ...,  4.56 ,  4.596,
-  4.632]" shape="(288,)" standard_name="grid_longitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord id="fce7021b" points="[-5.7, -5.664, -5.628, ..., 4.56, 4.596, 4.632]" shape="(288,)" standard_name="grid_longitude" units="Unit('degrees')" value_type="float64">
           <rotatedGeogCS ellipsoid="GeogCS(6367470.0)" grid_north_pole_latitude="37.5" grid_north_pole_longitude="177.5"/>
         </dimCoord>
       </coord>

@@ -9,14 +9,12 @@
         <dimCoord id="1d45e087" points="[0]" shape="(1,)" standard_name="forecast_period" units="Unit('hours')" value_type="int32"/>
       </coord>
       <coord datadims="[0]">
-        <dimCoord id="98bcd589" points="[-90.   , -89.625, -89.25 , ...,  89.25 ,  89.625,
-  90.   ]" shape="(481,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord id="98bcd589" points="[-90., -89.625, -89.25, ..., 89.25, 89.625, 90.]" shape="(481,)" standard_name="latitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
       <coord datadims="[1]">
-        <dimCoord circular="True" id="160a738f" points="[  0.        ,   0.56250078,   1.12500156, ...,
- 358.31299844, 358.87549922, 359.438     ]" shape="(640,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
+        <dimCoord circular="True" id="160a738f" points="[0., 0.56250078, 1.12500156, ..., 358.31299844, 358.87549922, 359.438]" shape="(640,)" standard_name="longitude" units="Unit('degrees')" value_type="float64">
           <geogCS earth_radius="6367470.0"/>
         </dimCoord>
       </coord>
