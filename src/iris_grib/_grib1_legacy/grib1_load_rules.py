@@ -171,7 +171,9 @@ def grib1_convert(grib):
     ##################################################
     ##### decode TIME -> aux_coords (=always scalar)
 
+    added_unbounded = False
     if grib._phenomenonDateTime != -1.0:
+        added_unbounded = True
         aux_coords_and_dims.append(
             (
                 DimCoord(
@@ -194,6 +196,7 @@ def grib1_convert(grib):
         )
 
     def add_bounded_time_coords(aux_coords_and_dims, grib):
+        assert added_unbounded == False
         t_bounds = grib.phenomenon_bounds("hours")
         period = t_bounds[1] - t_bounds[0]
         aux_coords_and_dims.append(
