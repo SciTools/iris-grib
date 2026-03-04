@@ -439,56 +439,61 @@ class GribWrapper:
         else:
             raise TranslationError("unhandled grid type: {}".format(gridType))
 
-        if gridType in ["regular_ll", "rotated_ll"]:
-            self._regular_longitude_common()
-            j_step = self.jDirectionIncrementInDegrees
-            if not self.jScansPositively:
-                j_step = -j_step
-            self._y_points = (
-                np.arange(self.Nj, dtype=np.float64) * j_step
-                + self.latitudeOfFirstGridPointInDegrees
-            )
-
-        elif gridType in ["regular_gg"]:
-            # longitude coordinate is straight-forward
-            self._regular_longitude_common()
-            # get the distinct latitudes, and make sure they are sorted
-            # (south-to-north) and then put them in the right direction
-            # depending on the scan direction
-            latitude_points = eccodes.codes_get_double_array(
-                self.grib_message, "distinctLatitudes"
-            ).astype(np.float64)
-            latitude_points.sort()
-            if not self.jScansPositively:
-                # we require latitudes north-to-south
-                self._y_points = latitude_points[::-1]
-            else:
-                self._y_points = latitude_points
-
-        elif gridType in ["polar_stereographic", "lambert"]:
-            # convert the starting latlon into meters
-            cartopy_crs = self.extra_keys["_coord_system"].as_cartopy_crs()
-            x1, y1 = cartopy_crs.transform_point(
-                self.longitudeOfFirstGridPointInDegrees,
-                self.latitudeOfFirstGridPointInDegrees,
-                ccrs.Geodetic(),
-            )
-
-            if not np.all(np.isfinite([x1, y1])):
-                raise TranslationError(
-                    "Could not determine the first latitude"
-                    " and/or longitude grid point."
+        match gridType:
+            case "regular_ll" | "rotated_ll":
+                self._regular_longitude_common()
+                j_step = self.jDirectionIncrementInDegrees
+                if not self.jScansPositively:
+                    j_step = -j_step
+                self._y_points = (
+                    np.arange(self.Nj, dtype=np.float64) * j_step
+                    + self.latitudeOfFirstGridPointInDegrees
                 )
 
-            self._x_points = x1 + self.DxInMetres * np.arange(self.Nx, dtype=np.float64)
-            self._y_points = y1 + self.DyInMetres * np.arange(self.Ny, dtype=np.float64)
+            case "regular_gg":
+                # longitude coordinate is straight-forward
+                self._regular_longitude_common()
+                # get the distinct latitudes, and make sure they are sorted
+                # (south-to-north) and then put them in the right direction
+                # depending on the scan direction
+                latitude_points = eccodes.codes_get_double_array(
+                    self.grib_message, "distinctLatitudes"
+                ).astype(np.float64)
+                latitude_points.sort()
+                if not self.jScansPositively:
+                    # we require latitudes north-to-south
+                    self._y_points = latitude_points[::-1]
+                else:
+                    self._y_points = latitude_points
 
-        elif gridType in ["reduced_ll", "reduced_gg"]:
-            self._x_points = self.longitudes
-            self._y_points = self.latitudes
+            case "polar_stereographic" | "lambert":
+                # convert the starting latlon into meters
+                cartopy_crs = self.extra_keys["_coord_system"].as_cartopy_crs()
+                x1, y1 = cartopy_crs.transform_point(
+                    self.longitudeOfFirstGridPointInDegrees,
+                    self.latitudeOfFirstGridPointInDegrees,
+                    ccrs.Geodetic(),
+                )
 
-        else:
-            raise TranslationError("unhandled grid type")
+                if not np.all(np.isfinite([x1, y1])):
+                    raise TranslationError(
+                        "Could not determine the first latitude"
+                        " and/or longitude grid point."
+                    )
+
+                self._x_points = x1 + self.DxInMetres * np.arange(
+                    self.Nx, dtype=np.float64
+                )
+                self._y_points = y1 + self.DyInMetres * np.arange(
+                    self.Ny, dtype=np.float64
+                )
+
+            case "reduced_ll" | "reduced_gg":
+                self._x_points = self.longitudes
+                self._y_points = self.latitudes
+
+            case _:
+                raise TranslationError("unhandled grid type")
 
     def _regular_longitude_common(self):
         """Define a regular longitude dimension."""
