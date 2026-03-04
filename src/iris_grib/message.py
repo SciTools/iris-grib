@@ -155,7 +155,7 @@ class GribMessage:
             or grid_section["interpretationOfNumberOfPoints"] != 0
         )
         template = grid_section["gridDefinitionTemplateNumber"]
-        if reduced and template not in (40,):
+        if reduced and template != 40:
             raise TranslationError(
                 "Grid definition Section 3 contains unsupported quasi-regular grid."
             )
