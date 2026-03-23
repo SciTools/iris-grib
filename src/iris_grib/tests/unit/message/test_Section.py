@@ -11,6 +11,7 @@ Unit tests for `iris_grib.message.Section`.
 # importing anything else.
 import iris_grib.tests as tests
 
+
 import eccodes
 import numpy as np
 
@@ -47,10 +48,59 @@ class Test___getitem__(tests.IrisGribTest):
         section = Section(self.grib_id, n, ["numberOfSection"])
         self.assertEqual(section["numberOfSection"], n)
 
+    def test_alias(self):
+        # Note: I think this particular alias is really 'the wrong way around'
+        # TODO: resolve?  see https://github.com/SciTools/iris-grib/issues/765
+        section = Section(self.grib_id, None, ["indicatorOfUnitOfTimeRange"])
+        self.assertEqual(section["indicatorOfUnitForForecastTime"], 1)
+        self.assertEqual(section["indicatorOfUnitOfTimeRange"], 1)
+
     def test_invalid(self):
         section = Section(self.grib_id, None, ["Ni"])
         with self.assertRaisesRegex(KeyError, "Nii"):
             section["Nii"]
+
+
+@tests.skip_data
+class Test___setitem__(tests.IrisGribTest):
+    """Check writing keys, including error modes."""
+
+    def setUp(self):
+        # Open test file.  Don't need writeable, as we only 'write' our own values.
+        filename = tests.get_data_path(("GRIB", "uk_t", "uk_t.grib2"))
+        with open(filename, "rb") as grib_fh:
+            self.grib_id = eccodes.codes_new_from_file(
+                grib_fh, eccodes.CODES_PRODUCT_GRIB
+            )
+
+    def test_withread_first(self):
+        section = Section(self.grib_id, None, ["Ni"])
+        self.assertEqual(section["Ni"], 47)
+        section["Ni"] = 99
+        self.assertEqual(section["Ni"], 99)
+
+    def test_noread_first(self):
+        section = Section(self.grib_id, None, ["Ni"])
+        section["Ni"] = 99
+        self.assertEqual(section["Ni"], 99)
+
+    def test_badkey_error(self):
+        section = Section(self.grib_id, 333, ["Ni"])
+        msg = "'unknown' is not a valid key for section 333"
+        with self.assertRaisesRegex(KeyError, msg):
+            section["unknown"] = 99
+
+    def test_numberOfSection_error(self):
+        section = Section(self.grib_id, 3, ["Ni"])
+        msg = "Cannot write 'numberOfSection'"
+        with self.assertRaisesRegex(KeyError, msg):
+            section["numberOfSection"] = 4
+
+    def test_write_alias(self):
+        # "indicatorOfUnitForForecastTime": "indicatorOfUnitOfTimeRange",
+        section = Section(self.grib_id, 101, ["indicatorOfUnitOfTimeRange"])
+        section["indicatorOfUnitForForecastTime"] = 202
+        self.assertEqual(section["indicatorOfUnitOfTimeRange"], 202)
 
 
 @tests.skip_data
