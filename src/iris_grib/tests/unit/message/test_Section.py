@@ -50,7 +50,7 @@ class Test___getitem__(tests.IrisGribTest):
 
     def test_alias(self):
         # Note: I think this particular alias is really 'the wrong way around'
-        # TODO: resolve, sometime?
+        # TODO: resolve?  see https://github.com/SciTools/iris-grib/issues/765
         section = Section(self.grib_id, None, ["indicatorOfUnitOfTimeRange"])
         self.assertEqual(section["indicatorOfUnitForForecastTime"], 1)
         self.assertEqual(section["indicatorOfUnitOfTimeRange"], 1)
