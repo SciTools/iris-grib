@@ -1,4 +1,3 @@
-=========
 Tutorials
 =========
 
@@ -8,5 +7,12 @@ Tutorials
    via **action**.
 
    Read more: `Diataxis`_
+
+
+.. toctree::
+   :maxdepth: 1
+
+   load_save_api
+
 
 .. _Diataxis: https://diataxis.fr/

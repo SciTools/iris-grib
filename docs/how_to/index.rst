@@ -1,4 +1,3 @@
-=============
 How-To Guides
 =============
 
@@ -8,5 +7,13 @@ How-To Guides
    Supports **work**, via **action**.
 
    Read more: `Diataxis`_
+
+
+.. toctree::
+   :maxdepth: 1
+
+   get_started
+   simple_grib_io
+
 
 .. _Diataxis: https://diataxis.fr/

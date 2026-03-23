@@ -1,4 +1,3 @@
-===========
 Explanation
 ===========
 
@@ -8,5 +7,12 @@ Explanation
    **study**, via **theory**.
 
    Read more: `Diataxis`_
+
+
+.. toctree::
+   :maxdepth: 1
+
+   phenom_translation
+
 
 .. _Diataxis: https://diataxis.fr/
