@@ -6,12 +6,13 @@ See also: :doc:`/tutorial/load_save_api`.
 .. testsetup::
 
     import iris
+    import iris_grib
     import warnings
 
     warnings.simplefilter("ignore")
     cube = iris.load_cube(iris.sample_data_path("A1B_north_america.nc"))
     cube.coord("forecast_period").guess_bounds()
-    filename = "test_file.grib"
+    filename = "testfile.grib"
     iris.save(cube, filename, saver="grib2")
 
 Here is a basic example of how you can modify the GRIB messages being loaded,

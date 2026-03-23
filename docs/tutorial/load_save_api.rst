@@ -4,6 +4,16 @@ Iris-grib Load and Save API
 In addition to direct load and save with Iris, as described above,
 it is also possible to load and save GRIB data using iris-grib functions.
 
+.. testsetup::
+
+   import iris
+   import iris_grib
+   import warnings
+
+   warnings.simplefilter("ignore")
+   cube = iris.load_cube(iris.sample_data_path("rotated_pole.nc"))
+   iris.save(cube, "testfile.grib", saver="grib2")
+
 Loading and saving Cubes
 ------------------------
 
