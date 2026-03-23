@@ -14,6 +14,7 @@ How-To Guides
 
    get_started
    simple_grib_io
+   modify_during_load
 
 
 .. _Diataxis: https://diataxis.fr/

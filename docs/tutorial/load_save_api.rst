@@ -72,12 +72,19 @@ You can load and save messages to and from files, and convert them to and from C
 Load
 ^^^^
 
+See also: :doc:`/how_to/modify_during_load`.
+
 The key functions are :func:`~iris_grib.load_pairs_from_fields` and
 :func:`~iris_grib.message.GribMessage.messages_from_filename`.
 See those for more detail.
 
 You can load data to 'messages', and filter or modify them to enable or correct
 how Iris converts them to 'raw' cubes (i.e. individual 2-dimensional fields).
+
+.. caution::
+
+   Remember: modifying a :class:`~iris_grib.message.GribMessage` does NOT modify
+   the underlying GRIB file.
 
 For example:
 
