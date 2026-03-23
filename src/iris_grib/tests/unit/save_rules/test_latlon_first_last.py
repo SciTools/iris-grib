@@ -5,6 +5,7 @@
 """Unit tests for `iris_grib.grib_save_rules.identification`."""
 
 import numpy as np
+import pytest
 
 from iris.coords import AuxCoord
 
@@ -28,11 +29,15 @@ class Test:
     bzy = -90.046875000000000000000000000000
     bdy = 0.093750000000000000000000000000
 
-    def test_lats(self, mocker):
+    @pytest.mark.parametrize("wraplons", ["wrapped", "nowrap"])
+    def test_latlons(self, wraplons, mocker):
         patch = mocker.patch("iris_grib._save_rules.eccodes.codes_set_long")
         x_points = np.array(
             [self.bzx + self.bdx, self.bzx + self.lbnpt * self.bdx], dtype=np.float32
         )
+        if wraplons == "wrapped":
+            # Drive longitudes negative : results should be just the same.
+            x_points -= 720
         y_points = np.array(
             [self.bzy + self.bdy, self.bzy + self.lbrow * self.bdy], dtype=np.float32
         )
