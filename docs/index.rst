@@ -12,6 +12,15 @@ GRIB files can be loaded as Iris cubes using ``iris-grib`` so that you can use I
 for analysing and visualising the contents of the GRIB files. Iris cubes can also be
 saved to GRIB edition-2 files using ``iris-grib``.
 
+.. toctree::
+    :maxdepth: 2
+    :caption: Contents:
+
+    tutorial/index
+    explanation/index
+    how_to/index
+    reference/index
+
 
 Simple GRIB Loading and Saving with Iris
 ----------------------------------------
