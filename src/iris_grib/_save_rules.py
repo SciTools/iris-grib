@@ -219,28 +219,24 @@ def latlon_first_last(x_coord, y_coord, grib):
     if x_coord.has_bounds() or y_coord.has_bounds():
         warnings.warn("Ignoring xy bounds")
 
-    # XXX Pending #1125
-    #    eccodes.codes_set_double(grib, "latitudeOfFirstGridPointInDegrees",
-    #                            float(y_coord.points[0]))
-    #    eccodes.codes_set_double(grib, "latitudeOfLastGridPointInDegrees",
-    #                            float(y_coord.points[-1]))
-    #    eccodes.codes_set_double(grib, "longitudeOfFirstGridPointInDegrees",
-    #                            float(x_coord.points[0]))
-    #    eccodes.codes_set_double(grib, "longitudeOfLastGridPointInDegrees",
-    #                            float(x_coord.points[-1]))
-    # WORKAROUND
-    eccodes.codes_set_long(
-        grib, "latitudeOfFirstGridPoint", int(y_coord.points[0] * 1000000)
-    )
-    eccodes.codes_set_long(
-        grib, "latitudeOfLastGridPoint", int(y_coord.points[-1] * 1000000)
-    )
-    eccodes.codes_set_long(
-        grib, "longitudeOfFirstGridPoint", int((x_coord.points[0] % 360) * 1000000)
-    )
-    eccodes.codes_set_long(
-        grib, "longitudeOfLastGridPoint", int((x_coord.points[-1] % 360) * 1000000)
-    )
+    def scaled_minmax_points(coord, wrap_360=False):
+        """Get coord scaled min+max values.
+
+        Return numpy integer values, in millionths.
+        Promote values to double-precision before rounding.
+        """
+        point0, point1 = coord.points[[0, -1]]
+        if wrap_360:
+            point0, point1 = [point % 360 for point in [point0, point1]]
+        int0, int1 = [int(flt.astype("f8") * 1000000) for flt in (point0, point1)]
+        return int0, int1
+
+    lat0, lat1 = scaled_minmax_points(y_coord)
+    eccodes.codes_set_long(grib, "latitudeOfFirstGridPoint", lat0)
+    eccodes.codes_set_long(grib, "latitudeOfLastGridPoint", lat1)
+    lon0, lon1 = scaled_minmax_points(x_coord, wrap_360=True)
+    eccodes.codes_set_long(grib, "longitudeOfFirstGridPoint", lon0)
+    eccodes.codes_set_long(grib, "longitudeOfLastGridPoint", lon1)
 
 
 def dx_dy(x_coord, y_coord, grib):
