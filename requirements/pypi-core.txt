@@ -1,2 +1,2 @@
-scitools-iris>=3.0.2
+scitools-iris>=3.10
 eccodes>=1.6.1
