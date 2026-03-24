@@ -22,16 +22,63 @@ We recommend:
 - :doc:`/how_to/simple_grib_io`
 
 
-Full Contents
--------------
+Navigating this site
+--------------------
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+
+   * -
+     - Description
+     - supports ...
+     - via ...
+   * - Tutorials
+     - Guided lessons for understanding a topic.
+     - study
+     - action
+   * - Explanation
+     - In-depth discussion for understanding concepts.
+     - study
+     - theory
+   * - How-To Guides
+     - Step by step instructions for achieving a specific goal.
+     - work
+     - action
+   * - Reference
+     - Concise information to look up when needed.
+     - work
+     - theory
+
+Read more: `Diataxis.fr`_
+
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Tutorials
 
-   tutorial/index
-   explanation/index
-   how_to/index
-   reference/index
+   tutorial/load_save_api
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Explanation
+
+   explanation/phenom_translation
+
+.. toctree::
+   :maxdepth: 1
+   :caption: How-To Guides
+
+   how_to/get_started
+   how_to/simple_grib_io
+   how_to/modify_during_load
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference
+
+   reference/release_notes
+   Iris-grib API </api/modules>
 
 
 See also
@@ -39,3 +86,6 @@ See also
 
 * :ref:`genindex`
 * :ref:`modindex`
+
+
+.. _Diataxis.fr: https://diataxis.fr/
