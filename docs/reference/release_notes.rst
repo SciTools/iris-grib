@@ -1,5 +1,3 @@
-:orphan:
-
 .. _release_notes:
 
 Release Notes
