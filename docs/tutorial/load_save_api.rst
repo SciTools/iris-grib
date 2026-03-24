@@ -4,6 +4,12 @@ Iris-grib Load and Save API
 In addition to direct load and save with Iris, as described above,
 it is also possible to load and save GRIB data using iris-grib functions.
 
+.. note::
+
+   The API here is for special cases. It is usually simplest to load and
+   save GRIB data using the regular iris load and save functions, as described
+   at :doc:`/how_to/simple_grib_io`.
+
 .. testsetup::
 
    import iris
@@ -82,8 +88,6 @@ You can load and save messages to and from files, and convert them to and from C
 Load
 ^^^^
 
-See also: :doc:`/how_to/modify_during_load`.
-
 The key functions are :func:`~iris_grib.load_pairs_from_fields` and
 :func:`~iris_grib.message.GribMessage.messages_from_filename`.
 See those for more detail.
@@ -111,6 +115,7 @@ For example:
 Filtering fields can be very useful to speed up loading, since otherwise all data must
 be converted to Iris *before* selection with constraints, which can be quite costly.
 
+See also: :doc:`/how_to/modify_during_load`.
 
 Save
 ^^^^
