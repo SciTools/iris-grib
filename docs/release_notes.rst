@@ -17,10 +17,91 @@ Features
 * `@MoseleyS <https://github.com/MoseleyS>`_ added support for loading GRIB2 data
   found in the Met Office wholesale Weather Data Hub and CEDA archive.
   `(PR#647) <https://github.com/SciTools/iris-grib/pull/647>`_
+
 * `@andrewgryan <https://github.com/andrewgryan>`_ and
   `@trexfeathers <https://github.com/trexfeathers>`_ added saving support for
   Earth shape 6 - fixed radius 6,371,229 m.
   `(PR#712) <https://github.com/SciTools/iris-grib/pull/712>`_
+
+
+Fixes
+^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ fixed the setting of
+  :class:`~iris_grib.grib_message.GribMessage` values, making it possible to
+  set values for keys that have not been read yet.
+  `(PR#766) <https://github.com/SciTools/iris-grib/pull/766>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ fixed a problem of scaled integers
+  rounding incorrectly, resulting from the transition to NumPy v2.
+  `(PR#767) <https://github.com/SciTools/iris-grib/pull/767>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_ updated the supported
+  Python versions to be 3.12, 3.13, 3.14; in line with
+  `SPEC 0 <https://scientific-python.org/specs/spec-0000/>`_.
+  `(PR#770) <https://github.com/SciTools/iris-grib/pull/770>`_
+
+* `@trexfeathers <https://github.com/trexfeathers>`_ updated the minimum
+  supported Iris version to >=3.10, owing to some internal changes in Iris-grib.
+  `(PR#770) <https://github.com/SciTools/iris-grib/pull/770>`_
+
+* Iris-grib is continually updated to test against the latest version of its
+  dependencies, allowing us to respond promptly to any breaking changes, and to
+  provide a record of what changed and when.
+
+* Iris-grib is continually updated to follow the latest coding standard
+  conventions in scientific Python - via
+  `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_
+  and `pre-commit <https://pre-commit.com/>`_ - maximising the ease of
+  contribution and maintenance.
+
+
+Internal
+^^^^^^^^
+* `@ESadek-MO <https://github.com/ESadek-MO>`_ improved Pickle testing to not
+  rely on Iris, and to use PyTest.
+  `(PR#620) <https://github.com/SciTools/iris-grib/pull/620>`_
+
+* `@stephenworsley <https://github.com/stephenworsley>`_ increased Iris-grib's
+  compliance with Scientific Python's
+  `repo-review <https://learn.scientific-python.org/development/guides/repo-review/>`_.
+  `(PR#638) <https://github.com/SciTools/iris-grib/pull/638>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ added testing for reading/writing
+  ``GRIB_PARAM`` attributes in NetCDF files.
+  `(PR#677) <https://github.com/SciTools/iris-grib/pull/677>`_
+
+* Various improvements to coding standards ('linting'):
+
+    * `PR#599 <https://github.com/SciTools/iris-grib/pull/599>`_
+    * `PR#625 <https://github.com/SciTools/iris-grib/pull/625>`_
+    * `PR#667 <https://github.com/SciTools/iris-grib/pull/667>`_
+    * `PR#694 <https://github.com/SciTools/iris-grib/pull/694>`_
+    * `PR#758 <https://github.com/SciTools/iris-grib/pull/758>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ dropped the outdated use of the
+  ``np.floating`` type. `PR#664 <https://github.com/SciTools/iris-grib/pull/664>`_
+
+* `@trexfeathers <https://github.com/trexfeathers>`_ adapted tests for upstream
+  changes in ecCodes test data (ECC-2110).
+  `(PR#716) <https://github.com/SciTools/iris-grib/pull/716>`_
+
+* `@trexfeathers <https://github.com/trexfeathers>`_ adapted tests for an
+  upstream fix in cf-time date2num conversion (cftime#355).
+  `(PR#748) <https://github.com/SciTools/iris-grib/pull/748>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ and
+  `@trexfeathers <https://github.com/trexfeathers>`_ are working through a
+  large refactor so that GRIB1 and GRIB2 support share as much code as possible.
+  Progress in this release: `PR#738 <https://github.com/SciTools/iris-grib/pull/738>`_
+
+* `@ukmo-ccbunney <https://github.com/ukmo-ccbunney>`_ and
+  `@ESadek-MO <https://github.com/ESadek-MO>`_ aligned ``CITATION.cff`` and
+  ``MANIFEST.in`` with agreed SciTools standards.
+  `(PR#675) <https://github.com/SciTools/iris-grib/pull/675>`_,
+  `(PR#676) <https://github.com/SciTools/iris-grib/pull/676>`_
 
 
 New Contributors
@@ -29,6 +110,7 @@ Welcome to
 
 * `@MoseleyS <https://github.com/MoseleyS>`_
 * `@andrewgryan <https://github.com/andrewgryan>`_
+* `@ukmo-ccbunney <https://github.com/ukmo-ccbunney>`_
 
 
 What's new in iris-grib v0.20.0
