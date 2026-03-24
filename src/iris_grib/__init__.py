@@ -29,8 +29,9 @@ except ModuleNotFoundError:
     __version__ = "unknown"
 
 __all__ = [
-    "GRIB1_LOADING_MODE",
-    "Grib1LoadingMode",
+    # TODO: publish grib1 loading controls, when ready to announce
+    # "GRIB1_LOADING_MODE",
+    # "Grib1LoadingMode",
     "load_cubes",
     "load_pairs_from_fields",
     "save_grib2",
