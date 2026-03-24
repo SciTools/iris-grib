@@ -36,6 +36,12 @@ Fixes
   `(PR#767) <https://github.com/SciTools/iris-grib/pull/767>`_
 
 
+Documentation
+^^^^^^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_ reorganised the
+  documentation to be easier to navigate, using the Diataxis framework.
+  `(PR#768) <https://github.com/SciTools/iris-grib/pull/768>`_
+
 Dependencies
 ^^^^^^^^^^^^
 * `@trexfeathers <https://github.com/trexfeathers>`_ updated the supported
