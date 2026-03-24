@@ -19,7 +19,7 @@ Features
 * `@andrewgryan <https://github.com/andrewgryan>`_ and
   `@trexfeathers <https://github.com/trexfeathers>`_ added saving support for
   Earth shape 6 - fixed radius 6,371,229 m.
-  `(PR#712) <https://github.com/SciTools/iris-grib/pull/712>`_
+  `(PR#712) <https://github.com/SciTools/iris-grib/pull/721>`_
 
 
 Fixes
