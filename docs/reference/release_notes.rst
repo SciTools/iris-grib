@@ -8,7 +8,7 @@ What's new in iris-grib v0.22.0
 -------------------------------
 
 :Release: 0.22.0
-:Date: TBC
+:Date: 24 March 2026
 
 Features
 ^^^^^^^^
