@@ -111,7 +111,7 @@ class Grib1LoadingMode(threading.local):
         .. note::
 
             The legacy implementation is now deprecated and will be removed in due
-            course. However, for full backwwards compatibility, 'legacy' mode is still
+            course. However, for full backwards compatibility, 'legacy' mode is still
             the default.
 
             You are advised to use ``iris_grib.GRIB1_LOADING_MODE.set(legacy=False)``
