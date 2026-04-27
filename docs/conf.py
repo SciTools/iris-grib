@@ -109,6 +109,7 @@ linkcheck_ignore = [
     "https://github.com/Scitools/iris-grib/compare"
     "/c4243ae..5c314e3#diff-cf46b46880cae59e82a91c7ab6bb81ba"
 ]
+linkcheck_timeout = 60
 
 # -- Autodoc ------------------------------------------------------------------
 
