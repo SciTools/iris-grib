@@ -66,6 +66,14 @@ ignore = [
 ignore-words-list = "alpha-numeric,assertIn,degreee,discontiguities,lazyness,meaned,nin"
 skip = "./CODE_OF_CONDUCT.md,_build,*.css,*.ipynb,*.js,*.html,*.svg,*.xml,.git,generated"
 
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
 [tool.coverage.run]
 # See https://coverage.readthedocs.io/en/latest/config.html
 branch = true
@@ -76,20 +84,14 @@ omit = [
     "src/iris_grib/tests/*",
 ]
 
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if __name__ == .__main__.:"
-]
-
 [tool.mypy]
 # See https://mypy.readthedocs.io/en/stable/config_file.html
-
+# https://mypy.readthedocs.io/en/stable/error_code_list2.html
 # Extra checks we have chosen to enable.
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+strict = true
 warn_unused_configs = true
 warn_unreachable = true
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 
 # Checks we have temporarily *disabled*
 # NOTE:
@@ -109,26 +111,29 @@ exclude = [
     'noxfile\.py',
     'docs/conf\.py'
 ]
-strict = true  # Default value, make true when introducing type hinting.
 
 [tool.numpydoc_validation]
+# We have agreed a that some of the numpydoc rules that we are going to ignore.
 checks = [
     "all",  # Enable all numpydoc validation rules, apart from the following:
 
     # -> Docstring text (summary) should start in the line immediately
     #    after the opening quotes (not in the same line, or leaving a
     #    blank line in between)
+    # Reason for ignore: A chosen house-style
     "GL01",  # Permit summary line on same line as docstring opening quotes.
 
     # -> Closing quotes should be placed in the line after the last text
     #    in the docstring (do not close the quotes in the same line as
     #    the text, or leave a blank line between the last text and the
     #    quotes)
+    # Reason for ignore: A chosen house-style
     "GL02",  # Permit a blank line before docstring closing quotes.
 
     # -> Double line break found; please use only one blank line to
     #    separate sections or paragraphs, and do not leave blank lines
     #    at the end of docstrings
+    # Reason for ignore: We benefit from more flexability in formatting
     "GL03",  # Ignoring.
 
     # -> See Also section not found
@@ -143,8 +148,7 @@ checks = [
     # -> No Yields section found
     "YD01",  # Not all docstrings require a "Yields" section.
 
-    # Record temporarily ignored checks below; will be reviewed at a later date:
-    # TODO: work to remove these at a later date.
+    # TODO: exceptions that still need investigating are below. Might be fixable, or might become permanent (above):
     "GL08",  # *975    The object does not have a docstring
     "PR01",  # *149    Parameters ... not documented
     "RT01",  # *9      No Returns section found
@@ -166,14 +170,13 @@ addopts = [
     "-v",
 ]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS NUMBER"
-# configure settings as recommended by repo-review:
+filterwarnings = ["default"]
 log_cli = "True"
 log_cli_level = "INFO"
+log_level = "INFO"
 minversion = "6.0"
 testpaths = "src/iris_grib"
 xfail_strict = "True"
-filterwarnings = ["default"]
-log_level = "INFO"
 
 [tool.repo-review]
 ignore = [
@@ -197,10 +200,8 @@ docstring-code-format = true
 preview = false
 
 [tool.ruff.lint]
+# We have agreed that we will permanently ignore the ruff rules in the first half of this ignore list.
 ignore = [
-    # The following ruff checks are intended to be *permanently* ignored (by design).
-    # NOTE: *temporary* ignores are listed separately, below.
-
     # flake8-commas (COM)
     # https://docs.astral.sh/ruff/rules/#flake8-commas-com
     "COM812",  # Trailing comma missing.
@@ -211,6 +212,7 @@ ignore = [
     # NOTE: This rule may cause conflicts when used with "ruff format".
     "ISC001",  # Implicitly concatenate string literals on one line.
 
+    # TODO: exceptions that still need investigating are below. Might be fixable, or might become permanent (above):
     # ==============================================
     # From here on, we list the *temporary* check disables
     # TODO: eventually, remove all these by either
@@ -415,14 +417,13 @@ ignore = [
     "UP018",
     "UP031",
     "UP032",
-    ]
+]
 preview = false
 select = [
     "ALL",
-
     # Note: the above "all" disables conflicting rules, if you want that
     # rule it needs to be explicitly enabled below:
-    "D212",  # conflicts with D213 : this one is our choice, so enforce it
+    "D212",  # Multi-line docstring summary should start at the first line
 ]
 
 [tool.ruff.lint.isort]
@@ -448,6 +449,7 @@ include = ["iris_grib*"]
 where = ["src"]
 
 [tool.setuptools_scm]
-write_to = "src/iris_grib/_version.py"
 local_scheme = "dirty-tag"
+# https://setuptools-scm.readthedocs.io/en/latest/extending/#version-number-construction
 version_scheme = "release-branch-semver"
+write_to = "src/iris_grib/_version.py"
