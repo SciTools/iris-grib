@@ -3,6 +3,18 @@
 Release Notes
 =============
 
+What's new in iris-grib v0.23.0
+-------------------------------
+
+:Release: 0.23.0
+:Date: TBC
+
+Internal
+^^^^^^^^
+* `@trexfeathers <https://github.com/trexfeathers>`_ switched the link check CI
+  to be the standard SciTools overnight job using Lychee.
+  `(PR#795) <https://github.com/SciTools/iris-grib/pull/795>`_
+
 
 What's new in iris-grib v0.22.0
 -------------------------------
