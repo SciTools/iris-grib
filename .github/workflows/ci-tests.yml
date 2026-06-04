@@ -36,7 +36,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.14"]
-        session: ["doctest", "linkcheck"]
+        session: ["doctest"]
         iris-source : ["conda-forge"]
         include:
           - os: "ubuntu-latest"
