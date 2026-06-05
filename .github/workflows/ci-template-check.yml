@@ -8,6 +8,8 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   prompt-share:
     uses: scitools/workflows/.github/workflows/ci-template-check.yml@1f2141422a63321a32575ddd186e53acff12550c

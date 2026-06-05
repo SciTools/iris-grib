@@ -8,6 +8,8 @@ on:
   schedule:
     - cron: "2 0 * * 6"
 
+permissions: {}
+
 jobs:
   refresh_lockfiles:
     uses: scitools/workflows/.github/workflows/refresh-lockfiles.yml@1f2141422a63321a32575ddd186e53acff12550c
