@@ -940,7 +940,7 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
     return grib
 
 
-def grid_definition_section(cube, grib, x_coord, y_coord):
+def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
     """
     Write the grid definition template.
 
@@ -948,7 +948,11 @@ def grid_definition_section(cube, grib, x_coord, y_coord):
     based on the properties of the cube.
 
     """
-    result = None
+    # NB x_coord and y_coord are only optional because of legacy testing code
+    if x_coord is None and y_coord is None:
+        x_coord = cube.coord(dimensions=[1])
+        y_coord = cube.coord(dimensions=[0])
+
     cs = x_coord.coord_system  # N.B. already CS exists and is the same for x and y.
     regular_x_and_y = is_regular(x_coord) and is_regular(y_coord)
 
@@ -997,8 +1001,6 @@ def grid_definition_section(cube, grib, x_coord, y_coord):
         name = cs.grid_mapping_name.replace("_", " ").title()
         emsg = "Grib saving is not supported for coordinate system {!r}"
         raise ValueError(emsg.format(name))
-
-    return result
 
 
 ###############################################################################
@@ -1969,16 +1971,10 @@ def run(slice2d_cube, grib, full3d_cube, x_coord, y_coord):
     identification(slice2d_cube, grib)
 
     # Section 3 - Grid Definition Section (Grid Definition Template)
-    result = grid_definition_section(slice2d_cube, grib, x_coord, y_coord)
-    if result is not None:
-        # message was replaced : must also re-run ID phase
-        grib = result
-        identification(slice2d_cube, grib)
+    grid_definition_section(slice2d_cube, grib, x_coord, y_coord)
 
     # Section 4 - Product Definition Section (Product Definition Template)
     product_definition_section(slice2d_cube, grib, full3d_cube)
 
     # Section 5 - Data Representation Section (Data Representation Template)
     data_section(slice2d_cube, grib)
-
-    return result
