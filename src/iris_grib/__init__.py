@@ -349,15 +349,31 @@ def save_pairs_from_cube(cube):
         slice of the input and each``field`` is an eccodes message "id".
         N.B. the message "id"s are integer handles.
     """
+    dim_coords = True
     x_coords = cube.coords(axis="x", dim_coords=True)
     y_coords = cube.coords(axis="y", dim_coords=True)
+    if not x_coords and not y_coords:
+        # Try aux-coords if there are no dim-coords : needed for gaussian data
+        # NB in this case we won't rely on axis logic, but simply assume that the
+        #  required coordinates are always "latitude" and "longitude".
+        #  This excludes rotated gaussian grids, but we don't support those (yet).
+        dim_coords = False
+        x_coords = cube.coords("longitude")
+        y_coords = cube.coords("latitude")
+
     if len(x_coords) != 1 or len(y_coords) != 1:
         raise TranslationError("Did not find one (and only one) x or y coord")
 
+    (x_coord,) = x_coords
+    (y_coord,) = y_coords
+
     # Save each latlon slice2D in the cube
-    for slice2D in cube.slices([y_coords[0], x_coords[0]]):
+    slice_param = [y_coord, x_coord] if dim_coords else [x_coord]
+    for slice2D in cube.slices(slice_param):
         grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
-        _save_rules.run(slice2D, grib_message, cube)
+        result = _save_rules.run(slice2D, grib_message, cube, x_coord, y_coord)
+        if result is not None:
+            grib_message = result
         yield (slice2D, grib_message)
 
 

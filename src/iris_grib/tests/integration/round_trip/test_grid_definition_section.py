@@ -164,3 +164,23 @@ def test_gdt20_save_load(
         coord.points = np.round(coord.points)
 
     assert cube_expected == cube_reloaded
+
+
+def test_gdt40_loadsave(tmp_path):
+    loadpath = tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
+    cube = load_cube(loadpath)
+    # This kludge is needed for now to make it saveable
+    #  - ASIS: fails to add pressure factory on load, so has no vertical coord
+    cube.coord("level_pressure").rename("pressure")
+    savepath = tmp_path / "tmp.grib2"
+    save(cube, savepath)
+    cube_reloaded = load_cube(savepath)
+
+    def coord_dims_names(cube):
+        return [
+            [co.name() for co in cube.coords(dimension=i_dim)]
+            for i_dim in range(cube.ndim)
+        ]
+
+    assert coord_dims_names(cube_reloaded) == coord_dims_names(cube)
+    assert np.all(cube_reloaded.data == cube.data)
