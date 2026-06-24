@@ -11,8 +11,10 @@ Code to convert a GRIB2 message into cube metadata.
 
 from collections import namedtuple
 from collections.abc import Iterable
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 import math
+import threading
 import warnings
 
 import cartopy.crs as ccrs
@@ -1379,6 +1381,47 @@ def grid_definition_template_140(section, metadata):
     metadata["dim_coords_and_dims"].append((x_coord, x_dim))
 
 
+class TemplateRecorder(threading.local):
+    """
+    Object to control the recording of grid template number on loading.
+
+    This provides a setting, controlled by `set` and `context` methods, which causes all
+    loaded cubes to record the grid template definition number as a cube attribute.
+
+    When present, the 'GRIB_GRID_TEMPLATE' attribute is used to control how certain
+    types of data are saved -- notably, for gaussian grids.
+
+    e.g. ``TEMPLATE_RECORD.set(True)`` or ``with TEMPLATE_RECORD.context(True): ...``.
+    """
+
+    def __init__(self):
+        self._record = False  # default to 'off' : not recording template numbers
+
+    def __repr__(self):
+        content = ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
+        msg = f"TemplateRecorder({content})"
+        return msg
+
+    def set(self, record: bool = False):
+        self._record = record
+
+    @contextmanager
+    def context(self, record: bool = False):
+        old_value = self._record
+        try:
+            self._record = record
+            yield
+        finally:
+            self._record = old_value
+
+    def __bool__(self):
+        return bool(self._record)
+
+
+#: The unique object which controls recording of grid template numbers.
+TEMPLATE_RECORD = TemplateRecorder()
+
+
 def grid_definition_section(section, metadata):
     """
     Translate section 3 from the GRIB2 message.
@@ -1441,6 +1484,11 @@ def grid_definition_section(section, metadata):
     else:
         msg = "Grid definition template [{}] is not supported".format(template)
         raise TranslationError(msg)
+
+    # If enabled, always record the 'original' grib template number, as an attribute.
+    if TEMPLATE_RECORD:
+        # This can also potentially control saving, in some cases.
+        metadata["attributes"]["GRIB2_GRID_TEMPLATE"] = template
 
 
 ###############################################################################

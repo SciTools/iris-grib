@@ -19,6 +19,7 @@ import iris  # noqa: F401
 from iris.exceptions import TranslationError
 
 from . import _save_rules
+from ._grib2_convert import TEMPLATE_RECORD
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
@@ -32,6 +33,7 @@ __all__ = [
     # TODO: publish grib1 loading controls, when ready to announce
     # "GRIB1_LOADING_MODE",
     # "Grib1LoadingMode",
+    "TEMPLATE_RECORD",
     "load_cubes",
     "load_pairs_from_fields",
     "save_grib2",
@@ -370,7 +372,11 @@ def save_pairs_from_cube(cube):
     # Save each latlon slice2D in the cube
     slice_param = [y_coord, x_coord] if dim_coords else [x_coord]
     for slice2D in cube.slices(slice_param):
-        grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
+        if _save_rules.is_grid_definition_template_40(cube, x_coord, y_coord):
+            template_name = "reduced_gg_sfc_grib2"
+        else:
+            template_name = "GRIB2"
+        grib_message = eccodes.codes_grib_new_from_samples(template_name)
         result = _save_rules.run(slice2D, grib_message, cube, x_coord, y_coord)
         if result is not None:
             grib_message = result

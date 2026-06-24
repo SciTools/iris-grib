@@ -826,80 +826,83 @@ def grid_definition_template_140(cube, grib):
         raise TranslationError(msg)
 
 
-def is_grid_definition_template_40(cube, grib, x_coord, y_coord):
-    # N.B. unlike the other template definitions, this one returns a success response.
-    # This is simply because it is complicated to determine whether the given lats and
-    #  lons belong to a gaussian grid, and it is necessary to attempt to create a
-    #  grib message to find out.
-    #
-    # In use, this is only called when we already know that we have lats + lons, and the
-    # lats are not regular.
-    # If this routine returns "False", the caller should fallback to GDT3.4
-    #  = "irregular lat-lon".
-    result = None
-    lons, lats = x_coord.points, y_coord.points
-    ydiffs = np.diff(lats)
-    # Must have some repeated values.
-    if not np.any(ydiffs == 0):
-        return result
-    # Otherwise must be monotonic
-    yd_min = ydiffs.min()
-    yd_max = ydiffs.max()
-    lats_increasing = yd_max > 0
-    if (lats_increasing and yd_min < 0) or (not lats_increasing and yd_min > 0):
-        return result
+def is_grid_definition_template_40(cube, x_coord, y_coord):
+    """Work out whether this cube will save with GDT 3.40 (gaussian grid)."""
+    # Only allow saving to GDT3.40 when the enabling attribute is present.
+    template = cube.attributes.get("GRIB2_GRID_TEMPLATE", "")
+    ok = isinstance(template, int) and template == 40  # nothing else will do !
 
-    # Check the expected structure of the data:
-    #  each lat-val occupies a contiguous block,
-    #  within which the lon vals are (strictly) monotonic.
-    lat_vals = np.array(sorted(set(lats)))
-    n_lat_vals = len(lat_vals)
-    if n_lat_vals % 2 != 0:
+    if ok:
+        lons, lats = x_coord.points, y_coord.points
+        ydiffs = np.diff(lats)
+        # Must have some repeated values.
+        if not np.any(ydiffs == 0):
+            ok = False
+
+    if ok:
+        # Otherwise must be monotonic
+        yd_min = ydiffs.min()
+        yd_max = ydiffs.max()
+        lats_increasing = yd_max > 0
+        ok = (lats_increasing and yd_min >= 0) or (not lats_increasing and yd_max <= 0)
+
+    if ok:
+        # Check the expected structure of the data:
+        #  each lat-val occupies a contiguous block,
+        #  within which the lon vals are (strictly) monotonic.
+        lat_vals = np.array(sorted(set(lats)))
+        n_lat_vals = len(lat_vals)
         # ought to always divide by 2, since N parallels either side of equator
-        return result
-    if not lats_increasing:
-        # Put the set of latitude values into the expected order
-        lat_vals = lat_vals[::-1]
-    lons = x_coord.points
-    lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
+        ok = n_lat_vals % 2 == 0
 
-    ok = True
-    lon_repeats = []
-    prev_maxind = -1
-    for one_lat in lat_vals:
-        onelat_inds = np.where(lats == one_lat)[0]
-        n_onelats = len(onelat_inds)
-        i_min, i_max = onelat_inds[[0, -1]]
-        # Check that we are dealing with latitude values consistently in one direction
-        #  - since the way we assemble 'lon_repeats' assumes that.
-        if i_min != prev_maxind + 1:
-            ok = False
-            break
-        prev_maxind = i_max
-        if (i_max - i_min + 1) != n_onelats:
-            ok = False
-            break
+    if ok:
+        if not lats_increasing:
+            # Put the set of latitude values into the expected order
+            lat_vals = lat_vals[::-1]
+        lons = x_coord.points
+        lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
 
-        lon_repeats.append(n_onelats)
-        onelat_lons = lons[i_min : i_max + 1]
-        if (lons_increasing and np.diff(onelat_lons).min() <= 0) or (
-            not lons_increasing and np.diff(onelat_lons).max() >= 0
-        ):
-            ok = False
-            break
+        prev_maxind = -1
+        for one_lat in lat_vals:
+            onelat_inds = np.where(lats == one_lat)[0]
+            n_onelats = len(onelat_inds)
+            i_min, i_max = onelat_inds[[0, -1]]
+            # Check that latitudes are contiguous in one direction
+            #  (effectively, monotonic and "lat_vals" is in order of occurrence)
+            if i_min != prev_maxind + 1:
+                ok = False
+                break
+            prev_maxind = i_max
+            if (i_max - i_min + 1) != n_onelats:
+                ok = False
+                break
 
-    if ok is False:
-        return result
+            onelat_lons = lons[i_min : i_max + 1]
+            if (lons_increasing and np.diff(onelat_lons).min() <= 0) or (
+                not lons_increasing and np.diff(onelat_lons).max() >= 0
+            ):
+                ok = False
+                break
 
-    # That's as much pre-check as we can handle ...
+    return ok
 
-    # It seems that to get a functioning gaussian-grid message, we need to replace the
-    # passed-in 'grib' message with a new one, based on a different template.
-    grib = eccodes.codes_grib_new_from_samples("reduced_gg_sfc_grib2")
+
+def grid_definition_template_40(cube, grib, x_coord, y_coord):
+    # # It seems that to get a functioning gaussian-grid message, we need to replace the
+    # # passed-in 'grib' message with a new one, based on a different template.
+    # grib = eccodes.codes_grib_new_from_samples("reduced_gg_sfc_grib2")
+
     eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 40)
 
-    # .. unfortunately, we must re-run the 'identification' step
-    identification(cube, grib)
+    # # .. unfortunately, we must re-run the 'identification' step
+    # identification(cube, grib)
+
+    lons, lats = x_coord.points, y_coord.points
+    lats_increasing = np.diff(lats).min() >= 0
+    lat_vals = sorted(set(lats))
+    n_lat_vals = len(lat_vals)
+    if not lats_increasing:
+        lat_vals = lat_vals[::-1]
 
     # We want to do the equivalent of 'horizontal_common', but we can't call that as it
     #  calls "grid_dims" to set Ni/Nj, which we need to control differently.
@@ -922,6 +925,7 @@ def is_grid_definition_template_40(cube, grib, x_coord, y_coord):
     eccodes.codes_set_long(grib, "resolutionAndComponentFlags", 0)
     eccodes.codes_set_missing(grib, "iDirectionIncrement")
 
+    lon_repeats = [np.sum(lats == onelat) for onelat in lat_vals]
     eccodes.codes_set(grib, "numberOfOctectsForNumberOfPoints", 2)
     eccodes.codes_set(grib, "interpretationOfNumberOfPoints", 1)
     eccodes.codes_set_array(grib, "pl", list(lon_repeats))
@@ -953,8 +957,9 @@ def grid_definition_section(cube, grib, x_coord, y_coord):
             grid_definition_template_0(cube, grib)
         else:
             # Check for gaussian lats+lons, and if not fallback on GDT3.4
-            result = is_grid_definition_template_40(cube, grib, x_coord, y_coord)
-            if result is None:
+            if is_grid_definition_template_40(cube, x_coord, y_coord):
+                grid_definition_template_40(cube, grib, x_coord, y_coord)
+            else:
                 grid_definition_template_4(cube, grib)
 
     elif isinstance(cs, RotatedGeogCS):

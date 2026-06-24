@@ -20,8 +20,10 @@ from iris import load_cube, save
 from iris.coord_systems import GeogCS, PolarStereographic, RotatedGeogCS, Stereographic
 from iris.coords import DimCoord
 from iris.cube import Cube
+from iris.exceptions import CoordinateNotFoundError
 from iris.util import is_regular
 
+from iris_grib import TEMPLATE_RECORD
 from iris_grib.grib_phenom_translation import GRIBCode
 from iris_grib.message import GribMessage
 
@@ -166,21 +168,53 @@ def test_gdt20_save_load(
     assert cube_expected == cube_reloaded
 
 
-def test_gdt40_loadsave(tmp_path):
+@pytest.fixture(params=[True, False], ids=["recordGDT", "norecordGDT"])
+def record(request):
+    record = bool(request.param)
+    with TEMPLATE_RECORD.context(record=record):
+        yield record
+
+
+def test_gdt40_loadsave(tmp_path, record):
     loadpath = tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
     cube = load_cube(loadpath)
+    print(cube)
+
     # This kludge is needed for now to make it saveable
     #  - ASIS: fails to add pressure factory on load, so has no vertical coord
     cube.coord("level_pressure").rename("pressure")
+    # Removing these *also* allows the "coord_dims_names" check to match.
+    cube.remove_coord("model_level_number")
+    cube.remove_coord("sigma")
+
+    if record:
+        assert cube.attributes["GRIB2_GRID_TEMPLATE"] == 40
+    else:
+        assert "GRIB2_GRID_TEMPLATE" not in cube.attributes
+
     savepath = tmp_path / "tmp.grib2"
-    save(cube, savepath)
-    cube_reloaded = load_cube(savepath)
+    if not record:
+        msg = (
+            "Expected to find exactly 1 coordinate, but found 2. "
+            "They were: latitude, longitude."
+        )
+        with pytest.raises(CoordinateNotFoundError, match=msg):
+            save(cube, savepath)
+    else:
+        save(cube, savepath)
+        cube_reloaded = load_cube(savepath)
 
-    def coord_dims_names(cube):
-        return [
-            [co.name() for co in cube.coords(dimension=i_dim)]
-            for i_dim in range(cube.ndim)
-        ]
+        def coord_dims_names(cube):
+            return [
+                [co.name() for co in cube.coords(dimensions=i_dim)]
+                for i_dim in list(range(cube.ndim)) + [()]
+            ]
 
-    assert coord_dims_names(cube_reloaded) == coord_dims_names(cube)
-    assert np.all(cube_reloaded.data == cube.data)
+        print("\nORIGINAL:")
+        print(cube)
+        print(coord_dims_names(cube))
+        print("\n\nRELOADED:")
+        print(cube_reloaded)
+        print(coord_dims_names(cube_reloaded))
+        assert coord_dims_names(cube_reloaded) == coord_dims_names(cube)
+        assert np.all(cube_reloaded.data == cube.data)
