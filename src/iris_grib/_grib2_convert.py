@@ -1225,6 +1225,13 @@ def grid_definition_template_40_reduced(section, metadata, cs):
     metadata["aux_coords_and_dims"].append((y_coord, 0))
     metadata["aux_coords_and_dims"].append((x_coord, 0))
 
+    # In order to enable a reference surface to be attached to a resulting cube
+    #  with a factory, it is necessary for the cubes to have *also* have a DimCoord on
+    #  the unstructured dimension, so they can match their dimensions.
+    metadata["dim_coords_and_dims"].append(
+        (DimCoord(np.arange(x_points.shape[0]), long_name="gaussian_grid"), 0)
+    )
+
 
 def grid_definition_template_90(section, metadata):
     """
@@ -1575,7 +1582,7 @@ def translate_phenomenon(
     # Look for fields at surface level first.
     if (
         typeOfFirstFixedSurface == 1
-        and scaledValueOfFirstFixedSurface == 0
+        and scaledValueOfFirstFixedSurface in [0, None]
         and typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING
     ):
         # Land surface products for model terrain height:
