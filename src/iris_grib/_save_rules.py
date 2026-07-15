@@ -31,6 +31,7 @@ from iris.coord_systems import (
 )
 from iris.exceptions import TranslationError
 
+
 from . import grib_phenom_translation as gptx
 from ._grib2_convert import (
     _STATISTIC_TYPE_NAMES,
@@ -835,12 +836,11 @@ def is_grid_definition_template_40(cube, x_coord, y_coord):
     if ok:
         lons, lats = x_coord.points, y_coord.points
         ydiffs = np.diff(lats)
-        # Must have some repeated values.
-        if not np.any(ydiffs == 0):
-            ok = False
+        # Latitudes should have some repeated values.
+        ok = np.any(ydiffs == 0)
 
     if ok:
-        # Otherwise must be monotonic
+        # Latitudes should be monotonic
         yd_min = ydiffs.min()
         yd_max = ydiffs.max()
         lats_increasing = yd_max > 0
@@ -863,23 +863,23 @@ def is_grid_definition_template_40(cube, x_coord, y_coord):
         lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
 
         prev_maxind = -1
-        for one_lat in lat_vals:
-            onelat_inds = np.where(lats == one_lat)[0]
-            n_onelats = len(onelat_inds)
-            i_min, i_max = onelat_inds[[0, -1]]
+        for this_lat in lat_vals:
+            thislat_inds = np.where(lats == this_lat)[0]
+            n_thislat = len(thislat_inds)
+            i_min, i_max = thislat_inds[[0, -1]]
             # Check that latitudes are contiguous in one direction
             #  (effectively, monotonic and "lat_vals" is in order of occurrence)
             if i_min != prev_maxind + 1:
                 ok = False
                 break
             prev_maxind = i_max
-            if (i_max - i_min + 1) != n_onelats:
+            if (i_max - i_min + 1) != n_thislat:
                 ok = False
                 break
 
-            onelat_lons = lons[i_min : i_max + 1]
-            if (lons_increasing and np.diff(onelat_lons).min() <= 0) or (
-                not lons_increasing and np.diff(onelat_lons).max() >= 0
+            thislat_lons = lons[i_min : i_max + 1]
+            if (lons_increasing and np.diff(thislat_lons).min() <= 0) or (
+                not lons_increasing and np.diff(thislat_lons).max() >= 0
             ):
                 ok = False
                 break
@@ -953,7 +953,9 @@ def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
         x_coord = cube.coord(dimensions=[1])
         y_coord = cube.coord(dimensions=[0])
 
-    cs = x_coord.coord_system  # N.B. already CS exists and is the same for x and y.
+    # Get coord system
+    #  N.B. caller already checked that it exists and is same for x and y.
+    cs = x_coord.coord_system
     regular_x_and_y = is_regular(x_coord) and is_regular(y_coord)
 
     if isinstance(cs, GeogCS):
