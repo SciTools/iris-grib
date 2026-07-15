@@ -195,8 +195,8 @@ def test_gdt40_loadsave(tmp_path, record):
     savepath = tmp_path / "tmp.grib2"
     if not record:
         msg = (
-            "Expected to find exactly 1 coordinate, but found 2. "
-            "They were: latitude, longitude."
+            "Expected to find exactly 1 coordinate, but found 3. "
+            "They were: gaussian_grid, latitude, longitude."
         )
         with pytest.raises(CoordinateNotFoundError, match=msg):
             save(cube, savepath)
