@@ -1229,7 +1229,12 @@ def grid_definition_template_40_reduced(section, metadata, cs):
     #  with a factory, it is necessary for the cubes to have *also* have a DimCoord on
     #  the unstructured dimension, so they can match their dimensions.
     metadata["dim_coords_and_dims"].append(
-        (DimCoord(np.arange(x_points.shape[0]), long_name="gaussian_grid"), 0)
+        (
+            DimCoord(
+                np.arange(x_points.shape[0]), long_name="gaussian_grid", units="1"
+            ),
+            0,
+        )
     )
 
 
