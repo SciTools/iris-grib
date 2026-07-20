@@ -180,20 +180,23 @@ def test_gdt40_loadsave(tmp_path, record):
     loadpath = tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
     cube = load_cube(loadpath)
 
-    # This kludge is needed for now to make it saveable
-    #  - ASIS: fails to add pressure factory on load, so has no vertical coord
+    # This adjustment is needed for now to make this content saveable
+    #  - since the file contains no air-pressure reference, it loads without a valid
+    #   vertical coordinate which the save process can work with
     cube.coord("level_pressure").rename("pressure")
     # Removing these *also* allows the "coord_dims_names" check to match.
     cube.remove_coord("model_level_number")
     cube.remove_coord("sigma")
 
     if record:
+        # Test the "record" mechanism : when enabled saves to GDT40, like the input data
         assert cube.attributes["GRIB2_GRID_TEMPLATE"] == 40
     else:
         assert "GRIB2_GRID_TEMPLATE" not in cube.attributes
 
     savepath = tmp_path / "tmp.grib2"
     if not record:
+        # Can't save 1-D data in the normal way
         msg = (
             "Expected to find exactly 1 coordinate, but found 3. "
             "They were: gaussian_grid, latitude, longitude."
