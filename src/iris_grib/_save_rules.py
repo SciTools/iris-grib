@@ -834,6 +834,12 @@ def is_grid_definition_template_40(cube, x_coord, y_coord):
     ok = isinstance(template, int) and template == 40  # nothing else will do !
 
     if ok:
+        # Initial basic check that we have 1-D coords.
+        xco_dims = cube.coord_dims(x_coord)
+        yco_dims = cube.coord_dims(y_coord)
+        ok = yco_dims == xco_dims and len(xco_dims) == 1
+
+    if ok:
         lons, lats = x_coord.points, y_coord.points
         ydiffs = np.diff(lats)
         # Latitudes should have some repeated values.
@@ -914,8 +920,16 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
         grib, "latitudeOfFirstGridPoint", int(1.0e6 * lats[0])
     )  # in micro degrees
     eccodes.codes_set(grib, "latitudeOfLastGridPoint", int(1.0e6 * lats[-1]))
-    eccodes.codes_set(grib, "longitudeOfFirstGridPoint", int(1.0e6 * lons[0]))
-    eccodes.codes_set(grib, "longitudeOfLastGridPoint", int(1.0e6 * lons[-1]))
+
+    # Copied from the 'is..' routine : TODO improve DRY??
+    lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
+    if lons_increasing:
+        lon0, lon1 = lons.min(), lons.max()
+    else:
+        lon0, lon1 = lons.max(), lons.min()
+
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint", int(1.0e6 * lon0))
+    eccodes.codes_set(grib, "longitudeOfLastGridPoint", int(1.0e6 * lon1))
 
     eccodes.codes_set(grib, "N", n_lat_vals / 2)
     eccodes.codes_set(grib, "Nj", n_lat_vals)
