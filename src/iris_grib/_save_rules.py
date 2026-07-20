@@ -894,14 +894,17 @@ def is_grid_definition_template_40(cube, x_coord, y_coord):
 
 
 def grid_definition_template_40(cube, grib, x_coord, y_coord):
-    # # It seems that to get a functioning gaussian-grid message, we need to replace the
-    # # passed-in 'grib' message with a new one, based on a different template.
+    # For the gaussian grids, for now it appears that to function the message must be
+    # based on a different template.
     # grib = eccodes.codes_grib_new_from_samples("reduced_gg_sfc_grib2")
+    # --OR-- possibly also, can set the "computed key" 'gridType = gg' ??
+    #
+    # **FOR NOW:** this is handled as a special case by the caller:
+    #  'grid_definition_section' --> 'is_grid_definition_template_40'
+
+    # NB some code here is also duplicated from the 'is..' routine : TODO improve DRY??
 
     eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 40)
-
-    # # .. unfortunately, we must re-run the 'identification' step
-    # identification(cube, grib)
 
     lons, lats = x_coord.points, y_coord.points
     lats_increasing = np.diff(lats).min() >= 0
@@ -921,7 +924,6 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
     )  # in micro degrees
     eccodes.codes_set(grib, "latitudeOfLastGridPoint", int(1.0e6 * lats[-1]))
 
-    # Copied from the 'is..' routine : TODO improve DRY??
     lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
     if lons_increasing:
         lon0, lon1 = lons.min(), lons.max()
