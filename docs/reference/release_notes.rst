@@ -9,6 +9,44 @@ What's new in iris-grib v0.23.0
 :Release: 0.23.0
 :Date: TBC
 
+Features
+^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ added a new ``TEMPLATE_RECORD`` control
+  in :mod:`iris_grib`, enabling users
+  to record source GRIB2 grid template numbers on load as a
+  ``GRIB2_GRID_TEMPLATE`` cube attribute.  This attribute is also used to control saving
+  of 1-D data to a "reduced gaussian" grid, and may be used for further save controls in
+  future.  See :ref:`template_record` for more information.
+  `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
+  `(PR#813) <https://github.com/SciTools/iris-grib/pull/813>`_
+
+* `@pp-mo <https://github.com/pp-mo>`_ added saving support for reduced
+  Gaussian grids as GRIB2 grid definition template 3.40, when cubes carry
+  ``GRIB2_GRID_TEMPLATE = 40`` and have a compatible reduced-Gaussian
+  coordinate layout.  See :ref:`template_record` for more information.
+  `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
+  `(PR#813) <https://github.com/SciTools/iris-grib/pull/813>`_
+
+
+Fixes
+^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ improved loading of Gaussian grids by adding a
+  ``gaussian_grid`` dimension coordinate, which enables hybrid vertical coordinates to
+  be attached.
+  `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
+  `(PR#813) <https://github.com/SciTools/iris-grib/pull/813>`_
+
+
+Documentation
+^^^^^^^^^^^^^
+* `@pp-mo <https://github.com/pp-mo>`_ added a new explanation page,
+  :doc:`../explanation/template_record`, documenting the ``TEMPLATE_RECORD`` load
+  control, and how a ``GRIB2_GRID_TEMPLATE`` attribute controls saving to a
+  reduced gaussian grid template (GDT 3.40).   See :ref:`template_record`.
+  `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
+  `(PR#813) <https://github.com/SciTools/iris-grib/pull/813>`_
+
+
 Internal
 ^^^^^^^^
 * `@trexfeathers <https://github.com/trexfeathers>`_ switched the link check CI
