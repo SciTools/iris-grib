@@ -18,11 +18,23 @@ from iris_grib._save_rules import (
 )
 
 
-def make_gaussian_cube(x_points=None, y_points=None, grib_grid_template=40):
+def make_gaussian_cube(
+    x_points=None,
+    y_points=None,
+    grib_grid_template=40,
+    semi_major_axis=6371200.0,
+    semi_minor_axis=None,
+):
     if x_points is None or y_points is None:
         x_points = [0.0, 90.0, 180.0, 270.0] * 4
         y_points = [-60.0] * 4 + [-30.0] * 4 + [30.0] * 4 + [60.0] * 4
-    ellipsoid = GeogCS(semi_major_axis=6371200.0)
+    if semi_minor_axis is None:
+        ellipsoid = GeogCS(semi_major_axis=semi_major_axis)
+    else:
+        ellipsoid = GeogCS(
+            semi_major_axis=semi_major_axis,
+            semi_minor_axis=semi_minor_axis,
+        )
     x_coord = AuxCoord(
         x_points, long_name="longitude", units="degrees", coord_system=ellipsoid
     )
@@ -192,6 +204,11 @@ class TestGridDefinitionTemplate40:
 
         assert returned is mock_grib
         assert mock_grib.keys["gridDefinitionTemplateNumber"] == 40
+        # From shape_of_the_earth() using the default spherical GeogCS.
+        assert mock_grib.keys["shapeOfTheEarth"] == 1
+        assert mock_grib.keys["scaledValueOfRadiusOfSphericalEarth"] == 6371200.0
+        # From scanning_mode_flags(): default has +x and non-+y (first 2 lats equal).
+        assert mock_grib.keys["scanningMode"] == 0
         assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(-60.0e6)
         assert mock_grib.keys["latitudeOfLastGridPoint"] == int(60.0e6)
         assert mock_grib.keys["longitudeOfFirstGridPoint"] == int(0.0e6)
@@ -206,6 +223,17 @@ class TestGridDefinitionTemplate40:
         assert mock_grib.keys["interpretationOfNumberOfPoints"] == 1
         assert mock_grib.keys["pl"] == [4, 4, 4, 4]
 
+    def test_writes_shape_of_earth_fixed_6(self, mock_grib, patched_eccodes):
+        cube = make_gaussian_cube(semi_major_axis=6371229.0)
+        grid_definition_template_40(
+            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
+        )
+        assert mock_grib.keys["shapeOfTheEarth"] == 6
+        assert mock_grib.keys["scaleFactorOfEarthMajorAxis"] == 0
+        assert mock_grib.keys["scaledValueOfEarthMajorAxis"] == 0
+        assert mock_grib.keys["scaleFactorOfEarthMinorAxis"] == 0
+        assert mock_grib.keys["scaledValueOfEarthMinorAxis"] == 0
+
     def test_writes_decreasing_lon_endpoints(self, mock_grib, patched_eccodes):
         cube = make_gaussian_cube(
             x_points=[270.0, 180.0, 90.0, 0.0] * 4,
@@ -216,6 +244,8 @@ class TestGridDefinitionTemplate40:
         )
         assert mock_grib.keys["longitudeOfFirstGridPoint"] == int(270.0e6)
         assert mock_grib.keys["longitudeOfLastGridPoint"] == int(0.0e6)
+        # Opposite X scan direction sets bit 1 (0x80).
+        assert mock_grib.keys["scanningMode"] == 0x80
 
     def test_writes_decreasing_lat_endpoints(self, mock_grib, patched_eccodes):
         cube = make_gaussian_cube(
@@ -227,6 +257,18 @@ class TestGridDefinitionTemplate40:
         )
         assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(60.0e6)
         assert mock_grib.keys["latitudeOfLastGridPoint"] == int(-60.0e6)
+
+    def test_writes_increasing_lat_scanmode_flag(self, mock_grib, patched_eccodes):
+        # This ordering drives scanning_mode_flags() to detect +Y from first 2 points.
+        cube = make_gaussian_cube(
+            x_points=[0.0, 90.0, 180.0, 270.0, 0.0, 90.0, 180.0, 270.0],
+            y_points=[-60.0, -30.0, -60.0, -30.0, 30.0, 30.0, 60.0, 60.0],
+        )
+        grid_definition_template_40(
+            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
+        )
+        # Opposite Y scan direction sets bit 2 (0x40).
+        assert mock_grib.keys["scanningMode"] == 0x40
 
     def test_writes_pl_with_varying_lon_counts(self, mock_grib, patched_eccodes):
         cube = make_gaussian_cube(
