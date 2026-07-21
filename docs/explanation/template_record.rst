@@ -13,33 +13,33 @@ can subsequently influence how the data is is saved back to a GRIB2 format file.
 What is a Grid Definition Template?
 -----------------------------------
 
-In GRIB2 files, the **Grid Definition Section (Section 3)** describes how the
+In GRIB2 messages, the **Grid Definition Section (Section 3)** describes how the
 data is laid out geographically. The type of grid is specified by a
 **grid definition template number** (from GRIB2 Code Table 3.1).
 
-Common templates include:
+Templates supported by iris-grib include:
 
-- **Template 0**: Regular latitude/longitude grid
-- **Template 1**: Rotated latitude/longitude grid
-- **Template 4**: Variable resolution latitude/longitude
-- **Template 5**: Variable resolution rotated latitude/longitude
-- **Template 10**: Mercator projection
-- **Template 20**: Polar stereographic
-- **Template 30**: Lambert conformal
-- **Template 40**: Gaussian reduced grid (Gaussian grid on a reduced octahedral mesh)
+- **GDT 3.0**: Regular latitude/longitude grid
+- **GDT 3.1**: Rotated latitude/longitude grid
+- **GDT 3.4**: Variable resolution latitude/longitude
+- **GDT 3.5**: Variable resolution rotated latitude/longitude
+- **GDT 3.10**: Mercator projection
+- **GDT 3.20**: Polar stereographic
+- **GDT 3.30**: Lambert conformal
+- **GDT 3.40**: Gaussian grid
 
 For most regular rectangular grids, the template is inferred automatically from
-the coordinate structure during saving. However, for **specialized grids like
-Gaussian grids (Template 40)**, the structure is more complex and cannot be
+the coordinate structure during saving. However, for specialized grids, **notably
+Gaussian grids (template GDT 3.40)**, the structure is more complex and cannot be
 reliably inferred from the coordinate metadata alone.
 
 
 The TEMPLATE_RECORD Control
 ---------------------------
 
-The ``TEMPLATE_RECORD`` control is essential a boolean flag which can be set to either
-``True`` or ``False`` to enable or disable the recording of the template number in cubes
-loaded from GRIB2 data.
+The ``TEMPLATE_RECORD`` control is essentially like a boolean flag, which can be set to
+either ``True`` or ``False`` to enable or disable the recording of the template number
+in cubes loaded from GRIB2 data.
 
 When enabled, the template number is stored as a
 ``GRIB2_GRID_TEMPLATE`` attribute.  It is **disabled by default**.
@@ -81,15 +81,14 @@ To enable template recording during loading, use one of these methods:
 
 The ``GRIB2_GRID_TEMPLATE`` attribute
 -------------------------------------
-This attribute, when present, shows the exact type of source grid used in the GRIB2 file,
-from which a cube was loaded.
+This attribute, when present, shows the exact type of source grid used in the GRIB2
+message(s) from which a cube was loaded.
 
-When saving certain types of data, it can be used to ensure that the correct grid
-definition template is used, matching the original data format.  This is currently
-especially useful for **reduced Gaussian grids** (Grid definition template GDT 3.40)
--- see below.
+In principle, it can also be used to determine how data is saved to GRIB2 format,
+i.e. with what Grid Definition Template.  Currently, however, this **only** affects the
+saving to reduced gaussian grids (GDT 3.40) -- see below.
 
-This attribute can also easily be added by the user, to control the output format.
+This attribute can also be added by the user, to control the output format.
 For example, reduced-gaussian data loaded from GRIB1 messages (which do not have a grid
 definition template like GRIB2 data) can be saved to GRIB2 with the correct template by
 adding the attribute manually :
@@ -107,228 +106,80 @@ adding the attribute manually :
     iris.save(cube, "data.grib2")
     # Data is saved with GDT 3.40
 
-Using the Recorded Template for Saving
---------------------------------------
 
-The ``GRIB2_GRID_TEMPLATE`` attribute, when present in a cube, controls how
-the cube is saved back to GRIB2 format. This is especially important for
-Gaussian reduced grids (Template 40), which require special handling.
+Template 3.40: Gaussian Grids
+-----------------------------
 
-**Example: Round-trip with Gaussian grids**
+Template 3.40 represents data on a **Gaussian grid**. This grid structure:
 
-.. code-block:: python
+-   Uses Gaussian latitude points (not regular spacing)
 
-    from iris_grib import TEMPLATE_RECORD
-    import iris
+-   May have *either* "regular" or "reduced" longitudes:
 
-    # Load with template recording enabled
-    with TEMPLATE_RECORD.context(record=True):
-        original_cube = iris.load_cube("gaussian_data.grib2")
+    -   "regular" grids" have a fixed set of longitude points, the same for all latitudes
 
-    # The cube now has the template attribute
-    print(original_cube.attributes["GRIB2_GRID_TEMPLATE"])
-    # Output: 40
+    -   "reduced" grids" have varying numbers of longitude points at different latitudes
 
-    # Save the cube - it will use the same template structure
-    iris.save(original_cube, "gaussian_data_roundtrip.grib2")
+Loading
+^^^^^^^
+Iris-grib can load data from either of these types of grid, but the resulting cubes have
+different coordinate structures.
 
-    # Reload and verify
-    reloaded_cube = iris.load_cube("gaussian_data_roundtrip.grib2")
-    assert reloaded_cube.shape == original_cube.shape
-    assert (reloaded_cube.data == original_cube.data).all()
+-   "reduced" grids have a single grid dimension, shared by both the latitude and
+    longitude coordinates. In the case of GRIB2 data, this dimension also has an
+    identifying dimension coordinate called ``gaussian_grid``.
 
+-   "regular" grids have two separate latitude and longitude dimensions, and coordinates,
+    i.e. the same longitude points at each latitude.  The data is a corresponding 2D
+    mesh of points.  Such cubes are essentially the same as data loaded from
+    'irregular' lat-lon grids (which is GDT 3.4 in GRIB2 data).
 
-Template 3.40: Gaussian Reduced Grids
--------------------------------------
+Saving
+^^^^^^
+When saving data to GRIB2, the grid definition template is inferred from the coordinate
+structure.
 
-Template 3.40 represents data on a **Gaussian grid with a reduced octahedral
-mesh**. This grid structure:
+-   "Reduced" gaussian-grid data **can not be saved without** the appropriate
+    ``GRIB2_GRID_TEMPLATE = 40`` attribute.  If the structure of the latitudes and
+    longitudes is consistent with a GDT3.40 reduced Gaussian grid, then it will be saved
+    as such.  If the attribute is missing, or different, or if the coordinate structure
+    is wrong, an error will be raised :  It is not (currently) possible to save data on
+    a 1-dimensional grid in any other way.
 
-- Has varying numbers of longitude points at different latitudes
-- Uses Gaussian latitude points (not regular spacing)
-- Is commonly used in climate and weather models (e.g., ECMWF output)
-
-When ``TEMPLATE_RECORD`` is enabled and a Template 3.40 data file is loaded,
-the cube will have ``GRIB2_GRID_TEMPLATE: 40`` in its attributes. This informs
-the save mechanism to:
-
-1. Use a special GRIB2 template ("reduced_gg_sfc_grib2") as the base message
-2. Apply Template 3.40-specific encoding rules
-3. Properly encode the variable longitude counts per latitude (the ``pl`` array)
-
-**Why is this important?**
-
-Without the template attribute, the save mechanism cannot reliably determine
-that the data should be encoded as Template 3.40. It would attempt to save using
-a standard rectangular grid template, which would fail because:
-
-- Template 3.40 has a different structure with varying longitude counts
-- The coordinates are 1-dimensional (not 2D grids with ``x_coord`` and ``y_coord``)
-
-**Example: Template 3.40 specific code**
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-    import iris
-    from iris.coords import DimCoord
-    import numpy as np
-
-    # This demonstrates the internal check (for reference)
-    # In actual use, this happens automatically when saving
-
-    with TEMPLATE_RECORD.context(record=True):
-        cube = iris.load_cube("reduced_gaussian_grid.grib2")
-
-    # Check that the template was recorded
-    if cube.attributes.get("GRIB2_GRID_TEMPLATE") == 40:
-        print("This is a Gaussian reduced grid")
-        print(f"Grid shape: {cube.shape}")
-        # The latitude coordinate will have repeated values
-        # (one block of longitudes per latitude)
-
-
-Advanced Usage
---------------
-
-**Examining the TEMPLATE_RECORD state**
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-
-    # Check current state
-    print(bool(TEMPLATE_RECORD))
-    # Output: False (if not recording) or True (if recording enabled)
-
-    print(repr(TEMPLATE_RECORD))
-    # Output: TemplateRecorder(_record=False)
-
-
-**Thread-safe usage**
-
-The ``TEMPLATE_RECORD`` object is thread-local, meaning each thread maintains
-its own recording state. This is important for multi-threaded applications:
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-    import Threading
-    import iris
-
-
-    def load_in_thread(filename):
-        # Each thread has its own recording state
-        with TEMPLATE_RECORD.context(record=True):
-            return iris.load_cube(filename)
-
-
-    thread = threading.Thread(target=load_in_thread, args=("data.grib2",))
-    thread.start()
-    # The main thread's TEMPLATE_RECORD state is unaffected
-
-
-Common Patterns
----------------
-
-**Pattern 1: Load and round-trip test**
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-    import iris
-    import tempfile
-
-    with TEMPLATE_RECORD.context(record=True):
-        original = iris.load_cube("input.grib2")
-
-    with tempfile.NamedTemporaryFile(suffix=".grib2") as f:
-        iris.save(original, f.name)
-        reloaded = iris.load_cube(f.name)
-        assert reloaded.shape == original.shape
-
-
-**Pattern 2: Bulk loading with template preservation**
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-    import iris
-    from pathlib import Path
-
-    # Load all GRIB2 files in a directory, preserving templates
-    with TEMPLATE_RECORD.context(record=True):
-        cubes = iris.load(str(Path("data") / "*.grib2"))
-
-    # Each cube now has its template information if available
-    for cube in cubes:
-        if "GRIB2_GRID_TEMPLATE" in cube.attributes:
-            template = cube.attributes["GRIB2_GRID_TEMPLATE"]
-            print(f"{cube.name()}: Template {template}")
+-   "Regular" gaussian-grid data, however, can currently only be saved as an
+    "irregular lat-lon" grid (GDT 3.4).  In future, it may be possible to save this as
+    GDT 3.40, but this is **not currently implemented**.
 
 
 Related Concepts
 ----------------
 
-- **GRIB Parameter Records**: Similar to template records, the ``GRIB_PARAM``
-  attribute records the original parameter encoding. See
-  :doc:`phenom_translation` for details.
+-   **GRIB Parameter Records**: Similar to template records, the ``GRIB_PARAM``
+    attribute records the original parameter encoding. See
+    :doc:`phenom_translation` for details.
 
-- **Grid Definition Section**: For technical details on GRIB2 grid definitions,
-  consult the `GRIB2 specification <https://www.wmo.int/pages/prog/wis/2010/doc/GRIB2_MASTER_TABLE_283-16-0p1.doc>`_.
-
-- **Reduced Gaussian Grids**: Common in climate models; learn more about
-  Gaussian quadrature and reduced Gaussian grids in atmospheric modelling
-  documentation.
-
-
-Troubleshooting
----------------
-
-**Issue: "Expected to find exactly 1 coordinate" error when saving**
-
-This typically occurs when trying to save a Gaussian grid without the template
-attribute:
-
-.. code-block:: python
-
-    cube = iris.load_cube("gaussian_data.grib2")  # Loaded without TEMPLATE_RECORD
-    iris.save(cube, "output.grib2")
-    # Error: CoordinateNotFoundError
-
-**Solution**: Reload with ``TEMPLATE_RECORD`` enabled:
-
-.. code-block:: python
-
-    from iris_grib import TEMPLATE_RECORD
-    import iris
-
-    with TEMPLATE_RECORD.context(record=True):
-        cube = iris.load_cube("gaussian_data.grib2")
-    iris.save(cube, "output.grib2")  # Now works!
-
-
-**Issue: Attribute is present but not being used during save**
-
-The ``GRIB2_GRID_TEMPLATE`` attribute must be an integer with value ``40``
-(or other valid template number). Check:
-
-.. code-block:: python
-
-    cube = iris.load_cube("data.grib2")
-    template = cube.attributes.get("GRIB2_GRID_TEMPLATE")
-    print(f"Type: {type(template)}, Value: {template}")
-    # Must be: Type: <class 'int'>, Value: 40
+-   **Reduced Gaussian Grids**: Common in climate models; learn more about
+    Gaussian quadrature and reduced Gaussian grids in atmospheric modelling
+    documentation. See
+    `OpenIFS: Gaussian grids <https://confluence.ecmwf.int/spaces/OIFS/pages/85396207/4.1+OpenIFS+Gaussian+grids>`_.
 
 
 Summary
 -------
 
-- Use ``TEMPLATE_RECORD.set(True)`` or ``TEMPLATE_RECORD.context(record=True)``
-  to record grid definition templates during loading
-- The recorded template is stored as a ``GRIB2_GRID_TEMPLATE`` cube attribute
-- This attribute controls how the cube is saved, ensuring round-trip
-  compatibility, especially for specialized grids like Gaussian reduced grids
-- Use the context manager method for cleaner, thread-safe code
-- Template recording is particularly important when working with Template 3.40
-  Gaussian grids
+-   Use ``TEMPLATE_RECORD.set(True)`` or ``TEMPLATE_RECORD.context(record=True)``
+    to record grid definition templates during loading
+
+-   The recorded template is stored as a ``GRIB2_GRID_TEMPLATE`` cube attribute
+
+-   The special ``GRIB2_GRID_TEMPLATE`` attribute can also in some cases control *how*
+    data is saved -- notably for certain specialized grids, such as the Gaussian grids
+
+    -   A ``GRIB2_GRID_TEMPLATE`` attribute can also be **written by the user** to enable
+        saving data in a particular form
+
+-   The special attribute is **required** to save data to a reduced Gaussian grid format
+    (GDT 3.40), otherwise the save will raise an error.
+
+    -   This can be used to successfully save reduced gaussian grids loaded from GRIB1
+        data to GRIB2 format (since iris-grib cannot save to GRIB1).
