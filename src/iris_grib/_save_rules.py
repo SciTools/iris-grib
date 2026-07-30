@@ -933,7 +933,7 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
     eccodes.codes_set(grib, "longitudeOfFirstGridPoint", int(1.0e6 * lon0))
     eccodes.codes_set(grib, "longitudeOfLastGridPoint", int(1.0e6 * lon1))
 
-    eccodes.codes_set(grib, "N", n_lat_vals / 2)
+    eccodes.codes_set(grib, "N", n_lat_vals // 2)
     eccodes.codes_set(grib, "Nj", n_lat_vals)
     eccodes.codes_set_missing(grib, "Ni")
 
@@ -990,7 +990,7 @@ def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
         if regular_x_and_y:
             grid_definition_template_1(cube, grib)
         else:
-            # N.B. we could here be dealing with data on a "rotated gaussion" grid,
+            # N.B. we could here be dealing with data on a "rotated gaussian" grid,
             #  (GDT 3.41 or 3.43), but we don't yet support those.
             grid_definition_template_5(cube, grib)
 

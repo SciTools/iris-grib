@@ -377,9 +377,7 @@ def save_pairs_from_cube(cube):
         else:
             template_name = "GRIB2"
         grib_message = eccodes.codes_grib_new_from_samples(template_name)
-        result = _save_rules.run(slice2D, grib_message, cube, x_coord, y_coord)
-        if result is not None:
-            grib_message = result
+        _save_rules.run(slice2D, grib_message, cube, x_coord, y_coord)
         yield (slice2D, grib_message)
 
 

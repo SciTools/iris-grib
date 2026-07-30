@@ -26,6 +26,7 @@ from iris.util import is_regular
 from iris_grib import TEMPLATE_RECORD
 from iris_grib.grib_phenom_translation import GRIBCode
 from iris_grib.message import GribMessage
+from iris.tests._shared_utils import assert_array_all_close
 
 
 def assert_grib_message_contents(filename, contents):
@@ -178,7 +179,6 @@ def record(request):
 def test_gdt40_loadsave(tmp_path, record):
     loadpath = tests.get_data_path(("GRIB", "reduced", "reduced_gg.grib2"))
     cube = load_cube(loadpath)
-    print(cube)
 
     # This kludge is needed for now to make it saveable
     #  - ASIS: fails to add pressure factory on load, so has no vertical coord
@@ -210,11 +210,5 @@ def test_gdt40_loadsave(tmp_path, record):
                 for i_dim in list(range(cube.ndim)) + [()]
             ]
 
-        print("\nORIGINAL:")
-        print(cube)
-        print(coord_dims_names(cube))
-        print("\n\nRELOADED:")
-        print(cube_reloaded)
-        print(coord_dims_names(cube_reloaded))
         assert coord_dims_names(cube_reloaded) == coord_dims_names(cube)
-        assert np.all(cube_reloaded.data == cube.data)
+        assert_array_all_close(cube_reloaded.data, cube.data)

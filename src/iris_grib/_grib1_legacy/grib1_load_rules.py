@@ -185,7 +185,14 @@ def grib1_convert(grib):
             ReferenceTarget("ref_surface_pressure", ensure_surface_air_pressure_name)
         )
         dim_coords_and_dims.append(
-            (DimCoord(np.arange(grib._x_points.shape[0]), long_name="gaussian_grid"), 0)
+            (
+                DimCoord(
+                    np.arange(grib._x_points.shape[0]),
+                    long_name="gaussian_grid",
+                    units="1",
+                ),
+                0,
+            )
         )
 
     ##################################################

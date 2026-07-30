@@ -1400,7 +1400,7 @@ class TemplateRecorder(threading.local):
     This provides a setting, controlled by `set` and `context` methods, which causes all
     loaded cubes to record the grid template definition number as a cube attribute.
 
-    When present, the 'GRIB_GRID_TEMPLATE' attribute is used to control how certain
+    When present, the 'GRIB2_GRID_TEMPLATE' attribute is used to control how certain
     types of data are saved -- notably, for gaussian grids.
 
     e.g. ``TEMPLATE_RECORD.set(True)`` or ``with TEMPLATE_RECORD.context(True): ...``.
