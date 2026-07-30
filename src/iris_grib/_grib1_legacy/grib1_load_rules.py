@@ -8,21 +8,12 @@ Rules for grib1 loading.
 Used exclusively by the 'legacy' GRIB loader in `_grib1_legacy.grib_wrapper`.
 """
 
-import numpy as np
-
-from iris_grib._grib2_convert import ensure_surface_air_pressure_name
-
 from cf_units import CALENDAR_GREGORIAN, Unit
 
 from iris.aux_factory import HybridPressureFactory
 from iris.coords import AuxCoord, CellMethod, DimCoord
 from iris.exceptions import TranslationError
-from iris.fileformats.rules import (
-    ConversionMetadata,
-    Factory,
-    Reference,
-    ReferenceTarget,
-)
+from iris.fileformats.rules import ConversionMetadata, Factory, Reference
 
 
 def grib1_convert(grib):
@@ -176,24 +167,6 @@ def grib1_convert(grib):
             f"UNKNOWN LOCAL PARAM {grib.indicatorOfParameter}.{grib.table2Version}"
         )
         units = "???"
-
-    # Special!!
-    if grib.table2Version == 128 and grib.indicatorOfParameter == 134:
-        standard_name = "air_pressure"
-        units = "Pa"
-        references.append(
-            ReferenceTarget("ref_surface_pressure", ensure_surface_air_pressure_name)
-        )
-        dim_coords_and_dims.append(
-            (
-                DimCoord(
-                    np.arange(grib._x_points.shape[0]),
-                    long_name="gaussian_grid",
-                    units="1",
-                ),
-                0,
-            )
-        )
 
     ##################################################
     ##### decode TIME -> aux_coords (=always scalar)
