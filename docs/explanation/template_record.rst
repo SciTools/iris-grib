@@ -1,3 +1,5 @@
+.. _template_record:
+
 Template Recording
 ==================
 
