@@ -829,82 +829,23 @@ def grid_definition_template_140(cube, grib):
 
 def is_grid_definition_template_40(cube, x_coord, y_coord):
     """Work out whether this cube will save with GDT 3.40 (gaussian grid)."""
-    # Only allow saving to GDT3.40 when the enabling attribute is present.
+    # *Only* allow saving to GDT3.40 when the enabling attribute is present.
+    #  -- if not, fails elsewhere, as a 1-D cube can't be saved any other way.
     template = cube.attributes.get("GRIB2_GRID_TEMPLATE", "")
     ok = isinstance(template, int) and template == 40  # nothing else will do !
 
+    # Also need x and y coords to be 1-D, on the same dimension,
+    #  i.e. like a trajectory or mesh cube
     if ok:
-        # Initial basic check that we have 1-D coords.
         xco_dims = cube.coord_dims(x_coord)
         yco_dims = cube.coord_dims(y_coord)
-        ok = yco_dims == xco_dims and len(xco_dims) == 1
-
-    if ok:
-        lons, lats = x_coord.points, y_coord.points
-        ydiffs = np.diff(lats)
-        # Latitudes should have some repeated values.
-        ok = np.any(ydiffs == 0)
-
-    if ok:
-        # Latitudes should be monotonic
-        yd_min = ydiffs.min()
-        yd_max = ydiffs.max()
-        lats_increasing = yd_max > 0
-        ok = (lats_increasing and yd_min >= 0) or (not lats_increasing and yd_max <= 0)
-
-    if ok:
-        # Check the expected structure of the data:
-        #  each lat-val occupies a contiguous block,
-        #  within which the lon vals are (strictly) monotonic.
-        lat_vals = np.array(sorted(set(lats)))
-        n_lat_vals = len(lat_vals)
-        # ought to always divide by 2, since N parallels either side of equator
-        ok = n_lat_vals % 2 == 0
-
-    if ok:
-        if not lats_increasing:
-            # Put the set of latitude values into the expected order
-            lat_vals = lat_vals[::-1]
-        lons = x_coord.points
-        lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
-
-        prev_maxind = -1
-        for this_lat in lat_vals:
-            thislat_inds = np.where(lats == this_lat)[0]
-            n_thislat = len(thislat_inds)
-            i_min, i_max = thislat_inds[[0, -1]]
-            # Check that latitudes are contiguous in one direction
-            #  (effectively, monotonic and "lat_vals" is in order of occurrence)
-            if i_min != prev_maxind + 1:
-                ok = False
-                break
-            prev_maxind = i_max
-            if (i_max - i_min + 1) != n_thislat:
-                ok = False
-                break
-
-            thislat_lons = lons[i_min : i_max + 1]
-            if (lons_increasing and np.diff(thislat_lons).min() <= 0) or (
-                not lons_increasing and np.diff(thislat_lons).max() >= 0
-            ):
-                ok = False
-                break
+        ok = len(xco_dims) == 1 and yco_dims == xco_dims
 
     return ok
 
 
 def grid_definition_template_40(cube, grib, x_coord, y_coord):
-    # For the gaussian grids, for now it appears that to function the message must be
-    # based on a different template.
-    # grib = eccodes.codes_grib_new_from_samples("reduced_gg_sfc_grib2")
-    # --OR-- possibly also, can set the "computed key" 'gridType = gg' ??
-    #
-    # **FOR NOW:** this is handled as a special case by the caller:
-    #  'grid_definition_section' --> 'is_grid_definition_template_40'
-
-    # NB some code here is also duplicated from the 'is..' routine : TODO improve DRY??
-
-    eccodes.codes_set(grib, "gridDefinitionTemplateNumber", 40)
+    eccodes.codes_set(grib, "gridType", "reduced_gg")
 
     lons, lats = x_coord.points, y_coord.points
     lats_increasing = np.diff(lats).min() >= 0
@@ -946,14 +887,34 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
     eccodes.codes_set(grib, "interpretationOfNumberOfPoints", 1)
     eccodes.codes_set_array(grib, "pl", list(lon_repeats))
 
-    # # Check the latitude values calculation
-    # # ??? but apparently, this can't be called in this way ???
-    # y_points = eccodes.codes_get_array(grib, "distinctLatitudes")
-    # tolerance = (lats.max() - lats.min()) * 0.05 / n_lat_vals
-    # if not np.all(np.abs(y_points - lats) < tolerance):
-    #     return result
+    (n_values,) = x_coord.shape  # coords are always 1-D
+    # Setting these 2 additional keys makes the message fully valid,
+    #  allowing us to read the 'correct' gaussian latitude and longitude values
+    eccodes.codes_set(grib, "numberOfValues", n_values)
+    eccodes.codes_set(grib, "numberOfDataPoints", n_values)
 
-    return grib
+    # Check the latitude and longitudes match.
+    # We do this because the message is configured based on only certain key properties
+    #   of the coordinate values, which doesn't guarantee that the values are all
+    #   actually the same as those of GDT3.40 template with the same shape.
+    # We defer to eccodes on this, as exact calculations are complex + somewhat obscure
+    y_points = eccodes.codes_get_array(grib, "latitudes")
+    tolerance = (lats.max() - lats.min()) * 0.02 / n_lat_vals
+    if not np.allclose(y_points, lats, atol=tolerance, rtol=0):
+        msg = (
+            "Cube y coordinate values do not match the expected latitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        raise ValueError(msg)
+
+    x_points = eccodes.codes_get_array(grib, "longitudes")
+    tolerance = abs(lon1 - lon0) * 0.02 / n_values
+    if not np.allclose(x_points, lons, atol=tolerance, rtol=0):
+        msg = (
+            "Cube x coordinate values do not match the expected longitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        raise ValueError(msg)
 
 
 def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
@@ -978,10 +939,11 @@ def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
         if regular_x_and_y:
             grid_definition_template_0(cube, grib)
         else:
-            # Check for gaussian lats+lons, and if not fallback on GDT3.4
             if is_grid_definition_template_40(cube, x_coord, y_coord):
+                # If 1-D lats+lons, and template-record=40, try reduced-gaussian ..
                 grid_definition_template_40(cube, grib, x_coord, y_coord)
             else:
+                # .. else fallback on GDT3.4 : irregular lat-lon grids
                 grid_definition_template_4(cube, grib)
 
     elif isinstance(cs, RotatedGeogCS):

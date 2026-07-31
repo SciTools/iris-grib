@@ -372,11 +372,7 @@ def save_pairs_from_cube(cube):
     # Save each latlon slice2D in the cube
     slice_param = [y_coord, x_coord] if dim_coords else [x_coord]
     for slice2D in cube.slices(slice_param):
-        if _save_rules.is_grid_definition_template_40(cube, x_coord, y_coord):
-            template_name = "reduced_gg_sfc_grib2"
-        else:
-            template_name = "GRIB2"
-        grib_message = eccodes.codes_grib_new_from_samples(template_name)
+        grib_message = eccodes.codes_grib_new_from_samples("GRIB2")
         _save_rules.run(slice2D, grib_message, cube, x_coord, y_coord)
         yield (slice2D, grib_message)
 
