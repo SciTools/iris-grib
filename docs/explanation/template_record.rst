@@ -50,13 +50,10 @@ To enable template recording during loading, use one of these methods:
 
 .. testsetup::
 
-    import matplotlib as mpl
-
-    mpl.use("Agg")  # Prevents matplotlib from trying to open a window
     from pathlib import Path
-    from iris.tests._shared_utils import get_data_path
+    from iris.config import TEST_DATA_DIR
 
-    grib_data_dir = Path(get_data_path(["GRIB"]))
+    grib_data_dir = Path(TEST_DATA_DIR) / "GRIB"
 
 
 **Method 2: Context manager (for temporary use)**
