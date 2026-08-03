@@ -899,7 +899,7 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
                 break
 
             # it is finally safe to calculate the direction of longitudes (>2 of them)
-            lons_thislat = lons[lats == lat_vals[0]]
+            lons_thislat = lons[lats == this_lat]
             londiffs = np.diff(lons_thislat)
             lons_increase = londiffs[0] > 0
             if (lons_increase and np.any(londiffs <= 0)) or (
