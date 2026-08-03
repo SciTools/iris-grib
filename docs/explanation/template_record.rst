@@ -56,7 +56,7 @@ To enable template recording during loading, use one of these methods:
     grib_data_dir = Path(TEST_DATA_DIR) / "GRIB"
 
 
-**Method 2: Context manager (for temporary use)**
+**Method 1: Context manager (for temporary use)**
 
 .. doctest::
 
@@ -75,7 +75,7 @@ To enable template recording during loading, use one of these methods:
     >>> print(cube2.attributes.get("GRIB2_GRID_TEMPLATE", None))
     None
 
-**Method 1: Persistent setting**
+**Method 2: Persistent setting**
 
 .. doctest::
 
