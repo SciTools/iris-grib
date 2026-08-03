@@ -24,10 +24,12 @@ def make_gaussian_cube(
     grib_grid_template=40,
     semi_major_axis=6371200.0,
     semi_minor_axis=None,
+    patch_eccodes_getarrays=None,
 ):
     if x_points is None or y_points is None:
+        # commonest cases have increasing lons + decreasing lats, so mimic that
         x_points = [0.0, 90.0, 180.0, 270.0] * 4
-        y_points = [-60.0] * 4 + [-30.0] * 4 + [30.0] * 4 + [60.0] * 4
+        y_points = [60.0] * 4 + [30.0] * 4 + [-30.0] * 4 + [-60.0] * 4
     if semi_minor_axis is None:
         ellipsoid = GeogCS(semi_major_axis=semi_major_axis)
     else:
@@ -46,7 +48,15 @@ def make_gaussian_cube(
     cube.add_aux_coord(x_coord, 0)
     if grib_grid_template is not None:
         cube.attributes["GRIB2_GRID_TEMPLATE"] = grib_grid_template
-    return cube
+
+    if patch_eccodes_getarrays is not None:
+
+        def array_results(grib, key, ktype=None):
+            return {"longitudes": x_coord.points, "latitudes": y_coord.points}[key]
+
+        patch_eccodes_getarrays.codes_get_array = array_results
+
+    return cube, x_coord, y_coord
 
 
 @pytest.fixture
@@ -78,25 +88,25 @@ def patched_eccodes(mocker):
 
 class TestIsGridDefinitionTemplate40:
     def test_true_for_valid_grid(self):
-        cube = make_gaussian_cube()
+        cube, _, _ = make_gaussian_cube()
         assert is_grid_definition_template_40(
             cube, cube.coord("longitude"), cube.coord("latitude")
         )
 
     def test_false_missing_attribute(self):
-        cube = make_gaussian_cube(grib_grid_template=None)
+        cube, _, _ = make_gaussian_cube(grib_grid_template=None)
         assert not is_grid_definition_template_40(
             cube, cube.coord("longitude"), cube.coord("latitude")
         )
 
     def test_false_wrong_attribute_value(self):
-        cube = make_gaussian_cube(grib_grid_template=4)
+        cube, _, _ = make_gaussian_cube(grib_grid_template=4)
         assert not is_grid_definition_template_40(
             cube, cube.coord("longitude"), cube.coord("latitude")
         )
 
     def test_false_attribute_not_int(self):
-        cube = make_gaussian_cube()
+        cube, _, _ = make_gaussian_cube()
         cube.attributes["GRIB2_GRID_TEMPLATE"] = "40"
         assert not is_grid_definition_template_40(
             cube, cube.coord("longitude"), cube.coord("latitude")
@@ -122,53 +132,8 @@ class TestIsGridDefinitionTemplate40:
         cube.attributes["GRIB2_GRID_TEMPLATE"] = 40
         assert not is_grid_definition_template_40(cube, x_coord, y_coord)
 
-    def test_false_no_repeated_latitudes(self):
-        cube = make_gaussian_cube(
-            x_points=list(range(8)),
-            y_points=[0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0],
-        )
-        assert not is_grid_definition_template_40(
-            cube, cube.coord("longitude"), cube.coord("latitude")
-        )
-
-    def test_false_non_monotonic_latitudes(self):
-        cube = make_gaussian_cube(
-            x_points=list(range(8)),
-            y_points=[-60.0, -60.0, -30.0, 0.0, -30.0, 30.0, 30.0, 60.0],
-        )
-        assert not is_grid_definition_template_40(
-            cube, cube.coord("longitude"), cube.coord("latitude")
-        )
-
-    def test_false_odd_number_unique_latitudes(self):
-        cube = make_gaussian_cube(
-            x_points=[0.0, 90.0, 0.0, 90.0, 0.0, 90.0],
-            y_points=[-60.0, -60.0, 0.0, 0.0, 60.0, 60.0],
-        )
-        assert not is_grid_definition_template_40(
-            cube, cube.coord("longitude"), cube.coord("latitude")
-        )
-
-    def test_false_non_contiguous_latitudes(self):
-        cube = make_gaussian_cube(
-            x_points=[0.0, 90.0, 180.0, 270.0, 0.0, 90.0, 180.0, 270.0],
-            y_points=[-30.0, -30.0, 30.0, 30.0, -30.0, -30.0, 30.0, 30.0],
-        )
-        assert not is_grid_definition_template_40(
-            cube, cube.coord("longitude"), cube.coord("latitude")
-        )
-
-    def test_false_non_monotonic_longitudes_within_lat_block(self):
-        cube = make_gaussian_cube(
-            x_points=[0.0, 180.0, 90.0, 270.0, 0.0, 90.0, 180.0, 270.0],
-            y_points=[-60.0, -60.0, -60.0, -60.0, 30.0, 30.0, 30.0, 30.0],
-        )
-        assert not is_grid_definition_template_40(
-            cube, cube.coord("longitude"), cube.coord("latitude")
-        )
-
     def test_true_with_decreasing_latitudes(self):
-        cube = make_gaussian_cube(
+        cube, _, _ = make_gaussian_cube(
             x_points=[0.0, 90.0, 180.0, 270.0] * 4,
             y_points=[60.0] * 4 + [30.0] * 4 + [-30.0] * 4 + [-60.0] * 4,
         )
@@ -177,7 +142,7 @@ class TestIsGridDefinitionTemplate40:
         )
 
     def test_true_with_decreasing_longitudes(self):
-        cube = make_gaussian_cube(
+        cube, _, _ = make_gaussian_cube(
             x_points=[270.0, 180.0, 90.0, 0.0] * 4,
             y_points=[-60.0] * 4 + [-30.0] * 4 + [30.0] * 4 + [60.0] * 4,
         )
@@ -186,7 +151,7 @@ class TestIsGridDefinitionTemplate40:
         )
 
     def test_true_with_varying_lon_counts_per_lat(self):
-        cube = make_gaussian_cube(
+        cube, _, _ = make_gaussian_cube(
             x_points=[0.0, 180.0, 0.0, 90.0, 180.0, 270.0],
             y_points=[-60.0, -60.0, 60.0, 60.0, 60.0, 60.0],
         )
@@ -197,20 +162,19 @@ class TestIsGridDefinitionTemplate40:
 
 class TestGridDefinitionTemplate40:
     def test_writes_expected_core_keys(self, mock_grib, patched_eccodes):
-        cube = make_gaussian_cube()
-        x_coord = cube.coord("longitude")
-        y_coord = cube.coord("latitude")
-        returned = grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+        cube, x_coord, y_coord = make_gaussian_cube(
+            patch_eccodes_getarrays=patched_eccodes
+        )
+        grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
 
-        assert returned is mock_grib
-        assert mock_grib.keys["gridDefinitionTemplateNumber"] == 40
+        assert mock_grib.keys["gridType"] == "reduced_gg"
         # From shape_of_the_earth() using the default spherical GeogCS.
         assert mock_grib.keys["shapeOfTheEarth"] == 1
         assert mock_grib.keys["scaledValueOfRadiusOfSphericalEarth"] == 6371200.0
         # From scanning_mode_flags(): default has +x and non-+y (first 2 lats equal).
         assert mock_grib.keys["scanningMode"] == 0
-        assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(-60.0e6)
-        assert mock_grib.keys["latitudeOfLastGridPoint"] == int(60.0e6)
+        assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(60.0e6)
+        assert mock_grib.keys["latitudeOfLastGridPoint"] == int(-60.0e6)
         assert mock_grib.keys["longitudeOfFirstGridPoint"] == int(0.0e6)
         assert mock_grib.keys["longitudeOfLastGridPoint"] == int(270.0e6)
         assert mock_grib.keys["N"] == 2
@@ -224,60 +188,101 @@ class TestGridDefinitionTemplate40:
         assert mock_grib.keys["pl"] == [4, 4, 4, 4]
 
     def test_writes_shape_of_earth_fixed_6(self, mock_grib, patched_eccodes):
-        cube = make_gaussian_cube(semi_major_axis=6371229.0)
-        grid_definition_template_40(
-            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
+        cube, x_coord, y_coord = make_gaussian_cube(
+            semi_major_axis=6371229.0,
+            patch_eccodes_getarrays=patched_eccodes,
         )
+        grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
         assert mock_grib.keys["shapeOfTheEarth"] == 6
         assert mock_grib.keys["scaleFactorOfEarthMajorAxis"] == 0
         assert mock_grib.keys["scaledValueOfEarthMajorAxis"] == 0
         assert mock_grib.keys["scaleFactorOfEarthMinorAxis"] == 0
         assert mock_grib.keys["scaledValueOfEarthMinorAxis"] == 0
 
-    def test_writes_decreasing_lon_endpoints(self, mock_grib, patched_eccodes):
-        cube = make_gaussian_cube(
+    def test_writes_decreasing_lons(self, mock_grib, patched_eccodes):
+        "Test the less-usual X scan direction."
+        cube, x_coord, y_coord = make_gaussian_cube(
             x_points=[270.0, 180.0, 90.0, 0.0] * 4,
-            y_points=[-60.0] * 4 + [-30.0] * 4 + [30.0] * 4 + [60.0] * 4,
+            y_points=[60.0] * 4 + [30.0] * 4 + [-30.0] * 4 + [-60.0] * 4,
+            patch_eccodes_getarrays=patched_eccodes,
         )
-        grid_definition_template_40(
-            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
-        )
+        grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
         assert mock_grib.keys["longitudeOfFirstGridPoint"] == int(270.0e6)
         assert mock_grib.keys["longitudeOfLastGridPoint"] == int(0.0e6)
         # Opposite X scan direction sets bit 1 (0x80).
         assert mock_grib.keys["scanningMode"] == 0x80
 
-    def test_writes_decreasing_lat_endpoints(self, mock_grib, patched_eccodes):
-        cube = make_gaussian_cube(
+    def test_writes_increasing_lats(self, mock_grib, patched_eccodes):
+        "Test the less-usual Y scan direction."
+        cube, x_coord, y_coord = make_gaussian_cube(
             x_points=[0.0, 90.0, 180.0, 270.0] * 4,
-            y_points=[60.0] * 4 + [30.0] * 4 + [-30.0] * 4 + [-60.0] * 4,
+            y_points=[-60.0] * 4 + [-30.0] * 4 + [30.0] * 4 + [60.0] * 4,
+            patch_eccodes_getarrays=patched_eccodes,
         )
-        grid_definition_template_40(
-            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
-        )
-        assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(60.0e6)
-        assert mock_grib.keys["latitudeOfLastGridPoint"] == int(-60.0e6)
-
-    def test_writes_increasing_lat_scanmode_flag(self, mock_grib, patched_eccodes):
-        # This ordering drives scanning_mode_flags() to detect +Y from first 2 points.
-        cube = make_gaussian_cube(
-            x_points=[0.0, 90.0, 180.0, 270.0, 0.0, 90.0, 180.0, 270.0],
-            y_points=[-60.0, -30.0, -60.0, -30.0, 30.0, 30.0, 60.0, 60.0],
-        )
-        grid_definition_template_40(
-            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
-        )
-        # Opposite Y scan direction sets bit 2 (0x40).
+        grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+        assert mock_grib.keys["latitudeOfFirstGridPoint"] == int(-60.0e6)
+        assert mock_grib.keys["latitudeOfLastGridPoint"] == int(60.0e6)
+        # Positive Y scan direction sets bit 2 (0x40).
         assert mock_grib.keys["scanningMode"] == 0x40
 
     def test_writes_pl_with_varying_lon_counts(self, mock_grib, patched_eccodes):
-        cube = make_gaussian_cube(
+        cube, x_coord, y_coord = make_gaussian_cube(
             x_points=[0.0, 180.0, 0.0, 90.0, 180.0, 270.0],
             y_points=[-60.0, -60.0, 60.0, 60.0, 60.0, 60.0],
+            patch_eccodes_getarrays=patched_eccodes,
         )
-        grid_definition_template_40(
-            cube, mock_grib, cube.coord("longitude"), cube.coord("latitude")
-        )
+        grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
         assert mock_grib.keys["N"] == 1
         assert mock_grib.keys["Nj"] == 2
         assert mock_grib.keys["pl"] == [2, 4]
+
+    def test_fails_no_repeated_latitudes(self, mock_grib, patched_eccodes):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=list(range(8)),
+            y_points=[0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0],
+            patch_eccodes_getarrays=patched_eccodes,
+        )
+        msg = "Latitudes have no repeated values."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_non_monotonic_latitudes(self, mock_grib, patched_eccodes):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+            y_points=[-60.0, -60.0, -30.0, 0.0, -30.0, 30.0, 30.0, 60.0],
+        )
+        msg = "Latitudes are not monotonic."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_odd_number_unique_latitudes(self, mock_grib, patched_eccodes):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=[0.0, 90.0, 0.0, 90.0, 0.0, 90.0],
+            y_points=[-60.0, -60.0, 0.0, 0.0, 60.0, 60.0],
+            patch_eccodes_getarrays=patched_eccodes,
+        )
+        msg = r"Number of distinct latitude repeat sections, 'N \* 2', is not even."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_non_contiguous_latitudes(self, mock_grib, patched_eccodes):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=[0.0, 90.0, 180.0, 45.0, 0.0, 90.0, 180.0, 0.0, 90.0, 180.0],
+            y_points=[0.0, 0.0, 0.0, 20.0, 30.0, 30.0, 30.0, 70.0, 70.0, 70.0],
+            patch_eccodes_getarrays=patched_eccodes,
+        )
+        msg = "Latitude value of 20.0 occurs only 1 times, must be >= 2."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_non_monotonic_longitudes_within_lat_block(
+        self, mock_grib, patched_eccodes
+    ):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=[0.0, 180.0, 90.0, 270.0, 0.0, 90.0, 180.0, 270.0],
+            y_points=[-60.0, -60.0, -60.0, -60.0, 30.0, 30.0, 30.0, 30.0],
+            patch_eccodes_getarrays=patched_eccodes,
+        )
+        msg = "Longitude values for latitude -60.0 are not monotonic."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
