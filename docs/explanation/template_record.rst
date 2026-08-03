@@ -48,37 +48,52 @@ When enabled, the template number is stored as a
 
 To enable template recording during loading, use one of these methods:
 
-**Method 1: Persistent setting**
+.. testsetup::
 
-.. code-block:: python
+    import matplotlib as mpl
 
-    from iris_grib import TEMPLATE_RECORD
-    import iris
+    mpl.use("Agg")  # Prevents matplotlib from trying to open a window
+    from pathlib import Path
+    from iris.tests._shared_utils import get_data_path
 
-    # Enable template recording for all subsequent loads
-    TEMPLATE_RECORD.set(True)
-
-    cube = iris.load_cube("data.grib2")
-    print(cube.attributes)
-    # Output might include: {'GRIB2_GRID_TEMPLATE': 40, ...}
+    grib_data_dir = Path(get_data_path(["GRIB"]))
 
 
 **Method 2: Context manager (for temporary use)**
 
-.. code-block:: python
+.. doctest::
 
-    from iris_grib import TEMPLATE_RECORD
-    import iris
+    >>> from iris_grib import TEMPLATE_RECORD
+    >>> import iris
+    >>> testpath = grib_data_dir / "lambert" / "lambert.grib2"
 
-    with TEMPLATE_RECORD.context(record=True):
-        cube = iris.load_cube("data.grib2")
-        print(cube.attributes)
-        # GRIB2_GRID_TEMPLATE attribute is now available
+    >>> with TEMPLATE_RECORD.context(record=True):
+    ...     cube1 = iris.load_cube(testpath)
+    ...     print(cube1.attributes.get("GRIB2_GRID_TEMPLATE", None))
+    ...
+    30
 
     # Template recording is automatically disabled after the context block
-    cube2 = iris.load_cube("other_data.grib2")
-    print("GRIB2_GRID_TEMPLATE" in cube2.attributes)
-    # Output: False
+    >>> cube2 = iris.load_cube(testpath)
+    >>> print(cube2.attributes.get("GRIB2_GRID_TEMPLATE", None))
+    None
+
+**Method 1: Persistent setting**
+
+.. doctest::
+
+    >>> # Enable template recording for all subsequent loads
+    >>> TEMPLATE_RECORD.set(True)
+
+    >>> cube = iris.load_cube(grib_data_dir / "reduced" / "reduced_gg.grib2")
+    >>> print(cube.attributes.get("GRIB2_GRID_TEMPLATE", None))
+    40
+
+
+.. testcleanup::
+
+    # Make sure is reset to default (off) after doctests
+    TEMPLATE_RECORD.set(False)
 
 
 The ``GRIB2_GRID_TEMPLATE`` attribute
