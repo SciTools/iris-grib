@@ -2,7 +2,10 @@
 #
 # This file is part of iris-grib and is released under the BSD license.
 # See LICENSE in the root of the repository for full licensing details.
-"""Unit tests for GDT 3.40 save rules."""
+"""
+Unit tests for :meth:`iris_grib._save_rules.grid_definition_template_40`.
+
+"""
 
 import numpy as np
 import pytest
