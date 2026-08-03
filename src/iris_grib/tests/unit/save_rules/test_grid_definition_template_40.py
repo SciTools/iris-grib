@@ -10,6 +10,8 @@ Unit tests for :meth:`iris_grib._save_rules.grid_definition_template_40`.
 import numpy as np
 import pytest
 
+import eccodes
+
 from iris.coords import AuxCoord, DimCoord
 from iris.coord_systems import GeogCS
 from iris.cube import Cube
@@ -289,3 +291,48 @@ class TestGridDefinitionTemplate40:
         msg = "Longitude values for latitude -60.0 are not monotonic."
         with pytest.raises(ValueError, match=msg):
             grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_different_lon_directions_between_latitudes(
+        self, mock_grib, patched_eccodes
+    ):
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=[0.0, 90.0, 180.0, 270.0, 270.0, 180.0, 90.0, 0.0],
+            y_points=[-60.0] * 4 + [60.0] * 4,
+        )
+        msg = "Longitude values do not go in the same direction for all latitudes."
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, mock_grib, x_coord, y_coord)
+
+    def test_fails_when_eccodes_latitudes_do_not_match(self):
+        """Test via a *real* grib message, with incorrect latitude values."""
+        x_points = [0.0, 90.0, 180.0, 270.0] * 4
+        # latitudes that look structurally ~OK, but are not correct gaussian latitudes
+        y_points = [80.0] * 4 + [20.0] * 4 + [-20.0] * 4 + [-80.0] * 4
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=x_points, y_points=y_points
+        )
+        grib = eccodes.codes_grib_new_from_samples("GRIB2")
+        msg = (
+            "Cube y coordinate values do not match the expected latitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, grib, x_coord, y_coord)
+
+    def test_fails_when_eccodes_longitudes_do_not_match(self):
+        """Test via a *real* grib message, with correct lats but bad lons."""
+        # latitudes that are the correct gaussian latitudes for N=2
+        y_points = [59.4444] * 4 + [19.8757] * 4 + [-19.8757] * 4 + [-59.4444] * 4
+        # longitudes that look ~OK, but with one point 'off' a bit
+        x_points = [0.0, 90.0, 180.0, 270.0] * 4
+        x_points[6] += 25.0
+        cube, x_coord, y_coord = make_gaussian_cube(
+            x_points=x_points, y_points=y_points
+        )
+        grib = eccodes.codes_grib_new_from_samples("GRIB2")
+        msg = (
+            "Cube x coordinate values do not match the expected longitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        with pytest.raises(ValueError, match=msg):
+            grid_definition_template_40(cube, grib, x_coord, y_coord)
