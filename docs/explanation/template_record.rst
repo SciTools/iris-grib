@@ -51,9 +51,12 @@ To enable template recording during loading, use one of these methods:
 .. testsetup::
 
     from pathlib import Path
-    from iris.config import TEST_DATA_DIR
+    import matplotlib as mpl
 
-    grib_data_dir = Path(TEST_DATA_DIR) / "GRIB"
+    mpl.use("Agg")  # Prevent plots from being displayed during doctests
+    from iris_grib.tests import IrisGribTest
+
+    grib_data_dir = Path(IrisGribTest.get_data_path("GRIB"))
 
 
 **Method 1: Context manager (for temporary use)**
