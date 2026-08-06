@@ -25,7 +25,7 @@ Features
 
 * `@pp-mo <https://github.com/pp-mo>`_ , `@sawom666 <https://github.com/sawom666>`_,
   `@trexfeathers <https://github.com/trexfeathers>`_,
-  `@chrisbunney <https://github.com/chrisbunney>`_ and
+  `@ukmo-ccbunney <https://github.com/ukmo-ccbunney>`_ and
   `@HGWright <https://github.com/HGWright>`_ added saving support for reduced
   Gaussian grids as a GRIB2 grid definition template 3.40, when cubes carry
   ``GRIB2_GRID_TEMPLATE = 40`` and have a compatible reduced-Gaussian
