@@ -6,8 +6,8 @@ Template Recording
 Overview
 --------
 
-The ``TEMPLATE_RECORD`` object is a control which enables the recording of GRIB2
-**grid definition template numbers** during loading, which is added as an extra
+The :data:`~iris_grib.TEMPLATE_RECORD` object is a control which enables the recording
+of GRIB2 **grid definition template numbers** during loading, which is added as an extra
 attribute of loaded cubes.  The presence of this ``GRIB2_GRID_TEMPLATE`` attribute
 can subsequently influence how the data is is saved back to a GRIB2 format file.
 

@@ -1431,7 +1431,7 @@ class TemplateRecorder(threading.local):
 
 
 #: The unique object which controls recording of grid template numbers.
-TEMPLATE_RECORD = TemplateRecorder()
+_TEMPLATE_RECORD = TemplateRecorder()
 
 
 def grid_definition_section(section, metadata):
@@ -1498,7 +1498,7 @@ def grid_definition_section(section, metadata):
         raise TranslationError(msg)
 
     # If enabled, always record the 'original' grib template number, as an attribute.
-    if TEMPLATE_RECORD:
+    if _TEMPLATE_RECORD:
         # This can also potentially control saving, in some cases.
         metadata["attributes"]["GRIB2_GRID_TEMPLATE"] = template
 

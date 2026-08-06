@@ -19,10 +19,12 @@ import iris  # noqa: F401
 from iris.exceptions import TranslationError
 
 from . import _save_rules
-from ._grib2_convert import TEMPLATE_RECORD
+from ._grib2_convert import _TEMPLATE_RECORD
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
+#: An object to control the recording of GRIB2 templates on load.
+TEMPLATE_RECORD = _TEMPLATE_RECORD
 
 try:
     from ._version import version as __version__
