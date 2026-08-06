@@ -7,7 +7,9 @@ What's new in iris-grib v0.23.0
 -------------------------------
 
 :Release: 0.23.0
-:Date: TBC
+:Date: 06 March 2026
+
+A small release, adding the ability to save to a reduced-gaussian grid with GDT3.40 .
 
 Features
 ^^^^^^^^
