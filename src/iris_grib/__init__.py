@@ -19,7 +19,7 @@ import iris  # noqa: F401
 from iris.exceptions import TranslationError
 
 from . import _save_rules
-from ._grib2_convert import _TEMPLATE_RECORD
+from ._grib2_convert import _TEMPLATE_RECORD, TemplateRecorder
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
@@ -36,6 +36,7 @@ __all__ = [
     # "GRIB1_LOADING_MODE",
     # "Grib1LoadingMode",
     "TEMPLATE_RECORD",
+    "TemplateRecorder",
     "load_cubes",
     "load_pairs_from_fields",
     "save_grib2",
