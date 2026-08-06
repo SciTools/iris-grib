@@ -19,10 +19,13 @@ import iris  # noqa: F401
 from iris.exceptions import TranslationError
 
 from . import _save_rules
-from ._grib2_convert import TEMPLATE_RECORD
+from ._grib2_convert import _TEMPLATE_RECORD, TemplateRecorder
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
+#: A :class:`TemplateRecorder` object which controls the recording of GRIB2 templates
+#: on load.
+TEMPLATE_RECORD = _TEMPLATE_RECORD
 
 try:
     from ._version import version as __version__
@@ -34,6 +37,7 @@ __all__ = [
     # "GRIB1_LOADING_MODE",
     # "Grib1LoadingMode",
     "TEMPLATE_RECORD",
+    "TemplateRecorder",
     "load_cubes",
     "load_pairs_from_fields",
     "save_grib2",
