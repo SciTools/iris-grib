@@ -1397,11 +1397,13 @@ class TemplateRecorder(threading.local):
     """
     Object to control the recording of grid template number on loading.
 
-    This provides a setting, controlled by `set` and `context` methods, which causes all
-    loaded cubes to record the grid template definition number as a cube attribute.
+    This provides a setting, controlled by :meth:`set` and :meth:`context` methods,
+    which causes all loaded grib2 cubes to record the grid template definition number
+    in a ``GRIB2_GRIB_TEMPLATE`` cube attribute.
 
-    When present, the 'GRIB2_GRID_TEMPLATE' attribute is used to control how certain
-    types of data are saved -- notably, for gaussian grids.
+    When present, the 'GRIB2_GRID_TEMPLATE' attribute also affects how certain
+    types of data are saved -- notably, for reduced gaussian grids.
+    See :ref:`_template_record`.
 
     e.g. ``TEMPLATE_RECORD.set(True)`` or ``with TEMPLATE_RECORD.context(True): ...``.
     """
