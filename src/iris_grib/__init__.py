@@ -23,7 +23,8 @@ from ._grib2_convert import _TEMPLATE_RECORD, TemplateRecorder
 from ._load_convert import convert as load_convert
 from .message import GribMessage
 
-#: An object to control the recording of GRIB2 templates on load.
+#: A :class:`TemplateRecorder` object which controls the recording of GRIB2 templates
+#: on load.
 TEMPLATE_RECORD = _TEMPLATE_RECORD
 
 try:
