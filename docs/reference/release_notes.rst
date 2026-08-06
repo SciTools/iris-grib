@@ -11,8 +11,11 @@ What's new in iris-grib v0.23.0
 
 Features
 ^^^^^^^^
-* `@pp-mo <https://github.com/pp-mo>`_ added a new ``TEMPLATE_RECORD`` control
-  in :mod:`iris_grib`, enabling users
+* `@pp-mo <https://github.com/pp-mo>`_ , `@sawom666 <https://github.com/sawom666>`_,
+  `@trexfeathers <https://github.com/trexfeathers>`_,
+  `@chrisbunney <https://github.com/chrisbunney>`_ and
+  `@HGWright <https://github.com/HGWright>`_ added a new
+  :data:`~iris_grib.TEMPLATE_RECORD` control in :mod:`iris_grib`, enabling users
   to record source GRIB2 grid template numbers on load as a
   ``GRIB2_GRID_TEMPLATE`` cube attribute.  This attribute is also used to control saving
   of 1-D data to a "reduced gaussian" grid, and may be used for further save controls in
@@ -20,8 +23,11 @@ Features
   `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
   `(PR#813) <https://github.com/SciTools/iris-grib/pull/813>`_
 
-* `@pp-mo <https://github.com/pp-mo>`_ added saving support for reduced
-  Gaussian grids as GRIB2 grid definition template 3.40, when cubes carry
+* `@pp-mo <https://github.com/pp-mo>`_ , `@sawom666 <https://github.com/sawom666>`_,
+  `@trexfeathers <https://github.com/trexfeathers>`_,
+  `@chrisbunney <https://github.com/chrisbunney>`_ and
+  `@HGWright <https://github.com/HGWright>`_ added saving support for reduced
+  Gaussian grids as a GRIB2 grid definition template 3.40, when cubes carry
   ``GRIB2_GRID_TEMPLATE = 40`` and have a compatible reduced-Gaussian
   coordinate layout.  See :ref:`template_record` for more information.
   `(ISSUE#785) <https://github.com/SciTools/iris-grib/issues/785>`_,
