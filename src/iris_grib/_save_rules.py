@@ -260,9 +260,18 @@ def dx_dy(x_coord, y_coord, grib):
         )
 
 
-def scanning_mode_flags(x_coord, y_coord, grib):
-    x_positive = x_coord.points[1] - x_coord.points[0] > 0
-    y_positive = y_coord.points[1] - y_coord.points[0] > 0
+def scanning_mode_flags(
+    x_coord,
+    y_coord,
+    grib,
+    # allow these to be provided, for non-strictly-monotonic coords
+    x_positive=None,
+    y_positive=None,
+):
+    if x_positive is None:
+        x_positive = x_coord.points[1] - x_coord.points[0] > 0
+    if y_positive is None:
+        y_positive = y_coord.points[1] - y_coord.points[0] > 0
     scanningMode = 0
     if not x_positive:
         scanningMode |= 0x80  # "bit 1" has negative sense : set=decreasing
@@ -848,24 +857,87 @@ def grid_definition_template_40(cube, grib, x_coord, y_coord):
     eccodes.codes_set(grib, "gridType", "reduced_gg")
 
     lons, lats = x_coord.points, y_coord.points
-    lats_increasing = np.diff(lats).min() >= 0
-    lat_vals = sorted(set(lats))
-    n_lat_vals = len(lat_vals)
-    if not lats_increasing:
-        lat_vals = lat_vals[::-1]
+
+    # Perform some sanity checks, and calculate properties
+    err = None
+    lons_increasing, lats_increasing = False, False
+    ydiffs = np.diff(lats)
+    # Latitudes should have some repeated values.
+    if not np.any(ydiffs == 0):
+        err = "Latitudes have no repeated values."
+
+    if err is None:
+        # Latitudes should be monotonic
+        yd_min = ydiffs.min()
+        yd_max = ydiffs.max()
+        lats_increasing = yd_max > 0
+        if (lats_increasing and yd_min < 0) or (not lats_increasing and yd_max > 0):
+            err = "Latitudes are not monotonic."
+
+    if err is None:
+        # Number of latitude values should be a multiple of 2.
+        lat_vals = np.array(sorted(set(lats)))
+        n_lat_vals = len(lat_vals)
+        # ought to always divide by 2, since N parallels either side of equator
+        if n_lat_vals % 2 != 0:
+            err = "Number of distinct latitude repeat sections, 'N * 2', is not even."
+
+    if err is None:
+        if not lats_increasing:
+            # Put the set of latitude values into the expected order
+            lat_vals = lat_vals[::-1]
+
+        lons_increasing = None
+        for this_lat in lat_vals:
+            thislat_inds = np.where(lats == this_lat)[0]
+            n_thislat = len(thislat_inds)
+            if n_thislat < 2:
+                err = (
+                    f"Latitude value of {this_lat} occurs only {n_thislat} times, "
+                    f"must be >= 2."
+                )
+                break
+
+            # it is finally safe to calculate the direction of longitudes (>2 of them)
+            lons_thislat = lons[lats == this_lat]
+            londiffs = np.diff(lons_thislat)
+            lons_increase = londiffs[0] > 0
+            if (lons_increase and np.any(londiffs <= 0)) or (
+                not lons_increase and np.any(londiffs >= 0)
+            ):
+                err = f"Longitude values for latitude {this_lat} are not monotonic."
+                break
+
+            if lons_increasing is None:
+                lons_increasing = lons_increase
+            else:
+                if lons_increase != lons_increasing:
+                    err = (
+                        "Longitude values do not go in the same direction "
+                        "for all latitudes."
+                    )
+                    break
+
+    if err is not None:
+        err = "Latitude and longitude values are not appropriate to GDT3.40 : " + err
+        raise ValueError(err)
+
+    # We now reckon that the structure of the lats+lons *could* suit GDT3.40
+    #  - but N.B. the exact values might still not match (checked later).
 
     # We want to do the equivalent of 'horizontal_common', but we can't call that as it
     #  calls "grid_dims" to set Ni/Nj, which we need to control differently.
     # So we here call its other workers : "shape_of_the_earth" + "scanning_mode_flags"
     shape_of_the_earth(cube, grib, cs=x_coord.coord_system)
-    scanning_mode_flags(x_coord, y_coord, grib)
+    scanning_mode_flags(
+        x_coord, y_coord, grib, x_positive=lons_increasing, y_positive=lats_increasing
+    )
 
     eccodes.codes_set(
         grib, "latitudeOfFirstGridPoint", int(1.0e6 * lats[0])
     )  # in micro degrees
     eccodes.codes_set(grib, "latitudeOfLastGridPoint", int(1.0e6 * lats[-1]))
 
-    lons_increasing = np.diff(lons[lats == lat_vals[0]]).min() >= 0
     if lons_increasing:
         lon0, lon1 = lons.min(), lons.max()
     else:
