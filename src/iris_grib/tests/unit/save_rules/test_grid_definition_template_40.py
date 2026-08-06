@@ -243,7 +243,7 @@ class TestGridDefinitionTemplate40:
 
     def test_fails_no_repeated_latitudes(self, mock_grib, patched_eccodes):
         cube, x_coord, y_coord = make_gaussian_cube(
-            x_points=list(range(8)),
+            x_points=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
             y_points=[0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0],
             patch_eccodes_getarrays=patched_eccodes,
         )
