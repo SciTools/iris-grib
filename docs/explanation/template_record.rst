@@ -130,9 +130,9 @@ Template 3.40 represents data on a **Gaussian grid**. This grid structure:
 
 -   May have *either* "regular" or "reduced" longitudes:
 
-    -   "regular" grids" have a fixed set of longitude points, the same for all latitudes
+    -   "regular" grids have a fixed set of longitude points, the same for all latitudes
 
-    -   "reduced" grids" have varying numbers of longitude points at different latitudes
+    -   "reduced" grids have varying numbers of longitude points at different latitudes
 
 Loading
 ^^^^^^^
