@@ -30,6 +30,7 @@ jobs:
           args: |
             --verbose
             --max-concurrency 1
+            --timeout 60
             './docs/**/*.rst'
             './lib/**/*.py'
 
