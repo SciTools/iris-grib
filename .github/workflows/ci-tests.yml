@@ -129,7 +129,7 @@ jobs:
           PY_COLORS: 1
           PY_VER: ${{ matrix.python-version }}
         run: |
-          nox --session ${{ matrix.session }} -- ${{ matrix.coverage }} --test-data-dir ${HOME}/iris-test-data/test_data
+          nox --session ${{ matrix.session }} -- --verbose ${{ matrix.coverage }} --test-data-dir ${HOME}/iris-test-data/test_data
 
       - name: "upload coverage report"
         if: ${{ matrix.coverage }}
