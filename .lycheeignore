@@ -1,0 +1,10 @@
+# Change-log entries reference GitHub user accounts, which are common enough
+#  to trigger GitHub rate limiting.
+https://github.com/[^/]*$
+
+# GitHub seems especially keen to rate-limit "blob" URLs.
+#  (maybe because these are especially associated with abuse?)
+https://github.com/[^/]*/[^/]*/blob/.*
+
+# Returns 403 when accessed from GitHub Actions
+https://stackoverflow.com

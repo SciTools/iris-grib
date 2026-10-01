@@ -127,9 +127,10 @@ def identification(cube, grib):
 ###############################################################################
 
 
-def shape_of_the_earth(cube, grib):
+def shape_of_the_earth(cube, grib, cs=None):
     # assume latlon
-    cs = cube.coord(dimensions=[0]).coord_system
+    if cs is None:
+        cs = cube.coord(dimensions=[0]).coord_system
 
     def _set_octets(
         earth_shape: int | None = None,
@@ -259,9 +260,18 @@ def dx_dy(x_coord, y_coord, grib):
         )
 
 
-def scanning_mode_flags(x_coord, y_coord, grib):
-    x_positive = x_coord.points[1] - x_coord.points[0] > 0
-    y_positive = y_coord.points[1] - y_coord.points[0] > 0
+def scanning_mode_flags(
+    x_coord,
+    y_coord,
+    grib,
+    # allow these to be provided, for non-strictly-monotonic coords
+    x_positive=None,
+    y_positive=None,
+):
+    if x_positive is None:
+        x_positive = x_coord.points[1] - x_coord.points[0] > 0
+    if y_positive is None:
+        y_positive = y_coord.points[1] - y_coord.points[0] > 0
     scanningMode = 0
     if not x_positive:
         scanningMode |= 0x80  # "bit 1" has negative sense : set=decreasing
@@ -276,7 +286,7 @@ def horizontal_grid_common(cube, grib, xy=False):
     y_coord = cube.coord(dimensions=[0])
     x_coord = cube.coord(dimensions=[1])
     shape_of_the_earth(cube, grib)
-    grid_dims(x_coord, y_coord, grib, nx_str, ny_str)
+    grid_dims(x_coord, y_coord, grib, nx_str, ny_str)  # ni,nj / nx,ny
     scanning_mode_flags(x_coord, y_coord, grib)
 
 
@@ -826,7 +836,160 @@ def grid_definition_template_140(cube, grib):
         raise TranslationError(msg)
 
 
-def grid_definition_section(cube, grib):
+def is_grid_definition_template_40(cube, x_coord, y_coord):
+    """Work out whether this cube will save with GDT 3.40 (gaussian grid)."""
+    # *Only* allow saving to GDT3.40 when the enabling attribute is present.
+    #  -- if not, fails elsewhere, as a 1-D cube can't be saved any other way.
+    template = cube.attributes.get("GRIB2_GRID_TEMPLATE", "")
+    ok = isinstance(template, int) and template == 40  # nothing else will do !
+
+    # Also need x and y coords to be 1-D, on the same dimension,
+    #  i.e. like a trajectory or mesh cube
+    if ok:
+        xco_dims = cube.coord_dims(x_coord)
+        yco_dims = cube.coord_dims(y_coord)
+        ok = len(xco_dims) == 1 and yco_dims == xco_dims
+
+    return ok
+
+
+def grid_definition_template_40(cube, grib, x_coord, y_coord):
+    eccodes.codes_set(grib, "gridType", "reduced_gg")
+
+    lons, lats = x_coord.points, y_coord.points
+
+    # Perform some sanity checks, and calculate properties
+    err = None
+    lons_increasing, lats_increasing = False, False
+    ydiffs = np.diff(lats)
+    # Latitudes should have some repeated values.
+    if not np.any(ydiffs == 0):
+        err = "Latitudes have no repeated values."
+
+    if err is None:
+        # Latitudes should be monotonic
+        yd_min = ydiffs.min()
+        yd_max = ydiffs.max()
+        lats_increasing = yd_max > 0
+        if (lats_increasing and yd_min < 0) or (not lats_increasing and yd_max > 0):
+            err = "Latitudes are not monotonic."
+
+    if err is None:
+        # Number of latitude values should be a multiple of 2.
+        lat_vals = np.array(sorted(set(lats)))
+        n_lat_vals = len(lat_vals)
+        # ought to always divide by 2, since N parallels either side of equator
+        if n_lat_vals % 2 != 0:
+            err = "Number of distinct latitude repeat sections, 'N * 2', is not even."
+
+    if err is None:
+        if not lats_increasing:
+            # Put the set of latitude values into the expected order
+            lat_vals = lat_vals[::-1]
+
+        lons_increasing = None
+        for this_lat in lat_vals:
+            thislat_inds = np.where(lats == this_lat)[0]
+            n_thislat = len(thislat_inds)
+            if n_thislat < 2:
+                err = (
+                    f"Latitude value of {this_lat} occurs only {n_thislat} times, "
+                    f"must be >= 2."
+                )
+                break
+
+            # it is finally safe to calculate the direction of longitudes (>2 of them)
+            lons_thislat = lons[lats == this_lat]
+            londiffs = np.diff(lons_thislat)
+            lons_increase = londiffs[0] > 0
+            if (lons_increase and np.any(londiffs <= 0)) or (
+                not lons_increase and np.any(londiffs >= 0)
+            ):
+                err = f"Longitude values for latitude {this_lat} are not monotonic."
+                break
+
+            if lons_increasing is None:
+                lons_increasing = lons_increase
+            else:
+                if lons_increase != lons_increasing:
+                    err = (
+                        "Longitude values do not go in the same direction "
+                        "for all latitudes."
+                    )
+                    break
+
+    if err is not None:
+        err = "Latitude and longitude values are not appropriate to GDT3.40 : " + err
+        raise ValueError(err)
+
+    # We now reckon that the structure of the lats+lons *could* suit GDT3.40
+    #  - but N.B. the exact values might still not match (checked later).
+
+    # We want to do the equivalent of 'horizontal_common', but we can't call that as it
+    #  calls "grid_dims" to set Ni/Nj, which we need to control differently.
+    # So we here call its other workers : "shape_of_the_earth" + "scanning_mode_flags"
+    shape_of_the_earth(cube, grib, cs=x_coord.coord_system)
+    scanning_mode_flags(
+        x_coord, y_coord, grib, x_positive=lons_increasing, y_positive=lats_increasing
+    )
+
+    eccodes.codes_set(
+        grib, "latitudeOfFirstGridPoint", int(1.0e6 * lats[0])
+    )  # in micro degrees
+    eccodes.codes_set(grib, "latitudeOfLastGridPoint", int(1.0e6 * lats[-1]))
+
+    if lons_increasing:
+        lon0, lon1 = lons.min(), lons.max()
+    else:
+        lon0, lon1 = lons.max(), lons.min()
+
+    eccodes.codes_set(grib, "longitudeOfFirstGridPoint", int(1.0e6 * lon0))
+    eccodes.codes_set(grib, "longitudeOfLastGridPoint", int(1.0e6 * lon1))
+
+    eccodes.codes_set(grib, "N", n_lat_vals // 2)
+    eccodes.codes_set(grib, "Nj", n_lat_vals)
+    eccodes.codes_set_missing(grib, "Ni")
+
+    eccodes.codes_set_long(grib, "basicAngleOfTheInitialProductionDomain", 0)
+    eccodes.codes_set_long(grib, "resolutionAndComponentFlags", 0)
+    eccodes.codes_set_missing(grib, "iDirectionIncrement")
+
+    lon_repeats = [np.sum(lats == onelat) for onelat in lat_vals]
+    eccodes.codes_set(grib, "numberOfOctectsForNumberOfPoints", 2)
+    eccodes.codes_set(grib, "interpretationOfNumberOfPoints", 1)
+    eccodes.codes_set_array(grib, "pl", list(lon_repeats))
+
+    (n_values,) = x_coord.shape  # coords are always 1-D
+    # Setting these 2 additional keys makes the message fully valid,
+    #  allowing us to read the 'correct' gaussian latitude and longitude values
+    eccodes.codes_set(grib, "numberOfValues", n_values)
+    eccodes.codes_set(grib, "numberOfDataPoints", n_values)
+
+    # Check the latitude and longitudes match.
+    # We do this because the message is configured based on only certain key properties
+    #   of the coordinate values, which doesn't guarantee that the values are all
+    #   actually the same as those of GDT3.40 template with the same shape.
+    # We defer to eccodes on this, as exact calculations are complex + somewhat obscure
+    y_points = eccodes.codes_get_array(grib, "latitudes")
+    tolerance = (lats.max() - lats.min()) * 0.02 / n_lat_vals
+    if not np.allclose(y_points, lats, atol=tolerance, rtol=0):
+        msg = (
+            "Cube y coordinate values do not match the expected latitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        raise ValueError(msg)
+
+    x_points = eccodes.codes_get_array(grib, "longitudes")
+    tolerance = abs(lon1 - lon0) * 0.02 / n_values
+    if not np.allclose(x_points, lons, atol=tolerance, rtol=0):
+        msg = (
+            "Cube x coordinate values do not match the expected longitude values "
+            "for a reduced gaussian grid with the given dimensions."
+        )
+        raise ValueError(msg)
+
+
+def grid_definition_section(cube, grib, x_coord=None, y_coord=None):
     """
     Write the grid definition template.
 
@@ -834,16 +997,26 @@ def grid_definition_section(cube, grib):
     based on the properties of the cube.
 
     """
-    x_coord = cube.coord(dimensions=[1])
-    y_coord = cube.coord(dimensions=[0])
-    cs = x_coord.coord_system  # N.B. already checked same cs for x and y.
+    # NB x_coord and y_coord are only optional because of legacy testing code
+    if x_coord is None and y_coord is None:
+        x_coord = cube.coord(dimensions=[1])
+        y_coord = cube.coord(dimensions=[0])
+
+    # Get coord system
+    #  N.B. caller already checked that it exists and is same for x and y.
+    cs = x_coord.coord_system
     regular_x_and_y = is_regular(x_coord) and is_regular(y_coord)
 
     if isinstance(cs, GeogCS):
         if regular_x_and_y:
             grid_definition_template_0(cube, grib)
         else:
-            grid_definition_template_4(cube, grib)
+            if is_grid_definition_template_40(cube, x_coord, y_coord):
+                # If 1-D lats+lons, and template-record=40, try reduced-gaussian ..
+                grid_definition_template_40(cube, grib, x_coord, y_coord)
+            else:
+                # .. else fallback on GDT3.4 : irregular lat-lon grids
+                grid_definition_template_4(cube, grib)
 
     elif isinstance(cs, RotatedGeogCS):
         # Rotated coordinate system cases.
@@ -851,6 +1024,8 @@ def grid_definition_section(cube, grib):
         if regular_x_and_y:
             grid_definition_template_1(cube, grib)
         else:
+            # N.B. we could here be dealing with data on a "rotated gaussian" grid,
+            #  (GDT 3.41 or 3.43), but we don't yet support those.
             grid_definition_template_5(cube, grib)
 
     elif isinstance(cs, Mercator):
@@ -1800,23 +1975,23 @@ def data_section(cube, grib):
 ###############################################################################
 
 
-def gribbability_check(cube):
+def gribbability_check(cube, x_coord, y_coord):
     "We always need the following things for grib saving."
 
     # GeogCS exists?
-    cs0 = cube.coord(dimensions=[0]).coord_system
-    cs1 = cube.coord(dimensions=[1]).coord_system
+    cs0 = x_coord.coord_system
+    cs1 = y_coord.coord_system
     if cs0 is None or cs1 is None:
-        raise TranslationError("CoordSystem not present")
+        raise TranslationError("CoordSystem not present on both X and Y coord")
     if cs0 != cs1:
-        raise TranslationError("Inconsistent CoordSystems")
+        raise TranslationError("Inconsistent CoordSystems between X and Y coords")
 
     # Time period exists?
     if not cube.coords("time"):
         raise TranslationError("time coord not found")
 
 
-def run(slice2d_cube, grib, full3d_cube):
+def run(slice2d_cube, grib, full3d_cube, x_coord, y_coord):
     """
     Set the keys of the grib message based on the contents of the slice2d_cube.
 
@@ -1835,14 +2010,20 @@ def run(slice2d_cube, grib, full3d_cube):
         the GRIB2 spec records hybrid coefficients for *all* the levels in
         every message.
 
+    * x_coord:
+        The selected x-coordinate
+
+    * y_coord:
+        The selected y-coordinate
+
     """
-    gribbability_check(slice2d_cube)
+    gribbability_check(slice2d_cube, x_coord, y_coord)
 
     # Section 1 - Identification Section.
     identification(slice2d_cube, grib)
 
     # Section 3 - Grid Definition Section (Grid Definition Template)
-    grid_definition_section(slice2d_cube, grib)
+    grid_definition_section(slice2d_cube, grib, x_coord, y_coord)
 
     # Section 4 - Product Definition Section (Product Definition Template)
     product_definition_section(slice2d_cube, grib, full3d_cube)

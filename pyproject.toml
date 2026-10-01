@@ -123,6 +123,7 @@ disallow_untyped_defs = false  # 964 errors
 disallow_incomplete_defs = false  # 3 errors
 check_untyped_defs = false  # 100 errors
 no_implicit_reexport = false  # 134 errors
+disallow_untyped_decorators = false  # 1 error?
 
 exclude = [
     'noxfile\.py',
