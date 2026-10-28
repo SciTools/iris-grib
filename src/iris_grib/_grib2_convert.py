@@ -11,8 +11,10 @@ Code to convert a GRIB2 message into cube metadata.
 
 from collections import namedtuple
 from collections.abc import Iterable
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 import math
+import threading
 import warnings
 
 import cartopy.crs as ccrs
@@ -1223,6 +1225,18 @@ def grid_definition_template_40_reduced(section, metadata, cs):
     metadata["aux_coords_and_dims"].append((y_coord, 0))
     metadata["aux_coords_and_dims"].append((x_coord, 0))
 
+    # In order to enable a reference surface to be attached to a resulting cube
+    #  with a factory, it is necessary for the cubes to have *also* have a DimCoord on
+    #  the unstructured dimension, so they can match their dimensions.
+    metadata["dim_coords_and_dims"].append(
+        (
+            DimCoord(
+                np.arange(x_points.shape[0]), long_name="gaussian_grid", units="1"
+            ),
+            0,
+        )
+    )
+
 
 def grid_definition_template_90(section, metadata):
     """
@@ -1379,6 +1393,49 @@ def grid_definition_template_140(section, metadata):
     metadata["dim_coords_and_dims"].append((x_coord, x_dim))
 
 
+class TemplateRecorder(threading.local):
+    """
+    Object to control the recording of grid template number on loading.
+
+    This provides a setting, controlled by :meth:`set` and :meth:`context` methods,
+    which causes all loaded grib2 cubes to record the grid template definition number
+    in a ``GRIB2_GRIB_TEMPLATE`` cube attribute.
+
+    When present, a ``GRIB2_GRID_TEMPLATE`` attribute also affects how certain
+    types of data are saved -- notably, for reduced gaussian grids.
+    See :ref:`template_record`.
+
+    e.g. ``TEMPLATE_RECORD.set(True)`` or ``with TEMPLATE_RECORD.context(True): ...``.
+    """
+
+    def __init__(self):
+        self._record = False  # default to 'off' : not recording template numbers
+
+    def __repr__(self):
+        content = ", ".join(f"{key}={value}" for key, value in self.__dict__.items())
+        msg = f"TemplateRecorder({content})"
+        return msg
+
+    def set(self, record: bool = False):
+        self._record = record
+
+    @contextmanager
+    def context(self, record: bool = False):
+        old_value = self._record
+        try:
+            self._record = record
+            yield
+        finally:
+            self._record = old_value
+
+    def __bool__(self):
+        return bool(self._record)
+
+
+#: The unique object which controls recording of grid template numbers.
+_TEMPLATE_RECORD = TemplateRecorder()
+
+
 def grid_definition_section(section, metadata):
     """
     Translate section 3 from the GRIB2 message.
@@ -1441,6 +1498,11 @@ def grid_definition_section(section, metadata):
     else:
         msg = "Grid definition template [{}] is not supported".format(template)
         raise TranslationError(msg)
+
+    # If enabled, always record the 'original' grib template number, as an attribute.
+    if _TEMPLATE_RECORD:
+        # This can also potentially control saving, in some cases.
+        metadata["attributes"]["GRIB2_GRID_TEMPLATE"] = template
 
 
 ###############################################################################
@@ -1527,7 +1589,7 @@ def translate_phenomenon(
     # Look for fields at surface level first.
     if (
         typeOfFirstFixedSurface == 1
-        and scaledValueOfFirstFixedSurface == 0
+        and scaledValueOfFirstFixedSurface in [0, None]
         and typeOfSecondFixedSurface == _TYPE_OF_FIXED_SURFACE_MISSING
     ):
         # Land surface products for model terrain height:

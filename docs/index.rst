@@ -64,6 +64,7 @@ Read more: `Diataxis.fr`_
    :caption: Explanation
 
    explanation/phenom_translation
+   explanation/template_record
 
 .. toctree::
    :maxdepth: 1

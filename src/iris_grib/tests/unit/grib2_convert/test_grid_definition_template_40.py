@@ -176,6 +176,10 @@ class Test_reduced(tests.IrisGribTest):
                 59.44440829,
             ]
         )
+        grid = iris.coords.DimCoord(
+            np.arange(10, dtype=int), long_name="gaussian_grid", units="1"
+        )
+        expected["dim_coords_and_dims"].append((grid, 0))
         x = iris.coords.AuxCoord(
             x_points, standard_name="longitude", units="degrees_east", coord_system=cs
         )

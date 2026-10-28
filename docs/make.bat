@@ -36,7 +36,6 @@ if "%1" == "help" (
 	echo.  changes    to make an overview over all changed/added/deprecated items
 	echo.  xml        to make Docutils-native XML files
 	echo.  pseudoxml  to make pseudoxml-XML files for display purposes
-	echo.  linkcheck  to check all external links for integrity
 	echo.  doctest    to run all doctests embedded in the documentation if enabled
 	echo.  coverage   to run coverage check of the documentation if enabled
 	echo.  dummy      to check syntax errors of document sources
@@ -224,15 +223,6 @@ if "%1" == "changes" (
 	if errorlevel 1 exit /b 1
 	echo.
 	echo.The overview file is in %BUILDDIR%/changes.
-	goto end
-)
-
-if "%1" == "linkcheck" (
-	%SPHINXBUILD% -b linkcheck %ALLSPHINXOPTS% %BUILDDIR%/linkcheck
-	if errorlevel 1 exit /b 1
-	echo.
-	echo.Link check complete; look for any errors in the above output ^
-or in %BUILDDIR%/linkcheck/output.txt.
 	goto end
 )
 
